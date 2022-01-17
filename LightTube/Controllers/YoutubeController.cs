@@ -45,6 +45,18 @@ namespace LightTube.Controllers
 			return View(context);
 		}
 
+		[Route("/playlist")]
+		public async Task<IActionResult> Playlist(string list, string continuation = null)
+		{
+			PlaylistContext context = new()
+			{
+				Playlist = await _youtube.GetPlaylistAsync(list, continuation),
+				Id = list,
+				ContinuationToken = continuation
+			};
+			return View(context);
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

@@ -40,5 +40,13 @@ namespace YTProxy
 				: await Client.GetStringAsync("/search?continuation=" + continuation);
 			return JsonConvert.DeserializeObject<YoutubeSearch>(jsonDoc);
 		}
+
+		public async Task<YoutubePlaylist> GetPlaylistAsync(string query, string continuation = null)
+		{
+			string jsonDoc = continuation == null
+				? await Client.GetStringAsync("/playlist?id=" + query)
+				: await Client.GetStringAsync("/playlist?continuation=" + continuation);
+			return JsonConvert.DeserializeObject<YoutubePlaylist>(jsonDoc);
+		}
 	}
 }
