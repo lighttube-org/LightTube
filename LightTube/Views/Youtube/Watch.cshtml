@@ -20,7 +20,7 @@
 			
 			@foreach (Subtitle subtitle in Model.Player.Subtitles)
 			{
-				<track src="/proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+				<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
 			}
 		</video>
 
