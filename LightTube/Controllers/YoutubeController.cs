@@ -57,6 +57,19 @@ namespace LightTube.Controllers
 			return View(context);
 		}
 
+		[Route("/channel/{id}")]
+		public async Task<IActionResult> Channel(string id, string continuation = null)
+		{
+			continuation ??= Request.Query["continuation"];
+			ChannelContext context = new()
+			{
+				Channel = await _youtube.GetChannelAsync(id, continuation),
+				Id = id,
+				ContinuationToken = continuation
+			};
+			return View(context);
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

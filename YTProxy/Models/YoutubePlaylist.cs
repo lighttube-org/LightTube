@@ -21,5 +21,10 @@ namespace YTProxy.Models
 		[JsonProperty("videos")] public VideoPreview[] Videos { get; set; }
 
 		[JsonProperty("continuation_token")] public string ContinuationToken { get; set; }
+
+		public string GetHtmlDescription()
+		{
+			return Utils.GetHtmlDescription(Description);
+		}
 	}
 }

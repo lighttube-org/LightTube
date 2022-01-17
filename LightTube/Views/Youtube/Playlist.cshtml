@@ -15,7 +15,7 @@
 	<span>•</span>
 	<span>Last updated @Model.Playlist.LastUpdated</span>
 </div>
-<p>@Model.Playlist.Description</p>
+<p>@Html.Raw(Model.Playlist.GetHtmlDescription())</p>
 <p>
 	Created by:
 	<b>

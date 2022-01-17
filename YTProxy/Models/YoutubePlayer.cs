@@ -2,6 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -45,23 +46,7 @@ namespace YTProxy.Models
 
 		public string GetHtmlDescription()
 		{
-			const string urlPattern = @"(http[s]*)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?";
-			const string hashtagPattern = @"#[\w]*";
-			string html = Description.Replace("\n", "<br>");
-
-			// turn URLs into hyperlinks
-			Regex urlRegex = new(urlPattern, RegexOptions.IgnoreCase);
-			Match m;
-			for (m = urlRegex.Match(html); m.Success; m = m.NextMatch())
-				html = html.Replace(m.Groups[0].ToString(),
-					$"<a href=\"{m.Groups[0]}\">{m.Groups[0]}</a>");
-			
-			// turn hashtags into hyperlinks
-			Regex chr = new(hashtagPattern, RegexOptions.IgnoreCase);
-			for (m = chr.Match(html); m.Success; m = m.NextMatch())
-				html = html.Replace(m.Groups[0].ToString(),
-					$"<a href=\"/hashtag/{m.Groups[0].ToString().Replace("#", "")}\">{m.Groups[0]}</a>");
-			return html;
+			return Utils.GetHtmlDescription(Description);
 		}
 	}
 
