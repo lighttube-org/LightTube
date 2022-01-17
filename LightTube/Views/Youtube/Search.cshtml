@@ -1,0 +1,83 @@
+@using YTProxy.Models
+@model LightTube.Contexts.SearchContext
+
+@{
+	ViewBag.Title = Model.Query;
+	Layout = "_Layout";
+}
+
+<div class="results-container">
+	@foreach (ItemPreview preview in Model.Results.Results)
+	{
+		Preview itemPreview = preview.GetPreview();
+		switch (preview.GetPreview())
+		{
+			case VideoPreview video:
+				<div class="result">
+					<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
+						<span>@video.Duration</span>
+					</div>
+					<div class="info">
+						<a href="/watch?v=@video.Id" class="title">@video.Title</a>
+						<a href="/channel/@video.Channel.Id" class="uploader">@video.Channel.Name</a>
+						<div>
+							<span>@video.Views views</span>
+							<span>•</span>
+							<span>@video.UploadedAt</span>
+						</div>
+					</div>
+				</div>
+				break;
+			case PlaylistPreview playlist:
+				<div class="result">
+					<div class="thumbnail thumbnail-playlist" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
+						<div><b>@playlist.VideoCount</b><br>VIDEOS</div>
+					</div>
+					<div class="info">
+						<a href="/watch?v=@playlist.FirstVideoId&amp;list=@playlist.Id" class="title">@playlist.Title</a>
+						<a href="/channel/@playlist.Channel.Id" class="uploader">@playlist.Channel.Name</a>
+					</div>
+				</div>
+				break;
+			case ChannelPreview channel:
+				<div class="result">
+					<div class="thumbnail avatar">
+						<img src="@itemPreview.Thumbnails.Last().Url" alt="@channel.Title">
+					</div>
+					<div class="info">
+						<a class="title">@itemPreview.Title</a>
+						<div>
+							<span>@channel.Subscribers subscribers</span>
+							<span>•</span>
+							<span>@channel.VideoCount videos</span>
+						</div>
+						<p class="description">@Html.Raw(channel.Description)</p>
+					</div>
+				</div>
+				break;
+			default:
+				<div class="result">
+					<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')"></div>
+					<div class="info">
+						<a class="title">@itemPreview.Title</a>
+						<span><b>WARNING:</b> Unknown result type: @preview.Type</span>
+					</div>
+				</div>
+				break;
+		}
+	}
+</div>
+
+<div class="page-controls">
+	@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
+	{
+		<a href="/results?search_query=@Model.Query">First Page</a>
+	}
+	<div class="flex-divider"></div>
+	<span>•</span>
+	<div class="flex-divider"></div>
+	@if (!string.IsNullOrWhiteSpace(Model.Results.ContinuationKey))
+	{
+		<a href="/results?search_query=@Model.Query&continuation=@Model.Results.ContinuationKey">Next Page</a>
+	}
+</div>

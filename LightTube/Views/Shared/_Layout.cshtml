@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>@ViewData["Title"] - lighttube</title>
+	<link rel="stylesheet" href="~/css/site.css"/>
+	<link rel="stylesheet" href="~/css/videojs/video-js.css"/>
+	<link rel="stylesheet" href="~/css/videojs/tube.css"/>
+	<link href="https://unpkg.com/@("@silvermine")/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
+	<link rel="icon" href="~/favicon.ico">
+</head>
+<body>
+<header>
+	<a href="/" class="logo">light<b>tube</b></a>
+	<div class="flex-divider"></div>
+	<form method="get" action="/results">
+		<input type="text" name="search_query" placeholder="Search...">
+		<input type="submit" value="Search">
+	</form>
+	<div class="flex-divider"></div>
+</header>
+<div class="page-container">
+@RenderBody()
+</div>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

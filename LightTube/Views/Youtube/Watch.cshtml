@@ -1,0 +1,148 @@
+@using System.Globalization
+@using System.Web
+@using YTProxy.Models
+@model LightTube.Contexts.PlayerContext
+
+@{
+	ViewBag.Title = Model.Player.Title;
+	Layout = "_Layout";
+	Model.Resolution ??= Model.Player.Formats.First().FormatNote;
+}
+
+<!-- TODO: chapters -->
+<div class="video-page-container">
+	<div class="video-container">
+		<video id="player" class="video-js" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
+			@foreach (AdaptiveFormat format in Model.Player.Formats.Reverse())
+			{
+				<source label='@format.FormatNote' src='/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type='video/mp4'>
+			}
+			
+			@foreach (Subtitle subtitle in Model.Player.Subtitles)
+			{
+				<track src="/proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+			}
+		</video>
+
+		<noscript>
+			<div class="resolutions-container">
+				<h2>Resolutions</h2>
+				<div>
+					@foreach (AdaptiveFormat format in Model.Player.Formats)
+					{
+						@if (format.FormatNote == Model.Resolution)
+						{
+							<b>@format.FormatNote</b>
+						}
+						else
+						{
+							<a href="/watch?v=@Model.Player.Id&quality=@format.FormatNote">@format.FormatNote</a>
+						}
+					}
+				</div>
+			</div>
+		</noscript>
+		<h1>@Model.Player.Title</h1>
+		<div class="video-info-bar">
+			<span id="view-count">@Model.Player.Engagement.Views views</span>
+			•
+			<span id="publish-date">Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
+			<div class="flex-divider"></div>
+			<div class="engagements">
+				<span id="like-count">@Model.Player.Engagement.Likes</span>
+				<span id="dislike-count">@Model.Player.Engagement.Dislikes</span>
+				<div class="engagement-bar">
+					<div style="width: @Model.Player.Engagement.GetLikePercentage().ToString().Split(".")[0]%"></div>
+				</div>
+			</div>
+			<a href="https://www.youtube.com/watch?v=@Model.Player.Id">YouTube Link</a>
+		</div>
+		<br>
+		<div class="uploader">
+			Uploaded by: <a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
+		</div>
+
+		<p>@Html.Raw(Model.Player.GetHtmlDescription())</p>
+	</div>
+	<div class="recommendations-container">
+		<h1>Recommended videos</h1>
+		<div>
+			@if (Model.Player.Recommended.Length == 0)
+			{
+				<p style="text-align: center">None :(<br>This is most likely an age-restricted video</p>
+			}
+			@foreach (ItemPreview recommendation in Model.Player.Recommended)
+			{
+				Preview itemPreview = recommendation.GetPreview();
+				switch (itemPreview)
+				{
+					case VideoPreview video:
+						<div class="recommendation">
+							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
+								<span>@video.Duration</span>
+							</div>
+							<div class="info">
+								<a href="/watch?v=@video.Id" class="title">@video.Title</a>
+								<a href="/channel/@video.Channel.Id" class="uploader">@video.Channel.Name</a>
+								<div>
+									<span>@video.Views views</span>
+									<span>•</span>
+									<span>@video.UploadedAt</span>
+								</div>
+							</div>
+						</div>
+						break;
+					case PlaylistPreview playlist:
+						<div class="recommendation">
+							<div class="thumbnail thumbnail-playlist" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
+								<div><b>@playlist.VideoCount</b><br>VIDEOS</div>
+							</div>
+							<div class="info">
+								<a href="/watch?v=@playlist.FirstVideoId&amp;list=@playlist.Id" class="title">@playlist.Title</a>
+								<a href="/channel/@playlist.Channel.Id" class="uploader">@playlist.Channel.Name</a>
+							</div>
+						</div>
+						break;
+					default:
+						<div class="recommendation">
+							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')"></div>
+							<div class="info">
+								<a class="title">@itemPreview.Title</a>
+								<span><b>WARNING:</b> Unknown recommendation type: @recommendation.Type</span>
+							</div>
+						</div>
+						break;
+				}
+			}
+		</div>
+	</div>
+</div>
+
+<script src="~/js/videojs/video.js"></script>
+<script src="https://unpkg.com/@("@silvermine")/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
+<script>
+const player = videojs('player', {
+	controlBar: {
+		children: [
+			'playToggle',
+			'volumePanel',
+			'currentTimeDisplay',
+			'timeDivider',
+			'durationDisplay',
+			'progressControl',
+			'spacer',
+			'chaptersButton',
+			'subsCapsButton',
+			'playbackRateMenuButton',
+			'qualitySelector',
+			'pictureInPictureToggle',
+			'fullscreenToggle',
+		],
+	},
+}, function () {
+	var player = this;
+	player.on('resolutionchange', function () {
+		console.log('Source changed')
+	})
+});
+</script>
