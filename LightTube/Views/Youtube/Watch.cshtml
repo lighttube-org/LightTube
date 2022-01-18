@@ -77,7 +77,7 @@
 				switch (itemPreview)
 				{
 					case VideoPreview video:
-						<div class="recommendation">
+						<div class="recommendation" onclick="window.location = '/watch?v=@video.Id'">
 							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
 								<span>@video.Duration</span>
 							</div>
@@ -93,7 +93,7 @@
 						</div>
 						break;
 					case PlaylistPreview playlist:
-						<div class="recommendation">
+						<div class="recommendation" onclick="window.location = '/playlist?list=@playlist.Id'">
 							<div class="thumbnail thumbnail-playlist" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
 								<div><b>@playlist.VideoCount</b><br>VIDEOS</div>
 							</div>

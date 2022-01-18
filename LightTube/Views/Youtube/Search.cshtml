@@ -13,7 +13,7 @@
 		switch (preview.GetPreview())
 		{
 			case VideoPreview video:
-				<div class="result">
+				<div class="result" onclick="window.location = '/watch?v=@video.Id'">
 					<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
 						<span>@video.Duration</span>
 					</div>
@@ -29,7 +29,7 @@
 				</div>
 				break;
 			case PlaylistPreview playlist:
-				<div class="result">
+				<div class="result" onclick="window.location = '/playlist?list=@playlist.Id'">
 					<div class="thumbnail thumbnail-playlist" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
 						<div><b>@playlist.VideoCount</b><br>VIDEOS</div>
 					</div>
@@ -40,7 +40,7 @@
 				</div>
 				break;
 			case ChannelPreview channel:
-				<div class="result">
+				<div class="result" onclick="window.location = '/channel/@channel.Id'">
 					<div class="thumbnail avatar">
 						<img src="@itemPreview.Thumbnails.Last().Url" alt="@channel.Title">
 					</div>

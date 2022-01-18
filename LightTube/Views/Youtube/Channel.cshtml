@@ -30,7 +30,7 @@
 	<div class="channel-videos">
 		@foreach (VideoPreview video in Model.Channel.Videos)
 		{
-			<div class="grid-video">
+			<div class="grid-video" onclick="window.location = '/watch?v=@video.Id'">
 				<div class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
 					<span>@video.Duration</span>
 				</div>
