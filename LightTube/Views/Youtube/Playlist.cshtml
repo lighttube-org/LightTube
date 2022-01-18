@@ -6,51 +6,57 @@
 	Layout = "_Layout";
 }
 
-<h1>@Model.Playlist.Title</h1>
-<h2>TODO: actually do the css for this page</h2>
-<div>
-	<span>@Model.Playlist.VideoCount videos</span>
-	<span>•</span>
-	<span>@Model.Playlist.ViewCount</span>
-	<span>•</span>
-	<span>Last updated @Model.Playlist.LastUpdated</span>
-</div>
-<p>@Html.Raw(Model.Playlist.GetHtmlDescription())</p>
-<p>
-	Created by:
-	<b>
-		<a href="/channel/@Model.Playlist.Channel.Id">@Model.Playlist.Channel.Name</a>
-	</b>
-</p>
-
-
-<br>
-
-<div class="results-container">
-	@foreach (VideoPreview video in Model.Playlist.Videos)
-	{
-		<div class="result">
-			<div class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
-				<span>@video.Duration</span>
-			</div>
-			<div class="info">
-				<a href="/watch?v=@video.Id&list=@Model.Id" class="title">@video.Title</a>
-				<a href="/channel/@video.Channel.Id" class="uploader">@video.Channel.Name</a>
-			</div>
+<div class="playlist-container">
+	<div class="playlist-info">
+		<img class="playlist-thumbnail" src="@Model.Playlist.Thumbnail.Last().Url" alt="@Model.Playlist.Title">
+		<h1>@Model.Playlist.Title</h1>
+		<div>
+			<span>@Model.Playlist.VideoCount videos</span>
+			<span>•</span>
+			<span>@Model.Playlist.ViewCount</span>
+			<span>•</span>
+			<span>Last updated @Model.Playlist.LastUpdated</span>
 		</div>
-	}
-</div>
+		<p>@Html.Raw(Model.Playlist.GetHtmlDescription())</p>
+		<br>
+		<p>
+			Created by:
+			<b>
+				<a href="/channel/@Model.Playlist.Channel.Id">@Model.Playlist.Channel.Name</a>
+			</b>
+		</p>
+	</div>
 
-<div class="page-controls">
-	@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
-	{
-		<a href="/playlist?list=@Model.Id">First Page</a>
-	}
-	<div class="flex-divider"></div>
-	<span>•</span>
-	<div class="flex-divider"></div>
-	@if (!string.IsNullOrWhiteSpace(Model.Playlist.ContinuationToken))
-	{
-		<a href="/playlist?list=@Model.Id&continuation=@Model.Playlist.ContinuationToken">Next Page</a>
-	}
+	<div style="border-left:1px solid #bbbbbb;height:inherit;"></div>
+
+	<div style="width: 100%">
+		@foreach (VideoPreview video in Model.Playlist.Videos)
+		{
+			<div onclick="window.location = '/watch?v=@video.Id&list=@Model.Id'" class="playlist-video">
+				<div class="video-index">
+					@video.Views
+				</div>
+				<div class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
+					<span>@video.Duration</span>
+				</div>
+				<div class="info">
+					<a href="/watch?v=@video.Id&list=@Model.Id" class="title">@video.Title</a>
+					<a href="/channel/@video.Channel.Id" class="uploader">@video.Channel.Name</a>
+				</div>
+			</div>
+		}
+		<div class="page-controls">
+			@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
+			{
+				<a href="/playlist?list=@Model.Id">First Page</a>
+			}
+			<div class="flex-divider"></div>
+			<span>•</span>
+			<div class="flex-divider"></div>
+			@if (!string.IsNullOrWhiteSpace(Model.Playlist.ContinuationToken))
+			{
+				<a href="/playlist?list=@Model.Id&continuation=@Model.Playlist.ContinuationToken">Next Page</a>
+			}
+		</div>
+	</div>
 </div>
