@@ -1,145 +1,145 @@
 ﻿html {
-  background-color: #33353e;
-  color: #ccc;
-  font-family: sans-serif;
+    background-color: #33353e;
+    color: #ccc;
+    font-family: sans-serif;
 }
 
 a {
-  color: #ccc;
-  text-decoration: underline;
+    color: #ccc;
+    text-decoration: underline;
 }
 
 a:active {
-  color: #aaa;
+    color: #aaa;
 }
 
 a:visited {
-  color: #ccc;
+    color: #ccc;
 }
 
 a:hover {
-  color: #bbb;
+    color: #bbb;
 }
 
 header {
-  background-color: #0003;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 3rem;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
+    background-color: #0003;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 3rem;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
 }
 
 header > .logo {
-  text-decoration: none;
-  color: #ccc;
-  font-size: 1.5rem;
-  margin: auto .5rem;
+    text-decoration: none;
+    color: #ccc;
+    font-size: 1.5rem;
+    margin: auto .5rem;
 }
 
 .flex-divider {
-  flex-grow: 1
+    flex-grow: 1
 }
 
 @media screen and (max-width: 700px) {
-  header > .flex-divider {
-    flex-grow: 0
-  }
+    header > .flex-divider {
+        flex-grow: 0
+    }
 }
 
 header > form {
-  flex-grow: 2;
-  max-width: 600px;
-  margin: 0.5rem 0;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
+    flex-grow: 2;
+    max-width: 600px;
+    margin: 0.5rem 0;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
 }
 
 header > form > input {
-  color: #ccc;
+    color: #ccc;
 }
 
 header > form > input[type=text] {
-  flex-grow: 1;
-  background-color: #0002;
-  border: 1px solid #222;
+    flex-grow: 1;
+    background-color: #0002;
+    border: 1px solid #222;
 }
 
 header > form > input[type=submit] {
-  background-color: #222;
-  border: 1px solid #222;
+    background-color: #222;
+    border: 1px solid #222;
 }
 
 .page-container {
-  margin-top: 3rem;
-  padding: 1rem;
+    margin-top: 3rem;
+    padding: 1rem;
 }
 
 .video-page-container {
-  display: flex;
-  column-gap: 1rem;
-  flex-direction: row;
+    display: flex;
+    column-gap: 1rem;
+    flex-direction: row;
 }
 
 .video-container {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 video, #player {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  height: fit-content;
-  background-color: #000;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: fit-content;
+    background-color: #000;
 }
 
 .resolutions-container {
-  border: 1px solid black;
-  background-color: #0003;
-  padding: 1rem;
+    border: 1px solid black;
+    background-color: #0003;
+    padding: 1rem;
 }
 
 .resolutions-container > h2 {
-  margin-top: 0;
-  padding-top: 0;
+    margin-top: 0;
+    padding-top: 0;
 }
 
 .resolutions-container > ul {
-  display: flex;
-  flex-direction: row;
-  column-gap: 10px;
-  list-style: none;
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+    list-style: none;
 }
 
 .video-info-bar {
-  display: flex;
-  column-gap: 10px;
-  border-bottom: 1px solid #ccc;
+    display: flex;
+    column-gap: 10px;
+    border-bottom: 1px solid #ccc;
 }
 
 #like-count {
-  margin-right: 5px;
+    margin-right: 5px;
 }
 
 #dislike-count {
-  margin-left: 5px;
+    margin-left: 5px;
 }
 
 .engagement-bar {
-  width: 100%;
-  height: 5px;
-  background-color: darkred;
+    width: 100%;
+    height: 5px;
+    background-color: darkred;
 }
 
 .engagement-bar > div {
-  width: 0;
-  height: 5px;
-  background-color: green;
+    width: 0;
+    height: 5px;
+    background-color: green;
 }
 
 .uploader {
@@ -147,269 +147,381 @@ video, #player {
 }
 
 .uploader > a {
-  font-weight: bold;
-  text-decoration: none;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .recommendations-container {
-  column-gap: 5px;
-  width: 400px;
+    column-gap: 5px;
+    width: 400px;
 }
 
 .recommendation {
-  display: flex;
-  flex-direction: row;
-  width: 400px;
-  margin-bottom: 10px;
-  column-gap: .5rem;
+    display: flex;
+    flex-direction: row;
+    width: 400px;
+    margin-bottom: 10px;
+    column-gap: .5rem;
 }
 
 .recommendation > * {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 .recommendation > .thumbnail {
-  min-width: 150px;
-  max-width: 150px;
-  height: fit-content;
-  aspect-ratio: 16 / 9;
-  background-size: contain;
-  flex-basis: 200px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
+    min-width: 150px;
+    max-width: 150px;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
+    background-size: contain;
+    flex-basis: 200px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 .recommendation > .thumbnail.thumbnail-playlist {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .recommendation > .thumbnail > span {
-  margin: 5px;
-  background-color: #000D;
-  padding: 3px;
+    margin: 5px;
+    background-color: #000D;
+    padding: 3px;
 }
 
 .recommendation > .thumbnail > div {
-  height: 100%;
-  width: 40%;
-  vertical-align: center;
-  background-color: #000D;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  row-gap: 0;
-  justify-content: center;
-  align-items: center;
+    height: 100%;
+    width: 40%;
+    vertical-align: center;
+    background-color: #000D;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 .recommendation > .info {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .recommendation > .info > .title {
-  max-lines: 2;
-  font-weight: bold;
-  text-decoration: none;
+    max-lines: 2;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .recommendation > .info > .uploader {
-  max-lines: 1;
-  overflow: hidden;
-  text-decoration: none;
+    max-lines: 1;
+    overflow: hidden;
+    text-decoration: none;
 }
 
 @media screen and (min-width: 1000px) {
-  .results-container {
-    margin-left: 5rem;
-    margin-right: 5rem;
-  }
+    .results-container {
+        margin-left: 5rem;
+        margin-right: 5rem;
+    }
 }
 
 .result {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  height: 200px;
-  margin-bottom: 10px;
-  column-gap: 1rem;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 200px;
+    margin-bottom: 10px;
+    column-gap: 1rem;
 }
 
 .result > * {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 .result > .thumbnail {
-  min-width: 350px;
-  max-width: 350px;
-  height: fit-content;
-  aspect-ratio: 16 / 9;
-  background-size: contain;
-  flex-basis: 200px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
+    min-width: 350px;
+    max-width: 350px;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
+    background-size: contain;
+    flex-basis: 200px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 .result > .thumbnail.avatar {
-  justify-content: center;
-  align-items: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .result > .thumbnail.avatar > img {
-  border-radius: 50%;
+    border-radius: 50%;
 }
 
 .result > .thumbnail.thumbnail-playlist {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .result > .thumbnail > span {
-  margin: 5px;
-  background-color: #000D;
-  padding: 3px;
+    margin: 5px;
+    background-color: #000D;
+    padding: 3px;
 }
 
 .result > .thumbnail > div {
-  height: 100%;
-  width: 40%;
-  vertical-align: center;
-  background-color: #000D;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  row-gap: 0;
-  justify-content: center;
-  align-items: center;
+    height: 100%;
+    width: 40%;
+    vertical-align: center;
+    background-color: #000D;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 .result > .info {
-  display: flex;
-  flex-direction: column;
-  row-gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }
 
 .result > .info > .title {
-  max-lines: 2;
-  font-weight: bold;
-  text-decoration: none;
+    max-lines: 2;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .result > .info > .uploader {
-  max-lines: 1;
-  overflow: hidden;
-  text-decoration: none;
+    max-lines: 1;
+    overflow: hidden;
+    text-decoration: none;
 }
 
 .page-controls {
-  display: flex;
-  flex-direction: row;
+    display: flex;
+    flex-direction: row;
 }
 
 .playlist-container {
-  display: flex;
+    display: flex;
 }
 
 .playlist-info {
-  width: 360px;
-  padding: 24px;
+    width: 360px;
+    padding: 24px;
 }
 
 .playlist-thumbnail {
-  min-width: 312px;
-  max-width: 312px;
-  height: fit-content;
-  aspect-ratio: 16 / 9;
+    min-width: 312px;
+    max-width: 312px;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
 }
 
 .playlist-video {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  height: 100px;
-  border-bottom: 1px solid #0005;
-  column-gap: 1rem;
-  align-items: center;
-  cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100px;
+    border-bottom: 1px solid #0005;
+    column-gap: 1rem;
+    align-items: center;
+    cursor: pointer;
 }
 
 .playlist-video > * {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 .playlist-video > .thumbnail {
-  min-width: 120px;
-  max-width: 120px;
-  height: fit-content;
-  aspect-ratio: 16 / 9;
-  background-size: contain;
-  flex-basis: 200px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
+    min-width: 120px;
+    max-width: 120px;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
+    background-size: contain;
+    flex-basis: 200px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 .playlist-video > .thumbnail.avatar {
-  justify-content: center;
-  align-items: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .playlist-video > .thumbnail.avatar > img {
-  border-radius: 50%;
+    border-radius: 50%;
 }
 
 .playlist-video > .thumbnail.thumbnail-playlist {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .playlist-video > .thumbnail > span {
-  margin: 5px;
-  background-color: #000D;
-  padding: 3px;
+    margin: 5px;
+    background-color: #000D;
+    padding: 3px;
 }
 
 .playlist-video > .thumbnail > div {
-  height: 100%;
-  width: 40%;
-  vertical-align: center;
-  background-color: #000D;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  row-gap: 0;
-  justify-content: center;
-  align-items: center;
+    height: 100%;
+    width: 40%;
+    vertical-align: center;
+    background-color: #000D;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 .playlist-video > .info {
-  display: flex;
-  flex-direction: column;
-  row-gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }
 
 .playlist-video > .info > .title {
-  max-lines: 2;
-  font-weight: bold;
-  text-decoration: none;
+    max-lines: 2;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .playlist-video > .info > .uploader {
-  max-lines: 1;
-  overflow: hidden;
-  text-decoration: none;
+    max-lines: 1;
+    overflow: hidden;
+    text-decoration: none;
 }
 
 .video-index {
-  max-width: 5rem;
-  min-width: 5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    max-width: 5rem;
+    min-width: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.channel-container {
+    max-width: 1500px;
+    margin: auto;
+}
+
+.channel-banner {
+    display: block;
+    width: 100%;
+    max-width: 1500px;
+    height: fit-content;
+    aspect-ratio: 6.2;
+    background-color: #000a;
+    background-size: contain;
+}
+
+.channel-info {
+    height: 120px;
+    padding: 10px;
+    display: flex;
+    column-gap: 1rem;
+    align-items: center;
+}
+
+.channel-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background-color: #000a;
+}
+
+.channel-videos {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 4px;
+    justify-content: space-evenly;
+}
+
+.grid-video {
+    width: 210px;
+    height: 214px;
+    cursor: pointer;
+}
+
+.grid-video > * {
+    flex-grow: 1;
+}
+
+.grid-video > .thumbnail {
+    min-width: 210px;
+    max-width: 210px;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
+    background-size: contain;
+    flex-basis: 200px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.grid-video > .thumbnail.avatar {
+    justify-content: center;
+    align-items: center;
+}
+
+.grid-video > .thumbnail.avatar > img {
+    border-radius: 50%;
+}
+
+.grid-video > .thumbnail.thumbnail-playlist {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.grid-video > .thumbnail > span {
+    margin: 5px;
+    background-color: #000D;
+    padding: 3px;
+}
+
+.grid-video > .thumbnail > div {
+    height: 100%;
+    width: 40%;
+    vertical-align: center;
+    background-color: #000D;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.grid-video > .info {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
+}
+
+.grid-video > .info > .title {
+    max-lines: 2;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.grid-video > .info > .uploader {
+    max-lines: 1;
+    overflow: hidden;
+    text-decoration: none;
 }

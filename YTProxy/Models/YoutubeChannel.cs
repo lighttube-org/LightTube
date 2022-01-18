@@ -16,6 +16,9 @@ namespace YTProxy.Models
 		[JsonProperty("avatars")]
 		public Thumbnail[] Avatars { get; set; }
 
+		[JsonProperty("banners")]
+		public Thumbnail[] Banners { get; set; }
+
 		[JsonProperty("description")]
 		public string Description { get; set; }
 

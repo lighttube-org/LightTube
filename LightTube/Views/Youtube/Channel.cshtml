@@ -6,39 +6,57 @@
 	Layout = "_Layout";
 }
 
-<h1><b>@Model.Channel.Name</b> - @Model.Channel.Subscribers</h1>
-
-<p>@Html.Raw(Model.Channel.GetHtmlDescription())</p>
-
-<div class="results-container">
-	@foreach (VideoPreview video in Model.Channel.Videos)
+<div class="channel-container">
+	@if (Model.Channel.Banners.Length > 0)
 	{
-		<div class="result">
-			<div class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
-				<span>@video.Duration</span>
-			</div>
-			<div class="info">
-				<a href="/watch?v=@video.Id" class="title">@video.Title</a>
-				<div>
-					<span>@video.Views views</span>
-					<span>•</span>
-					<span>@video.UploadedAt</span>
+		<img class="channel-banner" alt="Channel Banner" src="@Model.Channel.Banners.Last().Url">
+	}
+
+	<div class="channel-info">
+		<img class="channel-avatar" alt="Channel Avatar" src="/proxy?url=@Model.Channel.Avatars.Last().Url"/>
+		<div>
+			<h1>@Model.Channel.Name</h1>
+			<p>@Model.Channel.Subscribers</p>
+		</div>
+		<div class="flex-divider"></div>
+	</div>
+	
+	<div class="channel-about">
+		<h2>About</h2>
+		<p>@Html.Raw(Model.Channel.GetHtmlDescription())</p>
+	</div>
+
+	<h2>Videos</h2>
+	<div class="channel-videos">
+		@foreach (VideoPreview video in Model.Channel.Videos)
+		{
+			<div class="grid-video">
+				<div class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
+					<span>@video.Duration</span>
+				</div>
+				<div class="info">
+					<a href="/watch?v=@video.Id" class="title">@video.Title</a>
+					<div>
+						<span>@video.Views views</span>
+						<span>•</span>
+						<span>@video.UploadedAt</span>
+					</div>
 				</div>
 			</div>
-		</div>
-	}
-</div>
+		}
+	</div>
 
-<div class="page-controls">
-	@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
-	{
-		<a href="/channel?id=@Model.Id">First Page</a>
-	}
-	<div class="flex-divider"></div>
-	<span>•</span>
-	<div class="flex-divider"></div>
-	@if (!string.IsNullOrWhiteSpace(Model.Channel.ContinuationToken))
-	{
-		<a href="/channel/@Model.Id&continuation=@Model.Channel.ContinuationToken">Next Page</a>
-	}
+	<div class="page-controls">
+		@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
+		{
+			<a href="/channel?id=@Model.Id">First Page</a>
+		}
+		<div class="flex-divider"></div>
+		<span>•</span>
+		<div class="flex-divider"></div>
+		@if (!string.IsNullOrWhiteSpace(Model.Channel.ContinuationToken))
+		{
+			<a href="/channel/@Model.Id?continuation=@Model.Channel.ContinuationToken">Next Page</a>
+		}
+	</div>
 </div>

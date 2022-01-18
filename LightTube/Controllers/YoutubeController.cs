@@ -60,7 +60,6 @@ namespace LightTube.Controllers
 		[Route("/channel/{id}")]
 		public async Task<IActionResult> Channel(string id, string continuation = null)
 		{
-			continuation ??= Request.Query["continuation"];
 			ChannelContext context = new()
 			{
 				Channel = await _youtube.GetChannelAsync(id, continuation),
