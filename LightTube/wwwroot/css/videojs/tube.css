@@ -130,6 +130,15 @@
 
 .video-js .vjs-progress-control {
     position: absolute;
+    left: 1em;
+    right: 1em;
+    width: calc(100% - 2em);
+    height: .5em;
+    top: -.5em;
+}
+
+.video-js.vjs-user-inactive .vjs-progress-control {
+    position: absolute;
     left: 0;
     right: 0;
     width: 100%;
@@ -260,7 +269,7 @@
 .video-js .vjs-control-bar {
     background-color: rgba(0, 0, 0, 0.3) !important;
     color: #ffffff;
-    font-size: 12px
+    font-size: 14px
 }
 
 .video-js .vjs-play-progress, .video-js {
