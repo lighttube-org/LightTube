@@ -149,6 +149,7 @@
 {
 	<script src="~/js/videojs/video.js"></script>
 	<script src="~/js/videojs/videojs-quality-selector.js"></script>
+	<script src="~/js/videojs/videojs-hotkeys.js"></script>
 	<script>
 	const player = videojs('player', {
 		controlBar: {
@@ -168,11 +169,12 @@
 				'fullscreenToggle',
 			],
 		},
-	}, function () {
-		var player = this;
-		player.on('resolutionchange', function () {
-			console.log('Source changed')
-		})
-	});
+	}).ready(function() {
+        this.hotkeys({
+          volumeStep: 0.1,
+          seekStep: 5,
+          enableModifiersForNumbers: false
+        });
+      });
 	</script>
 }
