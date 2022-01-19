@@ -98,6 +98,16 @@ video, #player {
     background-color: #000;
 }
 
+#player.error {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+
+#player.error > span {
+    background-color: #000000;
+}
+
 .resolutions-container {
     border: 1px solid black;
     background-color: #0003;

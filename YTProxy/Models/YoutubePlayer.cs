@@ -44,6 +44,8 @@ namespace YTProxy.Models
 
 		[JsonProperty("recommended")] public ItemPreview[] Recommended { get; set; }
 
+		[JsonProperty("error")] public string ErrorMessage { get; set; }
+
 		public string GetHtmlDescription()
 		{
 			return Utils.GetHtmlDescription(Description);
