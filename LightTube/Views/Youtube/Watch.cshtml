@@ -6,6 +6,7 @@
 @{
 	ViewBag.Title = Model.Player.Title;
 	Layout = "_Layout";
+	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
 	try
 	{
 		Model.Resolution ??= Model.Player.Formats.First().FormatNote;
@@ -19,19 +20,36 @@
 <!-- TODO: chapters -->
 <div class="video-page-container">
 	<div class="video-container">
-		@if (Model.Player.Formats.Length > 0)
+		@if (Model.Player.Formats.Length > 0 || live)
 		{
-			<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
-				@foreach (AdaptiveFormat format in Model.Player.Formats.Reverse())
-				{
-					<source label='@format.FormatNote' src='/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type='video/mp4'>
-				}
+			@if (live)
+			{
+				<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.Last().Url" controls>
+					@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Reverse())
+					{
+						@:<source label='@format.Resolution.Split("x")[1]P' src='/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
+					}
 
-				@foreach (Subtitle subtitle in Model.Player.Subtitles)
-				{
-					<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
-				}
-			</video>
+					@foreach (Subtitle subtitle in Model.Player.Subtitles)
+					{
+						@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+					}
+				</video>
+			}
+			else
+			{
+				<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
+					@foreach (AdaptiveFormat format in Model.Player.Formats.Reverse())
+					{
+						@:<source label='@format.FormatNote' src='/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type='video/mp4'>
+					}
+
+					@foreach (Subtitle subtitle in Model.Player.Subtitles)
+					{
+						@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+					}
+				</video>
+			}
 		}
 		else
 		{
@@ -39,7 +57,7 @@
 					@if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
 					{
 						<span>
-							No playable streams returned from the API (@Model.Player.Formats.Length/@Model.Player.AdaptiveFormats.Length)
+							No playable streams returned from the API (@Model.Player.Formats.Length/@Model.Player.AdaptiveFormats.Length/@live)
 						</span>
 					}
 					else
@@ -145,7 +163,7 @@
 	</div>
 </div>
 
-@if (Model.Player.Formats.Length > 0)
+@if (Model.Player.Formats.Length > 0 || live)
 {
 	<script src="~/js/videojs/video.js"></script>
 	<script src="~/js/videojs/videojs-quality-selector.js"></script>
@@ -159,6 +177,8 @@
 				'currentTimeDisplay',
 				'timeDivider',
 				'durationDisplay',
+				'liveDisplay',
+				'seekToLive',
 				'progressControl',
 				'spacer',
 				'chaptersButton',

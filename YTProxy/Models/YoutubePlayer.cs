@@ -20,7 +20,7 @@ namespace YTProxy.Models
 
 		[JsonProperty("description")] public string Description { get; set; }
 
-		[JsonProperty("duration")] public long Duration { get; set; }
+		[JsonProperty("duration")] public long? Duration { get; set; }
 
 		[JsonProperty("engagement")] public Engagement Engagement { get; set; }
 

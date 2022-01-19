@@ -102,6 +102,8 @@ video, #player {
     display: flex !important;
     justify-content: center;
     align-items: center;
+    background-image: url("https://i.giphy.com/media/l41K3o5TzvmhZwd4A/giphy.gif");
+    background-size: contain;
 }
 
 #player.error > span {
