@@ -20,7 +20,7 @@ namespace LightTube
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllersWithViews();
-			services.AddSingleton(new Youtube("http://cat.casa:30222/"));
+			services.AddSingleton(new Youtube("http://yt-proxy-api.herokuapp.com/"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
