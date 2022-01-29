@@ -527,9 +527,14 @@ video, #player {
 }
 
 .grid-video > .info > .title {
-    max-lines: 2;
     font-weight: bold;
     text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-clamp: 2; 
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .grid-video > .info > .uploader {
