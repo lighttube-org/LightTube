@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using LightTube.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +34,11 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Index()
 		{
 			return View(await _youtube.GetAllEndpoints());
+		}
+
+		public async Task<IActionResult> Feed(string[] channelId)
+		{
+			return View(await YoutubeRSS.GetMultipleFeeds(channelId));
 		}
 
 		[Route("/proxy")]
@@ -77,7 +85,7 @@ namespace LightTube.Controllers
 
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			
+
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
 				foreach (string value in values)
@@ -85,7 +93,7 @@ namespace LightTube.Controllers
 
 			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 			response.Headers.Add("Content-Type", "text/vtt");
-			
+
 			await using Stream stream = response.GetResponseStream();
 			await stream.CopyToAsync(Response.Body);
 			await Response.StartAsync();

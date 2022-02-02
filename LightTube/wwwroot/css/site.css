@@ -542,3 +542,20 @@ video, #player {
     overflow: hidden;
     text-decoration: none;
 }
+
+.subscription-container {
+    max-width: 1500px;
+    margin: auto;
+}
+
+.subscription-videos {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 4px;
+    justify-content: space-evenly;
+}
+
+.subscription-videos > .grid-video > .info {
+    row-gap: 0;
+}
