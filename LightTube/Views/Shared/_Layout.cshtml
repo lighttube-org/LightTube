@@ -3,6 +3,23 @@
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta property="og:site_name" content="lighttube" />
+	<meta property="og:type" content="website" />
+	@if (ViewBag.Metadata is not null)
+	{
+		@foreach (KeyValuePair<string, string> metaTag in ViewBag.Metadata)
+		{
+			if (metaTag.Key.StartsWith("og:"))
+			{
+				<meta property="@metaTag.Key" content="@metaTag.Value"/>
+			}
+			else
+			{
+				<meta name="@metaTag.Key" content="@metaTag.Value"/>
+			}
+		}
+	}
+	<meta property="theme-color" content="#AA0000" />
 	<title>@ViewData["Title"] - lighttube</title>
 	<link rel="stylesheet" href="~/css/site.css"/>
 	<link rel="stylesheet" href="~/css/videojs/video-js.css"/>
