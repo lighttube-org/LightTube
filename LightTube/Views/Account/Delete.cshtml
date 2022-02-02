@@ -1,0 +1,16 @@
+@model string[]
+@{
+	Layout = "_Layout";
+}
+
+@if (!string.IsNullOrWhiteSpace(Model[0]))
+{
+	<h1>@Model[0]</h1>
+}
+
+<form asp-action="Delete" method="POST" class="login-form">
+	<h1>Delete Account</h1>
+	<input name="email" type="email" placeholder="Email">
+	<input name="password" type="password" placeholder="Password">
+	<input type="submit" value="Delete Account">
+</form>

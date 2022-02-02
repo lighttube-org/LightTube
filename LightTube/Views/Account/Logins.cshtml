@@ -1,0 +1,12 @@
+@model List<LTLogin>
+@{
+	Layout = "_Layout";
+}
+
+
+<ul>
+	@foreach (LTLogin login in Model)
+	{
+		<li>@login.Identifier - @login.UserAgent</li>
+	}
+</ul>

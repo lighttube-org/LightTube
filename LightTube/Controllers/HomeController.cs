@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
+using LightTube.Contexts;
 using LightTube.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -33,12 +32,40 @@ namespace LightTube.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-			return View(await _youtube.GetAllEndpoints());
+			IEnumerable<string> endpoints = await _youtube.GetAllEndpoints();
+			if (!HttpContext.Request.Cookies.ContainsKey("token"))
+				return View(endpoints);
+			try
+			{
+				return Redirect("/feed/subscriptions");
+			}
+			catch
+			{
+				return View(endpoints);
+			}
 		}
 
-		public async Task<IActionResult> Feed(string[] channelId)
+		[Route("/feed/subscriptions")]
+		public async Task<IActionResult> Feed()
 		{
-			return View(await YoutubeRSS.GetMultipleFeeds(channelId));
+			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+				return Redirect("/");
+
+			try
+			{
+				LTUser user = await DatabaseManager.GetUserFromToken(token);
+				FeedContext context = new()
+				{
+					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
+					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels)
+				};
+				return View(context);
+			}
+			catch
+			{
+				HttpContext.Response.Cookies.Delete("token");
+				return Redirect("/");
+			}
 		}
 
 		[Route("/proxy")]

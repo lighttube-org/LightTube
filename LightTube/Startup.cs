@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,7 @@ namespace LightTube
 		{
 			services.AddControllersWithViews();
 			services.AddSingleton(new Youtube("http://yt-proxy-api.herokuapp.com/"));
+			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

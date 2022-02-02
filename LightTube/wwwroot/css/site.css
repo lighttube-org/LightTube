@@ -479,7 +479,8 @@ video, #player {
     max-width: 210px;
     height: fit-content;
     aspect-ratio: 16 / 9;
-    background-size: contain;
+    background-size: cover;
+    background-position: center;
     flex-basis: 200px;
     display: flex;
     justify-content: flex-end;
@@ -532,7 +533,7 @@ video, #player {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    line-clamp: 2; 
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
@@ -558,4 +559,83 @@ video, #player {
 
 .subscription-videos > .grid-video > .info {
     row-gap: 0;
+}
+
+.subscribe-button {
+    float: right;
+    background-color: red;
+    font-weight: bold;
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    height: min-content;
+}
+
+.subscribe-button.subscribed {
+    background-color: lightgray;
+    color: gray;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+    margin-right: 8px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    row-gap: 10px;
+    margin: auto;
+}
+
+.login-form > input {
+    background-color: #24242b;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    max-width: 400px;
+    row-gap: 10px;
+    margin: auto;
+}
+
+.login-form > h1 {
+    text-align: center;
+}
+
+.subscription-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+}
+
+.subscription-channels-container {
+    background-color: #24242b;
+}
+
+.list-channel {
+    display: grid;
+    grid-template-columns: 60px 1fr max-content;
+    grid-template-areas:
+    "avatar info subscribebutton"
+}
+
+.list-channel > .channel-avatar {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+}
+
+.list-channel > .info {
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.list-channel > .subscribe-button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }

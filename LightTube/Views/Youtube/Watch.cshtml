@@ -112,6 +112,7 @@
 		<br>
 		<div class="uploader">
 			Uploaded by: <a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
+			<button style="display: none" class="subscribe-button" data-cid="@Model.Player.Channel.Id"></button>
 		</div>
 
 		<p>@Html.Raw(Model.Player.GetHtmlDescription())</p>
