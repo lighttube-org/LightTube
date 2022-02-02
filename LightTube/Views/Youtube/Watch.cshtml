@@ -4,20 +4,18 @@
 @model LightTube.Contexts.PlayerContext
 
 @{
-	ViewBag.Metadata = new Dictionary<string, string>
-	{
-		["og:title"] = Model.Player.Title,
-		["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}",
-		["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}",
-		["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}",
-		["og:description"] = Model.Player.Description,
-		["og:video"] = $"/proxy?url={HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())}",
-	};
+	ViewBag.Metadata = new Dictionary<string, string>();
+	ViewBag.Metadata["og:title"] = Model.Player.Title;
+	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
+	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["og:description"] = Model.Player.Description;
 	ViewBag.Title = Model.Player.Title;
 	Layout = "_Layout";
 	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
 	try
 	{
+		ViewBag.Metadata["og:video"] = $"/proxy?url={HttpUtility.UrlEncode(Model.Player.Formats.First().Url.ToString())}";
 		Model.Resolution ??= Model.Player.Formats.First().FormatNote;
 	}
 	catch
