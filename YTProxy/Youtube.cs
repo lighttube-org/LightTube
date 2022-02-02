@@ -11,14 +11,16 @@ namespace YTProxy
 {
 	public class Youtube
 	{
-		private HttpClient Client;
-
+		internal HttpClient Client;
+		public YoutubeMusic Music;
+		
 		public Youtube(string apiRoot)
 		{
 			Client = new HttpClient
 			{
 				BaseAddress = new Uri(apiRoot)
 			};
+			Music = new YoutubeMusic(this);
 		}
 
 		public async Task<IEnumerable<string>> GetAllEndpoints()
