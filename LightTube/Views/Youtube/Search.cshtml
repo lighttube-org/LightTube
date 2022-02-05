@@ -19,7 +19,12 @@
 					</div>
 					<div class="info">
 						<a href="/watch?v=@video.Id" class="title">@video.Title</a>
-						<a href="/channel/@video.Channel.Id" class="uploader">@video.Channel.Name</a>
+						<div class="uploader">
+							<img class="uploader-avatar" alt="Uploader Avatar" src="@video.Channel.Avatars.Last().Url">
+							<div class="name-container">
+								<a href="/channel/@video.Channel.Id">@video.Channel.Name</a>
+							</div>
+						</div>
 						<div>
 							<span>@video.Views views</span>
 							<span>•</span>

@@ -111,7 +111,10 @@
 		</div>
 		<br>
 		<div class="uploader">
-			Uploaded by: <a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
+			<img class="uploader-avatar" alt="Uploader Avatar" src="@Model.Player.Channel.Avatars.Last().Url">
+			<div class="name-container">
+				<a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
+			</div>
 			<button style="display: none" class="subscribe-button" data-cid="@Model.Player.Channel.Id"></button>
 		</div>
 

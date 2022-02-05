@@ -19,12 +19,13 @@
 		</div>
 		<p>@Html.Raw(Model.Playlist.GetHtmlDescription())</p>
 		<br>
-		<p>
-			Created by:
-			<b>
+		<div class="uploader">
+			<img class="uploader-avatar" alt="Uploader Avatar" src="@Model.Playlist.Channel.Avatars.Last().Url">
+			<div class="name-container">
 				<a href="/channel/@Model.Playlist.Channel.Id">@Model.Playlist.Channel.Name</a>
-			</b>
-		</p>
+			</div>
+			<button style="display: none" class="subscribe-button" data-cid="@Model.Playlist.Channel.Id"></button>
+		</div>
 	</div>
 
 	<div style="border-left:1px solid #bbbbbb;height:inherit;"></div>

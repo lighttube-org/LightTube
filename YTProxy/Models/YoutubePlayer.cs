@@ -45,7 +45,7 @@ namespace YTProxy.Models
 	{
 		[JsonProperty("id")] public string Id { get; set; }
 		[JsonProperty("name")] public string Name { get; set; }
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("avatars")] public Thumbnail[] Avatars { get; set; }
 	}
 
 	public class Chapter

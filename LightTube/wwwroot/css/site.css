@@ -155,10 +155,16 @@ video, #player {
 }
 
 .uploader {
-
+    display: flex;
+    align-items: center;
+    column-gap: 4px;
 }
 
-.uploader > a {
+.uploader > .name-container {
+    width: 100%;
+}
+
+.uploader > .name-container > a {
     font-weight: bold;
     text-decoration: none;
 }
@@ -638,4 +644,17 @@ video, #player {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.uploader-avatar {
+    border-radius: 50%;
+    height: 40px;
+}
+
+.result > .info > .uploader > .uploader-avatar {
+    height: 30px;
+}
+
+.result > .info > .uploader > .name-container > * {
+    font-weight: normal;
 }
