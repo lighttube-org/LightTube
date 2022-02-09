@@ -1,0 +1,240 @@
+/* shared layout */
+
+body {
+    margin: 48px 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+
+    box-shadow: #0004 0 2px 5px;
+    background-color: #fff;
+}
+
+.top-bar > form {
+    display: none;
+}
+
+.top-bar > .divider {
+    flex-grow: 1;
+}
+
+.guide {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+
+    border-top: 1px solid #E5E5E5;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+    background-color: #fff;
+}
+
+.app {
+    background-color: #f9f9f9;
+}
+
+a.icon-link, a.icon-link > img {
+    width: 32px;
+    height: 32px;
+}
+
+/* guide */
+
+.guide-item > a {
+    height: 100%;
+    padding: 0 24px;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    font-size: x-small;
+    align-items: center;
+    color: #000;
+    text-decoration: none;
+    justify-content: center;
+}
+
+.guide-item > a > .icon {
+    width: 24px;
+    margin-right: 0px;
+}
+
+.guide-item:hover {
+    background-color: #f2f2f2;
+}
+
+.guide-item.active {
+    background-color: #E5E5E5;
+}
+
+.hide-on-minmode {
+    display: none;
+}
+
+/* top bar */
+
+.logo {
+    color: #000;
+    text-decoration: none;
+    font-size: larger;
+}
+
+.account {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.account > img {
+    width: 32px;
+    height: 32px;
+}
+
+.account-menu {
+    display: none;
+}
+
+.search-button {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* TODO: search bar on /results */
+
+/* rich video grid */
+
+@media screen and (min-width: 850px) {
+    .rich-video-grid {
+        width: 100%;
+
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px 16px;
+        padding-top: 16px;
+        justify-content: space-evenly;
+    }
+
+    .rich-video-grid > .video {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        grid-template-rows: min-content min-content;
+        grid-auto-flow: row;
+        grid-gap: 10px 0;
+        grid-template-areas:
+    "thumbnail thumbnail"
+    "avatar info";
+
+        margin-bottom: 16px;
+        width: 400px;
+    }
+}
+
+@media screen and (max-width: 850px) {
+    .rich-video-grid {
+        width: 100%;
+    }
+
+    .rich-video-grid > .video {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        grid-template-rows: min-content min-content;
+        grid-auto-flow: row;
+        grid-gap: 10px 0;
+        grid-template-areas:
+    "thumbnail thumbnail"
+    "avatar info";
+
+        margin-bottom: 16px;
+    }
+}
+
+
+
+.rich-video-grid > .video a {
+    text-decoration: none;
+    color: #606060;
+}
+
+.rich-video-grid > .video > .thumbnail {
+    grid-area: thumbnail;
+    background-color: #CCC;
+    width: 100%;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 4px;
+
+    background-position-y: center;
+    background-size: cover;
+}
+
+.rich-video-grid > .video > .thumbnail > span {
+    font-size: smaller;
+
+    background-color: #0008;
+    color: #fff;
+    padding: 2px;
+    border-radius: 2px;
+}
+
+.rich-video-grid > .video > .avatar {
+    grid-area: avatar;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: #E3E3E3;
+
+    margin-left: 12px;
+}
+
+.rich-video-grid > .video > .avatar > img {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+}
+
+.rich-video-grid > .video > .info {
+    grid-area: info;
+}
+
+.rich-video-grid > .video > .info > div {
+    display: flex;
+    flex-direction: row;
+    color: #606060;
+    column-gap: 8px;
+    max-height: 1.1rem;
+    overflow-y: hidden;
+}
+
+.rich-video-grid > .video > .info > .title {
+    color: #000 !important;
+    max-height: 1.1rem;
+    overflow-y: hidden;
+}

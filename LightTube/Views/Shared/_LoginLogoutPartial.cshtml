@@ -1,20 +1,23 @@
-@if (@Context.Request.Cookies.TryGetValue("token", out string token))
+@if (Context.Request.Cookies.TryGetValue("token", out string token))
 {
 	@try
 	{
 		LTUser user = await DatabaseManager.GetUserFromToken(token);
-		<span>Logged in as @user.Email.Split("@")[0]</span>
-		<a href="/Account/Logout">Logout</a>
+
+		<div class="guide-item"><a>@user.Email.Split("@")[0]</a></div>
+		<div class="guide-item"><a href="/Account/Logins">Settings</a></div>
+		<div class="guide-item"><a href="/Account/Logins">Active logins</a></div>
+        <div class="guide-item"><a href="/Account/Logout">Log out</a></div>
 	}
 	catch
 	{
-		<a href="/Account/Login">Login</a>
-		<a href="/Account/Register">Register</a>
+		<div class="guide-item"><a href="/Account/Login">Log in</a></div>
+		<div class="guide-item"><a href="/Account/Register">Register</a></div>
 	}
 }
 else
 {
-	<a href="/Account/Login">Login</a>
-	<a href="/Account/Register">Register</a>
+	<div class="guide-item"><a href="/Account/Login">Log in</a></div>
+	<div class="guide-item"><a href="/Account/Register">Register</a></div>
 }
 

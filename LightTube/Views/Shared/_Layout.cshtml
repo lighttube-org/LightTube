@@ -21,28 +21,58 @@
 	}
 	<meta property="theme-color" content="#AA0000" />
 	<title>@ViewData["Title"] - lighttube</title>
-	<link rel="stylesheet" href="~/css/site.css"/>
+	@if ((ViewData["DisableOldCss"] ?? false).Equals(false))
+	{
+		<link rel="stylesheet" href="~/css/site.css"/>
+	}
+	<link rel="stylesheet" href="~/css/desktop.css"/>
 	<link rel="stylesheet" href="~/css/videojs/video-js.css"/>
 	<link rel="stylesheet" href="~/css/videojs/quality-selector.css"/>
 	<link rel="stylesheet" href="~/css/videojs/tube.css"/>
 	<link rel="icon" href="~/favicon.ico">
 </head>
 <body>
-<header>
-	<a href="/" class="logo">light<b>tube</b></a>
-	<div class="flex-divider"></div>
-	<form method="get" action="/results">
-		<input type="text" name="search_query" placeholder="Search...">
+
+<div class="top-bar">
+	<a class="logo" href="/">light<b>tube</b></a>
+	<div class="divider"></div>
+	<form action="/results">
+		<input type="text" placeholder="Search" name="search_query">
 		<input type="submit" value="Search">
 	</form>
-	<div class="flex-divider"></div>
-	<div class="user-info">
-		@Html.Partial("_LoginLogoutPartial")
+	<div class="divider"></div>
+	<div class="search-button">
+		<a class="icon-link" href="/results">
+			<img src="/icons/search.svg">
+		</a>
 	</div>
-</header>
-<div class="page-container">
-@RenderBody()
+	<div class="account" tabindex="-1">
+		<a class="icon-link" href="/Account">
+			<img src="/icons/profile.svg">
+		</a>
+		<div class="account-menu">
+			@Html.Partial("_LoginLogoutPartial")
+		</div>
+	</div>
 </div>
+
+<div class="guide minmode">
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "home" ? "active" : "")"><a href="/"><i class="icon"><img src="/icons/home.svg"></i>Home</a></div>
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "explore" ? "active" : "")"><a href="/feed/explore"><i class="icon"><img src="/icons/compass.svg"></i>Explore</a></div>
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "subs" ? "active" : "")"><a href="/feed/subscriptions"><i class="icon"><img src="/icons/subscriptions.svg"></i>
+		Subscriptions</a></div>
+	<hr class="hide-on-minmode">
+	<p class="hide-on-minmode">
+		<a href="https://gitlab.com/kuylar/lighttube/-/blob/master/README.md">About</a>
+		<a href="https://gitlab.com/kuylar/lighttube/-/blob/master/OTHERLIBS.md">Licenses</a>
+		<a href="https://gitlab.com/kuylar/lighttube">Source code</a>
+	</p>
+</div>
+
+<div class="app">
+	@RenderBody()
+</div>
+
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
