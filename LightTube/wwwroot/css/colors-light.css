@@ -1,0 +1,11 @@
+:root {
+    --text-primary: #000;
+    --text-secondary: #606060;
+
+    --app-background: #f9f9f9;
+    --context-menu-background: #f2f2f2;
+    --border-color: #c5c5c5;
+
+    --engagement-bar-background: #CCCCCC;
+    --engagement-bar-foreground: #909090;
+}
