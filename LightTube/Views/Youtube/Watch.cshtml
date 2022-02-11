@@ -22,49 +22,52 @@
 	{
 		
 	}
+	ViewData["DisableOldCss"] = true;
+	ViewData["HideGuide"] = true;
 }
 
 <!-- TODO: chapters -->
-<div class="video-page-container">
-	<div class="video-container">
-		@if (Model.Player.Formats.Length > 0 || live)
-		{
-			@if (live)
+<div class="watch-page">
+	<div class="primary">
+		<div class="video-player-container">
+			@if (Model.Player.Formats.Length > 0 || live)
 			{
-				<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.Last().Url" controls>
-					@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Reverse())
-					{
-						@:<source label='@format.Resolution.Split("x")[1]P' src='/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
-					}
+				@if (live)
+				{
+					<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.Last().Url" controls>
+						@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Reverse())
+						{
+							@:<source label='@format.Resolution.Split("x")[1]P' src='/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
+						}
 
-					@foreach (Subtitle subtitle in Model.Player.Subtitles)
-					{
-						@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
-					}
-				</video>
+						@foreach (Subtitle subtitle in Model.Player.Subtitles)
+						{
+							@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+						}
+					</video>
+				}
+				else
+				{
+					<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
+						@foreach (AdaptiveFormat format in Model.Player.Formats.Reverse())
+						{
+							@:<source label='@format.FormatNote' src='/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type='video/mp4'>
+						}
+
+						@foreach (Subtitle subtitle in Model.Player.Subtitles)
+						{
+							@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+						}
+					</video>
+				}
 			}
 			else
 			{
-				<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
-					@foreach (AdaptiveFormat format in Model.Player.Formats.Reverse())
-					{
-						@:<source label='@format.FormatNote' src='/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type='video/mp4'>
-					}
-
-					@foreach (Subtitle subtitle in Model.Player.Subtitles)
-					{
-						@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
-					}
-				</video>
-			}
-		}
-		else
-		{
-			<div id="player" class="error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
+				<div id="player" class="error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
 					@if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
 					{
 						<span>
-							No playable streams returned from the API (@Model.Player.Formats.Length/@Model.Player.AdaptiveFormats.Length/@live)
+							No playable streams returned from the API (@Model.Player.Formats.Length/@Model.Player.AdaptiveFormats.Length)
 						</span>
 					}
 					else
@@ -73,18 +76,50 @@
 							@Model.Player.ErrorMessage
 						</span>
 					}
+				</div>
+			}
+		</div>
+		<div class="video-info">
+			<div class="video-title">@Model.Player.Title</div>
+			<div class="video-info-bar">
+				<span>@Model.Player.Engagement.Views views</span>
+				<span>Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
+				<div class="divider"></div>
+				<div class="engagement-container">
+					<div class="engagement-info">
+						<span class="likes"><img src="icons/like.svg">@Model.Player.Engagement.Likes</span>
+						<span class="dislikes"><img src="icons/dislike.svg">@Model.Player.Engagement.Dislikes</span>
+					</div>
+					<div class="engagement-bar">
+						<div style="width: @(Model.Player.Engagement.GetLikePercentage().ToString().Split(".")[0])%"></div>
+					</div>
+				</div>
+				<a href="https://www.youtube.com/watch?v=@Model.Player.Id">YouTube link</a>
 			</div>
-		}
-
+			<div class="channel-info">
+				<a href="/channel/@Model.Player.Channel.Id" class="avatar">
+					<img src="@Model.Player.Channel.Avatars.Last().Url">
+				</a>
+				<div class="name">
+					<a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
+					<span>922K subscribers</span>
+				</div>
+				<button class="subscribe-button" data-cid="@Model.Player.Channel.Id">Subscribe</button>
+			</div>
+			<p class="description">@Html.Raw(Model.Player.GetHtmlDescription())</p>
+		</div>
+		<hr>
+	</div>
+	<div class="secondary">
 		<noscript>
-			<div class="resolutions-container">
-				<h2>Resolutions</h2>
+			<div class="resolutions-list">
+				<h3>Change Resolution</h3>
 				<div>
 					@foreach (AdaptiveFormat format in Model.Player.Formats)
 					{
 						@if (format.FormatNote == Model.Resolution)
 						{
-							<b>@format.FormatNote</b>
+							<b>@format.FormatNote (current)</b>
 						}
 						else
 						{
@@ -94,35 +129,8 @@
 				</div>
 			</div>
 		</noscript>
-		<h1>@Model.Player.Title</h1>
-		<div class="video-info-bar">
-			<span id="view-count">@Model.Player.Engagement.Views views</span>
-			•
-			<span id="publish-date">Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
-			<div class="flex-divider"></div>
-			<div class="engagements">
-				<span id="like-count">@Model.Player.Engagement.Likes</span>
-				<span id="dislike-count">@Model.Player.Engagement.Dislikes</span>
-				<div class="engagement-bar">
-					<div style="width: @Model.Player.Engagement.GetLikePercentage().ToString().Split(".")[0]%"></div>
-				</div>
-			</div>
-			<a href="https://www.youtube.com/watch?v=@Model.Player.Id">YouTube Link</a>
-		</div>
-		<br>
-		<div class="uploader">
-			<img class="uploader-avatar" alt="Uploader Avatar" src="@Model.Player.Channel.Avatars.Last().Url">
-			<div class="name-container">
-				<a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
-			</div>
-			<button style="display: none" class="subscribe-button" data-cid="@Model.Player.Channel.Id"></button>
-		</div>
-
-		<p>@Html.Raw(Model.Player.GetHtmlDescription())</p>
-	</div>
-	<div class="recommendations-container">
-		<h1>Recommended videos</h1>
-		<div>
+		<div class="recommended-list">
+			
 			@if (Model.Player.Recommended.Length == 0)
 			{
 				<p style="text-align: center">None :(<br>This is most likely an age-restricted video</p>
@@ -133,17 +141,19 @@
 				switch (itemPreview)
 				{
 					case VideoPreview video:
-						<div class="recommendation" onclick="window.location = '/watch?v=@video.Id'">
-							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
-								<span>@video.Duration</span>
-							</div>
+						<div class="video">
+							<a href="/watch?v=@video.Id" class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
+								<span class="video-length">@video.Duration</span>
+							</a>
 							<div class="info">
-								<a href="/watch?v=@video.Id" class="title">@video.Title</a>
-								<a href="/channel/@video.Channel.Id" class="uploader">@video.Channel.Name</a>
+								<a href="/watch?v=@video.Id" class="title max-lines-2">@video.Title</a>
 								<div>
-									<span>@video.Views views</span>
-									<span>•</span>
-									<span>@video.UploadedAt</span>
+									<a href="/channel/@video.Channel.Id" class="max-lines-1">@video.Channel.Name</a>
+									<div>
+										<span>@video.Views views</span>
+										<span>•</span>
+										<span>@video.UploadedAt</span>
+									</div>
 								</div>
 							</div>
 						</div>

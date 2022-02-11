@@ -25,10 +25,15 @@
 	{
 		<link rel="stylesheet" href="~/css/site.css"/>
 	}
-	<link rel="stylesheet" href="~/css/desktop.css"/>
-	<link rel="stylesheet" href="~/css/videojs/video-js.css"/>
-	<link rel="stylesheet" href="~/css/videojs/quality-selector.css"/>
-	<link rel="stylesheet" href="~/css/videojs/tube.css"/>
+	@if ((ViewData["HideGuide"] ?? false).Equals(true))
+	{
+		<style> .guide { display: none !important; } </style>
+	}
+	<link rel="stylesheet" href="~/css/colors-light.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/desktop.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/videojs/video-js.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/videojs/quality-selector.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/videojs/tube.css" asp-append-version="true"/>
 	<link rel="icon" href="~/favicon.ico">
 </head>
 <body>
