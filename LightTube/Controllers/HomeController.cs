@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using LightTube.Contexts;
 using LightTube.Models;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using YTProxy;
+using YTProxy.Models;
 
 namespace LightTube.Controllers
 {
@@ -83,7 +85,19 @@ namespace LightTube.Controllers
 				foreach (string value in values)
 					request.Headers.Add(header, value);
 
-			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+			HttpWebResponse response = null;
+
+			try
+			{
+				response = (HttpWebResponse)request.GetResponse();
+			}
+			catch (WebException e)
+			{
+				response = e.Response as HttpWebResponse;
+			}
+			
+			if (response == null) 
+				await Response.StartAsync();
 
 			foreach (string header in response.Headers.AllKeys)
 				if (Response.Headers.ContainsKey(header))
