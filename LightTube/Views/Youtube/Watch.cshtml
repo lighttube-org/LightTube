@@ -1,3 +1,4 @@
+@using System.Collections.Specialized
 @using System.Globalization
 @using System.Web
 @using YTProxy.Models
@@ -49,11 +50,6 @@
 				else
 				{
 					<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
-						@foreach (AdaptiveFormat format in Model.Player.Formats.Reverse())
-						{
-							@:<source label='@format.FormatNote' src='/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type='video/mp4'>
-						}
-
 						@foreach (Subtitle subtitle in Model.Player.Subtitles)
 						{
 							@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
@@ -188,6 +184,7 @@
 {
 	<script src="~/js/videojs/video.js"></script>
 	<script src="~/js/videojs/videojs-quality-selector.js"></script>
+	<script src="~/js/videojs/videojs-audio.js"></script>
 	<script src="~/js/videojs/videojs-hotkeys.js"></script>
 	<script>
 	const player = videojs('player', {
@@ -210,7 +207,30 @@
 				'fullscreenToggle',
 			],
 		},
+		plugins: {
+			"audio": {
+				audioTracks: [
+					@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Where(x => x.Resolution == "audio only").Reverse().GroupBy(x => x.FormatNote)
+						.Select(g => g.First()))
+					{
+						NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
+
+						@:{src: '/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())'},
+					}
+				],
+				syncInterval: 10000
+			},
+		}
 	}).ready(function() {
+		this.src([
+			@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.Format != "144p").Reverse().GroupBy(x => x.FormatNote)
+				.Select(g => g.First()))
+			{
+				NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
+
+				@:{src: '/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())',type: '@query.Get("mime")',label: '@format.FormatNote', selected: @(format.FormatNote.StartsWith("720p") ? "true" : "false")},
+			}
+        ]);
         this.hotkeys({
           volumeStep: 0.1,
           seekStep: 5,
