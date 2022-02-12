@@ -6,6 +6,7 @@
 
 @{
 	ViewBag.Metadata = new Dictionary<string, string>();
+	ViewBag.Metadata["author"] = Model.Player.Channel.Name;
 	ViewBag.Metadata["og:title"] = Model.Player.Title;
 	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
 	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
