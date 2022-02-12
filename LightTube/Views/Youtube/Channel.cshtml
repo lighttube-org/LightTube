@@ -1,60 +1,68 @@
 @using YTProxy.Models
+@using System.Web
 @model LightTube.Contexts.ChannelContext
 
 @{
+	ViewBag.Metadata = new Dictionary<string, string>();
+	ViewBag.Metadata["og:title"] = Model.Channel.Name;
+	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
+	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Channel.Avatars.FirstOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Channel.Avatars.LastOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["og:description"] = Model.Channel.Description;
 	ViewBag.Title = Model.Channel.Name;
 	Layout = "_Layout";
+	ViewData["DisableOldCss"] = true;
 }
 
-<div class="channel-container">
+<div class="channel-page">
 	@if (Model.Channel.Banners.Length > 0)
 	{
 		<img class="channel-banner" alt="Channel Banner" src="@Model.Channel.Banners.Last().Url">
 	}
 
-	<div class="channel-info">
-		<img class="channel-avatar" alt="Channel Avatar" src="/proxy?url=@Model.Channel.Avatars.Last().Url"/>
-		<div>
-			<h1>@Model.Channel.Name</h1>
-			<p>@Model.Channel.Subscribers</p>
+	<div class="channel-info-container">
+		<div class="channel-info">
+			<a href="/channel/@Model.Channel.Id" class="avatar">
+				<img src="@Model.Channel.Avatars.Last().Url" alt="Channel Avatar">
+			</a>
+			<div class="name">
+				<a>@Model.Channel.Name</a>
+				<span>@Model.Channel.Subscribers</span>
+			</div>
+			<button class="subscribe-button" data-cid="@Model.Channel.Id">Subscribe</button>
 		</div>
-		<div class="flex-divider"></div>
-		<button style="display: none" class="subscribe-button" data-cid="@Model.Channel.Id"></button>
-	</div>
-	
-	<div class="channel-about">
-		<h2>About</h2>
-		<p>@Html.Raw(Model.Channel.GetHtmlDescription())</p>
 	</div>
 
-	<h2>Videos</h2>
-	<div class="channel-videos">
+	<h3>About</h3>
+	<p>@Html.Raw(Model.Channel.GetHtmlDescription())</p>
+	<br><br>
+	<h3>Uploads</h3>
+	<div class="video-grid">
 		@foreach (VideoPreview video in Model.Channel.Videos)
 		{
-			<div class="grid-video" onclick="window.location = '/watch?v=@video.Id'">
-				<div class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
-					<span>@video.Duration</span>
-				</div>
+			<a href="/watch?v=@video.Id" class="video">
+				<div class="thumbnail" style="background-image: url('@video.Thumbnails.First().Url')"></div>
 				<div class="info">
-					<a href="/watch?v=@video.Id" class="title">@video.Title</a>
+					<span class="title max-lines-2">@video.Title</span>
 					<div>
-						<span>@video.Views views</span>
-						<span>•</span>
-						<span>@video.UploadedAt</span>
+						<div>
+							<span>@video.Views views</span>
+							<span>@video.UploadedAt</span>
+						</div>
 					</div>
 				</div>
-			</div>
+			</a>	
 		}
 	</div>
 
-	<div class="page-controls">
+	<div class="pagination-buttons">
 		@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
 		{
 			<a href="/channel?id=@Model.Id">First Page</a>
 		}
-		<div class="flex-divider"></div>
+		<div class="divider"></div>	
 		<span>•</span>
-		<div class="flex-divider"></div>
+		<div class="divider"></div>
 		@if (!string.IsNullOrWhiteSpace(Model.Channel.ContinuationToken))
 		{
 			<a href="/channel/@Model.Id?continuation=@Model.Channel.ContinuationToken">Next Page</a>

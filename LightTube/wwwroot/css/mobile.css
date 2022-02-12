@@ -255,9 +255,9 @@ a.icon-link, a.icon-link > img {
 .video > .info > div {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     color: #606060;
     column-gap: 8px;
-    max-height: 1.1rem;
     overflow-y: hidden;
 }
 
@@ -480,4 +480,98 @@ a.icon-link, a.icon-link > img {
 .recommended-list > .video > .info > div {
     flex-wrap: wrap;
     max-height: unset;
+}
+
+/* channel page */
+
+.channel-banner {
+    display: block;
+    width: 100%;
+    height: fit-content;
+    aspect-ratio: 6.2;
+    background-color: #000a;
+    background-size: contain;
+}
+
+.channel-info-container {
+    background-color: #fff;
+}
+
+.channel-info-container > .channel-info {
+    grid-template-columns: 50px 1fr;
+    grid-template-rows: 50px min-content;
+    grid-template-areas: "avatar name" ". subscribe-button";
+    column-gap: 16px;
+    padding: 16px;
+}
+
+.channel-info-container > .channel-info > .subscribe-button {
+    width: max-content;
+}
+
+.channel-info-container > .channel-info > .name > *:first-child {
+    font-size: larger;
+    color: var(--text-primary);
+}
+
+.channel-info-container > .channel-info > .name > * {
+    color: var(--text-secondary);
+}
+
+/* channel video "grid" */
+
+.video-grid {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    column-gap: 16px;
+    row-gap: 12px;
+    padding: 0 12px;
+}
+
+.video-grid > .video {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    grid-template-rows: 90px;
+    grid-auto-flow: row;
+    grid-gap: 10px 0;
+    grid-template-areas:
+    "thumbnail info";
+
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.video-grid > .avatar {
+    display: none;
+}
+
+.video-grid > .video > .info > span {
+    font-weight: bold;
+    font-size: initial;
+}
+
+.video-grid > .video > .info > div > div {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+/* Pagination links */
+
+.pagination-buttons {
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    display: flex;
+}
+
+.pagination-buttons > * {
+    height: 3rem;
+    line-height: 3rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.pagination-buttons > .divider {
+    flex-grow: 1;
 }
