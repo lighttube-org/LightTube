@@ -32,7 +32,6 @@ namespace YTProxy
 			return html;
 		}
 
-		// TODO: this doesnt work for some reason, fix it
 		public static string GetMpdManifest(YoutubePlayer player, string proxyUrl)
 		{
 			XmlDocument doc = new();
@@ -112,6 +111,90 @@ namespace YTProxy
 
 			mpdRoot.AppendChild(period);
 			return doc.InnerXml;
+		}
+
+		public static string GetHlsManifest(YoutubePlayer player, string proxyUrl)
+		{
+			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query).Get("dur") ?? "0"));
+			StringBuilder hls = new();
+			
+			hls.AppendLine("#EXTM3U");
+			hls.AppendLine("#EXT-X-VERSION:3");
+			hls.AppendLine("##EXT-X-PLAYLIST-TYPE:VOD");
+			hls.AppendLine("#EXT-X-TARGETDURATION:" + (int)durationTs.TotalSeconds);
+			//hls.AppendLine("#EXT-X-MEDIA-SEQUENCE:0");
+
+			hls.AppendLine(
+				$"#EXT-X-MEDIA:NAME=\"YouTube DASH Audio\", TYPE=AUDIO, GROUP-ID=\"ytdash-audio\", LANGUAGE=\"en\", DEFAULT=YES, AUTOSELECT=YES, URI=\"{proxyUrl + HttpUtility.UrlEncode(player.AdaptiveFormats.Last(x => x.Resolution == "audio only").Url.ToString())}\"");
+			AdaptiveFormat format = player.AdaptiveFormats.First(x => x.Resolution != "audio only");
+			
+			hls.AppendLine($"#EXTINF:{(int)durationTs.TotalSeconds},");
+			hls.AppendLine(proxyUrl + HttpUtility.UrlEncode(format.Url.ToString()));
+			/*
+			StringBuilder duration = new("PT");
+			if (durationTs.TotalHours > 0)
+				duration.Append($"{durationTs.TotalHours}H");
+			if (durationTs.Minutes > 0)
+				duration.Append($"{durationTs.Minutes}M");
+			if (durationTs.Seconds > 0)
+				duration.Append(durationTs.Seconds);
+			mpdRoot.SetAttribute("mediaPresentationDuration", $"PT{duration}.{durationTs.Milliseconds}S");
+			doc.AppendChild(mpdRoot);
+
+			XmlElement period = doc.CreateElement( "Period");
+
+
+			XmlElement audioAdaptationSet = doc.CreateElement( "AdaptationSet");
+			audioAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query).Get("mime"));
+			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+			foreach (AdaptiveFormat format in player.AdaptiveFormats.Where(x => x.Resolution == "audio only"))
+			{
+				NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
+				XmlElement representation = doc.CreateElement("Representation");
+				representation.SetAttribute("id", format.FormatId);
+				representation.SetAttribute("codecs", "mp4a.40.5");
+				//representation.SetAttribute("audioSamplingRate", "");
+				representation.SetAttribute("startWithSAP", "1");
+				//representation.SetAttribute("bandwidth", "");
+
+				XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
+				audioChannelConfiguration.SetAttribute("schemeIdUri", "urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
+				audioChannelConfiguration.SetAttribute("value", "2");
+				representation.AppendChild(audioChannelConfiguration);
+
+				XmlElement baseUrl = doc.CreateElement("BaseURL");
+				baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
+				representation.AppendChild(baseUrl);
+
+				audioAdaptationSet.AppendChild(representation);
+			}
+			period.AppendChild(audioAdaptationSet);
+			
+			XmlElement videoAdaptationSet = doc.CreateElement( "AdaptationSet");
+			videoAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution != "audio only").Url.Query).Get("mime"));
+			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+			foreach (AdaptiveFormat format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only"))
+			{
+				XmlElement representation = doc.CreateElement("Representation");
+				representation.SetAttribute("id", format.FormatId);
+				representation.SetAttribute("codecs", "avc1.4d4015");
+				representation.SetAttribute("startWithSAP", "1");
+				string[] widthAndHeight = format.Resolution.Split("x");
+				representation.SetAttribute("width", widthAndHeight[0]);
+				representation.SetAttribute("height", widthAndHeight[1]);
+				//representation.SetAttribute("bandwidth", "");
+
+				XmlElement baseUrl = doc.CreateElement("BaseURL");
+				baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
+				representation.AppendChild(baseUrl);
+
+				videoAdaptationSet.AppendChild(representation);
+			}
+			period.AppendChild(videoAdaptationSet);
+
+			mpdRoot.AppendChild(period);
+			*/
+			return hls.ToString();
 		}
 	}
 }

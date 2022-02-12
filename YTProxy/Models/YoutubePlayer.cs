@@ -33,6 +33,11 @@ namespace YTProxy.Models
 		{
 			return Utils.GetMpdManifest(this, proxyUrl);
 		}
+
+		public string GetHlsManifest(string proxyUrl)
+		{
+			return Utils.GetHlsManifest(this, proxyUrl);
+		}
 	}
 
 	public class AdaptiveFormat
