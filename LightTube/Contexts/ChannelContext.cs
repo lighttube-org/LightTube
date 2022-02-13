@@ -2,7 +2,7 @@ using YTProxy.Models;
 
 namespace LightTube.Contexts
 {
-	public class ChannelContext
+	public class ChannelContext : BaseContext
 	{
 		public YoutubeChannel Channel;
 		public string Id;

@@ -2,7 +2,7 @@ using YTProxy.Models;
 
 namespace LightTube.Contexts
 {
-	public class PlaylistContext
+	public class PlaylistContext : BaseContext
 	{
 		public YoutubePlaylist Playlist;
 		public string Id;

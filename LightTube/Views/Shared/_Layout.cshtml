@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@model LightTube.Contexts.BaseContext
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8"/>
@@ -30,7 +31,14 @@
 		<style> .guide { display: none !important; } </style>
 	}
 	<link rel="stylesheet" href="~/css/colors-light.css" asp-append-version="true"/>
-	<link rel="stylesheet" href="~/css/desktop.css" asp-append-version="true"/>
+	@if (Model.MobileLayout)
+	{
+		<link rel="stylesheet" href="~/css/mobile.css" asp-append-version="true"/>
+	}
+	else
+	{
+		<link rel="stylesheet" href="~/css/desktop.css" asp-append-version="true"/>
+	}
 	<link rel="stylesheet" href="~/css/videojs/video-js.css" asp-append-version="true"/>
 	<link rel="stylesheet" href="~/css/videojs/quality-selector.css" asp-append-version="true"/>
 	<link rel="stylesheet" href="~/css/videojs/tube.css" asp-append-version="true"/>
@@ -38,7 +46,7 @@
 </head>
 <body>
 
-<div class="top-bar">
+<div class="top-bar @(ViewData["UseFullSizeSearchBar"]?.Equals(true) ?? false ? "full-size-search" : "")">
 	<a class="logo" href="/">light<b>tube</b></a>
 	<div class="divider"></div>
 	<form action="/results">

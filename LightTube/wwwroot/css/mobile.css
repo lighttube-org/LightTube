@@ -292,8 +292,6 @@ a.icon-link, a.icon-link > img {
 
 .video > .info > .title {
     color: #000 !important;
-    max-height: 1.1rem;
-    overflow-y: hidden;
 }
 
 /* list playlist item */
@@ -724,8 +722,11 @@ a.icon-link, a.icon-link > img {
 }
 
 .video-list > .video > .info > .title {
-    font-size: initial;
     font-weight: bold;
+}
+
+.video-list > .video > .info > div > a > img {
+    display: none;
 }
 
 .video-list > .playlist {

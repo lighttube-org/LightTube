@@ -28,7 +28,8 @@ namespace LightTube.Controllers
 			PlayerContext context = new()
 			{
 				Player = await _youtube.GetVideoPlayerAsync(v),
-				Resolution = quality
+				Resolution = quality,
+				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
 		}
@@ -40,7 +41,8 @@ namespace LightTube.Controllers
 			{
 				Results = await _youtube.SearchAsync(search_query, continuation),
 				Query = search_query,
-				ContinuationToken = continuation
+				ContinuationToken = continuation,
+				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
 		}
@@ -52,7 +54,8 @@ namespace LightTube.Controllers
 			{
 				Playlist = await _youtube.GetPlaylistAsync(list, continuation),
 				Id = list,
-				ContinuationToken = continuation
+				ContinuationToken = continuation,
+				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
 		}
@@ -64,7 +67,8 @@ namespace LightTube.Controllers
 			{
 				Channel = await _youtube.GetChannelAsync(id, continuation),
 				Id = id,
-				ContinuationToken = continuation
+				ContinuationToken = continuation,
+				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
 		}

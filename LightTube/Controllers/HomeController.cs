@@ -35,8 +35,11 @@ namespace LightTube.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-			IEnumerable<string> endpoints = await _youtube.GetAllEndpoints();
-			return View(endpoints);
+			await _youtube.GetAllEndpoints();
+			return View(new BaseContext
+			{
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
 		}
 
 		[Route("/feed/subscriptions")]
@@ -51,7 +54,8 @@ namespace LightTube.Controllers
 				FeedContext context = new()
 				{
 					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
-					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels)
+					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels),
+					MobileLayout = Utils.IsClientMobile(Request)
 				};
 				return View(context);
 			}
@@ -65,7 +69,10 @@ namespace LightTube.Controllers
 		[Route("/feed/explore")]
 		public async Task<IActionResult> Explore()
 		{
-			return View();
+			return View(new BaseContext
+			{
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
 		}
 
 		[Route("/proxy")]

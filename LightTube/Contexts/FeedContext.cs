@@ -1,6 +1,6 @@
 namespace LightTube.Contexts
 {
-	public class FeedContext
+	public class FeedContext : BaseContext
 	{
 		public LTChannel[] Channels;
 		public FeedVideo[] Videos;
