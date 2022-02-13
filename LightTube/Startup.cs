@@ -1,6 +1,8 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -52,6 +54,18 @@ namespace LightTube
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
 			});
+			app.Use(Middleware);
+		}
+
+		private Task Middleware(HttpContext context, Func<Task> next)
+		{
+			if (!context.Request.Cookies.ContainsKey("theme"))
+				context.Response.Cookies.Append("theme", "light", new CookieOptions
+				{
+					Expires = DateTimeOffset.MaxValue
+				});
+			next.Invoke();
+			return Task.CompletedTask;
 		}
 	}
 }

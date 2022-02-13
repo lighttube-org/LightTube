@@ -5,7 +5,17 @@
     --app-background: #f9f9f9;
     --context-menu-background: #f2f2f2;
     --border-color: #c5c5c5;
+    --item-hover-background: #f2f2f2;
+    --item-active-background: #E5E5E5;
 
     --engagement-bar-background: #CCCCCC;
     --engagement-bar-foreground: #909090;
+
+    --top-bar-background: #FFF;
+    --guide-background: #FFF;
+
+    --thumbnail-background: #CCC;
+
+    --channel-info-background: #fff;
+    --channel-contents-background: #f9f9f9;
 }

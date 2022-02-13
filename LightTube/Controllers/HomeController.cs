@@ -145,6 +145,22 @@ namespace LightTube.Controllers
 			await Response.StartAsync();
 		}
 
+		[Route("/toggle_theme")]
+		public IActionResult ToggleTheme(string redirectUrl)
+		{
+			if (Request.Cookies.TryGetValue("theme", out string theme))
+				Response.Cookies.Append("theme", theme switch
+				{
+					"light" => "dark",
+					"dark" => "light",
+					var _ => "light"
+				});
+			else
+				Response.Cookies.Append("theme", "light");
+
+			return Redirect(redirectUrl);
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

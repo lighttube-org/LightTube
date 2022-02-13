@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
 .divider {
     flex-grow: 1;
 }
@@ -38,6 +42,10 @@ body {
     font-family: sans-serif;
 }
 
+html {
+    background-color: var(--app-background);
+}
+
 body.noguide {
     grid-template-areas: "top-bar top-bar" "app app";
 }
@@ -48,6 +56,8 @@ body.noguide {
     display: flex;
     padding: 0 16px;
     align-items: center;
+    background-color: var(--top-bar-background);
+    color: var(--text-primary);
 }
 
 .divider {
@@ -69,6 +79,8 @@ body.noguide {
     height: 40px;
     border: 1px solid var(--border-color);
     border-radius: 0;
+    color: var(--text-primary);
+    background-color: var(--item-active-background);
 }
 
 .top-bar > form > input[type=text] {
@@ -88,8 +100,10 @@ body.noguide {
 
 .guide {
     grid-area: guide;
+    background-color: var(--guide-background);
+    color: var(--text-primary);
     width: 300px;
-    height: calc(100vh - 56px);
+    height: 100%;
 }
 
 .account {
@@ -107,6 +121,12 @@ a.icon-button, a.icon-button > img {
 
 .account-menu {
     display: none;
+
+    background-color: var(--context-menu-background);
+}
+
+.account-menu > .guide-item {
+    background-color: var(--context-menu-background);
 }
 
 .account:hover .account-menu {
@@ -136,7 +156,7 @@ a.icon-button, a.icon-button > img {
 /* guide */
 
 .guide-item:hover {
-    background-color: #f2f2f2;
+    background-color: var(--item-hover-background);
 }
 
 .guide-item > a {
@@ -154,12 +174,8 @@ a.icon-button, a.icon-button > img {
     margin-right: 24px;
 }
 
-.guide-item:hover {
-    background-color: #f2f2f2;
-}
-
 .guide-item.active {
-    background-color: #E5E5E5;
+    background-color: var(--item-active-background);
 }
 
 .guide hr {
@@ -207,14 +223,6 @@ a.icon-button, a.icon-button > img {
     margin-right: 0;
 }
 
-.guide.minmode > .guide-item:hover {
-    background-color: #f2f2f2;
-}
-
-.guide.minmode > .guide-item.active {
-    background-color: #E5E5E5;
-}
-
 .guide.minmode > .hide-on-minmode {
     display: none;
 }
@@ -240,6 +248,9 @@ a.icon-button, a.icon-button > img {
 @media screen and (max-width: 1000px) {
     .watch-page {
         flex-direction: column;
+    }
+    .recommended-list {
+        width: calc(100vw - 48px) !important;
     }
 }
 
@@ -459,7 +470,7 @@ a.icon-button, a.icon-button > img {
 .video > .thumbnail {
     grid-area: thumbnail;
 
-    background-color: #CCC;
+    background-color: var(--thumbnail-background);
 
     display: flex;
     justify-content: flex-end;
@@ -507,7 +518,7 @@ a.icon-button, a.icon-button > img {
 .playlist > .thumbnail {
     grid-area: thumbnail;
 
-    background-color: #CCC;
+    background-color: var(--thumbnail-background);
 
     display: flex;
     justify-content: flex-end;
@@ -553,7 +564,7 @@ a.icon-button, a.icon-button > img {
     margin-bottom: 8px;
 }
 
-/* list channel item */
+/* list video item */
 
 .channel a {
     text-decoration: none;
@@ -569,7 +580,7 @@ a.icon-button, a.icon-button > img {
 }
 
 .channel > .avatar > img {
-    background-color: #CCC;
+    background-color: var(--thumbnail-background);
 
     height: 136px;
     width: 136px;
@@ -593,14 +604,14 @@ a.icon-button, a.icon-button > img {
 .channel-banner {
     display: block;
     width: 100%;
-    height: fit-content;
+    height: auto;
     aspect-ratio: 6.2;
     background-color: #000a;
     background-size: contain;
 }
 
 .channel-info-container {
-    background-color: #fff;
+    background-color: var(--channel-info-background);
 }
 
 .channel-info-container > .channel-info {
@@ -626,8 +637,16 @@ a.icon-button, a.icon-button > img {
     color: var(--text-secondary);
 }
 
+.channel-page > p {
+    color: var(--text-secondary)
+}
+
+.channel-page .video-grid {
+    background-color: var(--channel-contents-background);
+}
 
 /* channel video grid */
+
 
 .video-grid {
     display: flex;

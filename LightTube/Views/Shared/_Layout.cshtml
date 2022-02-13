@@ -1,4 +1,5 @@
-﻿@model LightTube.Contexts.BaseContext
+﻿@using System.Web
+@model LightTube.Contexts.BaseContext
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,7 +31,11 @@
 	{
 		<style> .guide { display: none !important; } </style>
 	}
-	<link rel="stylesheet" href="~/css/colors-light.css" asp-append-version="true"/>
+	@{
+		Context.Request.Cookies.TryGetValue("theme", out string theme);
+		if (!new[] { "light", "dark" }.Contains(theme)) theme = "light";
+	}
+	<link rel="stylesheet" href="@($"~/css/colors-{theme}.css")" asp-append-version="true"/>
 	@if (Model.MobileLayout)
 	{
 		<link rel="stylesheet" href="~/css/mobile.css" asp-append-version="true"/>
@@ -64,6 +69,7 @@
 			<img src="/icons/profile.svg">
 		</a>
 		<div class="account-menu">
+			<div class="guide-item"><a href="/toggle_theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Toggle Theme</a></div>
 			@Html.Partial("_LoginLogoutPartial")
 		</div>
 	</div>
