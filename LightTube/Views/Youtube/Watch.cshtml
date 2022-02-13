@@ -99,7 +99,6 @@
 				</a>
 				<div class="name">
 					<a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
-					<span>922K subscribers</span>
 				</div>
 				<button class="subscribe-button" data-cid="@Model.Player.Channel.Id">Subscribe</button>
 			</div>
@@ -156,22 +155,29 @@
 						</div>
 						break;
 					case PlaylistPreview playlist:
-						<div class="recommendation" onclick="window.location = '/playlist?list=@playlist.Id'">
-							<div class="thumbnail thumbnail-playlist" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
-								<div><b>@playlist.VideoCount</b><br>VIDEOS</div>
-							</div>
+						<div class="playlist">
+							<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="thumbnail" style="background-image: url('@playlist.Thumbnails.First().Url')">
+								<div>
+									<span>@playlist.VideoCount</span>
+									<span>VIDEOS</span>
+								</div>
+							</a>
 							<div class="info">
-								<a href="/watch?v=@playlist.FirstVideoId&amp;list=@playlist.Id" class="title">@playlist.Title</a>
-								<a href="/channel/@playlist.Channel.Id" class="uploader">@playlist.Channel.Name</a>
+								<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="title max-lines-2">@playlist.Title</a>
+								<div>
+									<a href="/channel/@playlist.Channel.Id">@playlist.Channel.Name</a>
+								</div>
 							</div>
 						</div>
 						break;
 					default:
-						<div class="recommendation">
+						<div class="video">
 							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')"></div>
 							<div class="info">
-								<a class="title">@itemPreview.Title</a>
-								<span><b>WARNING:</b> Unknown recommendation type: @recommendation.Type</span>
+								<span class="title max-lines-2">@itemPreview.Title</span>
+								<div>
+									<b>WARNING:</b> Unknown recommendation type: @recommendation.Type
+								</div>
 							</div>
 						</div>
 						break;
