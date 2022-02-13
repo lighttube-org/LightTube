@@ -4,83 +4,94 @@
 @{
 	ViewBag.Title = Model.Query;
 	Layout = "_Layout";
+	ViewData["DisableOldCss"] = true;
 }
 
-<div class="results-container">
+<div class="video-list">
 	@foreach (ItemPreview preview in Model.Results.Results)
 	{
 		Preview itemPreview = preview.GetPreview();
 		switch (preview.GetPreview())
 		{
 			case VideoPreview video:
-				<div class="result" onclick="window.location = '/watch?v=@video.Id'">
-					<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
-						<span>@video.Duration</span>
-					</div>
+				<div class="video">
+					<a href="/watch?v=@video.Id" class="thumbnail"
+					   style="background-image: url('@video.Thumbnails.First().Url')"><span class="video-length">@video.Duration</span></a>
 					<div class="info">
-						<a href="/watch?v=@video.Id" class="title">@video.Title</a>
-						<div class="uploader">
-							<img class="uploader-avatar" alt="Uploader Avatar" src="@video.Channel.Avatars.Last().Url">
-							<div class="name-container">
-								<a href="/channel/@video.Channel.Id">@video.Channel.Name</a>
-							</div>
-						</div>
-						<div>
-							<span>@video.Views views</span>
-							<span>•</span>
-							<span>@video.UploadedAt</span>
+						<a href="/watch?v=@video.Id" class="title max-lines-2">@video.Title</a>
+						<div style="display: flex; flex-direction: column; row-gap: 8px">
+							<a href="/watch?v=@video.Id">
+								<span>@video.Views views</span>
+								<span>•</span>
+								<span>@video.UploadedAt</span>
+							</a>
+							<a href="/channel/@video.Channel.Id"><img alt="Channel Avatar" src="@video.Channel.Avatars.First().Url"> @video.Channel.Name</a>
 						</div>
 					</div>
 				</div>
 				break;
 			case PlaylistPreview playlist:
-				<div class="result" onclick="window.location = '/playlist?list=@playlist.Id'">
-					<div class="thumbnail thumbnail-playlist" style="background-image: url('@itemPreview.Thumbnails.Last().Url')">
-						<div><b>@playlist.VideoCount</b><br>VIDEOS</div>
-					</div>
+				<div class="playlist">
+					<a href="/watch?v=@playlist.FirstVideoId&amp;list=@playlist.Id" class="thumbnail" style="background-image: url('@playlist.Thumbnails.First().Url')">
+						<div>
+							<span>@playlist.VideoCount</span>
+							<span>VIDEOS</span>
+						</div>
+					</a>
 					<div class="info">
-						<a href="/watch?v=@playlist.FirstVideoId&amp;list=@playlist.Id" class="title">@playlist.Title</a>
-						<a href="/channel/@playlist.Channel.Id" class="uploader">@playlist.Channel.Name</a>
+						<a href="/watch?v=@playlist.Id" class="title max-lines-2">@playlist.Title</a>
+						<div>
+							<a href="/channel/@playlist.Channel.Id">@playlist.Channel.Name</a>
+							<ul>
+								<!--li><a href="#">Video #1 • 4:20</a></li-->
+								<li><a href="/playlist?list=@playlist.Id">View Full Playlist</a></li>
+							</ul>
+						</div>
 					</div>
 				</div>
 				break;
 			case ChannelPreview channel:
-				<div class="result" onclick="window.location = '/channel/@channel.Id'">
-					<div class="thumbnail avatar">
-						<img src="@itemPreview.Thumbnails.Last().Url" alt="@channel.Title">
-					</div>
-					<div class="info">
-						<a class="title">@itemPreview.Title</a>
+				<div class="channel">
+					<a href="/channel/@channel.Id" class="avatar">
+						<img src="@channel.Thumbnails.First().Url" alt="Channel Avatar">
+					</a>
+					<a href="/channel/@channel.Id" class="info">
+						<span class="name max-lines-2">@channel.Title</span>
 						<div>
-							<span>@channel.Subscribers subscribers</span>
-							<span>•</span>
-							<span>@channel.VideoCount videos</span>
+							<div>
+								<span>@channel.Subscribers</span>
+								<span>•</span>
+								<span>@channel.VideoCount videos</span>
+							</div>
+							<p>@Html.Raw(channel.Description)</p>
 						</div>
-						<p class="description">@Html.Raw(channel.Description)</p>
-					</div>
+					</a>
+					<button class="subscribe-button" data-cid="@channel.Id">Subscribe</button>
 				</div>
 				break;
 			default:
-				<div class="result">
-					<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')"></div>
+				<div class="video">
+					<span class="thumbnail"
+					   style="background-image: url('@itemPreview.Thumbnails.First().Url')"><span class="video-length">@preview.Type</span></span>
 					<div class="info">
-						<a class="title">@itemPreview.Title</a>
-						<span><b>WARNING:</b> Unknown result type: @preview.Type</span>
+						<span class="title max-lines-2">@itemPreview.Title</span>
+						<div>
+							<b>WARNING:</b> Unknown result type: @preview.Type
+						</div>
 					</div>
 				</div>
 				break;
 		}
 	}
 </div>
-
-<div class="page-controls">
+<div class="pagination-buttons">
 	@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
 	{
 		<a href="/results?search_query=@Model.Query">First Page</a>
 	}
-	<div class="flex-divider"></div>
+	<div class="divider"></div>
 	<span>•</span>
-	<div class="flex-divider"></div>
+	<div class="divider"></div>
 	@if (!string.IsNullOrWhiteSpace(Model.Results.ContinuationKey))
 	{
 		<a href="/results?search_query=@Model.Query&continuation=@Model.Results.ContinuationKey">Next Page</a>
