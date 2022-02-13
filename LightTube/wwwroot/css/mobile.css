@@ -304,6 +304,76 @@ a.icon-link, a.icon-link > img {
     color: var(--text-primary) !important;
 }
 
+/* playlist video item */
+
+.playlist-video a {
+    text-decoration: none;
+    color: #606060;
+}
+
+.playlist-video > .thumbnail {
+    grid-area: thumbnail;
+    background-color: #CCC;
+    width: 100%;
+    height: fit-content;
+    aspect-ratio: 16 / 9;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 4px;
+
+    background-position-y: center;
+    background-size: cover;
+}
+
+.playlist-video > .thumbnail > span {
+    font-size: smaller;
+
+    background-color: #0008;
+    color: #fff;
+    padding: 2px;
+    border-radius: 2px;
+}
+
+.playlist-video > .avatar {
+    grid-area: avatar;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: #E3E3E3;
+
+    margin-left: 12px;
+}
+
+.playlist-video > .avatar > img {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+}
+
+.playlist-video > .info {
+    grid-area: info;
+}
+
+.playlist-video > .info > div {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    color: #606060;
+    column-gap: 8px;
+    overflow-y: hidden;
+}
+
+.playlist-video > .info > .title {
+    color: var(--text-primary) !important;
+}
+
+.playlist-video > .index {
+    grid-area: index;
+    display: none;
+}
+
 /* list playlist item */
 
 .playlist a {
@@ -739,7 +809,21 @@ a.icon-link, a.icon-link > img {
     font-size: small;
 }
 
-.video-list > .video > .info > .title {
+.video-list > .playlist-video {
+    text-decoration: none;
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    grid-template-rows: 90px;
+    grid-auto-flow: row;
+    grid-gap: 0 16px;
+    grid-template-areas: "thumbnail info";
+
+    color: var(--text-secondary);
+    font-size: small;
+}
+
+.video-list > .video > .info > .title,
+.video-list > .playlist-video > .info > .title {
     font-weight: bold;
 }
 
@@ -772,5 +856,39 @@ a.icon-link, a.icon-link > img {
 }
 
 .video-list > .channel > .subscribe-button {
+    display: none;
+}
+
+/* Playlist page */
+
+.playlist-info > .thumbnail {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    background-color: var(--thumbnail-background);
+}
+
+.playlist-info > .thumbnail > a {
+    display: none;
+}
+
+.playlist-info > .title {
+    font-size: x-large;
+    color: var(--text-primary);
+}
+
+.playlist-info {
+    background-color: var(--channel-contents-background);
+    padding-bottom: 16px;
+}
+
+.playlist-info > .title,
+.playlist-info > .info,
+.playlist-info > .description {
+    display: block;
+    padding: 0 16px;
+}
+
+.playlist-info > .channel-info {
     display: none;
 }
