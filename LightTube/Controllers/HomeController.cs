@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LightTube.Contexts;
 using LightTube.Models;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
@@ -35,23 +36,14 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Index()
 		{
 			IEnumerable<string> endpoints = await _youtube.GetAllEndpoints();
-			if (!HttpContext.Request.Cookies.ContainsKey("token"))
-				return View(endpoints);
-			try
-			{
-				return Redirect("/feed/subscriptions");
-			}
-			catch
-			{
-				return View(endpoints);
-			}
+			return View(endpoints);
 		}
 
 		[Route("/feed/subscriptions")]
-		public async Task<IActionResult> Feed()
+		public async Task<IActionResult> Subscriptions()
 		{
 			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
-				return Redirect("/");
+				return Redirect("/Account/Login");
 
 			try
 			{
@@ -66,8 +58,14 @@ namespace LightTube.Controllers
 			catch
 			{
 				HttpContext.Response.Cookies.Delete("token");
-				return Redirect("/");
+				return Redirect("/Account/Login");
 			}
+		}
+
+		[Route("/feed/explore")]
+		public async Task<IActionResult> Explore()
+		{
+			return View();
 		}
 
 		[Route("/proxy")]
@@ -143,7 +141,7 @@ namespace LightTube.Controllers
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
-			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+			return View(new ErrorViewModel { RequestId = HttpContext.Features.Get<IExceptionHandlerPathFeature>().Path });
 		}
 	}
 }

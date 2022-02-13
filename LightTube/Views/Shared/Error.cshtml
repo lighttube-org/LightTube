@@ -1,6 +1,7 @@
 @model ErrorViewModel
 @{
 	ViewData["Title"] = "Error";
+	ViewData["DisableOldCss"] = true;
 }
 
 <h1 class="text-danger">Error.</h1>
@@ -8,17 +9,10 @@
 <p>
 	You can try other alternatives to access this resource such as: 
 	<b>
-		<a href="https://invidio.us/@($"{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}")">Invidious</a>
+		<a href="https://invidio.us@($"{Model.RequestId}{Context.Request.QueryString}")">Invidious</a>
 	</b> 
 	or
 	<b>
-		<a href="https://youtube.com/@($"{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}")">YouTube</a>
+		<a href="https://youtube.com@($"{Model.RequestId}{Context.Request.QueryString}")">YouTube</a>
 	</b>
 </p>
-
-@if (Model.ShowRequestId)
-{
-	<p>
-		<strong>Request ID:</strong> <code>@Model.RequestId</code>
-	</p>
-}
