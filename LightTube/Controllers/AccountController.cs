@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using System.Web;
+using LightTube.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using YTProxy;
@@ -18,15 +19,22 @@ namespace LightTube.Controllers
 			_youtube = youtube;
 		}
 
+		[Route("/Account")]
+		public IActionResult Account()
+		{
+			return Redirect(HttpContext.Request.Cookies.TryGetValue("token", out string _) ? "/" : "/Account/Login");
+		}
+
 		[HttpGet]
 		public IActionResult Login(string err = null)
 		{
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
-				Redirect("/");
+				return Redirect("/");
 
-			return View(new[]
+			return View(new MessageContext
 			{
-				err
+				Message = err,
+				MobileLayout = Utils.IsClientMobile(Request)
 			});
 		}
 
@@ -34,7 +42,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Login(string email, string password)
 		{
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
-				Redirect("/");
+				return Redirect("/");
 
 			try
 			{
@@ -59,7 +67,10 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Logout()
 		{
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string token))
+			{
 				await DatabaseManager.RemoveToken(token);
+				HttpContext.Response.Cookies.Delete("token");
+			}
 			return Redirect("/");
 		}
 
@@ -67,11 +78,12 @@ namespace LightTube.Controllers
 		public IActionResult Register(string err = null)
 		{
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
-				Redirect("/");
+				return Redirect("/");
 
-			return View(new[]
+			return View(new MessageContext
 			{
-				err
+				Message = err,
+				MobileLayout = Utils.IsClientMobile(Request)
 			});
 		}
 
@@ -79,7 +91,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Register(string email, string password)
 		{
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
-				Redirect("/");
+				return Redirect("/");
 
 			try
 			{
@@ -102,11 +114,12 @@ namespace LightTube.Controllers
 		public IActionResult Delete(string err = null)
 		{
 			if (!HttpContext.Request.Cookies.TryGetValue("token", out string _))
-				Redirect("/");
+				return Redirect("/");
 
-			return View(new[]
+			return View(new MessageContext
 			{
-				err
+				Message = err,
+				MobileLayout = Utils.IsClientMobile(Request)
 			});
 		}
 
@@ -131,9 +144,13 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Logins()
 		{
 			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
-				Redirect("/Account/Login");
+				return Redirect("/Account/Login");
 
-			return View(await DatabaseManager.GetAllUserTokens(token));
+			return View(new LoginsContext
+			{
+				Logins = await DatabaseManager.GetAllUserTokens(token),
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
 		}
 
 		public async Task<IActionResult> Subscribe(string channel)

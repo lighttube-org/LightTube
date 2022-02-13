@@ -1,4 +1,4 @@
-@model List<LTLogin>
+@model LightTube.Contexts.LoginsContext
 @{
 	ViewData["Title"] = "Active Logins";
 	Layout = "_Layout";
@@ -6,7 +6,7 @@
 
 
 <ul>
-	@foreach (LTLogin login in Model)
+	@foreach (LTLogin login in Model.Logins)
 	{
 		<li>@login.Identifier - @login.UserAgent</li>
 	}

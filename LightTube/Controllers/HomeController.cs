@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using YTProxy;
 using YTProxy.Models;
+using ErrorContext = LightTube.Contexts.ErrorContext;
 
 namespace LightTube.Controllers
 {
@@ -164,7 +165,11 @@ namespace LightTube.Controllers
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
-			return View(new ErrorViewModel { RequestId = HttpContext.Features.Get<IExceptionHandlerPathFeature>().Path });
+			return View(new ErrorContext
+			{
+				Path = HttpContext.Features.Get<IExceptionHandlerPathFeature>().Path,
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
 		}
 	}
 }

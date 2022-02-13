@@ -5,7 +5,7 @@
 		LTUser user = await DatabaseManager.GetUserFromToken(token);
 
 		<div class="guide-item"><a>@user.Email.Split("@")[0]</a></div>
-		<div class="guide-item"><a href="/Account/Logins">Settings</a></div>
+		<!--div class="guide-item"><a href="/Account/ContentSettings">Settings</a></div-->
 		<div class="guide-item"><a href="/Account/Logins">Active logins</a></div>
         <div class="guide-item"><a href="/Account/Logout">Log out</a></div>
 	}

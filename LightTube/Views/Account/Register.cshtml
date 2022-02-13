@@ -1,12 +1,12 @@
-@model string[]
+@model LightTube.Contexts.MessageContext
 @{
 	ViewData["Title"] = "Register";
 	Layout = "_Layout";
 }
 
-@if (!string.IsNullOrWhiteSpace(Model[0]))
+@if (!string.IsNullOrWhiteSpace(Model.Message))
 {
-	<h1>@Model[0]</h1>
+	<h1>@Model.Message</h1>
 }
 
 <form asp-action="Register" method="POST" class="login-form">
