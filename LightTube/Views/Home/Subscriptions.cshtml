@@ -10,8 +10,10 @@
 	@foreach (FeedVideo video in Model.Videos)
 	{
 		<div class="video">
-			<a href="/watch?v=@video.Id" class="thumbnail" style="background-image: url('@video.Thumbnail')"></a>
-			<a href="/channel/@video.ChannelId" class="avatar"><img></a>
+			<a href="/watch?v=@video.Id" class="thumbnail img-thumbnail">
+				<img src="@video.Thumbnail" loading="lazy">
+			</a>
+			<a href="/channel/@video.ChannelId" class="avatar"><img src="@Model.Channels.First(x => x.ChannelId == video.ChannelId).IconUrl"></a>
 			<div class="info">
 				<a href="/watch?v=@video.Id" class="title max-lines-2">@video.Title</a>
 				<div>
