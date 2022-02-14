@@ -36,7 +36,7 @@
 			{
 				@if (live)
 				{
-					<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.Last().Url" controls>
+					<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
 						@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Reverse())
 						{
 							@:<source label='@format.Resolution.Split("x")[1]P' src='/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
@@ -50,7 +50,7 @@
 				}
 				else
 				{
-					<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.Last().Url" controls>
+					<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
 						@foreach (Subtitle subtitle in Model.Player.Subtitles)
 						{
 							@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
@@ -60,7 +60,7 @@
 			}
 			else
 			{
-				<div id="player" class="error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
+				<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
 					@if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
 					{
 						<span>
@@ -95,7 +95,7 @@
 			</div>
 			<div class="channel-info">
 				<a href="/channel/@Model.Player.Channel.Id" class="avatar">
-					<img src="@Model.Player.Channel.Avatars.Last().Url">
+					<img src="@Model.Player.Channel.Avatars.LastOrDefault()?.Url">
 				</a>
 				<div class="name">
 					<a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
@@ -138,7 +138,7 @@
 				{
 					case VideoPreview video:
 						<div class="video">
-							<a href="/watch?v=@video.Id" class="thumbnail" style="background-image: url('@video.Thumbnails.Last().Url')">
+							<a href="/watch?v=@video.Id" class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')">
 								<span class="video-length">@video.Duration</span>
 							</a>
 							<div class="info">
@@ -156,7 +156,7 @@
 						break;
 					case PlaylistPreview playlist:
 						<div class="playlist">
-							<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="thumbnail" style="background-image: url('@playlist.Thumbnails.First().Url')">
+							<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="thumbnail" style="background-image: url('@playlist.Thumbnails.LastOrDefault()?.Url')">
 								<div>
 									<span>@playlist.VideoCount</span>
 									<span>VIDEOS</span>
@@ -172,7 +172,7 @@
 						break;
 					default:
 						<div class="video">
-							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.Last().Url')"></div>
+							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.LastOrDefault()?.Url')"></div>
 							<div class="info">
 								<span class="title max-lines-2">@itemPreview.Title</span>
 								<div>

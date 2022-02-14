@@ -24,7 +24,7 @@
 		<span class="description">@Html.Raw(Model.Playlist.GetHtmlDescription())</span>
 		<div class="channel-info">
 			<a href="/channel/@Model.Playlist.Channel.Id" class="avatar">
-				<img src="@Model.Playlist.Channel.Avatars.Last().Url">
+				<img src="@Model.Playlist.Channel.Avatars.LastOrDefault()?.Url">
 			</a>
 			<div class="name">
 				<a class="name" href="/channel/@Model.Playlist.Channel.Id">@Model.Playlist.Channel.Name</a>
@@ -40,7 +40,7 @@
 					@video.Views
 				</a>
 				<a href="/watch?v=@video.Id&list=@Model.Id" class="thumbnail"
-				   style="background-image: url('@video.Thumbnails.Last().Url')">
+				   style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')">
 					<span class="video-length">@video.Duration</span>
 				</a>
 				<div class="info">

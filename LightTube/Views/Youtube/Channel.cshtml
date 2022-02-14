@@ -23,7 +23,7 @@
 	<div class="channel-info-container">
 		<div class="channel-info">
 			<a href="/channel/@Model.Channel.Id" class="avatar">
-				<img src="@Model.Channel.Avatars.Last().Url" alt="Channel Avatar">
+				<img src="@Model.Channel.Avatars.LastOrDefault()?.Url" alt="Channel Avatar">
 			</a>
 			<div class="name">
 				<a>@Model.Channel.Name</a>
@@ -41,7 +41,7 @@
 		@foreach (VideoPreview video in Model.Channel.Videos)
 		{
 			<a href="/watch?v=@video.Id" class="video">
-				<div class="thumbnail" style="background-image: url('@video.Thumbnails.First().Url')"></div>
+				<div class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')"></div>
 				<div class="info">
 					<span class="title max-lines-2">@video.Title</span>
 					<div>
