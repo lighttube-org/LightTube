@@ -56,6 +56,8 @@ h1, h2, h3, h4, h5, h6 {
 
     box-shadow: #0004 0 2px 5px;
     background-color: var(--top-bar-background);
+    
+    z-index: 1;
 }
 
 .top-bar > form {
@@ -260,6 +262,16 @@ a.icon-link, a.icon-link > img {
 
     background-position-y: center;
     background-size: cover;
+}
+
+.video > .thumbnail.img-thumbnail {
+    padding: 0 !important;
+}
+
+.video > .thumbnail > img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
 }
 
 .video > .thumbnail > span {
@@ -500,6 +512,20 @@ a.icon-link, a.icon-link > img {
 .player {
     width: 100%;
     height: 100%;
+}
+
+.player.error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ccc;
+    background-image: url('/img/player-error.png') !important;
+    background-size: contain;
+}
+
+.player.error > * {
+    background-color: #000;
+    color: #fff;
 }
 
 .video-info {
