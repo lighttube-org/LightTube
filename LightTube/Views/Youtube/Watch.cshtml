@@ -37,7 +37,7 @@
 				@if (live)
 				{
 					<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
-						@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Reverse())
+						@foreach (Format format in Model.Player.AdaptiveFormats.Reverse())
 						{
 							@:<source label='@format.Resolution.Split("x")[1]P' src='/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
 						}
@@ -111,7 +111,7 @@
 			<div class="resolutions-list">
 				<h3>Change Resolution</h3>
 				<div>
-					@foreach (AdaptiveFormat format in Model.Player.Formats)
+					@foreach (Format format in Model.Player.Formats)
 					{
 						@if (format.FormatNote == Model.Resolution)
 						{
@@ -217,7 +217,7 @@
 		plugins: {
 			"audio": {
 				audioTracks: [
-					@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Where(x => x.Resolution == "audio only").Reverse().GroupBy(x => x.FormatNote)
+					@foreach (Format format in Model.Player.AdaptiveFormats.Where(x => x.Resolution == "audio only").Reverse().GroupBy(x => x.FormatNote)
 						.Select(g => g.First()))
 					{
 						NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
@@ -230,7 +230,7 @@
 		}
 	}).ready(function() {
 		this.src([
-			@foreach (AdaptiveFormat format in Model.Player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.Format != "144p").Reverse().GroupBy(x => x.FormatNote)
+			@foreach (Format format in Model.Player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.Name != "144p").Reverse().GroupBy(x => x.FormatNote)
 				.Select(g => g.First()))
 			{
 				NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);

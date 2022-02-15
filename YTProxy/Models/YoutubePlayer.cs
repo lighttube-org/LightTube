@@ -5,17 +5,17 @@ namespace YTProxy.Models
 {
 	public class YoutubePlayer
 	{
-		[JsonProperty("adaptive_formats")] public AdaptiveFormat[] AdaptiveFormats { get; set; }
+		[JsonProperty("adaptive_formats")] public Format[] AdaptiveFormats { get; set; }
 		[JsonProperty("categories")] public string[] Categories { get; set; }
 		[JsonProperty("channel")] public Channel Channel { get; set; }
 		[JsonProperty("chapters")] public Chapter[] Chapters { get; set; }
 		[JsonProperty("description")] public string Description { get; set; }
 		[JsonProperty("duration")] public long? Duration { get; set; }
 		[JsonProperty("engagement")] public Engagement Engagement { get; set; }
-		[JsonProperty("formats")] public AdaptiveFormat[] Formats { get; set; }
+		[JsonProperty("formats")] public Format[] Formats { get; set; }
 		[JsonProperty("id")] public string Id { get; set; }
 		[JsonProperty("live_status")] public string LiveStatus { get; set; }
-		[JsonProperty("storyboards")] public AdaptiveFormat[] Storyboards { get; set; }
+		[JsonProperty("storyboards")] public Format[] Storyboards { get; set; }
 		[JsonProperty("subtitles")] public Subtitle[] Subtitles { get; set; }
 		[JsonProperty("tags")] public string[] Tags { get; set; }
 		[JsonProperty("thumbnails")] public Thumbnail[] Thumbnails { get; set; }
@@ -40,15 +40,19 @@ namespace YTProxy.Models
 		}
 	}
 
-	public class AdaptiveFormat
+	public class Format
 	{
 		[JsonProperty("filesize")] public long? Filesize { get; set; }
-		[JsonProperty("format")] public string Format { get; set; }
+		[JsonProperty("format")] public string Name { get; set; }
 		[JsonProperty("format_id")] public string FormatId { get; set; }
 		[JsonProperty("format_note")] public string FormatNote { get; set; }
 		[JsonProperty("quality")] public long Quality { get; set; }
 		[JsonProperty("resolution")] public string Resolution { get; set; }
 		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("bitrate")] public double Bitrate { get; set; }
+		[JsonProperty("audio_codec")] public string AudioCodec { get; set; }
+		[JsonProperty("video_codec")] public string VideoCodec { get; set; }
+		[JsonProperty("audio_sample_rate")] public int? AudioSampleRate { get; set; }
 	}
 
 	public class Channel
