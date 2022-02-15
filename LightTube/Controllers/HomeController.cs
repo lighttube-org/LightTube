@@ -162,6 +162,22 @@ namespace LightTube.Controllers
 			return Redirect(redirectUrl);
 		}
 
+		[Route("/manifest/{v}.mpd")]
+		public async Task<IActionResult> DashManifest(string v)
+		{
+			YoutubePlayer player = await _youtube.GetVideoPlayerAsync(v);
+			string manifest = player.GetMpdManifest("https://localhost:5001/proxy?url=");
+			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
+		}
+
+		[Route("/manifest/{v}.m3u")]
+		public async Task<IActionResult> HlsManifest(string v)
+		{
+			YoutubePlayer player = await _youtube.GetVideoPlayerAsync(v);
+			string manifest = player.GetHlsManifest("https://localhost:5001/proxy?url=");
+			return File(Encoding.UTF8.GetBytes(manifest), "application/x-mpegURL");
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
