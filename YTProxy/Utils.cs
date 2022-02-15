@@ -44,8 +44,8 @@ namespace YTProxy
 			mpdRoot.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 			mpdRoot.SetAttribute("xmlns", "urn:mpeg:dash:schema:mpd:2011");
 			mpdRoot.SetAttribute("xsi:schemaLocation", "urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd");
-			mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-on-demand:2011");
-			//mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-main:2011");
+			//mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-on-demand:2011");
+			mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-main:2011");
 			mpdRoot.SetAttribute("type", "static");
 			mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
 			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query).Get("dur") ?? "0"));
@@ -63,18 +63,18 @@ namespace YTProxy
 
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
 			XmlElement audioAdaptationSet = doc.CreateElement( "AdaptationSet");
-			List<AdaptiveFormat> audios = player.AdaptiveFormats
+			List<Format> audios = player.AdaptiveFormats
 				.Where(x => x.Resolution == "audio only")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.First())
 				.ToList();
 			audioAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
 			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
-			foreach (AdaptiveFormat format in audios)
+			foreach (Format format in audios)
 			{
 				XmlElement representation = doc.CreateElement("Representation");
 				representation.SetAttribute("id", format.FormatId);
-				representation.SetAttribute("codecs", "mp4a.40.5");
+				representation.SetAttribute("codecs", format.AudioCodec);
 				representation.SetAttribute("startWithSAP", "1");
 				representation.SetAttribute("bandwidth", Math.Floor((format.Filesize ?? 1) / (double)(player.Duration ?? 1)).ToString());
 
@@ -98,14 +98,14 @@ namespace YTProxy
 			XmlElement videoAdaptationSet = doc.CreateElement( "AdaptationSet");
 			videoAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(player.AdaptiveFormats.Last(x => x.Resolution != "audio only").Url.Query).Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
-			foreach (AdaptiveFormat format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only")
+			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.First())
 				.ToList())
 			{
 				XmlElement representation = doc.CreateElement("Representation");
 				representation.SetAttribute("id", format.FormatId);
-				representation.SetAttribute("codecs", "avc1.4d4015");
+				representation.SetAttribute("codecs", format.VideoCodec);
 				representation.SetAttribute("startWithSAP", "1");
 				string[] widthAndHeight = format.Resolution.Split("x");
 				representation.SetAttribute("width", widthAndHeight[0]);
@@ -138,7 +138,7 @@ namespace YTProxy
 			hls.AppendLine("");
 
 			bool autoselected = false;
-			foreach (AdaptiveFormat format in player.AdaptiveFormats
+			foreach (Format format in player.AdaptiveFormats
 				.Where(x => x.Resolution == "audio only")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.First())
@@ -157,7 +157,7 @@ namespace YTProxy
 			}
 
 			hls.AppendLine("");
-			foreach (AdaptiveFormat format in player.AdaptiveFormats
+			foreach (Format format in player.AdaptiveFormats
 				.Where(x => x.Resolution != "audio only")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.First())

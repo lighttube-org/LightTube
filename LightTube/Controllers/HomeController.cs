@@ -166,7 +166,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> DashManifest(string v)
 		{
 			YoutubePlayer player = await _youtube.GetVideoPlayerAsync(v);
-			string manifest = player.GetMpdManifest("https://localhost:5001/proxy?url=");
+			string manifest = player.GetMpdManifest($"https://{Request.Host}/proxy?url=");
 			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
 		}
 
@@ -174,7 +174,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> HlsManifest(string v)
 		{
 			YoutubePlayer player = await _youtube.GetVideoPlayerAsync(v);
-			string manifest = player.GetHlsManifest("https://localhost:5001/proxy?url=");
+			string manifest = player.GetHlsManifest($"https://{Request.Host}/proxy?url=");
 			return File(Encoding.UTF8.GetBytes(manifest), "application/x-mpegURL");
 		}
 
