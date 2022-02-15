@@ -165,7 +165,7 @@ namespace YTProxy
 				.ToList())
 			{
 				hls.AppendLine(
-					$"#EXT-X-STREAM-INF:PROGRAM-ID=1,CODECS=\"mp4a.40.5,avc1.42000d\",RESOLUTION={format.Resolution},NAME=\"{format.FormatNote}\"");
+					$"#EXT-X-STREAM-INF:PROGRAM-ID=1,CODECS=\"{format.VideoCodec}\",RESOLUTION={format.Resolution},NAME=\"{format.FormatNote}\"");
 				if (string.IsNullOrWhiteSpace(proxyUrl))
 					hls.AppendLine(format.Url.ToString());
 				else

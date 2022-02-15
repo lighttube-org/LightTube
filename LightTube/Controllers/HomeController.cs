@@ -170,14 +170,6 @@ namespace LightTube.Controllers
 			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
 		}
 
-		[Route("/manifest/{v}.m3u")]
-		public async Task<IActionResult> HlsManifest(string v)
-		{
-			YoutubePlayer player = await _youtube.GetVideoPlayerAsync(v);
-			string manifest = player.GetHlsManifest($"https://{Request.Host}/proxy?url=");
-			return File(Encoding.UTF8.GetBytes(manifest), "application/x-mpegURL");
-		}
-
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
