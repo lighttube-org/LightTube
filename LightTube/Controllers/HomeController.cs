@@ -150,7 +150,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> DashManifest(string v)
 		{
 			YoutubePlayer player = await _youtube.GetPlayerAsync(v);
-			string manifest = player.GetMpdManifest($"{Request.Scheme}://{Request.Host}/proxy?url=");
+			string manifest = player.GetMpdManifest($"https://{Request.Host}/proxy?url=");
 			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
 		}
 
