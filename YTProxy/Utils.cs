@@ -9,7 +9,7 @@ using YTProxy.Models;
 
 namespace YTProxy
 {
-	public class Utils
+	public static class Utils
 	{
 		public static string GetHtmlDescription(string description)
 		{
@@ -32,7 +32,7 @@ namespace YTProxy
 			return html;
 		}
 
-		public static string GetMpdManifest(YoutubePlayer player, string proxyUrl)
+		public static string GetMpdManifest(this YoutubePlayer player, string proxyUrl)
 		{
 			XmlDocument doc = new();
 
@@ -48,7 +48,9 @@ namespace YTProxy
 			mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-main:2011");
 			mpdRoot.SetAttribute("type", "static");
 			mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
-			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query).Get("dur") ?? "0"));
+			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility
+				.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query)
+				.Get("dur") ?? "0"));
 			StringBuilder duration = new("PT");
 			if (durationTs.TotalHours > 0)
 				duration.Append($"{durationTs.Hours}H");
@@ -59,48 +61,69 @@ namespace YTProxy
 			mpdRoot.SetAttribute("mediaPresentationDuration", $"{duration}.{durationTs.Milliseconds}S");
 			doc.AppendChild(mpdRoot);
 
-			XmlElement period = doc.CreateElement( "Period");
+			XmlElement period = doc.CreateElement("Period");
 
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
-			XmlElement audioAdaptationSet = doc.CreateElement( "AdaptationSet");
+			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 			List<Format> audios = player.AdaptiveFormats
 				.Where(x => x.Resolution == "audio only")
 				.GroupBy(x => x.FormatNote)
-				.Select(x => x.First())
+				.Select(x => x.Last())
 				.ToList();
-			audioAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+			audioAdaptationSet.SetAttribute("mimeType",
+				HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
 			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+			audioAdaptationSet.SetAttribute("contentType", "audio");
 			foreach (Format format in audios)
 			{
 				XmlElement representation = doc.CreateElement("Representation");
 				representation.SetAttribute("id", format.FormatId);
 				representation.SetAttribute("codecs", format.AudioCodec);
 				representation.SetAttribute("startWithSAP", "1");
-				representation.SetAttribute("bandwidth", Math.Floor((format.Filesize ?? 1) / (double)(player.Duration ?? 1)).ToString());
+				representation.SetAttribute("bandwidth",
+					Math.Floor((format.Filesize ?? 1) / (double)player.Duration).ToString());
 
 				XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
-				audioChannelConfiguration.SetAttribute("schemeIdUri", "urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
+				audioChannelConfiguration.SetAttribute("schemeIdUri",
+					"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
 				audioChannelConfiguration.SetAttribute("value", "2");
 				representation.AppendChild(audioChannelConfiguration);
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				if (string.IsNullOrWhiteSpace(proxyUrl)) 
+				if (string.IsNullOrWhiteSpace(proxyUrl))
 					baseUrl.InnerText = format.Url.ToString();
 				else
 					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
 				representation.AppendChild(baseUrl);
 
+				if (format.IndexRange != null && format.InitRange != null)
+				{
+					XmlElement segmentBase = doc.CreateElement("SegmentBase");
+					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+					segmentBase.SetAttribute("indexRangeExact", "true");
+
+					XmlElement initialization = doc.CreateElement("Initialization");
+					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+
+					segmentBase.AppendChild(initialization);
+					representation.AppendChild(segmentBase);
+				}
+
 				audioAdaptationSet.AppendChild(representation);
 			}
+
 			period.AppendChild(audioAdaptationSet);
-			
+
 			period.AppendChild(doc.CreateComment("Video Adaptation Set"));
-			XmlElement videoAdaptationSet = doc.CreateElement( "AdaptationSet");
-			videoAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(player.AdaptiveFormats.Last(x => x.Resolution != "audio only").Url.Query).Get("mime"));
+			XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
+			videoAdaptationSet.SetAttribute("mimeType",
+				HttpUtility.ParseQueryString(player.AdaptiveFormats.Last(x => x.Resolution != "audio only").Url.Query)
+					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
-			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17")
+			videoAdaptationSet.SetAttribute("contentType", "video");
+			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only")
 				.GroupBy(x => x.FormatNote)
-				.Select(x => x.First())
+				.Select(x => x.Last())
 				.ToList())
 			{
 				XmlElement representation = doc.CreateElement("Representation");
@@ -110,71 +133,36 @@ namespace YTProxy
 				string[] widthAndHeight = format.Resolution.Split("x");
 				representation.SetAttribute("width", widthAndHeight[0]);
 				representation.SetAttribute("height", widthAndHeight[1]);
-				representation.SetAttribute("bandwidth", Math.Floor((format.Filesize ?? 1) / (double)(player.Duration ?? 1)).ToString());
+				representation.SetAttribute("bandwidth",
+					Math.Floor((format.Filesize ?? 1) / (double)player.Duration).ToString());
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				if (string.IsNullOrWhiteSpace(proxyUrl)) 
+				if (string.IsNullOrWhiteSpace(proxyUrl))
 					baseUrl.InnerText = format.Url.ToString();
 				else
 					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
 				representation.AppendChild(baseUrl);
 
+				if (format.IndexRange != null && format.InitRange != null)
+				{
+					XmlElement segmentBase = doc.CreateElement("SegmentBase");
+					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+					segmentBase.SetAttribute("indexRangeExact", "true");
+
+					XmlElement initialization = doc.CreateElement("Initialization");
+					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+
+					segmentBase.AppendChild(initialization);
+					representation.AppendChild(segmentBase);
+				}
+
 				videoAdaptationSet.AppendChild(representation);
 			}
+
 			period.AppendChild(videoAdaptationSet);
 
 			mpdRoot.AppendChild(period);
-			return doc.OuterXml;
-		}
-
-		public static string GetHlsManifest(YoutubePlayer player, string proxyUrl)
-		{
-			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query).Get("dur") ?? "0"));
-			StringBuilder hls = new();
-			
-			hls.AppendLine("#EXTM3U");
-			hls.AppendLine("#EXT-X-VERSION:3");
-			hls.AppendLine("#EXT-X-TARGETDURATION:10");
-			hls.AppendLine("");
-
-			bool autoselected = false;
-			foreach (Format format in player.AdaptiveFormats
-				.Where(x => x.Resolution == "audio only")
-				.GroupBy(x => x.FormatNote)
-				.Select(x => x.First())
-				.ToList())
-			{
-				string url = "";
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					url = format.Url.ToString();
-				else
-					url = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
-
-				hls.AppendLine(
-					$"#EXT-X-MEDIA:NAME=\"YouTube DASH Audio ({format.FormatNote})\", TYPE=AUDIO, GROUP-ID=\"ytdash-audio\", LANGUAGE=\"en\", {(!autoselected ? "DEFAULT=YES, AUTOSELECT=YES, " : "")}URI=\"{url}\"");
-
-				autoselected = true;
-			}
-
-			hls.AppendLine("");
-			foreach (Format format in player.AdaptiveFormats
-				.Where(x => x.Resolution != "audio only")
-				.GroupBy(x => x.FormatNote)
-				.Select(x => x.First())
-				.Skip(1)
-				.ToList())
-			{
-				hls.AppendLine(
-					$"#EXT-X-STREAM-INF:PROGRAM-ID=1,CODECS=\"{format.VideoCodec}\",RESOLUTION={format.Resolution},NAME=\"{format.FormatNote}\"");
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					hls.AppendLine(format.Url.ToString());
-				else
-					hls.AppendLine(proxyUrl + HttpUtility.UrlEncode(format.Url.ToString()));
-				hls.AppendLine("");
-			}
-
-			hls.AppendLine("#EXT-X-ENDLIST");
-			return hls.ToString();
+			return doc.OuterXml.Replace(" schemaLocation=\"", " xsi:schemaLocation=\"");
 		}
 	}
 }

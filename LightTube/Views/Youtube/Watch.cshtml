@@ -1,20 +1,20 @@
-@using System.Collections.Specialized
 @using System.Globalization
+@using System.Text.RegularExpressions
 @using System.Web
 @using YTProxy.Models
 @model LightTube.Contexts.PlayerContext
 
 @{
 	ViewBag.Metadata = new Dictionary<string, string>();
-	ViewBag.Metadata["author"] = Model.Player.Channel.Name;
+	ViewBag.Metadata["author"] = Model.Video.Channel.Name;
 	ViewBag.Metadata["og:title"] = Model.Player.Title;
 	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
 	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["og:description"] = Model.Player.Description;
 	ViewBag.Title = Model.Player.Title;
+
 	Layout = "_Layout";
-	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
 	try
 	{
 		ViewBag.Metadata["og:video"] = $"/proxy?url={HttpUtility.UrlEncode(Model.Player.Formats.First().Url.ToString())}";
@@ -22,17 +22,27 @@
 	}
 	catch
 	{
-		
 	}
 	ViewData["DisableOldCss"] = true;
 	ViewData["HideGuide"] = true;
+
+	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
+	string description = Model.Player.GetHtmlDescription();
+	const string youtubePattern = @"youtu[.]*be[.com]*/";
+
+	// turn URLs into hyperlinks
+	Regex urlRegex = new(youtubePattern, RegexOptions.IgnoreCase);
+	Match m;
+	for (m = urlRegex.Match(description); m.Success; m = m.NextMatch())
+		description = description.Replace(m.Groups[0].ToString(),
+			$"{Url.ActionContext.HttpContext.Request.Host}/");
 }
 
 <!-- TODO: chapters -->
 <div class="watch-page">
 	<div class="primary">
 		<div class="video-player-container">
-			@if (Model.Player.Formats.Length > 0 || live)
+			@if (Model.Player.Formats.Length > 0 || live && !Model.CompatibilityMode)
 			{
 				@if (live)
 				{
@@ -58,6 +68,14 @@
 					</video>
 				}
 			}
+			else if (live && Model.CompatibilityMode)
+			{
+				<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
+					<span>
+						Livestreams cannot be played in compatibility mode
+					</span>
+				</div>
+			}
 			else
 			{
 				<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
@@ -79,30 +97,34 @@
 		<div class="video-info">
 			<div class="video-title">@Model.Player.Title</div>
 			<div class="video-info-bar">
-				<span>@Model.Player.Engagement.Views views</span>
+				<span>@Model.Video.Engagement.Views views</span>
 				<span>Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
 				<div class="divider"></div>
 				<div class="engagement-container">
 					<div class="engagement-info">
-						<span class="likes"><img src="icons/like.svg">@Model.Player.Engagement.Likes</span>
-						<span class="dislikes"><img src="icons/dislike.svg">@Model.Player.Engagement.Dislikes</span>
+						<span class="likes">
+							<img src="icons/like.svg">@Model.Video.Engagement.Likes
+						</span>
+						<span class="dislikes">
+							<img src="icons/dislike.svg">@Model.Video.Engagement.Dislikes
+						</span>
 					</div>
 					<div class="engagement-bar">
-						<div style="width: @(Model.Player.Engagement.GetLikePercentage().ToString().Split(".")[0])%"></div>
+						<div style="width: @(Model.Video.Engagement.GetLikePercentage().ToString().Split(".")[0])%"></div>
 					</div>
 				</div>
 				<a href="https://www.youtube.com/watch?v=@Model.Player.Id">YouTube link</a>
 			</div>
 			<div class="channel-info">
-				<a href="/channel/@Model.Player.Channel.Id" class="avatar">
-					<img src="@Model.Player.Channel.Avatars.LastOrDefault()?.Url">
+				<a href="/channel/@Model.Video.Channel.Id" class="avatar">
+					<img src="@Model.Video.Channel.Avatars.LastOrDefault()?.Url">
 				</a>
 				<div class="name">
-					<a href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
+					<a href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Name</a>
 				</div>
-				<button class="subscribe-button" data-cid="@Model.Player.Channel.Id">Subscribe</button>
+				<button class="subscribe-button" data-cid="@Model.Video.Channel.Id">Subscribe</button>
 			</div>
-			<p class="description">@Html.Raw(Model.Player.GetHtmlDescription())</p>
+			<p class="description">@Html.Raw(description)</p>
 		</div>
 		<hr>
 	</div>
@@ -126,12 +148,12 @@
 			</div>
 		</noscript>
 		<div class="recommended-list">
-			
-			@if (Model.Player.Recommended.Length == 0)
+
+			@if (Model.Video.Recommended.Length == 0)
 			{
 				<p style="text-align: center">None :(<br>This is most likely an age-restricted video</p>
 			}
-			@foreach (ItemPreview recommendation in Model.Player.Recommended)
+			@foreach (ItemPreview recommendation in Model.Video.Recommended)
 			{
 				Preview itemPreview = recommendation.GetPreview();
 				switch (itemPreview)
@@ -187,63 +209,84 @@
 	</div>
 </div>
 
-@if (Model.Player.Formats.Length > 0 || live)
+@if (Model.Player.Formats.Length > 0)
+{
+@if (!live && !Model.CompatibilityMode)
+{
+	<script src="~/js/shaka-player/shaka-player.compiled.min.js"></script>
+	<script src="~/js/videojs/video.js"></script>
+	<script src="~/js/videojs/videojs-shaka.js"></script>
+	<script src="~/js/videojs/videojs-hotkeys.js"></script>
+	<script>
+		var player = videojs('player', {
+            techOrder: ['shaka'],
+            shaka: {
+              debug: false,
+              sideload: true,
+              configuration: {
+                manifest:
+                {
+					dash:{
+						ignoreEmptyAdaptationSet:true
+					}
+				}
+              }   
+            },
+			controlBar: {
+   				children: [
+   					'playToggle',
+   					'volumePanel',
+   					'currentTimeDisplay',
+   					'timeDivider',
+   					'durationDisplay',
+   					'liveDisplay',
+   					'seekToLive',
+   					'progressControl',
+   					'spacer',
+   					'chaptersButton',
+   					'subsCapsButton',
+   					'playbackRateMenuButton',
+   					'qualitySelector',
+   					'pictureInPictureToggle',
+   					'fullscreenToggle',
+   				],
+   			}
+        });
+        
+        player.qualityPickerPlugin();
+        player.src([{
+          type: 'application/dash+xml',
+          src: '/manifest/@(Model.Video.Id).mpd'
+        }]);
+		</script>
+}
+else if (Model.Player.Formats.Length > 0)
 {
 	<script src="~/js/videojs/video.js"></script>
 	<script src="~/js/videojs/videojs-quality-selector.js"></script>
-	<script src="~/js/videojs/videojs-audio.js"></script>
 	<script src="~/js/videojs/videojs-hotkeys.js"></script>
+
 	<script>
-	const player = videojs('player', {
-		controlBar: {
-			children: [
-				'playToggle',
-				'volumePanel',
-				'currentTimeDisplay',
-				'timeDivider',
-				'durationDisplay',
-				'liveDisplay',
-				'seekToLive',
-				'progressControl',
-				'spacer',
-				'chaptersButton',
-				'subsCapsButton',
-				'playbackRateMenuButton',
-				'qualitySelector',
-				'pictureInPictureToggle',
-				'fullscreenToggle',
-			],
-		},
-		plugins: {
-			"audio": {
-				audioTracks: [
-					@foreach (Format format in Model.Player.AdaptiveFormats.Where(x => x.Resolution == "audio only").Reverse().GroupBy(x => x.FormatNote)
-						.Select(g => g.First()))
-					{
-						NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
-
-						@:{src: '/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())'},
-					}
-				],
-				syncInterval: 10000
-			},
-		}
-	}).ready(function() {
-		this.src([
-			@foreach (Format format in Model.Player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.Name != "144p").Reverse().GroupBy(x => x.FormatNote)
-				.Select(g => g.First()))
-			{
-				NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
-
-				@:{src: '/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())',type: '@query.Get("mime")',label: '@format.FormatNote', selected: @(format.FormatNote.StartsWith("720p") ? "true" : "false")},
-			}
-        ]);
-        this.hotkeys({
-          volumeStep: 0.1,
-          seekStep: 5,
-          enableModifiersForNumbers: false,
-          enableVolumeScroll: false
+		var player = videojs('player', {
+			controlBar: {
+   				children: [
+   					'playToggle',
+   					'volumePanel',
+   					'currentTimeDisplay',
+   					'timeDivider',
+   					'durationDisplay',
+   					'liveDisplay',
+   					'seekToLive',
+   					'progressControl',
+   					'spacer',
+   					'chaptersButton',
+   					'subsCapsButton',
+   					'playbackRateMenuButton',
+   					'qualitySelector',
+   					'pictureInPictureToggle',
+   					'fullscreenToggle',
+   				],
+   			}
         });
-      });
 	</script>
-}
+}}

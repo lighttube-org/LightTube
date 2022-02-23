@@ -29,10 +29,16 @@ namespace YTProxy
 			return JObject.Parse(jsonDoc)["endpoints"]?.ToArray().Select(x => x.ToString()) ?? Array.Empty<string>();
 		}
 
-		public async Task<YoutubePlayer> GetVideoPlayerAsync(string videoId)
+		public async Task<YoutubePlayer> GetPlayerAsync(string videoId)
 		{
 			string jsonDoc = await Client.GetStringAsync("/get_player_info?v=" + videoId);
 			return JsonConvert.DeserializeObject<YoutubePlayer>(jsonDoc);
+		}
+
+		public async Task<YoutubeVideo> GetVideoAsync(string videoId)
+		{
+			string jsonDoc = await Client.GetStringAsync("/video?v=" + videoId);
+			return JsonConvert.DeserializeObject<YoutubeVideo>(jsonDoc);
 		}
 
 		public async Task<YoutubeSearch> SearchAsync(string query, string continuation = null)

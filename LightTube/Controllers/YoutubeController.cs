@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using LightTube.Models;
 using YTProxy;
+using YTProxy.Models;
 
 namespace LightTube.Controllers
 {
@@ -25,10 +26,23 @@ namespace LightTube.Controllers
 		[Route("/watch")]
 		public async Task<IActionResult> Watch(string v, string quality = null)
 		{
+			Task[] tasks = {
+				_youtube.GetPlayerAsync(v),
+				_youtube.GetVideoAsync(v)
+			};
+			await Task.WhenAll(tasks);
+
+			bool compatibility = false;
+			if (Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+				bool.TryParse(compatibilityString, out compatibility);
+			
+
 			PlayerContext context = new()
 			{
-				Player = await _youtube.GetVideoPlayerAsync(v),
+				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
+				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
 				Resolution = quality,
+				CompatibilityMode = compatibility,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
