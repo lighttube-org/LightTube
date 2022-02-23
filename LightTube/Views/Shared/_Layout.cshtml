@@ -71,6 +71,7 @@
 		<div class="account-menu">
 			<div class="guide-item"><a href="/toggle_theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Toggle Theme</a></div>
 			@Html.Partial("_LoginLogoutPartial")
+			<div class="guide-item"><a href="/toggles/theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Toggle Theme</a></div>
 		</div>
 	</div>
 </div>

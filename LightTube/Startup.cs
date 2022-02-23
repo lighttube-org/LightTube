@@ -54,18 +54,6 @@ namespace LightTube
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
 			});
-			app.Use(Middleware);
-		}
-
-		private Task Middleware(HttpContext context, Func<Task> next)
-		{
-			if (!context.Request.Cookies.ContainsKey("theme"))
-				context.Response.Cookies.Append("theme", "light", new CookieOptions
-				{
-					Expires = DateTimeOffset.MaxValue
-				});
-			next.Invoke();
-			return Task.CompletedTask;
 		}
 	}
 }

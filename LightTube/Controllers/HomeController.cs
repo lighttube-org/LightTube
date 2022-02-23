@@ -146,22 +146,6 @@ namespace LightTube.Controllers
 			await Response.StartAsync();
 		}
 
-		[Route("/toggle_theme")]
-		public IActionResult ToggleTheme(string redirectUrl)
-		{
-			if (Request.Cookies.TryGetValue("theme", out string theme))
-				Response.Cookies.Append("theme", theme switch
-				{
-					"light" => "dark",
-					"dark" => "light",
-					var _ => "light"
-				});
-			else
-				Response.Cookies.Append("theme", "light");
-
-			return Redirect(redirectUrl);
-		}
-
 		[Route("/manifest/{v}.mpd")]
 		public async Task<IActionResult> DashManifest(string v)
 		{
