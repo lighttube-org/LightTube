@@ -1,3 +1,5 @@
+using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers
@@ -14,6 +16,9 @@ namespace LightTube.Controllers
 					"light" => "dark",
 					"dark" => "light",
 					var _ => "dark"
+				}, new CookieOptions
+				{
+					Expires = DateTimeOffset.MaxValue
 				});
 			else
 				Response.Cookies.Append("theme", "light");
@@ -30,6 +35,9 @@ namespace LightTube.Controllers
 					"true" => "false",
 					"false" => "true",
 					var _ => "true"
+				}, new CookieOptions
+				{
+					Expires = DateTimeOffset.MaxValue
 				});
 			else
 				Response.Cookies.Append("compatibility", "true");
