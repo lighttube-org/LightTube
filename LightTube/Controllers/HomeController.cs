@@ -84,7 +84,7 @@ namespace LightTube.Controllers
 
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
+			request.Method = Request.Method;
 
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
