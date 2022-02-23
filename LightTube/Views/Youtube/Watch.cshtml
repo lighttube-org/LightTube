@@ -1,3 +1,4 @@
+@using System.Collections.Specialized
 @using System.Globalization
 @using System.Text.RegularExpressions
 @using System.Web
@@ -5,6 +6,10 @@
 @model LightTube.Contexts.PlayerContext
 
 @{
+	bool compatibility = false;
+	if (Context.Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+		bool.TryParse(compatibilityString, out compatibility);
+
 	ViewBag.Metadata = new Dictionary<string, string>();
 	ViewBag.Metadata["author"] = Model.Video.Channel.Name;
 	ViewBag.Metadata["og:title"] = Model.Player.Title;
@@ -42,7 +47,7 @@
 <div class="watch-page">
 	<div class="primary">
 		<div class="video-player-container">
-			@if (Model.Player.Formats.Length > 0 || live && !Model.CompatibilityMode)
+			@if (Model.Player.Formats.Length > 0 || live && !compatibility)
 			{
 				@if (live)
 				{
@@ -68,11 +73,12 @@
 					</video>
 				}
 			}
-			else if (live && Model.CompatibilityMode)
+			else if (live && compatibility)
 			{
 				<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
-					<span>
-						Livestreams cannot be played in compatibility mode
+					<span style="text-align: center">
+						Livestreams cannot be played in compatibility mode<br>
+						<a style="color: #77F" href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Click here</a> to disable compatibility mode
 					</span>
 				</div>
 			}
@@ -209,15 +215,15 @@
 	</div>
 </div>
 
-@if (Model.Player.Formats.Length > 0)
+@if (Model.Player.Formats.Length > 0 || live && !compatibility)
 {
-@if (!live && !Model.CompatibilityMode)
-{
-	<script src="~/js/shaka-player/shaka-player.compiled.min.js"></script>
-	<script src="~/js/videojs/video.js"></script>
-	<script src="~/js/videojs/videojs-shaka.js"></script>
-	<script src="~/js/videojs/videojs-hotkeys.js"></script>
-	<script>
+	@if (!compatibility && !live)
+	{
+		<script src="~/js/shaka-player/shaka-player.compiled.min.js"></script>
+		<script src="~/js/videojs/video.js"></script>
+		<script src="~/js/videojs/videojs-shaka.js"></script>
+		<script src="~/js/videojs/videojs-hotkeys.js"></script>
+		<script>
 		var player = videojs('player', {
             techOrder: ['shaka'],
             shaka: {
@@ -251,42 +257,74 @@
    					'fullscreenToggle',
    				],
    			}
-        });
-        
-        player.qualityPickerPlugin();
-        player.src([{
-          type: 'application/dash+xml',
-          src: '/manifest/@(Model.Video.Id).mpd'
-        }]);
+        }).ready(function() {
+			this.qualityPickerPlugin();
+			this.src([{
+				type: 'application/dash+xml',
+            	src: '/manifest/@(Model.Video.Id).mpd'
+            }]);
+			this.hotkeys({
+				volumeStep: 0.1,
+				seekStep: 5,
+				enableModifiersForNumbers: false,
+				enableVolumeScroll: false
+			});
+		});
 		</script>
-}
-else if (Model.Player.Formats.Length > 0)
-{
-	<script src="~/js/videojs/video.js"></script>
-	<script src="~/js/videojs/videojs-quality-selector.js"></script>
-	<script src="~/js/videojs/videojs-hotkeys.js"></script>
+	}
+	else
+	{
+		<script src="~/js/videojs/video.js"></script>
+		<script src="~/js/videojs/videojs-quality-selector.js"></script>
+		<script src="~/js/videojs/videojs-hotkeys.js"></script>
 
-	<script>
-		var player = videojs('player', {
+		<script>
+		const player = videojs('player', {
 			controlBar: {
-   				children: [
-   					'playToggle',
-   					'volumePanel',
-   					'currentTimeDisplay',
-   					'timeDivider',
-   					'durationDisplay',
-   					'liveDisplay',
-   					'seekToLive',
-   					'progressControl',
-   					'spacer',
-   					'chaptersButton',
-   					'subsCapsButton',
-   					'playbackRateMenuButton',
-   					'qualitySelector',
-   					'pictureInPictureToggle',
-   					'fullscreenToggle',
-   				],
-   			}
-        });
+				children: [
+					'playToggle',
+					'volumePanel',
+					'currentTimeDisplay',
+					'timeDivider',
+					'durationDisplay',
+					'liveDisplay',
+					'seekToLive',
+					'progressControl',
+					'spacer',
+					'chaptersButton',
+					'subsCapsButton',
+					'playbackRateMenuButton',
+					'qualitySelector',
+					'pictureInPictureToggle',
+					'fullscreenToggle',
+				],
+			}
+		}).ready(function() {
+			this.src([
+				@if (live)
+				{
+					foreach (Format format in Model.Player.AdaptiveFormats.Reverse().GroupBy(x => x.FormatNote).Select(g => g.First()))
+					{
+						@:{src: '/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())'},
+					}
+				}
+				else
+				{
+					foreach (Format format in Model.Player.Formats.Reverse().GroupBy(x => x.FormatNote).Select(g => g.First()))
+					{
+						NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
+
+						@:{src: '/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())',type: '@query.Get("mime")',label: '@format.FormatNote', selected: @(format.FormatNote.StartsWith("720p") ? "true" : "false")},
+					}
+				}
+			]);
+			this.hotkeys({
+				volumeStep: 0.1,
+				seekStep: 5,
+				enableModifiersForNumbers: false,
+				enableVolumeScroll: false
+			});
+		  });
 	</script>
-}}
+	}
+}

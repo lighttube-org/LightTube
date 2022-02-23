@@ -7,6 +7,5 @@ namespace LightTube.Contexts
 		public YoutubePlayer Player;
 		public YoutubeVideo Video;
 		public string Resolution;
-		public bool CompatibilityMode;
 	}
 }

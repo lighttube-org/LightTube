@@ -32,17 +32,11 @@ namespace LightTube.Controllers
 			};
 			await Task.WhenAll(tasks);
 
-			bool compatibility = false;
-			if (Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
-				bool.TryParse(compatibilityString, out compatibility);
-			
-
 			PlayerContext context = new()
 			{
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
 				Resolution = quality,
-				CompatibilityMode = compatibility,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);

@@ -1,5 +1,10 @@
 ﻿@using System.Web
 @model LightTube.Contexts.BaseContext
+@{
+	bool compatibility = false;
+	if (Context.Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+		bool.TryParse(compatibilityString, out compatibility);
+}
 <!DOCTYPE html>
 <html>
 <head>
@@ -52,7 +57,7 @@
 <body>
 
 <div class="top-bar @(ViewData["UseFullSizeSearchBar"]?.Equals(true) ?? false ? "full-size-search" : "")">
-	<a class="logo" href="/">light<b>tube</b></a>
+	<a class="logo" href="/">light<b>tube</b> @(compatibility ? (Model.MobileLayout ? "(compat.)" : "(compatibility mode)") : "")</a>
 	<div class="divider"></div>
 	<form action="/results">
 		<input type="text" placeholder="Search" name="search_query">
