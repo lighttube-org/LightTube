@@ -43,39 +43,6 @@ namespace LightTube.Controllers
 			});
 		}
 
-		[Route("/feed/subscriptions")]
-		public async Task<IActionResult> Subscriptions()
-		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
-				return Redirect("/Account/Login");
-
-			try
-			{
-				LTUser user = await DatabaseManager.GetUserFromToken(token);
-				FeedContext context = new()
-				{
-					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
-					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels),
-					MobileLayout = Utils.IsClientMobile(Request)
-				};
-				return View(context);
-			}
-			catch
-			{
-				HttpContext.Response.Cookies.Delete("token");
-				return Redirect("/Account/Login");
-			}
-		}
-
-		[Route("/feed/explore")]
-		public async Task<IActionResult> Explore()
-		{
-			return View(new BaseContext
-			{
-				MobileLayout = Utils.IsClientMobile(Request)
-			});
-		}
-
 		[Route("/proxy")]
 		public async Task Proxy(string url)
 		{
