@@ -23,6 +23,8 @@ namespace YTProxy
 			Music = new YoutubeMusic(this);
 		}
 
+		public Dictionary<string, CacheItem<YoutubePlayer>> PlayerCache = new();
+
 		public async Task<IEnumerable<string>> GetAllEndpoints()
 		{
 			string jsonDoc = await Client.GetStringAsync("/");
@@ -31,8 +33,14 @@ namespace YTProxy
 
 		public async Task<YoutubePlayer> GetPlayerAsync(string videoId)
 		{
+			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now))
+				return PlayerCache[videoId].Item;
 			string jsonDoc = await Client.GetStringAsync("/get_player_info?v=" + videoId);
-			return JsonConvert.DeserializeObject<YoutubePlayer>(jsonDoc);
+			YoutubePlayer player = JsonConvert.DeserializeObject<YoutubePlayer>(jsonDoc);
+			PlayerCache.Add(videoId,
+				new CacheItem<YoutubePlayer>(player,
+					TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds)).Subtract(TimeSpan.FromHours(1))));
+			return player;
 		}
 
 		public async Task<YoutubeVideo> GetVideoAsync(string videoId)
