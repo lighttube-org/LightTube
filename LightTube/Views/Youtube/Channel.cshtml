@@ -41,7 +41,7 @@
 		@foreach (VideoPreview video in Model.Channel.Videos)
 		{
 			<a href="/watch?v=@video.Id" class="video">
-				<div class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')"></div>
+				<div class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')"><span class="video-length">@video.Duration</span></div>
 				<div class="info">
 					<span class="title max-lines-2">@video.Title</span>
 					<div>
