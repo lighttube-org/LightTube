@@ -7,8 +7,8 @@
 	ViewBag.Metadata = new Dictionary<string, string>();
 	ViewBag.Metadata["og:title"] = Model.Playlist.Title;
 	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
-	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Playlist.Thumbnail.FirstOrDefault()?.Url?.ToString())}";
-	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Playlist.Thumbnail.LastOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Playlist.Thumbnail.FirstOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Playlist.Thumbnail.LastOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["og:description"] = Model.Playlist.Description;
 	Layout = "_Layout";
 	ViewData["DisableOldCss"] = true;

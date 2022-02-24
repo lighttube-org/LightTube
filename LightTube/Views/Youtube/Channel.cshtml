@@ -6,8 +6,8 @@
 	ViewBag.Metadata = new Dictionary<string, string>();
 	ViewBag.Metadata["og:title"] = Model.Channel.Name;
 	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
-	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Channel.Avatars.FirstOrDefault()?.Url?.ToString())}";
-	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Channel.Avatars.LastOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Channel.Avatars.FirstOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Channel.Avatars.LastOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["og:description"] = Model.Channel.Description;
 	ViewBag.Title = Model.Channel.Name;
 	Layout = "_Layout";

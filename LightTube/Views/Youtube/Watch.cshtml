@@ -14,15 +14,15 @@
 	ViewBag.Metadata["author"] = Model.Video.Channel.Name;
 	ViewBag.Metadata["og:title"] = Model.Player.Title;
 	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
-	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
-	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
+	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["og:description"] = Model.Player.Description;
 	ViewBag.Title = Model.Player.Title;
 
 	Layout = "_Layout";
 	try
 	{
-		ViewBag.Metadata["og:video"] = $"/proxy?url={HttpUtility.UrlEncode(Model.Player.Formats.First().Url.ToString())}";
+		ViewBag.Metadata["og:video"] = $"/proxy/video?url={HttpUtility.UrlEncode(Model.Player.Formats.First().Url.ToString())}";
 		Model.Resolution ??= Model.Player.Formats.First().FormatNote;
 	}
 	catch
@@ -54,21 +54,21 @@
 					<video id="player" class="video-js player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
 						@foreach (Format format in Model.Player.AdaptiveFormats.Reverse())
 						{
-							@:<source label='@format.Resolution.Split("x")[1]P' src='/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
+							@:<source label='@format.Resolution.Split("x")[1]P' src='/proxy/hls?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
 						}
 
 						@foreach (Subtitle subtitle in Model.Player.Subtitles)
 						{
-							@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+							@:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
 						}
 					</video>
 				}
 				else
 				{
-					<video id="player" class="video-js player" src="/proxy?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
+					<video id="player" class="video-js player" src="/proxy/video?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
 						@foreach (Subtitle subtitle in Model.Player.Subtitles)
 						{
-							@:<track src="/subtitle_proxy?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
+							@:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
 						}
 					</video>
 				}
@@ -305,7 +305,7 @@
 				{
 					foreach (Format format in Model.Player.AdaptiveFormats.Reverse().GroupBy(x => x.FormatNote).Select(g => g.First()))
 					{
-						@:{src: '/subtitle_proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())'},
+						@:{src: '/proxy/hls?url=@HttpUtility.UrlEncode(format.Url.ToString())'},
 					}
 				}
 				else
@@ -314,7 +314,7 @@
 					{
 						NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Query);
 
-						@:{src: '/proxy?url=@HttpUtility.UrlEncode(format.Url.ToString())',type: '@query.Get("mime")',label: '@format.FormatNote', selected: @(format.FormatNote.StartsWith("720p") ? "true" : "false")},
+						@:{src: '/proxy/video?url=@HttpUtility.UrlEncode(format.Url.ToString())',type: '@query.Get("mime")',label: '@format.FormatNote', selected: @(format.FormatNote.StartsWith("720p") ? "true" : "false")},
 					}
 				}
 			]);
