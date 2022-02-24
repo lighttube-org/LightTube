@@ -269,6 +269,7 @@
 				enableModifiersForNumbers: false,
 				enableVolumeScroll: false
 			});
+			this.on("error", e => {if (confirm("Something has gone wrong while trying to play this video. Enable compatibility mode?")) {window.location = "/toggles/compatibility?redirectUrl=" + encodeURIComponent(window.location.href)}})
 		});
 		</script>
 	}
