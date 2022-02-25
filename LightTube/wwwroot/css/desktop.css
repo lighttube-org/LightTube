@@ -971,3 +971,64 @@ a.icon-button, a.icon-button > img {
     border-radius: 50%;
     background-color: var(--thumbnail-background);
 }
+
+/* Login / Register / Delete pages */
+
+.login-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.login-container > * {
+    flex: 1 1 0;
+}
+
+.login-container > * > div {
+    max-width: 600px;
+    margin: auto;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    row-gap: 10px;
+    margin: auto;
+}
+
+.login-form > input, .login-button {
+    background-color: var(--item-active-background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    max-width: 400px;
+    row-gap: 10px;
+    margin: auto;
+}
+
+.login-button {
+    background-color: var(--item-active-background);
+    color: var(--text-primary);
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    width: fit-content;
+}
+
+.login-button.danger {
+    color: red;
+    font-weight: bold;
+}
+
+.login-form > h1 {
+    text-align: center;
+}
+
+.login-message {
+    width: calc(100% - 96px);
+    margin: 48px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--item-active-background);
+    border-radius: 5px;
+}

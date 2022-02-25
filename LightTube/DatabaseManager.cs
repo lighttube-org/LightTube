@@ -31,10 +31,10 @@ namespace LightTube
 		{
 			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
 			if (!await users.AnyAsync())
-				throw new KeyNotFoundException("No users found with that email");
+				throw new KeyNotFoundException("Invalid credentials");
 			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-				throw new UnauthorizedAccessException("Password is not correct");
+				throw new UnauthorizedAccessException("Invalid credentials");
 
 			LTLogin login = new()
 			{
@@ -56,10 +56,10 @@ namespace LightTube
 		{
 			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
 			if (!await users.AnyAsync())
-				throw new KeyNotFoundException("No users found with that email");
+				throw new KeyNotFoundException("Invalid credentials");
 			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-				throw new UnauthorizedAccessException("Password is not correct");
+				throw new UnauthorizedAccessException("Invalid credentials");
 
 			await _tokenCollection.FindOneAndDeleteAsync(t => t.Identifier == identifier && t.Email == user.Email);
 		}
@@ -95,10 +95,10 @@ namespace LightTube
 		{
 			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
 			if (!await users.AnyAsync())
-				throw new KeyNotFoundException("No users found with that email");
+				throw new KeyNotFoundException("Invalid credentials");
 			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-				throw new UnauthorizedAccessException("Password is not correct");
+				throw new UnauthorizedAccessException("Invalid credentials");
 
 			await _userCollection.DeleteOneAsync(x => x.Email == email);
 			await _tokenCollection.DeleteManyAsync(x => x.Email == email);
@@ -119,7 +119,17 @@ namespace LightTube
 			await _userCollection.InsertOneAsync(user);
 		}
 
-		public static LTChannel GetChannel(string id) => _channelCacheCollection.FindSync(x => x.ChannelId == id).First();
+		public static LTChannel GetChannel(string id)
+		{
+			LTChannel res = _channelCacheCollection.FindSync(x => x.ChannelId == id).FirstOrDefault();
+			return res ?? new LTChannel
+			{
+				Name = "Unknown Channel",
+				ChannelId = id,
+				IconUrl = "",
+				Subscribers = ""
+			};
+		}
 
 		public static async Task<LTChannel> UpdateChannel(string id, string name, string subscribers, string iconUrl)
 		{

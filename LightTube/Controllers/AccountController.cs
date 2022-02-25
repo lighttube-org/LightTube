@@ -138,16 +138,19 @@ namespace LightTube.Controllers
 		{
 			try
 			{
-				await DatabaseManager.DeleteUser(email, password);
+				if (email == "Local Account" && password == "local_account")
+					Response.Cookies.Delete("account_data");
+				else
+					await DatabaseManager.DeleteUser(email, password);
 				return Redirect("/Account/Register?err=Account+deleted");
 			}
 			catch (KeyNotFoundException e)
 			{
-				return Redirect("/Account/Login?err=" + HttpUtility.UrlEncode(e.Message));
+				return Redirect("/Account/Delete?err=" + HttpUtility.UrlEncode(e.Message));
 			}
 			catch (UnauthorizedAccessException e)
 			{
-				return Redirect("/Account/Login?err=" + HttpUtility.UrlEncode(e.Message));
+				return Redirect("/Account/Delete?err=" + HttpUtility.UrlEncode(e.Message));
 			}
 		}
 
