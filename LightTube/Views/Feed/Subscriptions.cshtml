@@ -18,7 +18,7 @@
 	@foreach (LTChannel channel in Model.Channels)
 	{
 		<a href="/channel/@channel.ChannelId" class="channel">
-			<img src="@channel.ChannelId">
+			<img src="@channel.IconUrl" loading="lazy">
 			<div class="name max-lines-2">@channel.Name</div>
 		</a>
 	}
