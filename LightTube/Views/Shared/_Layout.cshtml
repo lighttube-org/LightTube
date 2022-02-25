@@ -4,6 +4,10 @@
 	bool compatibility = false;
 	if (Context.Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
 		bool.TryParse(compatibilityString, out compatibility);
+	
+	bool minMode = false;
+	if (Context.Request.Cookies.TryGetValue("minMode", out string minModeString))
+		bool.TryParse(minModeString, out minMode);
 }
 <!DOCTYPE html>
 <html>
@@ -87,15 +91,41 @@
 	</div>
 </div>
 
-<div class="guide minmode">
-	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "home" ? "active" : "")"><a href="/"><i class="icon"><img src="/icons/home.svg"></i>Home</a></div>
-	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "explore" ? "active" : "")"><a href="/feed/explore"><i class="icon"><img src="/icons/compass.svg"></i>Explore</a></div>
-	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "subs" ? "active" : "")"><a href="/feed/subscriptions"><i class="icon"><img src="/icons/subscriptions.svg"></i>
-		Subscriptions</a></div>
+<div class="guide @(minMode ? "minmode" : "")">
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "home" ? "active" : "")">
+		<a href="/">
+			<i class="icon"><img src="/icons/home.svg"></i>
+			Home
+		</a>
+	</div>
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "explore" ? "active" : "")">
+		<a href="/feed/explore">
+			<i class="icon"><img src="/icons/compass.svg"></i>
+			Explore
+		</a>
+	</div>
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "subs" ? "active" : "")">
+		<a href="/feed/subscriptions">
+			<i class="icon"><img src="/icons/subscriptions.svg"></i>
+			Subscriptions
+		</a>
+	</div>
+	<div class="hide-on-minmode guide-item">
+		<a href="/toggles/collapse_guide?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">
+			<i class="icon"><img src="/icons/collapse_guide.svg"></i>
+			Collapse Guide
+		</a>
+	</div>
+	<div class="show-on-minmode guide-item">
+		<a href="/toggles/collapse_guide?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">
+			<i class="icon"><img src="/icons/uncollapse_guide.svg"></i>
+			Uncollapse
+		</a>
+	</div>
 	<hr class="hide-on-minmode">
 	<p class="hide-on-minmode">
-		<a href="https://gitlab.com/kuylar/lighttube/-/blob/master/README.md">About</a>
-		<a href="https://gitlab.com/kuylar/lighttube/-/blob/master/OTHERLIBS.md">Licenses</a>
+		<a href="https://gitlab.com/kuylar/lighttube/-/blob/master/README.md">About</a><br>
+		<a href="https://gitlab.com/kuylar/lighttube/-/blob/master/OTHERLIBS.md">Libraries LightTube use</a><br>
 		<a href="https://gitlab.com/kuylar/lighttube">Source code</a>
 	</p>
 </div>

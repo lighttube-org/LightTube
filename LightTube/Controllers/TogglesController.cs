@@ -44,5 +44,24 @@ namespace LightTube.Controllers
 
 			return Redirect(redirectUrl);
 		}
+
+		[Route("collapse_guide")]
+		public IActionResult ToggleCollapseGuide(string redirectUrl)
+		{
+			if (Request.Cookies.TryGetValue("minmode", out string minmode))
+				Response.Cookies.Append("minmode", minmode switch
+				{
+					"true" => "false",
+					"false" => "true",
+					var _ => "true"
+				}, new CookieOptions
+				{
+					Expires = DateTimeOffset.MaxValue
+				});
+			else
+				Response.Cookies.Append("minmode", "true");
+
+			return Redirect(redirectUrl);
+		}
 	}
 }

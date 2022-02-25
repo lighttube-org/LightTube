@@ -105,6 +105,7 @@ body.noguide {
     color: var(--text-primary);
     width: 300px;
     height: 100%;
+    min-height: calc(100vh - 56px);
 }
 
 .account {
@@ -226,6 +227,14 @@ a.icon-button, a.icon-button > img {
 
 .guide.minmode > .hide-on-minmode {
     display: none;
+}
+
+.guide > .show-on-minmode {
+    display: none;
+}
+
+.guide.minmode > .show-on-minmode {
+    display: block;
 }
 
 @media screen and (max-width: 600px) {
