@@ -43,6 +43,30 @@ namespace LightTube.Controllers
 			}
 		}
 
+		[Route("channels")]
+		public async Task<IActionResult> Channels()
+		{
+			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+				return Redirect("/Account/Login");
+
+			try
+			{
+				LTUser user = await DatabaseManager.GetUserFromToken(token);
+				FeedContext context = new()
+				{
+					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
+					Videos = null,
+					MobileLayout = Utils.IsClientMobile(Request)
+				};
+				return View(context);
+			}
+			catch
+			{
+				HttpContext.Response.Cookies.Delete("token");
+				return Redirect("/Account/Login");
+			}
+		}
+
 		[Route("explore")]
 		public async Task<IActionResult> Explore()
 		{

@@ -1,10 +1,24 @@
 ﻿@using Humanizer
 @model LightTube.Contexts.FeedContext
 @{
-	ViewData["Title"] = "Subscription Feed";
+	ViewData["Title"] = "Subscriptions";
 	ViewData["DisableOldCss"] = true;
 	ViewData["SelectedGuideItem"] = "subs";
 }
+
+<div class="horizontal-channel-list">
+	<a href="/feed/channels" class="channel">
+		<img src="/icons/settings.svg">
+		<div class="name max-lines-2">Manage Channels</div>
+	</a>
+	@foreach (LTChannel channel in Model.Channels)
+	{
+		<a href="/channel/@channel.ChannelId" class="channel">
+			<img src="@channel.ChannelId">
+			<div class="name max-lines-2">@channel.Name</div>
+		</a>
+	}
+</div>
 
 <div class="rich-video-grid">
 	@foreach (FeedVideo video in Model.Videos)
@@ -13,7 +27,9 @@
 			<a href="/watch?v=@video.Id" class="thumbnail img-thumbnail">
 				<img src="@video.Thumbnail" loading="lazy">
 			</a>
-			<a href="/channel/@video.ChannelId" class="avatar"><img src="@Model.Channels.First(x => x.ChannelId == video.ChannelId).IconUrl"></a>
+			<a href="/channel/@video.ChannelId" class="avatar">
+				<img src="@Model.Channels.First(x => x.ChannelId == video.ChannelId).IconUrl">
+			</a>
 			<div class="info">
 				<a href="/watch?v=@video.Id" class="title max-lines-2">@video.Title</a>
 				<div>

@@ -94,7 +94,7 @@ body.noguide {
 }
 
 .logo {
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     text-decoration: none;
     font-size: larger;
 }
@@ -938,4 +938,36 @@ a.icon-button, a.icon-button > img {
 
 .playlist-info > .channel-info > .subscribe-button {
     margin-top: 4px;
+}
+
+/* horizontal channel list */
+
+.horizontal-channel-list {
+    display: flex;
+    column-gap: 16px;
+    padding: 16px;
+    overflow-x: scroll;
+    background-color: var(--item-hover-background);
+}
+
+.horizontal-channel-list > .channel {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    row-gap: 4px;
+    color: var(--text-secondary);
+}
+
+.horizontal-channel-list > .channel > div {
+    font-size: small;
+    text-align: center;
+    width: 72px;
+    color: var(--text-secondary);
+}
+
+.horizontal-channel-list > .channel > img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: var(--thumbnail-background);
 }
