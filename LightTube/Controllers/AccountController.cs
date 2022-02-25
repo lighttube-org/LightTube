@@ -22,13 +22,13 @@ namespace LightTube.Controllers
 		[Route("/Account")]
 		public IActionResult Account()
 		{
-			return Redirect(HttpContext.Request.Cookies.TryGetValue("token", out string _) ? "/" : "/Account/Login");
+			return Redirect(HttpContext.TryGetUser(out LTUser _) ? "/" : "/Account/Login");
 		}
 
 		[HttpGet]
 		public IActionResult Login(string err = null)
 		{
-			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
+			if (HttpContext.TryGetUser(out LTUser _))
 				return Redirect("/");
 
 			return View(new MessageContext
@@ -41,7 +41,7 @@ namespace LightTube.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Login(string email, string password)
 		{
-			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
+			if (HttpContext.TryGetUser(out LTUser _))
 				return Redirect("/");
 
 			try
@@ -69,15 +69,17 @@ namespace LightTube.Controllers
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string token))
 			{
 				await DatabaseManager.RemoveToken(token);
-				HttpContext.Response.Cookies.Delete("token");
 			}
+
+			HttpContext.Response.Cookies.Delete("token");
+			HttpContext.Response.Cookies.Delete("account_data");
 			return Redirect("/");
 		}
 
 		[HttpGet]
 		public IActionResult Register(string err = null)
 		{
-			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
+			if (HttpContext.TryGetUser(out LTUser _))
 				return Redirect("/");
 
 			return View(new MessageContext
@@ -90,7 +92,7 @@ namespace LightTube.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Register(string email, string password)
 		{
-			if (HttpContext.Request.Cookies.TryGetValue("token", out string _))
+			if (HttpContext.TryGetUser(out LTUser _))
 				return Redirect("/");
 
 			try
@@ -110,10 +112,18 @@ namespace LightTube.Controllers
 			}
 		}
 
+		public IActionResult RegisterLocal()
+		{
+			if (!HttpContext.TryGetUser(out LTUser _))
+				HttpContext.CreateLocalAccount();
+			
+			return Redirect("/");
+		}
+
 		[HttpGet]
 		public IActionResult Delete(string err = null)
 		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string _))
+			if (!HttpContext.TryGetUser(out LTUser _))
 				return Redirect("/");
 
 			return View(new MessageContext

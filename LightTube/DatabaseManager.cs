@@ -4,8 +4,10 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using YTProxy.Models;
 
 namespace LightTube
@@ -144,6 +146,87 @@ namespace LightTube
 			for (int i = 0; i < length; i++)
 				sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
 			return sb.ToString();
+		}
+
+		public static bool TryGetUser(this HttpContext context, out LTUser user)
+		{
+			// Check local account
+			if (context.Request.Cookies.TryGetValue("account_data", out string accountJson))
+			{
+				try
+				{
+					if (accountJson != null)
+					{
+						LTUser tempUser = JsonConvert.DeserializeObject<LTUser>(accountJson) ?? new LTUser();
+						if (tempUser.Email == "Local Account" && tempUser.PasswordHash == "local_account")
+						{
+							user = tempUser;
+							return true;
+						}
+					}
+				}
+				catch
+				{
+					user = null;
+					return false;
+				}
+			}
+			
+			// Check cloud account
+			if (context.Request.Cookies.TryGetValue("token", out string token))
+			{
+				try
+				{
+					if (token != null)
+					{
+						user = GetUserFromToken(token).Result;
+						return true;
+					}
+				}
+				catch
+				{
+					user = null;
+					return false;
+				}
+			}
+
+			user = null;
+			return false;
+		}
+
+		public static void CreateLocalAccount(this HttpContext context)
+		{
+			bool accountExists = false;
+
+			// Check local account
+			if (context.Request.Cookies.TryGetValue("account_data", out string accountJson))
+			{
+				try
+				{
+					if (accountJson != null)
+					{
+						LTUser tempUser = JsonConvert.DeserializeObject<LTUser>(accountJson) ?? new LTUser();
+						if (tempUser.Email == "Local Account" && tempUser.PasswordHash == "local_account")
+							accountExists = true;
+					}
+				}
+				catch { }
+			}
+
+			// Account already exists, just leave it there
+			if (accountExists) return;
+
+			LTUser user = new()
+			{
+				Email = "Local Account",
+				PasswordHash = "local_account",
+				SubscribedChannels = new List<string>()
+			};
+
+			context.Response.Cookies.Append("account_data", JsonConvert.SerializeObject(user), new CookieOptions
+			{
+				Expires = DateTimeOffset.MaxValue 
+			});
 		}
 	}
 

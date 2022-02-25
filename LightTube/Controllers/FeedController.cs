@@ -22,12 +22,11 @@ namespace LightTube.Controllers
 		[Route("subscriptions")]
 		public async Task<IActionResult> Subscriptions()
 		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+			if (!HttpContext.TryGetUser(out LTUser user))
 				return Redirect("/Account/Login");
 
 			try
 			{
-				LTUser user = await DatabaseManager.GetUserFromToken(token);
 				FeedContext context = new()
 				{
 					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
@@ -44,14 +43,13 @@ namespace LightTube.Controllers
 		}
 
 		[Route("channels")]
-		public async Task<IActionResult> Channels()
+		public IActionResult Channels()
 		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+			if (!HttpContext.TryGetUser(out LTUser user))
 				return Redirect("/Account/Login");
 
 			try
 			{
-				LTUser user = await DatabaseManager.GetUserFromToken(token);
 				FeedContext context = new()
 				{
 					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
@@ -68,7 +66,7 @@ namespace LightTube.Controllers
 		}
 
 		[Route("explore")]
-		public async Task<IActionResult> Explore()
+		public IActionResult Explore()
 		{
 			return View(new BaseContext
 			{
