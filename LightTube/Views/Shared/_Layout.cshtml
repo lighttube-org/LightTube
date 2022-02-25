@@ -57,7 +57,13 @@
 <body>
 
 <div class="top-bar @(ViewData["UseFullSizeSearchBar"]?.Equals(true) ?? false ? "full-size-search" : "")">
-	<a class="logo" href="/">light<b>tube</b> @(compatibility ? (Model.MobileLayout ? "(compat.)" : "(compatibility mode)") : "")</a>
+	<a class="logo" href="/">light<b>tube</b></a> 
+	@if (compatibility)
+	{
+		<a href="/compatibility_info" class="logo">
+			@(Model.MobileLayout ? "(compat.)" : "(compatibility mode)")
+		</a>
+	}
 	<div class="divider"></div>
 	<form action="/results">
 		<input type="text" placeholder="Search" name="search_query">
