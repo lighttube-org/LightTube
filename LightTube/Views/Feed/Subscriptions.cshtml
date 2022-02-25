@@ -4,9 +4,13 @@
 	ViewData["Title"] = "Subscriptions";
 	ViewData["DisableOldCss"] = true;
 	ViewData["SelectedGuideItem"] = "subs";
+	
+	bool minMode = false;
+	if (Context.Request.Cookies.TryGetValue("minMode", out string minModeString))
+		bool.TryParse(minModeString, out minMode);
 }
 
-<div class="horizontal-channel-list">
+<div class="horizontal-channel-list" style="max-width: @(!Model.MobileLayout ? $"calc(100vw - {(minMode ? 80 : 312)}px);" : "")">
 	<a href="/feed/channels" class="channel">
 		<img src="/icons/settings.svg">
 		<div class="name max-lines-2">Manage Channels</div>
