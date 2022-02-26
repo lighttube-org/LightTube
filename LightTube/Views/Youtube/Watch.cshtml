@@ -31,6 +31,9 @@
 	ViewData["DisableOldCss"] = true;
 	ViewData["HideGuide"] = true;
 
+	//TODO: this wont be necessary when the API is merged into LightTube, don't forget to delete this
+	Model.Player.Formats ??= Array.Empty<Format>();
+	Model.Player.AdaptiveFormats ??= Array.Empty<Format>();
 	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
 	string description = Model.Player.GetHtmlDescription();
 	const string youtubePattern = @"[w.]*youtu[.]*be[-nockie]*[.com]*";
