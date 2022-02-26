@@ -25,6 +25,7 @@ namespace LightTube
 			services.AddControllersWithViews();
 			services.AddSingleton(new Youtube("http://yt-proxy-api.herokuapp.com/"));
 			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"));
+			services.AddControllers().AddNewtonsoftJson();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
