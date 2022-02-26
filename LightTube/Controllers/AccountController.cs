@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using YTProxy;
+using YTProxy.Models;
 
 namespace LightTube.Controllers
 {
@@ -168,13 +171,39 @@ namespace LightTube.Controllers
 
 		public async Task<IActionResult> Subscribe(string channel)
 		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+			if (!HttpContext.TryGetUser(out LTUser user))
 				return Unauthorized();
 
 			try
 			{
-				(LTChannel channel, bool subscribed) result =
-					await DatabaseManager.SubscribeToChannel(token, await _youtube.GetChannelAsync(channel));
+				YoutubeChannel youtubeChannel = await _youtube.GetChannelAsync(channel);
+				
+				(LTChannel channel, bool subscribed) result;
+				result.channel = await DatabaseManager.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
+					youtubeChannel.Avatars.First().Url.ToString());
+				
+				if (user.PasswordHash == "local_account")
+				{
+					LTChannel ltChannel = await DatabaseManager.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
+						youtubeChannel.Avatars.First().Url.ToString());
+					if (user.SubscribedChannels.Contains(ltChannel.ChannelId))
+						user.SubscribedChannels.Remove(ltChannel.ChannelId);
+					else
+						user.SubscribedChannels.Add(ltChannel.ChannelId);
+
+					HttpContext.Response.Cookies.Append("account_data", JsonConvert.SerializeObject(user),
+						new CookieOptions
+						{
+							Expires = DateTimeOffset.MaxValue
+						});
+
+					result.subscribed = user.SubscribedChannels.Contains(ltChannel.ChannelId);
+				}
+				else
+				{
+					result =
+						await DatabaseManager.SubscribeToChannel(user, youtubeChannel);
+				}
 				return Ok(result.subscribed ? "true" : "false");
 			}
 			catch
@@ -183,13 +212,12 @@ namespace LightTube.Controllers
 			}
 		}
 
-		public async Task<IActionResult> SubscriptionsJson()
+		public IActionResult SubscriptionsJson()
 		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+			if (!HttpContext.TryGetUser(out LTUser user))
 				return Json(Array.Empty<string>());
 			try
 			{
-				LTUser user = await DatabaseManager.GetUserFromToken(token);
 				return Json(user.SubscribedChannels);
 			}
 			catch

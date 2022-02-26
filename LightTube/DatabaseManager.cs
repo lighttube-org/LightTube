@@ -76,9 +76,8 @@ namespace LightTube
 			return await (await _tokenCollection.FindAsync(u => u.Email == email)).ToListAsync();
 		}
 
-		public static async Task<(LTChannel channel, bool subscribed)> SubscribeToChannel(string token, YoutubeChannel channel)
+		public static async Task<(LTChannel channel, bool subscribed)> SubscribeToChannel(LTUser user, YoutubeChannel channel)
 		{
-			LTUser user = await GetUserFromToken(token);
 			LTChannel ltChannel = await UpdateChannel(channel.Id, channel.Name, channel.Subscribers,
 				channel.Avatars.First().Url.ToString());
 
