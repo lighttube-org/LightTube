@@ -38,7 +38,8 @@ namespace YTProxy
 				return PlayerCache[videoId].Item;
 			YoutubePlayer player = await MakeRequest<YoutubePlayer>("/get_player_info?v=" + videoId, language, region);
 
-			if (string.IsNullOrWhiteSpace(player.ErrorMessage))
+			// Do not cache error messages and live videos
+			if (string.IsNullOrWhiteSpace(player.ErrorMessage) && !(player.AdaptiveFormats.Length > 0 && player.Formats.Length == 0))
 			{
 				if (PlayerCache.ContainsKey(videoId))
 					PlayerCache.Remove(videoId);
