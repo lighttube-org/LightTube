@@ -13,9 +13,9 @@ namespace YTProxy
 	{
 		public static string GetHtmlDescription(string description)
 		{
-			const string urlPattern = @"(http[s]*)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?";
+			const string urlPattern = @"(http[s]*)://([\w-]+\.)+[\w-]+(\S)*";
 			const string hashtagPattern = @"#[\w]*";
-			string html = description.Replace("\n", "<br>");
+			string html = description.Replace("\n", " <br> ");
 
 			// turn URLs into hyperlinks
 			Regex urlRegex = new(urlPattern, RegexOptions.IgnoreCase);
@@ -29,6 +29,7 @@ namespace YTProxy
 			for (m = chr.Match(html); m.Success; m = m.NextMatch())
 				html = html.Replace(m.Groups[0].ToString(),
 					$"<a href=\"/hashtag/{m.Groups[0].ToString().Replace("#", "")}\">{m.Groups[0]}</a>");
+
 			return html;
 		}
 

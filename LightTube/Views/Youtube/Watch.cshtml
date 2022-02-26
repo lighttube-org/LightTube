@@ -36,14 +36,15 @@
 	Model.Player.AdaptiveFormats ??= Array.Empty<Format>();
 	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
 	string description = Model.Video.GetHtmlDescription();
-	const string youtubePattern = @"[w.]*youtu[.]*be[-nockie]*[.com]*";
+	const string youtubePattern = @"(www.)?youtube\.com";
 
 	// turn URLs into hyperlinks
 	Regex urlRegex = new(youtubePattern, RegexOptions.IgnoreCase);
 	Match m;
 	for (m = urlRegex.Match(description); m.Success; m = m.NextMatch())
 		description = description.Replace(m.Groups[0].ToString(),
-			$"{Url.ActionContext.HttpContext.Request.Host}/");
+			$"{Url.ActionContext.HttpContext.Request.Host}")
+			.Replace($"{Url.ActionContext.HttpContext.Request.Host}//", $"{Url.ActionContext.HttpContext.Request.Host}/");
 }
 
 <!-- TODO: chapters -->
