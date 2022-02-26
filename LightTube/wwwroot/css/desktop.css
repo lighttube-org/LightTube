@@ -137,7 +137,7 @@ a.icon-button, a.icon-button > img {
     position: absolute;
     top: 56px;
     right: 0;
-    width: 200px;
+    width: 250px;
     background-color: #fff;
     border: 1px solid var(--border-color);
 }
@@ -977,6 +977,12 @@ a.icon-button, a.icon-button > img {
 .login-container {
     display: flex;
     flex-direction: row;
+}
+
+@media screen and (max-width: 1300px) {
+    .login-container {
+        flex-direction: column;
+    }
 }
 
 .login-container > * {

@@ -25,7 +25,10 @@ namespace LightTube.Controllers
 		[Route("/Account")]
 		public IActionResult Account()
 		{
-			return Redirect(HttpContext.TryGetUser(out LTUser _) ? "/" : "/Account/Login");
+			return View(new BaseContext
+			{
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
 		}
 
 		[HttpGet]
