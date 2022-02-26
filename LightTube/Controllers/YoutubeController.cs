@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -76,6 +77,8 @@ namespace LightTube.Controllers
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
+			await DatabaseManager.UpdateChannel(context.Channel.Id, context.Channel.Name, context.Channel.Subscribers,
+				context.Channel.Avatars.First().Url.ToString());
 			return View(context);
 		}
 	}
