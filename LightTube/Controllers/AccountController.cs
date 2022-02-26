@@ -179,7 +179,7 @@ namespace LightTube.Controllers
 
 			try
 			{
-				YoutubeChannel youtubeChannel = await _youtube.GetChannelAsync(channel);
+				YoutubeChannel youtubeChannel = await _youtube.GetChannelAsync(channel, "en", "US");
 				
 				(LTChannel channel, bool subscribed) result;
 				result.channel = await DatabaseManager.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
@@ -227,6 +227,33 @@ namespace LightTube.Controllers
 			{
 				return Json(Array.Empty<string>());
 			}
+		}
+
+		public async Task<IActionResult> ContentSettings()
+		{
+			YoutubeLocals locals = await _youtube.GetLocalsAsync();
+			return View(new LocalsContext
+			{
+				Languages = locals.Languages,
+				Regions = locals.Regions,
+				CurrentLanguage = HttpContext.GetLanguage(),
+				CurrentRegion = HttpContext.GetRegion(),
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
+		}
+
+		public IActionResult SetContentSettings(string type, string value)
+		{
+			switch (type)
+			{
+				case "language":
+					HttpContext.Response.Cookies.Append("hl", value);
+					break;
+				case "region":
+					HttpContext.Response.Cookies.Append("gl", value);
+					break;
+			}
+			return Redirect("/Account/ContentSettings");
 		}
 	}
 }

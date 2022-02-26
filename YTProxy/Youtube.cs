@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,12 +32,11 @@ namespace YTProxy
 			return JObject.Parse(jsonDoc)["endpoints"]?.ToArray().Select(x => x.ToString()) ?? Array.Empty<string>();
 		}
 
-		public async Task<YoutubePlayer> GetPlayerAsync(string videoId)
+		public async Task<YoutubePlayer> GetPlayerAsync(string videoId, string language, string region)
 		{
 			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now))
 				return PlayerCache[videoId].Item;
-			string jsonDoc = await Client.GetStringAsync("/get_player_info?v=" + videoId);
-			YoutubePlayer player = JsonConvert.DeserializeObject<YoutubePlayer>(jsonDoc);
+			YoutubePlayer player = await MakeRequest<YoutubePlayer>("/get_player_info?v=" + videoId, language, region);
 
 			if (string.IsNullOrWhiteSpace(player.ErrorMessage))
 			{
@@ -50,34 +50,45 @@ namespace YTProxy
 			return player;
 		}
 
-		public async Task<YoutubeVideo> GetVideoAsync(string videoId)
+		public async Task<YoutubeVideo> GetVideoAsync(string videoId, string language, string region)
 		{
-			string jsonDoc = await Client.GetStringAsync("/video?v=" + videoId);
-			return JsonConvert.DeserializeObject<YoutubeVideo>(jsonDoc);
+			return await MakeRequest<YoutubeVideo>("/video?v=" + videoId, language, region);
 		}
 
-		public async Task<YoutubeSearch> SearchAsync(string query, string continuation = null)
+		public async Task<YoutubeSearch> SearchAsync(string query, string language, string region, string continuation = null)
 		{
-			string jsonDoc = continuation == null
-				? await Client.GetStringAsync("/search?q=" + query)
-				: await Client.GetStringAsync("/search?continuation=" + continuation);
-			return JsonConvert.DeserializeObject<YoutubeSearch>(jsonDoc);
+			return continuation == null
+				? await MakeRequest<YoutubeSearch>("/search?q=" + query, language, region)
+				: await MakeRequest<YoutubeSearch>("/search?continuation=" + continuation, language, region);
 		}
 
-		public async Task<YoutubePlaylist> GetPlaylistAsync(string query, string continuation = null)
+		public async Task<YoutubePlaylist> GetPlaylistAsync(string id, string language, string region, string continuation = null)
 		{
-			string jsonDoc = continuation == null
-				? await Client.GetStringAsync("/playlist?id=" + query)
-				: await Client.GetStringAsync("/playlist?continuation=" + continuation);
-			return JsonConvert.DeserializeObject<YoutubePlaylist>(jsonDoc);
+			return continuation == null
+				? await MakeRequest<YoutubePlaylist>("/playlist?id=" + id, language, region)
+				: await MakeRequest<YoutubePlaylist>("/playlist?continuation=" + continuation, language, region);
 		}
 
-		public async Task<YoutubeChannel> GetChannelAsync(string query, string continuation = null)
+		public async Task<YoutubeChannel> GetChannelAsync(string id, string language, string region, string continuation = null)
 		{
-			string jsonDoc = continuation == null
-				? await Client.GetStringAsync("/channel?id=" + query)
-				: await Client.GetStringAsync("/channel?continuation=" + continuation);
-			return JsonConvert.DeserializeObject<YoutubeChannel>(jsonDoc);
+			return continuation == null
+				? await MakeRequest<YoutubeChannel>("/channel?id=" + id, language, region)
+				: await MakeRequest<YoutubeChannel>("/channel?continuation=" + continuation, language, region);
+		}
+
+		public async Task<YoutubeLocals> GetLocalsAsync()
+		{
+			return await MakeRequest<YoutubeLocals>("/locals", "en", "US");
+		}
+
+		private async Task<T> MakeRequest<T>(string url, string hl, string gl)
+		{
+			HttpRequestMessage request = new(HttpMethod.Get, url);
+			request.Headers.Add("X-Content-Language", hl);
+			request.Headers.Add("X-Content-Region", gl);
+			HttpResponseMessage response = await Client.SendAsync(request);
+			string jsonDoc = await response.Content.ReadAsStringAsync();
+			return JsonConvert.DeserializeObject<T>(jsonDoc);
 		}
 	}
 }

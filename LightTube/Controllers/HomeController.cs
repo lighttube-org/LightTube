@@ -41,7 +41,7 @@ namespace LightTube.Controllers
 		[Route("/manifest/{v}.mpd")]
 		public async Task<IActionResult> DashManifest(string v)
 		{
-			YoutubePlayer player = await _youtube.GetPlayerAsync(v);
+			YoutubePlayer player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion());
 			string manifest = player.GetMpdManifest($"https://{Request.Host}/proxy/video?url=");
 			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
 		}

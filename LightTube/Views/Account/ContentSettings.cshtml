@@ -1,0 +1,38 @@
+@model LightTube.Contexts.LocalsContext
+
+@{
+	ViewBag.Title = "Content Settings";
+	Layout = "_Layout";
+}
+
+<h1 style="text-align: center">Content Settings</h1>
+<div class="login-container">
+	<div>
+		<div>
+			<h1>Content Language</h1>
+			<p>This will only affect the video names & descriptions, it has no effect on LightTube's UI</p>
+			<div style="display: flex; flex-wrap: wrap">
+				@foreach ((string hl, string name) in Model.Languages)
+				{
+					<a href="/Account/SetContentSettings?type=language&value=@hl" class="login-button" style="border: @(Model.CurrentLanguage == hl ? "1" : "0")px solid green">
+						@name
+					</a>
+				}
+			</div>
+		</div>
+	</div>
+	<div>
+		<div>
+			<h1>Content Region</h1>
+            <p>This affects the explore tab & recommended videos</p>
+			<div style="display: flex; flex-wrap: wrap">
+				@foreach ((string gl, string name) in Model.Regions)
+				{
+					<a href="/Account/SetContentSettings?type=region&value=@gl" class="login-button" style="border: @(Model.CurrentRegion == gl ? "1" : "0")px solid green">
+						@name
+					</a>
+				}
+			</div>
+			</div>
+	</div>
+</div>

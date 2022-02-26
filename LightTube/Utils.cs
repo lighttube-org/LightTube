@@ -19,5 +19,11 @@ namespace LightTube
 				RegexOptions.IgnoreCase | RegexOptions.Multiline);
 			return b.IsMatch(userAgent) || v.IsMatch(userAgent[..4]);
 		}
+
+		public static string GetRegion(this HttpContext context) =>
+			context.Request.Cookies.TryGetValue("gl", out string region) ? region : "US";
+
+		public static string GetLanguage(this HttpContext context) =>
+			context.Request.Cookies.TryGetValue("hl", out string language) ? language : "en";
 	}
 }

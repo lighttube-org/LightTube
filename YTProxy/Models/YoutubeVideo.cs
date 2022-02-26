@@ -13,6 +13,11 @@ namespace YTProxy.Models
 		[JsonProperty("engagement")] public Engagement Engagement { get; set; }
 		[JsonProperty("thumbnails")] public Thumbnail[] Thumbnails { get; set; }
 		[JsonProperty("recommended")] public ItemPreview[] Recommended { get; set; }
+
+		public string GetHtmlDescription()
+		{
+			return Utils.GetHtmlDescription(Description);
+		}
 	}
 
 	public class Avatar

@@ -12,12 +12,12 @@
 
 	ViewBag.Metadata = new Dictionary<string, string>();
 	ViewBag.Metadata["author"] = Model.Video.Channel.Name;
-	ViewBag.Metadata["og:title"] = Model.Player.Title;
+	ViewBag.Metadata["og:title"] = Model.Video.Title;
 	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
 	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["og:description"] = Model.Player.Description;
-	ViewBag.Title = Model.Player.Title;
+	ViewBag.Title = Model.Video.Title;
 
 	Layout = "_Layout";
 	try
@@ -35,7 +35,7 @@
 	Model.Player.Formats ??= Array.Empty<Format>();
 	Model.Player.AdaptiveFormats ??= Array.Empty<Format>();
 	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
-	string description = Model.Player.GetHtmlDescription();
+	string description = Model.Video.GetHtmlDescription();
 	const string youtubePattern = @"[w.]*youtu[.]*be[-nockie]*[.com]*";
 
 	// turn URLs into hyperlinks
@@ -104,7 +104,7 @@
 			}
 		</div>
 		<div class="video-info">
-			<div class="video-title">@Model.Player.Title</div>
+			<div class="video-title">@Model.Video.Title</div>
 			<div class="video-info-bar">
 				<span>@Model.Video.Engagement.Views views</span>
 				<span>Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
