@@ -37,9 +37,16 @@ namespace YTProxy
 				return PlayerCache[videoId].Item;
 			string jsonDoc = await Client.GetStringAsync("/get_player_info?v=" + videoId);
 			YoutubePlayer player = JsonConvert.DeserializeObject<YoutubePlayer>(jsonDoc);
-			PlayerCache.Add(videoId,
-				new CacheItem<YoutubePlayer>(player,
-					TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds)).Subtract(TimeSpan.FromHours(1))));
+
+			if (string.IsNullOrWhiteSpace(player.ErrorMessage))
+			{
+				if (PlayerCache.ContainsKey(videoId))
+					PlayerCache.Remove(videoId);
+				PlayerCache.Add(videoId,
+					new CacheItem<YoutubePlayer>(player,
+						TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds)).Subtract(TimeSpan.FromHours(1))));
+			}
+
 			return player;
 		}
 
