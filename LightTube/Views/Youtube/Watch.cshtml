@@ -33,7 +33,7 @@
 
 	bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
 	string description = Model.Player.GetHtmlDescription();
-	const string youtubePattern = @"youtu[.]*be[.com]*/";
+	const string youtubePattern = @"[w.]*youtu[.]*be[-nockie]*[.com]*";
 
 	// turn URLs into hyperlinks
 	Regex urlRegex = new(youtubePattern, RegexOptions.IgnoreCase);
