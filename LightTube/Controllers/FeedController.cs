@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using LightTube.Contexts;
@@ -33,6 +34,7 @@ namespace LightTube.Controllers
 					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels),
 					MobileLayout = Utils.IsClientMobile(Request)
 				};
+				Array.Sort(context.Channels, (p, q) => string.Compare(p.Name, q.Name, StringComparison.Ordinal));
 				return View(context);
 			}
 			catch
@@ -56,6 +58,7 @@ namespace LightTube.Controllers
 					Videos = null,
 					MobileLayout = Utils.IsClientMobile(Request)
 				};
+				Array.Sort(context.Channels, (p, q) => string.Compare(p.Name, q.Name, StringComparison.Ordinal));
 				return View(context);
 			}
 			catch
