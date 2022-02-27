@@ -156,7 +156,7 @@ namespace YTProxy
 			period.AppendChild(videoAdaptationSet);
 
 			period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
-			foreach (Subtitle subtitle in player.Subtitles)
+			foreach (Subtitle subtitle in player.Subtitles.Where(x => x.Ext == "vtt"))
 			{
 				period.AppendChild(doc.CreateComment(subtitle.Language));
 				XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
