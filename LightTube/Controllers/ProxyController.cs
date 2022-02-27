@@ -33,7 +33,7 @@ namespace LightTube.Controllers
 				foreach (string value in values)
 					request.Headers.Add(header, value);
 
-			HttpWebResponse response = null;
+			HttpWebResponse response;
 
 			try
 			{
@@ -66,7 +66,31 @@ namespace LightTube.Controllers
 			await Response.StartAsync();
 		}
 
-		private async Task SmallFileProxy(string url)
+		[Route("subtitle")]
+		public async Task<FileStreamResult> SubtitleProxy(string url)
+		{
+			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+				url = "https://" + url;
+
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			await using Stream stream = response.GetResponseStream();
+			using StreamReader reader = new(stream);
+
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(await reader.ReadToEndAsync())),
+				"text/vtt");
+		}
+
+		[Route("image")]
+		public async Task ImageProxy(string url)
 		{
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;
@@ -90,17 +114,11 @@ namespace LightTube.Controllers
 
 			await using Stream stream = response.GetResponseStream();
 			await stream.CopyToAsync(Response.Body);
-			await Response.StartAsync();			
+			await Response.StartAsync();
 		}
 
-		[Route("subtitle")]
-		public async Task SubtitleProxy(string url) => await SmallFileProxy(url);
-
-		[Route("image")]
-		public async Task ImageProxy(string url) => await SmallFileProxy(url);
-
 		[Route("hls")]
-		public async Task HlsProxy(string url)
+		public async Task<IActionResult> HlsProxy(string url)
 		{
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;
@@ -115,13 +133,6 @@ namespace LightTube.Controllers
 
 			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-			foreach (string header in response.Headers.AllKeys)
-				if (Response.Headers.ContainsKey(header))
-					Response.Headers[header] = response.Headers.Get(header);
-				else
-					Response.Headers.Add(header, response.Headers.Get(header));
-			Response.StatusCode = (int)response.StatusCode;
-
 			await using Stream stream = response.GetResponseStream();
 			using StreamReader reader = new(stream);
 			string manifest = await reader.ReadToEndAsync();
@@ -135,8 +146,8 @@ namespace LightTube.Controllers
 					: $"https://{Request.Host}/proxy/video?url={HttpUtility.UrlEncode(s)}");
 			}
 
-			await Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(proxyManifest.ToString()));
-			await Response.StartAsync();
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(proxyManifest.ToString())),
+				"application/vnd.apple.mpegurl");
 		}
 	}
 }
