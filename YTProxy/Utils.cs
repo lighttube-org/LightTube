@@ -153,8 +153,30 @@ namespace YTProxy
 
 				videoAdaptationSet.AppendChild(representation);
 			}
-
 			period.AppendChild(videoAdaptationSet);
+
+			period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
+			foreach (Subtitle subtitle in player.Subtitles)
+			{
+				period.AppendChild(doc.CreateComment(subtitle.Language));
+				XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
+				adaptationSet.SetAttribute("mimeType", "text/vtt");
+				adaptationSet.SetAttribute("lang", subtitle.Language);
+
+				XmlElement representation = doc.CreateElement("Representation");
+				representation.SetAttribute("id", $"caption_{subtitle.Language.ToLower()}");
+				representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
+				
+				XmlElement baseUrl = doc.CreateElement("BaseURL");
+				if (string.IsNullOrWhiteSpace(proxyUrl))
+					baseUrl.InnerText = subtitle.Url.ToString();
+				else
+					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(subtitle.Url.ToString());
+
+				representation.AppendChild(baseUrl);
+				adaptationSet.AppendChild(representation);
+				period.AppendChild(adaptationSet);
+			}
 
 			mpdRoot.AppendChild(period);
 			return doc.OuterXml.Replace(" schemaLocation=\"", " xsi:schemaLocation=\"");
