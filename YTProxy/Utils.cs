@@ -45,7 +45,6 @@ namespace YTProxy
 			mpdRoot.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 			mpdRoot.SetAttribute("xmlns", "urn:mpeg:dash:schema:mpd:2011");
 			mpdRoot.SetAttribute("xsi:schemaLocation", "urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd");
-			//mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-on-demand:2011");
 			mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-main:2011");
 			mpdRoot.SetAttribute("type", "static");
 			mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
@@ -67,7 +66,7 @@ namespace YTProxy
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 			List<Format> audios = player.AdaptiveFormats
-				.Where(x => x.Resolution == "audio only")
+				.Where(x => x.Resolution == "audio only" && x.InitRange is not null && x.IndexRange is not null)
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList();
@@ -97,18 +96,15 @@ namespace YTProxy
 					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
 				representation.AppendChild(baseUrl);
 
-				if (format.IndexRange != null && format.InitRange != null)
-				{
-					XmlElement segmentBase = doc.CreateElement("SegmentBase");
-					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
-					segmentBase.SetAttribute("indexRangeExact", "true");
+				XmlElement segmentBase = doc.CreateElement("SegmentBase");
+				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+				segmentBase.SetAttribute("indexRangeExact", "true");
 
-					XmlElement initialization = doc.CreateElement("Initialization");
-					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+				XmlElement initialization = doc.CreateElement("Initialization");
+				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
 
-					segmentBase.AppendChild(initialization);
-					representation.AppendChild(segmentBase);
-				}
+				segmentBase.AppendChild(initialization);
+				representation.AppendChild(segmentBase);
 
 				audioAdaptationSet.AppendChild(representation);
 			}
@@ -122,7 +118,8 @@ namespace YTProxy
 					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			videoAdaptationSet.SetAttribute("contentType", "video");
-			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only")
+			foreach (Format format in player.AdaptiveFormats
+				.Where(x => x.Resolution != "audio only" && x.InitRange is not null && x.IndexRange is not null)
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList())
@@ -144,18 +141,15 @@ namespace YTProxy
 					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
 				representation.AppendChild(baseUrl);
 
-				if (format.IndexRange != null && format.InitRange != null)
-				{
-					XmlElement segmentBase = doc.CreateElement("SegmentBase");
-					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
-					segmentBase.SetAttribute("indexRangeExact", "true");
+				XmlElement segmentBase = doc.CreateElement("SegmentBase");
+				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+				segmentBase.SetAttribute("indexRangeExact", "true");
 
-					XmlElement initialization = doc.CreateElement("Initialization");
-					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+				XmlElement initialization = doc.CreateElement("Initialization");
+				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
 
-					segmentBase.AppendChild(initialization);
-					representation.AppendChild(segmentBase);
-				}
+				segmentBase.AppendChild(initialization);
+				representation.AppendChild(segmentBase);
 
 				videoAdaptationSet.AppendChild(representation);
 			}
