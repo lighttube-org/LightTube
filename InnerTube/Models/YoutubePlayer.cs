@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 using Newtonsoft.Json;
 
 namespace InnerTube.Models
@@ -26,6 +27,84 @@ namespace InnerTube.Models
 		{
 			return Utils.GetHtmlDescription(Description);
 		}
+
+		public XmlDocument GetXmlDocument()
+		{
+			XmlDocument doc = new();
+			if (!string.IsNullOrWhiteSpace(ErrorMessage))
+			{
+				XmlElement error = doc.CreateElement("Error");
+				error.InnerText = ErrorMessage;
+				doc.AppendChild(error);
+			}
+			else
+			{
+				XmlElement player = doc.CreateElement("Player");
+				player.SetAttribute("id", Id);
+				player.SetAttribute("uploadDate", UploadDate);
+				player.SetAttribute("duration", Duration.ToString());
+				player.SetAttribute("expiresInSeconds", ExpiresInSeconds);
+
+				XmlElement title = doc.CreateElement("Title");
+				title.InnerText = Title;
+				player.AppendChild(title);
+
+				XmlElement description = doc.CreateElement("Description");
+				description.InnerText = Description;
+				player.AppendChild(description);
+
+				XmlElement categories = doc.CreateElement("Categories");
+				foreach (string category in Categories)
+				{
+					XmlElement categoryElement = doc.CreateElement("Category");
+					categoryElement.InnerText = category;
+					categories.AppendChild(categoryElement);
+				}
+				player.AppendChild(categories);
+
+				XmlElement tags = doc.CreateElement("Tags");
+				foreach (string tag in Tags)
+				{
+					XmlElement tagElement = doc.CreateElement("Tag");
+					tagElement.InnerText = tag;
+					tags.AppendChild(tagElement);
+				}
+				player.AppendChild(tags);
+
+				player.AppendChild(Channel.GetXmlElement(doc));
+
+				XmlElement thumbnails = doc.CreateElement("Thumbnails");
+				foreach (Thumbnail t in Thumbnails) 
+				{
+					XmlElement thumbnail = doc.CreateElement("Thumbnail");
+					thumbnail.SetAttribute("width", t.Width.ToString());
+					thumbnail.SetAttribute("height", t.Height.ToString());
+					thumbnail.InnerText = t.Url.ToString();
+					thumbnails.AppendChild(thumbnail);
+				}
+				player.AppendChild(thumbnails);
+
+				XmlElement formats = doc.CreateElement("Formats");
+				foreach (Format f in Formats ?? Array.Empty<Format>()) formats.AppendChild(f.GetXmlElement(doc));
+				player.AppendChild(formats);
+
+				XmlElement adaptiveFormats = doc.CreateElement("AdaptiveFormats");
+				foreach (Format f in AdaptiveFormats ?? Array.Empty<Format>()) adaptiveFormats.AppendChild(f.GetXmlElement(doc));
+				player.AppendChild(adaptiveFormats);
+
+				XmlElement storyboards = doc.CreateElement("Storyboards");
+				foreach (Format f in Storyboards ?? Array.Empty<Format>()) storyboards.AppendChild(f.GetXmlElement(doc));
+				player.AppendChild(storyboards);
+
+				XmlElement subtitles = doc.CreateElement("Subtitles");
+				foreach (Subtitle s in Subtitles ?? Array.Empty<Subtitle>()) subtitles.AppendChild(s.GetXmlElement(doc));
+				player.AppendChild(subtitles);
+
+				doc.AppendChild(player);
+			}
+
+			return doc;
+		}
 	}
 
 	public class Chapter
@@ -50,6 +129,40 @@ namespace InnerTube.Models
 		[JsonProperty("url")] public Uri Url { get; set; }
 		[JsonProperty("init_range")] public Range InitRange { get; set; }
 		[JsonProperty("index_range")] public Range IndexRange { get; set; }
+
+		public XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement format = doc.CreateElement("Format");
+
+			format.SetAttribute("id", FormatId);
+			format.SetAttribute("label", FormatNote);
+			format.SetAttribute("filesize", Filesize.ToString());
+			format.SetAttribute("quality", Bitrate.ToString());
+			format.SetAttribute("audioCodec", AudioCodec);
+			format.SetAttribute("videoCodec", VideoCodec);
+			if (AudioSampleRate != null)
+				format.SetAttribute("audioSampleRate", AudioSampleRate.ToString());
+			format.SetAttribute("resolution", Resolution);
+
+			XmlElement url = doc.CreateElement("URL");
+			url.InnerText = Url.ToString();
+			format.AppendChild(url);
+
+			if (InitRange != null && IndexRange != null)
+			{
+				XmlElement initRange = doc.CreateElement("InitRange");
+				initRange.SetAttribute("start", InitRange.Start);
+				initRange.SetAttribute("end", InitRange.End);
+				format.AppendChild(initRange);
+
+				XmlElement indexRange = doc.CreateElement("IndexRange");
+				indexRange.SetAttribute("start", IndexRange.Start);
+				indexRange.SetAttribute("end", IndexRange.End);
+				format.AppendChild(indexRange);
+			}
+
+			return format;
+		}
 	}
 
 	public class Range
@@ -69,6 +182,27 @@ namespace InnerTube.Models
 		[JsonProperty("name")] public string Name { get; set; }
 		[JsonProperty("id")] public string Id { get; set; }
 		[JsonProperty("avatars")] public Thumbnail[] Avatars { get; set; }
+
+		public XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement channel = doc.CreateElement("Channel");
+			channel.SetAttribute("id", Id);
+
+			XmlElement name = doc.CreateElement("Name");
+			name.InnerText = Name;
+			channel.AppendChild(name);
+
+			foreach (Thumbnail avatarThumb in Avatars)
+			{
+				XmlElement avatar = doc.CreateElement("Avatar");
+				avatar.SetAttribute("width", avatarThumb.Width.ToString());
+				avatar.SetAttribute("height", avatarThumb.Height.ToString());
+				avatar.InnerText = avatarThumb.Url.ToString();
+				channel.AppendChild(avatar);
+			}
+
+			return channel;
+		}
 	}
 
 	public class Subtitle
@@ -76,6 +210,15 @@ namespace InnerTube.Models
 		[JsonProperty("ext")] public string Ext { get; set; }
 		[JsonProperty("name")] public string Language { get; set; }
 		[JsonProperty("url")] public Uri Url { get; set; }
+
+		public XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement subtitle = doc.CreateElement("Subtitle");
+			subtitle.SetAttribute("ext", Ext);
+			subtitle.SetAttribute("language", Language);
+			subtitle.InnerText = Url.ToString();
+			return subtitle;
+		}
 	}
 
 	public class Thumbnail
