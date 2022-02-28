@@ -124,21 +124,16 @@ namespace InnerTube.Models.YtDlp
 					Name = Channel
 				},
 				UploadDate = UploadDate[..4] + "-" + UploadDate[4..6] + "-" + UploadDate[6..8],
-				Duration = Duration
+				Duration = Duration,
+				Chapters = Array.Empty<Models.Chapter>(),
+				Subtitles = Array.Empty<Models.Subtitle>()
 			};
-			try
+			player.Chapters = Chapters?.Select(x => new Models.Chapter
 			{
-				player.Chapters = Chapters.Select(x => new Models.Chapter
-				{
-					Title = x.Title,
-					StartTime = x.StartTime,
-					EndTime = x.EndTime
-				}).ToArray();
-			}
-			catch
-			{
-				player.Chapters = Array.Empty<Models.Chapter>();
-			}
+				Title = x.Title,
+				StartTime = x.StartTime,
+				EndTime = x.EndTime
+			}).ToArray();
 
 			player.Thumbnails = Thumbnails.Where(x => x.Height.HasValue && x.Width.HasValue).Select(x =>
 				new Models.Thumbnail
@@ -179,7 +174,7 @@ namespace InnerTube.Models.YtDlp
 			}
 			
 			player.Subtitles = Subtitles
-				.Select(x => x.Value.FirstOrDefault(s => s.Ext == "vtt"))
+				?.Select(x => x.Value.FirstOrDefault(s => s.Ext == "vtt"))
 				.Where(x => x != null)
 				.Select(x => new Models.Subtitle
 				{
