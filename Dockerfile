@@ -21,4 +21,4 @@ RUN apt install python3 curl -y
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /bin/yt-dlp
 RUN chmod a+rx /bin/yt-dlp
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "LightTube.dll"]
+CMD ASPNETCORE_URLS=http://*:$PORT dotnet LightTube.dll
