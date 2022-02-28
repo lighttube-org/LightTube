@@ -181,18 +181,21 @@ namespace InnerTube.Models
 	{
 		[JsonProperty("name")] public string Name { get; set; }
 		[JsonProperty("id")] public string Id { get; set; }
+		[JsonProperty("subscriberCount")] public string SubscriberCount { get; set; }
 		[JsonProperty("avatars")] public Thumbnail[] Avatars { get; set; }
 
 		public XmlElement GetXmlElement(XmlDocument doc)
 		{
 			XmlElement channel = doc.CreateElement("Channel");
 			channel.SetAttribute("id", Id);
+			if (!string.IsNullOrWhiteSpace(SubscriberCount)) 
+				channel.SetAttribute("subscriberCount", SubscriberCount);
 
 			XmlElement name = doc.CreateElement("Name");
 			name.InnerText = Name;
 			channel.AppendChild(name);
 
-			foreach (Thumbnail avatarThumb in Avatars)
+			foreach (Thumbnail avatarThumb in Avatars ?? Array.Empty<Thumbnail>())
 			{
 				XmlElement avatar = doc.CreateElement("Avatar");
 				avatar.SetAttribute("width", avatarThumb.Width.ToString());

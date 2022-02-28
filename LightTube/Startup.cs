@@ -24,6 +24,7 @@ namespace LightTube
 		{
 			services.AddControllersWithViews();
 			services.AddSingleton(new Youtube("http://yt-proxy-api.herokuapp.com/"));
+			services.AddSingleton(new InnerTube.Youtube());
 			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"));
 			services.AddControllers().AddNewtonsoftJson();
 		}

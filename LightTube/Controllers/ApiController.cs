@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using System.Xml;
 using InnerTube;
 using InnerTube.Models;
-using InnerTube.Models.YtDlp;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Chapter = InnerTube.Models.Chapter;
 using Format = InnerTube.Models.Format;
 using Subtitle = InnerTube.Models.Subtitle;
@@ -19,9 +19,17 @@ namespace LightTube.Controllers
 	[Route("/api")]
 	public class ApiController : Controller
 	{
-		public const string VideoIdRegex = @"[a-zA-Z0-9_-]{11}";
+		private const string VideoIdRegex = @"[a-zA-Z0-9_-]{11}";
+		private readonly ILogger<ApiController> _logger;
+		private readonly Youtube _youtube;
 
-		private IActionResult Xml(XmlDocument xmlDocument)
+		public ApiController(ILogger<ApiController> logger, Youtube youtube)
+		{
+			_logger = logger;
+			_youtube = youtube;
+		}
+
+		private IActionResult Xml(XmlNode xmlDocument)
 		{
 			MemoryStream ms = new();
 			ms.Write(Encoding.UTF8.GetBytes(xmlDocument.OuterXml));
@@ -38,8 +46,8 @@ namespace LightTube.Controllers
 
 			try
 			{
-				YtDlpOutput video = YtDlp.GetVideo(v);
-				XmlDocument xml = (await video.GetYoutubePlayer()).GetXmlDocument();
+				YoutubePlayer player = await _youtube.GetPlayerAsync(v);
+				XmlDocument xml = player.GetXmlDocument();
 				return Xml(xml);
 			}
 			catch (YtDlpException e)
@@ -79,6 +87,26 @@ namespace LightTube.Controllers
 				ErrorMessage = message
 			};
 			return Xml(player.GetXmlDocument());
+		}
+
+		[Route("video")]
+		public async Task<IActionResult> GetVideoInfo(string v)
+		{
+			Regex regex = new(VideoIdRegex);
+			if (!regex.IsMatch(v) || v.Length != 11)
+			{
+				XmlDocument doc = new();
+				XmlElement item = doc.CreateElement("Error");
+
+				item.InnerText = "Invalid YouTube ID " + v;
+
+				doc.AppendChild(item);
+				return Xml(doc);
+			}
+
+			YoutubeVideo player = await _youtube.GetVideoAsync(v);
+			XmlDocument xml = player.GetXmlDocument();
+			return Xml(xml);
 		}
 	}
 }
