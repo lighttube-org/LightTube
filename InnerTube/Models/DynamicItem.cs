@@ -37,6 +37,7 @@ namespace InnerTube.Models
 		public long Views;
 		public Channel Channel;
 		public string Duration;
+		public string Description;
 
 		public override XmlElement GetXmlElement(XmlDocument doc)
 		{
@@ -58,6 +59,13 @@ namespace InnerTube.Models
 				thumbnail.SetAttribute("height", t.Height.ToString());
 				thumbnail.InnerText = t.Url.ToString();
 				item.AppendChild(thumbnail);
+			}
+
+			if (!string.IsNullOrWhiteSpace(Description))
+			{
+				XmlElement description = doc.CreateElement("Description");
+				description.InnerText = Description;
+				item.AppendChild(description);
 			}
 
 			return item;
@@ -137,6 +145,8 @@ namespace InnerTube.Models
 			item.SetAttribute("id", Id);
 			item.SetAttribute("videoCount", VideoCount.ToString());
 			item.SetAttribute("subscribers", Subscribers);
+			if (!string.IsNullOrWhiteSpace(Url))
+				item.SetAttribute("customUrl", Url);
 
 			XmlElement title = doc.CreateElement("Name");
 			title.InnerText = Title;
@@ -165,6 +175,58 @@ namespace InnerTube.Models
 		{
 			XmlElement item = doc.CreateElement("Continuation");
 			item.SetAttribute("token", Id);
+			return item;
+		}
+	}
+
+	public class ShelfItem : DynamicItem
+	{
+		public DynamicItem[] Items;
+		public int CollapsedItemCount;
+
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("Shelf");
+			item.SetAttribute("title", Title);
+			item.SetAttribute("collapsedItemCount", CollapsedItemCount.ToString());
+
+			foreach (DynamicItem dynamicItem in Items) item.AppendChild(dynamicItem.GetXmlElement(doc));
+
+			return item;
+		}
+	}
+
+	public class HorizontalCardListItem : DynamicItem
+	{
+		public DynamicItem[] Items;
+
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("CardList");
+			item.SetAttribute("title", Title);
+
+			foreach (DynamicItem dynamicItem in Items) item.AppendChild(dynamicItem.GetXmlElement(doc));
+
+			return item;
+		}
+	}
+
+	public class CardItem : DynamicItem
+	{
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("Card");
+			item.SetAttribute("title", Title);
+
+			foreach (Thumbnail t in Thumbnails ?? Array.Empty<Thumbnail>()) 
+			{
+				XmlElement thumbnail = doc.CreateElement("Thumbnail");
+				thumbnail.SetAttribute("width", t.Width.ToString());
+				thumbnail.SetAttribute("height", t.Height.ToString());
+				thumbnail.InnerText = t.Url.ToString();
+				item.AppendChild(thumbnail);
+			}
+
 			return item;
 		}
 	}

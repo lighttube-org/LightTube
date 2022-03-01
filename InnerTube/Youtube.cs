@@ -86,7 +86,7 @@ namespace InnerTube
 					player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[0]?[
 						"videoPrimaryInfoRenderer"]?["dateText"]?["simpleText"]?.ToString(),
 				Recommended =
-					ParseRecommendations(
+					ParseRenderers(
 						player?["contents"]?["twoColumnWatchNextResults"]?["secondaryResults"]?["secondaryResults"]?
 							["results"]?.ToObject<JArray>() ?? JArray.Parse("[]"))
 			};
@@ -94,118 +94,35 @@ namespace InnerTube
 			return video;
 		}
 
-		private DynamicItem[] ParseRecommendations(JArray recommendationsArray)
+		public async Task<YoutubeSearchResults> SearchAsync(string query, string continuation = null)
 		{
-			List<DynamicItem> items = new();
+			Dictionary<string, object> data = new();
+			if (string.IsNullOrWhiteSpace(continuation))
+				data.Add("query", query);
+			else
+				data.Add("continuation", continuation);
+			JObject search = await MakeRequest("search", data);
 
-			foreach (JToken jToken in recommendationsArray)
+			return new YoutubeSearchResults
 			{
-				JObject recommendationContainer = jToken as JObject;
-				string rendererName = recommendationContainer?.First?.Path.Split(".").Last() ?? "";
-				JObject recommendationItem = recommendationContainer?[rendererName]?.ToObject<JObject>();
-				switch (rendererName)
-				{
-					case "compactVideoRenderer":
-						items.Add(new VideoItem
-						{
-							Id = recommendationItem?["videoId"]?.ToString(),
-							Title = recommendationItem?["title"]?["simpleText"]?.ToString(),
-							Thumbnails =
-								(recommendationItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
-								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
-							UploadedAt = recommendationItem?["publishedTimeText"]?["simpleText"]?.ToString(),
-							Views = int.Parse(
-								recommendationItem?["viewCountText"]?["simpleText"]?.ToString().Split(" ")[0]
-									.Replace(",", "").Replace(".", "") ?? "0"),
-							Channel = new Channel
-							{
-								Name = recommendationItem?["longBylineText"]?["runs"]?[0]?["text"]?.ToString(),
-								Id = recommendationItem?["longBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
-									"browseEndpoint"]?["browseId"]?.ToString(),
-								SubscriberCount = null,
-								Avatars = null
-							},
-							Duration = recommendationItem?["thumbnailOverlays"]?[0]?[
-								"thumbnailOverlayTimeStatusRenderer"]?["text"]?["simpleText"]?.ToString()
-						});
-						break;
-					case "compactPlaylistRenderer":
-						items.Add(new PlaylistItem
-						{
-							Id = recommendationItem?["playlistId"]
-								?.ToString(),
-							Title = recommendationItem?["title"]?["simpleText"]
-								?.ToString(),
-							Thumbnails =
-								(recommendationItem?["thumbnail"]?["thumbnails"]
-									?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
-								.ToArray(),
-							VideoCount = int.Parse(
-								recommendationItem?["videoCountText"]?["runs"]?[0]?["text"]?.ToString().Replace(",", "")
-									.Replace(".", "") ?? "0"),
-							FirstVideoId = recommendationItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
-								?.ToString(),
-							Channel = new Channel
-							{
-								Name = recommendationItem?["longBylineText"]?["runs"]?[0]?["text"]
-									?.ToString(),
-								Id = recommendationItem?["longBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
-										"browseEndpoint"]?["browseId"]
-									?.ToString(),
-								SubscriberCount = null,
-								Avatars = null
-							}
-						});
-						break;
-					case "compactRadioRenderer":
-						items.Add(new RadioItem
-						{
-							Id = recommendationItem?["playlistId"]
-								?.ToString(),
-							Title = recommendationItem?["title"]?["simpleText"]
-								?.ToString(),
-							Thumbnails =
-								(recommendationItem?["thumbnail"]?["thumbnails"]
-									?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
-								.ToArray(),
-							FirstVideoId = recommendationItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
-								?.ToString(),
-							Channel = new Channel
-							{
-								Name = recommendationItem?["longBylineText"]?["simpleText"]?.ToString(),
-								Id = "",
-								SubscriberCount = null,
-								Avatars = null
-							}
-						});
-						break;
-					case "continuationItemRenderer":
-						items.Add(new ContinuationItem
-						{
-							Id = recommendationItem?["continuationEndpoint"]?["continuationCommand"]?["token"]?.ToString()
-						});
-						break;
-					default:
-						items.Add(new DynamicItem
-						{
-							Id = rendererName,
-							Title = "Unknown Recommendation Type: " + rendererName
-						});
-						break;
-				}
-			}
-
-			return items.ToArray();
+				Refinements = search?["refinements"]?.ToObject<string[]>() ?? Array.Empty<string>(),
+				EstimatedResults = search?["estimatedResults"]?.ToObject<int>() ?? 0,
+				Results = ParseRenderers(
+					search?["contents"]?["twoColumnSearchResultsRenderer"]?["primaryContents"]?["sectionListRenderer"]?
+						["contents"]?[0]?["itemSectionRenderer"]?["contents"]?.ToObject<JArray>() ??
+					search?["onResponseReceivedCommands"]?[0]?["appendContinuationItemsAction"]?["continuationItems"]?
+						[0]?["itemSectionRenderer"]?["contents"]?.ToObject<JArray>() ?? JArray.Parse("[]")),
+				ContinuationKey =
+					search?["contents"]?["twoColumnSearchResultsRenderer"]?["primaryContents"]?["sectionListRenderer"]?
+						["contents"]?[1]?["continuationItemRenderer"]?["continuationEndpoint"]?["continuationCommand"]?
+						["token"]?.ToString() ??
+					search?["onResponseReceivedCommands"]?[0]?["appendContinuationItemsAction"]?["continuationItems"]?
+						[1]?["continuationItemRenderer"]?["continuationEndpoint"]?["continuationCommand"]?["token"]
+						?.ToString() ?? ""
+			};
 		}
+
 		/*
-		public async Task<YoutubeSearch> SearchAsync(string query, string continuation = null)
-		{
-			string jsonDoc = continuation == null
-				? await Client.GetStringAsync("/search?q=" + query)
-				: await Client.GetStringAsync("/search?continuation=" + continuation);
-			return JsonConvert.DeserializeObject<YoutubeSearch>(jsonDoc);
-		}
-
 		public async Task<YoutubePlaylist> GetPlaylistAsync(string query, string continuation = null)
 		{
 			string jsonDoc = continuation == null
@@ -221,6 +138,247 @@ namespace InnerTube
 				: await Client.GetStringAsync("/channel?continuation=" + continuation);
 			return JsonConvert.DeserializeObject<YoutubeChannel>(jsonDoc);
 		}
-*/
+		*/
+
+		private DynamicItem[] ParseRenderers(JArray renderersArray)
+		{
+			List<DynamicItem> items = new();
+
+			foreach (JToken jToken in renderersArray)
+			{
+				JObject recommendationContainer = jToken as JObject;
+				string rendererName = recommendationContainer?.First?.Path.Split(".").Last() ?? "";
+				JObject rendererItem = recommendationContainer?[rendererName]?.ToObject<JObject>();
+				switch (rendererName)
+				{
+					case "videoRenderer":
+						items.Add(new VideoItem
+						{
+							Id = rendererItem?["videoId"]?.ToString(),
+							Title = Utils.ReadRuns(rendererItem?["title"]?["runs"]?.ToObject<JArray>() ??
+							                       JArray.Parse("[]")),
+							Thumbnails =
+								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
+								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+							UploadedAt = rendererItem?["publishedTimeText"]?["simpleText"]?.ToString(),
+							Views = int.Parse(
+								rendererItem?["viewCountText"]?["simpleText"]?.ToString().Split(" ")[0]
+									.Replace(",", "").Replace(".", "") ?? "0"),
+							Channel = new Channel
+							{
+								Name = rendererItem?["longBylineText"]?["runs"]?[0]?["text"]?.ToString(),
+								Id = rendererItem?["longBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
+									"browseEndpoint"]?["browseId"]?.ToString(),
+								SubscriberCount = null,
+								Avatars =
+									(rendererItem?["channelThumbnailSupportedRenderers"]?[
+											"channelThumbnailWithLinkRenderer"]?["thumbnail"]?["thumbnails"]
+										?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+									.ToArray()
+							},
+							Duration = rendererItem?["thumbnailOverlays"]?[0]?[
+								"thumbnailOverlayTimeStatusRenderer"]?["text"]?["simpleText"]?.ToString(),
+							Description = Utils.ReadRuns(rendererItem?["detailedMetadataSnippets"]?[0]?[
+								"snippetText"]?["runs"]?.ToObject<JArray>() ?? JArray.Parse("[]"))
+						});
+						break;
+					case "playlistRenderer":
+						items.Add(new PlaylistItem
+						{
+							Id = rendererItem?["playlistId"]
+								?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]
+								?.ToString(),
+							Thumbnails =
+								(rendererItem?["thumbnails"]?[0]?["thumbnails"]?.ToObject<JArray>() ??
+								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+							VideoCount = int.Parse(
+								rendererItem?["videoCountText"]?["runs"]?[0]?["text"]?.ToString().Replace(",", "")
+									.Replace(".", "") ?? "0"),
+							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
+								?.ToString(),
+							Channel = new Channel
+							{
+								Name = rendererItem?["longBylineText"]?["runs"]?[0]?["text"]
+									?.ToString(),
+								Id = rendererItem?["longBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
+										"browseEndpoint"]?["browseId"]
+									?.ToString(),
+								SubscriberCount = null,
+								Avatars = null
+							}
+						});
+						break;
+					case "channelRenderer":
+						items.Add(new ChannelItem
+						{
+							Id = rendererItem?["channelId"]?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]?.ToString(),
+							Thumbnails =
+								(rendererItem?["thumbnail"]?["thumbnails"]
+									 ?.ToObject<JArray>() ??
+								 JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+								.ToArray(), //
+							Url = rendererItem?["navigationEndpoint"]?["commandMetadata"]?["webCommandMetadata"]?["url"]
+								?.ToString(),
+							Description =
+								Utils.ReadRuns(rendererItem?["descriptionSnippet"]?["runs"]?.ToObject<JArray>() ??
+								               JArray.Parse("[]")),
+							VideoCount = int.Parse(
+								rendererItem?["videoCountText"]?["runs"]?[0]?["text"]
+									?.ToString()
+									.Replace(",",
+										"")
+									.Replace(".",
+										"") ??
+								"0"),
+							Subscribers = rendererItem?["subscriberCountText"]?["simpleText"]?.ToString()
+						});
+						break;
+					case "radioRenderer":
+						items.Add(new RadioItem
+						{
+							Id = rendererItem?["playlistId"]
+								?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]
+								?.ToString(),
+							Thumbnails =
+								(rendererItem?["thumbnails"]?[0]?["thumbnails"]?.ToObject<JArray>() ??
+								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
+								?.ToString(),
+							Channel = new Channel
+							{
+								Name = rendererItem?["longBylineText"]?["simpleText"]?.ToString(),
+								Id = "",
+								SubscriberCount = null,
+								Avatars = null
+							}
+						});
+						break;
+					case "shelfRenderer":
+						items.Add(new ShelfItem
+						{
+							Title = rendererItem?["title"]?["simpleText"]
+								?.ToString(),
+							Items = ParseRenderers(
+								rendererItem?["content"]?["verticalListRenderer"]?["items"]?.ToObject<JArray>() ??
+								JArray.Parse("[]")),
+							CollapsedItemCount =
+								rendererItem?["content"]?["verticalListRenderer"]?["collapsedItemCount"]
+									?.ToObject<int>() ?? 0
+						});
+						break;
+					case "horizontalCardListRenderer":
+						items.Add(new HorizontalCardListItem
+						{
+							Title = rendererItem?["header"]?["richListHeaderRenderer"]?["title"]?["simpleText"]
+								?.ToString(),
+							Items = ParseRenderers(rendererItem?["cards"]?.ToObject<JArray>() ?? JArray.Parse("[]"))
+						});
+						break;
+					case "searchRefinementCardRenderer":
+						items.Add(new CardItem
+						{
+							Title = Utils.ReadRuns(rendererItem?["query"]?["runs"]?.ToObject<JArray>() ??
+							                       JArray.Parse("[]")),
+							Thumbnails = (rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
+							              JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray()
+						});
+						break;
+					case "compactVideoRenderer":
+						items.Add(new VideoItem
+						{
+							Id = rendererItem?["videoId"]?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]?.ToString(),
+							Thumbnails =
+								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
+								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+							UploadedAt = rendererItem?["publishedTimeText"]?["simpleText"]?.ToString(),
+							Views = int.Parse(
+								rendererItem?["viewCountText"]?["simpleText"]?.ToString().Split(" ")[0]
+									.Replace(",", "").Replace(".", "") ?? "0"),
+							Channel = new Channel
+							{
+								Name = rendererItem?["longBylineText"]?["runs"]?[0]?["text"]?.ToString(),
+								Id = rendererItem?["longBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
+									"browseEndpoint"]?["browseId"]?.ToString(),
+								SubscriberCount = null,
+								Avatars = null
+							},
+							Duration = rendererItem?["thumbnailOverlays"]?[0]?[
+								"thumbnailOverlayTimeStatusRenderer"]?["text"]?["simpleText"]?.ToString()
+						});
+						break;
+					case "compactPlaylistRenderer":
+						items.Add(new PlaylistItem
+						{
+							Id = rendererItem?["playlistId"]
+								?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]
+								?.ToString(),
+							Thumbnails =
+								(rendererItem?["thumbnail"]?["thumbnails"]
+									?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+								.ToArray(),
+							VideoCount = int.Parse(
+								rendererItem?["videoCountText"]?["runs"]?[0]?["text"]?.ToString().Replace(",", "")
+									.Replace(".", "") ?? "0"),
+							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
+								?.ToString(),
+							Channel = new Channel
+							{
+								Name = rendererItem?["longBylineText"]?["runs"]?[0]?["text"]
+									?.ToString(),
+								Id = rendererItem?["longBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
+										"browseEndpoint"]?["browseId"]
+									?.ToString(),
+								SubscriberCount = null,
+								Avatars = null
+							}
+						});
+						break;
+					case "compactRadioRenderer":
+						items.Add(new RadioItem
+						{
+							Id = rendererItem?["playlistId"]
+								?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]
+								?.ToString(),
+							Thumbnails =
+								(rendererItem?["thumbnail"]?["thumbnails"]
+									?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+								.ToArray(),
+							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
+								?.ToString(),
+							Channel = new Channel
+							{
+								Name = rendererItem?["longBylineText"]?["simpleText"]?.ToString(),
+								Id = "",
+								SubscriberCount = null,
+								Avatars = null
+							}
+						});
+						break;
+					case "continuationItemRenderer":
+						items.Add(new ContinuationItem
+						{
+							Id = rendererItem?["continuationEndpoint"]?["continuationCommand"]?["token"]?.ToString()
+						});
+						break;
+					default:
+						#if DEBUG
+						items.Add(new DynamicItem
+						{
+							Id = rendererName,
+							Title = rendererItem?.ToString()
+						});
+						#endif
+						break;
+				}
+			}
+
+			return items.ToArray();
+		}
 	}
 }

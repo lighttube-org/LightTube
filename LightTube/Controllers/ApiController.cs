@@ -108,5 +108,24 @@ namespace LightTube.Controllers
 			XmlDocument xml = player.GetXmlDocument();
 			return Xml(xml);
 		}
+
+		[Route("search")]
+		public async Task<IActionResult> Search(string query, string continuation = null)
+		{
+			if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
+			{
+				XmlDocument doc = new();
+				XmlElement item = doc.CreateElement("Error");
+
+				item.InnerText = "Invalid query " + query;
+
+				doc.AppendChild(item);
+				return Xml(doc);
+			}
+
+			YoutubeSearchResults player = await _youtube.SearchAsync(query, continuation);
+			XmlDocument xml = player.GetXmlDocument();
+			return Xml(xml);
+		}
 	}
 }
