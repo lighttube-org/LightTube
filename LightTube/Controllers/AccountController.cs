@@ -7,13 +7,9 @@ using System.Web;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-<<<<<<< HEAD
 using Newtonsoft.Json;
 using YTProxy;
 using YTProxy.Models;
-=======
-using InnerTube;
->>>>>>> local-api
 
 namespace LightTube.Controllers
 {

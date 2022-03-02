@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using InnerTube.Models;
+using YTProxy.Models;
 
 namespace LightTube
 {

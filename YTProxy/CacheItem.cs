@@ -1,6 +1,6 @@
 using System;
 
-namespace InnerTube
+namespace YTProxy
 {
 	public class CacheItem<T>
 	{

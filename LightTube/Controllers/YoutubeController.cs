@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using LightTube.Models;
-using InnerTube;
-using InnerTube.Models;
+using YTProxy;
+using YTProxy.Models;
 
 namespace LightTube.Controllers
 {
@@ -27,9 +23,8 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Watch(string v, string quality = null)
 		{
 			Task[] tasks = {
-				_youtube.GetPlayerAsync(v),
-				_youtube.GetVideoAsync(v),
-				ReturnYouTubeDislike.GetDislikes(v)
+				_youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				_youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion())
 			};
 			await Task.WhenAll(tasks);
 
@@ -37,7 +32,6 @@ namespace LightTube.Controllers
 			{
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
-				Engagement = (tasks[2] as Task<YoutubeDislikes>)?.Result,
 				Resolution = quality,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
@@ -49,9 +43,10 @@ namespace LightTube.Controllers
 		{
 			SearchContext context = new()
 			{
-				Results = await _youtube.SearchAsync(search_query, continuation),
+				Results = await _youtube.SearchAsync(search_query, HttpContext.GetLanguage(), HttpContext.GetRegion(),
+					continuation),
 				Query = search_query,
-				ContinuationKey = continuation,
+				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
@@ -62,7 +57,8 @@ namespace LightTube.Controllers
 		{
 			PlaylistContext context = new()
 			{
-				Playlist = await _youtube.GetPlaylistAsync(list, continuation),
+				Playlist = await _youtube.GetPlaylistAsync(list, HttpContext.GetLanguage(), HttpContext.GetRegion(),
+					continuation),
 				Id = list,
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
@@ -75,11 +71,14 @@ namespace LightTube.Controllers
 		{
 			ChannelContext context = new()
 			{
-				Channel = await _youtube.GetChannelAsync(id, ChannelTabs.Videos, continuation),
+				Channel = await _youtube.GetChannelAsync(id, HttpContext.GetLanguage(), HttpContext.GetRegion(),
+					continuation),
 				Id = id,
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
+			await DatabaseManager.UpdateChannel(context.Channel.Id, context.Channel.Name, context.Channel.Subscribers,
+				context.Channel.Avatars.First().Url.ToString());
 			return View(context);
 		}
 	}
