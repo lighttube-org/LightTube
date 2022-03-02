@@ -1,4 +1,4 @@
-@using YTProxy.Models
+@using InnerTube.Models
 @model LightTube.Contexts.SearchContext
 
 @{
@@ -9,12 +9,11 @@
 }
 
 <div class="video-list">
-	@foreach (ItemPreview preview in Model.Results.Results)
+	@foreach (DynamicItem preview in Model.Results.Results)
 	{
-		Preview itemPreview = preview.GetPreview();
-		switch (preview.GetPreview())
+		switch (preview)
 		{
-			case VideoPreview video:
+			case VideoItem video:
 				<div class="video">
 					<a href="/watch?v=@video.Id" class="thumbnail"
 					   style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')"><span class="video-length">@video.Duration</span></a>
@@ -31,7 +30,7 @@
 					</div>
 				</div>
 				break;
-			case PlaylistPreview playlist:
+			case PlaylistItem playlist:
 				<div class="playlist">
 					<a href="/watch?v=@playlist.FirstVideoId&amp;list=@playlist.Id" class="thumbnail" style="background-image: url('@playlist.Thumbnails.LastOrDefault()?.Url')">
 						<div>
@@ -51,7 +50,7 @@
 					</div>
 				</div>
 				break;
-			case ChannelPreview channel:
+			case ChannelItem channel:
 				<div class="channel">
 					<a href="/channel/@channel.Id" class="avatar">
 						<img src="@channel.Thumbnails.LastOrDefault()?.Url" alt="Channel Avatar">
@@ -70,15 +69,14 @@
 					<button class="subscribe-button" data-cid="@channel.Id">Subscribe</button>
 				</div>
 				break;
-			default:
+			case { } item:
 				<div class="video">
 					<span class="thumbnail"
-					   style="background-image: url('@itemPreview.Thumbnails.LastOrDefault()?.Url')"><span class="video-length">@preview.Type</span></span>
+					   style="background-image: url('@item.Thumbnails?.LastOrDefault()?.Url')"></span>
 					<div class="info">
-						<span class="title max-lines-2">@itemPreview.Title</span>
-						<div>
-							<b>WARNING:</b> Unknown result type: @preview.Type
-						</div>
+						<span class="title max-lines-2">
+							<b>WARNING:</b> Unknown result type: @item.Id (@item.GetType().Name)
+						</span>
 					</div>
 				</div>
 				break;
@@ -86,7 +84,7 @@
 	}
 </div>
 <div class="pagination-buttons">
-	@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
+	@if (!string.IsNullOrWhiteSpace(Model.ContinuationKey))
 	{
 		<a href="/results?search_query=@Model.Query">First Page</a>
 	}

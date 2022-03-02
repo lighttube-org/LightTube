@@ -1,11 +1,11 @@
-using YTProxy.Models;
+using InnerTube.Models;
 
 namespace LightTube.Contexts
 {
 	public class SearchContext : BaseContext
 	{
-		public YoutubeSearch Results;
+		public YoutubeSearchResults Results;
 		public string Query;
-		public string ContinuationToken;
+		public string ContinuationKey;
 	}
 }
