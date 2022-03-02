@@ -6,7 +6,7 @@ using System.Web;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using YTProxy;
+using InnerTube;
 
 namespace LightTube.Controllers
 {

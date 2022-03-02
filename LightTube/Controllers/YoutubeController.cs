@@ -7,8 +7,8 @@ using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using LightTube.Models;
-using YTProxy;
-using YTProxy.Models;
+using InnerTube;
+using InnerTube.Models;
 
 namespace LightTube.Controllers
 {
@@ -28,7 +28,8 @@ namespace LightTube.Controllers
 		{
 			Task[] tasks = {
 				_youtube.GetPlayerAsync(v),
-				_youtube.GetVideoAsync(v)
+				_youtube.GetVideoAsync(v),
+				ReturnYouTubeDislike.GetDislikes(v)
 			};
 			await Task.WhenAll(tasks);
 
@@ -36,6 +37,7 @@ namespace LightTube.Controllers
 			{
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
+				Engagement = (tasks[2] as Task<YoutubeDislikes>)?.Result,
 				Resolution = quality,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
@@ -49,7 +51,7 @@ namespace LightTube.Controllers
 			{
 				Results = await _youtube.SearchAsync(search_query, continuation),
 				Query = search_query,
-				ContinuationToken = continuation,
+				ContinuationKey = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
@@ -73,7 +75,7 @@ namespace LightTube.Controllers
 		{
 			ChannelContext context = new()
 			{
-				Channel = await _youtube.GetChannelAsync(id, continuation),
+				Channel = await _youtube.GetChannelAsync(id, ChannelTabs.Videos, continuation),
 				Id = id,
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)

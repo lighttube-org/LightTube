@@ -1,4 +1,4 @@
-@using YTProxy.Models
+@using InnerTube.Models
 @using System.Web
 @model LightTube.Contexts.ChannelContext
 
@@ -12,6 +12,16 @@
 	ViewBag.Title = Model.Channel.Name;
 	Layout = "_Layout";
 	ViewData["DisableOldCss"] = true;
+
+	DynamicItem[] contents;
+	try
+	{
+		contents = ((ItemSectionItem)((ItemSectionItem)Model.Channel.Videos[0]).Contents[0]).Contents;
+	}
+	catch
+	{
+		contents = Model.Channel.Videos;
+	}
 }
 
 <div class="channel-page">
@@ -38,7 +48,7 @@
 	<br><br>
 	<h3>Uploads</h3>
 	<div class="video-grid">
-		@foreach (VideoPreview video in Model.Channel.Videos)
+		@foreach (VideoItem video in contents.Where(x => x is VideoItem).Cast<VideoItem>())
 		{
 			<a href="/watch?v=@video.Id" class="video">
 				<div class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')"><span class="video-length">@video.Duration</span></div>
@@ -63,9 +73,9 @@
 		<div class="divider"></div>	
 		<span>•</span>
 		<div class="divider"></div>
-		@if (!string.IsNullOrWhiteSpace(Model.Channel.ContinuationToken))
+		@if (!string.IsNullOrWhiteSpace(contents.FirstOrDefault(x => x is ContinuationItem)?.Id))
 		{
-			<a href="/channel/@Model.Id?continuation=@Model.Channel.ContinuationToken">Next Page</a>
+			<a href="/channel/@Model.Id?continuation=@(contents.FirstOrDefault(x => x is ContinuationItem)?.Id)">Next Page</a>
 		}
 	</div>
 </div>

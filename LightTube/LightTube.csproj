@@ -6,7 +6,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\InnerTube\InnerTube.csproj" />
-      <ProjectReference Include="..\YTProxy\YTProxy.csproj" />
     </ItemGroup>
 
     <ItemGroup>

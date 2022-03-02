@@ -236,7 +236,7 @@ namespace InnerTube
 								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
 								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							UploadedAt = rendererItem?["publishedTimeText"]?["simpleText"]?.ToString(),
-							Views = int.Parse(
+							Views = long.Parse(
 								rendererItem?["viewCountText"]?["simpleText"]?.ToString().Split(" ")[0]
 									.Replace(",", "").Replace(".", "") ?? "0"),
 							Channel = new Channel

@@ -2,7 +2,7 @@
 @using System.Globalization
 @using System.Text.RegularExpressions
 @using System.Web
-@using YTProxy.Models
+@using InnerTube.Models
 @model LightTube.Contexts.PlayerContext
 
 @{
@@ -103,20 +103,20 @@
 		<div class="video-info">
 			<div class="video-title">@Model.Player.Title</div>
 			<div class="video-info-bar">
-				<span>@Model.Video.Engagement.Views views</span>
+				<span>@Model.Engagement.Views views</span>
 				<span>Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
 				<div class="divider"></div>
 				<div class="engagement-container">
 					<div class="engagement-info">
 						<span class="likes">
-							<img src="icons/like.svg">@Model.Video.Engagement.Likes
+							<img src="icons/like.svg">@Model.Engagement.Likes
 						</span>
 						<span class="dislikes">
-							<img src="icons/dislike.svg">@Model.Video.Engagement.Dislikes
+							<img src="icons/dislike.svg">@Model.Engagement.Dislikes
 						</span>
 					</div>
 					<div class="engagement-bar">
-						<div style="width: @(Model.Video.Engagement.GetLikePercentage().ToString().Split(".")[0])%"></div>
+						<div style="width: @(Model.Engagement.GetLikePercentage().ToString().Split(".")[0])%"></div>
 					</div>
 				</div>
 				<a href="https://www.youtube.com/watch?v=@Model.Player.Id">YouTube link</a>
@@ -159,12 +159,11 @@
 			{
 				<p style="text-align: center">None :(<br>This is most likely an age-restricted video</p>
 			}
-			@foreach (ItemPreview recommendation in Model.Video.Recommended)
+			@foreach (DynamicItem recommendation in Model.Video.Recommended)
 			{
-				Preview itemPreview = recommendation.GetPreview();
-				switch (itemPreview)
+				switch (recommendation)
 				{
-					case VideoPreview video:
+					case VideoItem video:
 						<div class="video">
 							<a href="/watch?v=@video.Id" class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')">
 								<span class="video-length">@video.Duration</span>
@@ -182,7 +181,7 @@
 							</div>
 						</div>
 						break;
-					case PlaylistPreview playlist:
+					case PlaylistItem playlist:
 						<div class="playlist">
 							<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="thumbnail" style="background-image: url('@playlist.Thumbnails.LastOrDefault()?.Url')">
 								<div>
@@ -198,13 +197,30 @@
 							</div>
 						</div>
 						break;
+					case RadioItem radio:
+						<div class="playlist">
+							<a href="/watch?v=@radio.FirstVideoId&list=@radio.Id" class="thumbnail" style="background-image: url('@radio.Thumbnails.LastOrDefault()?.Url')">
+								<div>
+									<span>MIX</span>
+								</div>
+							</a>
+							<div class="info">
+								<a href="/watch?v=@radio.FirstVideoId&list=@radio.Id" class="title max-lines-2">@radio.Title</a>
+								<div>
+									<span>@radio.Channel.Name</span>
+								</div>
+							</div>
+						</div>
+						break;
+					case ContinuationItem continuationItem:
+						break;
 					default:
 						<div class="video">
-							<div class="thumbnail" style="background-image: url('@itemPreview.Thumbnails.LastOrDefault()?.Url')"></div>
+							<div class="thumbnail" style="background-image: url('@recommendation.Thumbnails?.LastOrDefault()?.Url')"></div>
 							<div class="info">
-								<span class="title max-lines-2">@itemPreview.Title</span>
+								<span class="title max-lines-2">@recommendation.GetType().Name</span>
 								<div>
-									<b>WARNING:</b> Unknown recommendation type: @recommendation.Type
+									<b>WARNING:</b> Unknown recommendation type: @recommendation.Id
 								</div>
 							</div>
 						</div>
@@ -269,7 +285,7 @@
 				enableModifiersForNumbers: false,
 				enableVolumeScroll: false
 			});
-			this.on("error", e => {if (confirm("Something has gone wrong while trying to play this video. Enable compatibility mode?")) {window.location = "/toggles/compatibility?redirectUrl=" + encodeURIComponent(window.location.href)}})
+			this.on("error", () => {if (confirm("Something has gone wrong while trying to play this video. Enable compatibility mode?")) {window.location = "/toggles/compatibility?redirectUrl=" + encodeURIComponent(window.location.href)}})
 		});
 		</script>
 	}
