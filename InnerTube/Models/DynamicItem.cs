@@ -230,4 +230,35 @@ namespace InnerTube.Models
 			return item;
 		}
 	}
+
+	public class PlaylistVideoItem : DynamicItem
+	{
+		public long Index;
+		public Channel Channel;
+		public string Duration;
+
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("Video");
+			item.SetAttribute("id", Id);
+			item.SetAttribute("index", Index.ToString());
+			item.SetAttribute("duration", Duration);
+
+			XmlElement title = doc.CreateElement("Title");
+			title.InnerText = Title;
+			item.AppendChild(title);
+			item.AppendChild(Channel.GetXmlElement(doc));
+
+			foreach (Thumbnail t in Thumbnails ?? Array.Empty<Thumbnail>()) 
+			{
+				XmlElement thumbnail = doc.CreateElement("Thumbnail");
+				thumbnail.SetAttribute("width", t.Width.ToString());
+				thumbnail.SetAttribute("height", t.Height.ToString());
+				thumbnail.InnerText = t.Url.ToString();
+				item.AppendChild(thumbnail);
+			}
+
+			return item;
+		}
+	}
 }

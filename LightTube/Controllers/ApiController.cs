@@ -127,5 +127,24 @@ namespace LightTube.Controllers
 			XmlDocument xml = player.GetXmlDocument();
 			return Xml(xml);
 		}
+
+		[Route("playlist")]
+		public async Task<IActionResult> Playlist(string id, string continuation = null)
+		{
+			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
+			{
+				XmlDocument doc = new();
+				XmlElement item = doc.CreateElement("Error");
+
+				item.InnerText = "Invalid ID " + id;
+
+				doc.AppendChild(item);
+				return Xml(doc);
+			}
+
+			YoutubePlaylist player = await _youtube.GetPlaylistAsync(id, continuation);
+			XmlDocument xml = player.GetXmlDocument();
+			return Xml(xml);
+		}
 	}
 }

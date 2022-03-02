@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using InnerTube.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace InnerTube
@@ -80,7 +81,7 @@ namespace InnerTube
 						(player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[1]?[
 								"videoSecondaryInfoRenderer"]?["owner"]?["videoOwnerRenderer"]?["thumbnail"]?[
 								"thumbnails"]
-							?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray()
+							?.ToObject<JArray>() ?? new JArray()).Select(Utils.ParseThumbnails).ToArray()
 				},
 				UploadDate =
 					player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[0]?[
@@ -88,7 +89,7 @@ namespace InnerTube
 				Recommended =
 					ParseRenderers(
 						player?["contents"]?["twoColumnWatchNextResults"]?["secondaryResults"]?["secondaryResults"]?
-							["results"]?.ToObject<JArray>() ?? JArray.Parse("[]"))
+							["results"]?.ToObject<JArray>() ?? new JArray())
 			};
 
 			return video;
@@ -111,7 +112,7 @@ namespace InnerTube
 					search?["contents"]?["twoColumnSearchResultsRenderer"]?["primaryContents"]?["sectionListRenderer"]?
 						["contents"]?[0]?["itemSectionRenderer"]?["contents"]?.ToObject<JArray>() ??
 					search?["onResponseReceivedCommands"]?[0]?["appendContinuationItemsAction"]?["continuationItems"]?
-						[0]?["itemSectionRenderer"]?["contents"]?.ToObject<JArray>() ?? JArray.Parse("[]")),
+						[0]?["itemSectionRenderer"]?["contents"]?.ToObject<JArray>() ?? new JArray()),
 				ContinuationKey =
 					search?["contents"]?["twoColumnSearchResultsRenderer"]?["primaryContents"]?["sectionListRenderer"]?
 						["contents"]?[1]?["continuationItemRenderer"]?["continuationEndpoint"]?["continuationCommand"]?
@@ -122,15 +123,53 @@ namespace InnerTube
 			};
 		}
 
-		/*
-		public async Task<YoutubePlaylist> GetPlaylistAsync(string query, string continuation = null)
+		public async Task<YoutubePlaylist> GetPlaylistAsync(string id, string continuation = null)
 		{
-			string jsonDoc = continuation == null
-				? await Client.GetStringAsync("/playlist?id=" + query)
-				: await Client.GetStringAsync("/playlist?continuation=" + continuation);
-			return JsonConvert.DeserializeObject<YoutubePlaylist>(jsonDoc);
+			Dictionary<string, object> data = new();
+			if (string.IsNullOrWhiteSpace(continuation))
+				data.Add("browseId", "VL" + id);
+			else
+				data.Add("continuation", continuation);
+			JObject playlist = await MakeRequest("browse", data);
+			DynamicItem[] renderers = ParseRenderers(
+				playlist?["contents"]?["twoColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?
+					["sectionListRenderer"]?["contents"]?[0]?["itemSectionRenderer"]?["contents"]?[0]?
+					["playlistVideoListRenderer"]?["contents"]?.ToObject<JArray>() ??
+				playlist?["onResponseReceivedActions"]?[0]?["appendContinuationItemsAction"]?["continuationItems"]
+					?.ToObject<JArray>() ?? new JArray());
+
+			YoutubePlaylist @async = new YoutubePlaylist();
+			async.Title = playlist?["metadata"]?["playlistMetadataRenderer"]?["title"]?.ToString();
+			async.Description = playlist?["metadata"]?["playlistMetadataRenderer"]?["description"]?.ToString();
+			async.VideoCount = playlist?["sidebar"]?["playlistSidebarRenderer"]?["items"]?[0]?[
+				"playlistSidebarPrimaryInfoRenderer"]?["stats"]?[0]?["runs"]?[0]?["text"]?.ToString();
+			async.ViewCount = playlist?["sidebar"]?["playlistSidebarRenderer"]?["items"]?[0]?[
+				"playlistSidebarPrimaryInfoRenderer"]?["stats"]?[1]?["simpleText"]?.ToString();
+			async.LastUpdated = Utils.ReadRuns(playlist?["sidebar"]?["playlistSidebarRenderer"]?["items"]?[0]?[
+				"playlistSidebarPrimaryInfoRenderer"]?["stats"]?[2]?["runs"]?.ToObject<JArray>() ?? new JArray());
+			async.Thumbnail = (playlist?["microformat"]?["microformatDataRenderer"]?["thumbnail"]?["thumbnails"] ??
+			                   new JArray()).Select(Utils.ParseThumbnails).ToArray();
+			async.Channel = new Channel
+			{
+				Name =
+					playlist?["sidebar"]?["playlistSidebarRenderer"]?["items"]?[1]?
+						["playlistSidebarSecondaryInfoRenderer"]?["videoOwner"]?["videoOwnerRenderer"]?["title"]?
+						["runs"]?[0]?["text"]?.ToString(),
+				Id = playlist?["sidebar"]?["playlistSidebarRenderer"]?["items"]?[1]?
+					["playlistSidebarSecondaryInfoRenderer"]?["videoOwner"]?["videoOwnerRenderer"]?
+					["navigationEndpoint"]?["browseEndpoint"]?["browseId"]?.ToString(),
+				SubscriberCount = "",
+				Avatars =
+					(playlist?["sidebar"]?["playlistSidebarRenderer"]?["items"]?[1]?
+						["playlistSidebarSecondaryInfoRenderer"]?["videoOwner"]?["videoOwnerRenderer"]?["thumbnail"]
+						?["thumbnails"] ?? new JArray()).Select(Utils.ParseThumbnails).ToArray()
+			};
+			async.Videos = renderers.Where(x => x is not ContinuationItem).ToArray();
+			async.ContinuationKey = renderers.FirstOrDefault(x => x is ContinuationItem)?.Id;
+			return async;
 		}
 
+		/*
 		public async Task<YoutubeChannel> GetChannelAsync(string query, string continuation = null)
 		{
 			string jsonDoc = continuation == null
@@ -156,10 +195,10 @@ namespace InnerTube
 						{
 							Id = rendererItem?["videoId"]?.ToString(),
 							Title = Utils.ReadRuns(rendererItem?["title"]?["runs"]?.ToObject<JArray>() ??
-							                       JArray.Parse("[]")),
+							                       new JArray()),
 							Thumbnails =
 								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
-								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							UploadedAt = rendererItem?["publishedTimeText"]?["simpleText"]?.ToString(),
 							Views = int.Parse(
 								rendererItem?["viewCountText"]?["simpleText"]?.ToString().Split(" ")[0]
@@ -173,13 +212,13 @@ namespace InnerTube
 								Avatars =
 									(rendererItem?["channelThumbnailSupportedRenderers"]?[
 											"channelThumbnailWithLinkRenderer"]?["thumbnail"]?["thumbnails"]
-										?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+										?.ToObject<JArray>() ?? new JArray()).Select(Utils.ParseThumbnails)
 									.ToArray()
 							},
 							Duration = rendererItem?["thumbnailOverlays"]?[0]?[
 								"thumbnailOverlayTimeStatusRenderer"]?["text"]?["simpleText"]?.ToString(),
 							Description = Utils.ReadRuns(rendererItem?["detailedMetadataSnippets"]?[0]?[
-								"snippetText"]?["runs"]?.ToObject<JArray>() ?? JArray.Parse("[]"))
+								"snippetText"]?["runs"]?.ToObject<JArray>() ?? new JArray())
 						});
 						break;
 					case "playlistRenderer":
@@ -191,7 +230,7 @@ namespace InnerTube
 								?.ToString(),
 							Thumbnails =
 								(rendererItem?["thumbnails"]?[0]?["thumbnails"]?.ToObject<JArray>() ??
-								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							VideoCount = int.Parse(
 								rendererItem?["videoCountText"]?["runs"]?[0]?["text"]?.ToString().Replace(",", "")
 									.Replace(".", "") ?? "0"),
@@ -217,13 +256,13 @@ namespace InnerTube
 							Thumbnails =
 								(rendererItem?["thumbnail"]?["thumbnails"]
 									 ?.ToObject<JArray>() ??
-								 JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+								 new JArray()).Select(Utils.ParseThumbnails)
 								.ToArray(), //
 							Url = rendererItem?["navigationEndpoint"]?["commandMetadata"]?["webCommandMetadata"]?["url"]
 								?.ToString(),
 							Description =
 								Utils.ReadRuns(rendererItem?["descriptionSnippet"]?["runs"]?.ToObject<JArray>() ??
-								               JArray.Parse("[]")),
+								               new JArray()),
 							VideoCount = int.Parse(
 								rendererItem?["videoCountText"]?["runs"]?[0]?["text"]
 									?.ToString()
@@ -244,7 +283,7 @@ namespace InnerTube
 								?.ToString(),
 							Thumbnails =
 								(rendererItem?["thumbnails"]?[0]?["thumbnails"]?.ToObject<JArray>() ??
-								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
 								?.ToString(),
 							Channel = new Channel
@@ -263,7 +302,7 @@ namespace InnerTube
 								?.ToString(),
 							Items = ParseRenderers(
 								rendererItem?["content"]?["verticalListRenderer"]?["items"]?.ToObject<JArray>() ??
-								JArray.Parse("[]")),
+								new JArray()),
 							CollapsedItemCount =
 								rendererItem?["content"]?["verticalListRenderer"]?["collapsedItemCount"]
 									?.ToObject<int>() ?? 0
@@ -274,16 +313,16 @@ namespace InnerTube
 						{
 							Title = rendererItem?["header"]?["richListHeaderRenderer"]?["title"]?["simpleText"]
 								?.ToString(),
-							Items = ParseRenderers(rendererItem?["cards"]?.ToObject<JArray>() ?? JArray.Parse("[]"))
+							Items = ParseRenderers(rendererItem?["cards"]?.ToObject<JArray>() ?? new JArray())
 						});
 						break;
 					case "searchRefinementCardRenderer":
 						items.Add(new CardItem
 						{
 							Title = Utils.ReadRuns(rendererItem?["query"]?["runs"]?.ToObject<JArray>() ??
-							                       JArray.Parse("[]")),
+							                       new JArray()),
 							Thumbnails = (rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
-							              JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray()
+							              new JArray()).Select(Utils.ParseThumbnails).ToArray()
 						});
 						break;
 					case "compactVideoRenderer":
@@ -293,7 +332,7 @@ namespace InnerTube
 							Title = rendererItem?["title"]?["simpleText"]?.ToString(),
 							Thumbnails =
 								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
-								 JArray.Parse("[]")).Select(Utils.ParseThumbnails).ToArray(),
+								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							UploadedAt = rendererItem?["publishedTimeText"]?["simpleText"]?.ToString(),
 							Views = int.Parse(
 								rendererItem?["viewCountText"]?["simpleText"]?.ToString().Split(" ")[0]
@@ -319,7 +358,7 @@ namespace InnerTube
 								?.ToString(),
 							Thumbnails =
 								(rendererItem?["thumbnail"]?["thumbnails"]
-									?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+									?.ToObject<JArray>() ?? new JArray()).Select(Utils.ParseThumbnails)
 								.ToArray(),
 							VideoCount = int.Parse(
 								rendererItem?["videoCountText"]?["runs"]?[0]?["text"]?.ToString().Replace(",", "")
@@ -347,7 +386,7 @@ namespace InnerTube
 								?.ToString(),
 							Thumbnails =
 								(rendererItem?["thumbnail"]?["thumbnails"]
-									?.ToObject<JArray>() ?? JArray.Parse("[]")).Select(Utils.ParseThumbnails)
+									?.ToObject<JArray>() ?? new JArray()).Select(Utils.ParseThumbnails)
 								.ToArray(),
 							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
 								?.ToString(),
@@ -364,6 +403,27 @@ namespace InnerTube
 						items.Add(new ContinuationItem
 						{
 							Id = rendererItem?["continuationEndpoint"]?["continuationCommand"]?["token"]?.ToString()
+						});
+						break;
+					case "playlistVideoRenderer":
+						items.Add(new PlaylistVideoItem
+						{
+							Id = rendererItem?["videoId"]?.ToString(),
+							Index = rendererItem?["index"]?["simpleText"]?.ToObject<long>() ?? 0,
+							Title = Utils.ReadRuns(rendererItem?["title"]?["runs"]?.ToObject<JArray>() ??
+							                       new JArray()),
+							Thumbnails =
+								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
+								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
+							Channel = new Channel
+							{
+								Name = rendererItem?["shortBylineText"]?["runs"]?[0]?["text"]?.ToString(),
+								Id = rendererItem?["shortBylineText"]?["runs"]?[0]?["navigationEndpoint"]?[
+									"browseEndpoint"]?["browseId"]?.ToString(),
+								SubscriberCount = null,
+								Avatars = null
+							},
+							Duration = rendererItem?["lengthText"]?["simpleText"]?.ToString()
 						});
 						break;
 					default:
