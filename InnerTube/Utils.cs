@@ -1,21 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
-using YTProxy.Models;
+using InnerTube.Models;
+using Newtonsoft.Json.Linq;
 
-namespace YTProxy
+namespace InnerTube
 {
 	public static class Utils
 	{
 		public static string GetHtmlDescription(string description)
 		{
-			const string urlPattern = @"(http[s]*)://([\w-]+\.)+[\w-]+(\S)*";
+			const string urlPattern = @"(http[s]*)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?";
 			const string hashtagPattern = @"#[\w]*";
-			string html = description.Replace("\n", " <br> ");
+			string html = description.Replace("\n", "<br>");
 
 			// turn URLs into hyperlinks
 			Regex urlRegex = new(urlPattern, RegexOptions.IgnoreCase);
@@ -29,7 +31,6 @@ namespace YTProxy
 			for (m = chr.Match(html); m.Success; m = m.NextMatch())
 				html = html.Replace(m.Groups[0].ToString(),
 					$"<a href=\"/hashtag/{m.Groups[0].ToString().Replace("#", "")}\">{m.Groups[0]}</a>");
-
 			return html;
 		}
 
@@ -45,6 +46,7 @@ namespace YTProxy
 			mpdRoot.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 			mpdRoot.SetAttribute("xmlns", "urn:mpeg:dash:schema:mpd:2011");
 			mpdRoot.SetAttribute("xsi:schemaLocation", "urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd");
+			//mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-on-demand:2011");
 			mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-main:2011");
 			mpdRoot.SetAttribute("type", "static");
 			mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
@@ -66,7 +68,7 @@ namespace YTProxy
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 			List<Format> audios = player.AdaptiveFormats
-				.Where(x => x.Resolution == "audio only" && x.InitRange is not null && x.IndexRange is not null)
+				.Where(x => x.Resolution == "audio only")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList();
@@ -96,15 +98,18 @@ namespace YTProxy
 					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
 				representation.AppendChild(baseUrl);
 
-				XmlElement segmentBase = doc.CreateElement("SegmentBase");
-				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
-				segmentBase.SetAttribute("indexRangeExact", "true");
+				if (format.IndexRange != null && format.InitRange != null)
+				{
+					XmlElement segmentBase = doc.CreateElement("SegmentBase");
+					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+					segmentBase.SetAttribute("indexRangeExact", "true");
 
-				XmlElement initialization = doc.CreateElement("Initialization");
-				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+					XmlElement initialization = doc.CreateElement("Initialization");
+					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
 
-				segmentBase.AppendChild(initialization);
-				representation.AppendChild(segmentBase);
+					segmentBase.AppendChild(initialization);
+					representation.AppendChild(segmentBase);
+				}
 
 				audioAdaptationSet.AppendChild(representation);
 			}
@@ -118,8 +123,7 @@ namespace YTProxy
 					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			videoAdaptationSet.SetAttribute("contentType", "video");
-			foreach (Format format in player.AdaptiveFormats
-				.Where(x => x.Resolution != "audio only" && x.InitRange is not null && x.IndexRange is not null)
+			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList())
@@ -141,45 +145,76 @@ namespace YTProxy
 					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
 				representation.AppendChild(baseUrl);
 
-				XmlElement segmentBase = doc.CreateElement("SegmentBase");
-				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
-				segmentBase.SetAttribute("indexRangeExact", "true");
+				if (format.IndexRange != null && format.InitRange != null)
+				{
+					XmlElement segmentBase = doc.CreateElement("SegmentBase");
+					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+					segmentBase.SetAttribute("indexRangeExact", "true");
 
-				XmlElement initialization = doc.CreateElement("Initialization");
-				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+					XmlElement initialization = doc.CreateElement("Initialization");
+					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
 
-				segmentBase.AppendChild(initialization);
-				representation.AppendChild(segmentBase);
+					segmentBase.AppendChild(initialization);
+					representation.AppendChild(segmentBase);
+				}
 
 				videoAdaptationSet.AppendChild(representation);
 			}
+
 			period.AppendChild(videoAdaptationSet);
-
-			period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
-			foreach (Subtitle subtitle in player.Subtitles.Where(x => x.Ext == "vtt"))
-			{
-				period.AppendChild(doc.CreateComment(subtitle.Language));
-				XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
-				adaptationSet.SetAttribute("mimeType", "text/vtt");
-				adaptationSet.SetAttribute("lang", subtitle.Language);
-
-				XmlElement representation = doc.CreateElement("Representation");
-				representation.SetAttribute("id", $"caption_{subtitle.Language.ToLower()}");
-				representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
-				
-				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = subtitle.Url.ToString();
-				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(subtitle.Url.ToString());
-
-				representation.AppendChild(baseUrl);
-				adaptationSet.AppendChild(representation);
-				period.AppendChild(adaptationSet);
-			}
 
 			mpdRoot.AppendChild(period);
 			return doc.OuterXml.Replace(" schemaLocation=\"", " xsi:schemaLocation=\"");
 		}
+
+		public static string ReadRuns(JArray runs)
+		{
+			string str = "";
+			foreach (JToken runToken in runs)
+			{
+				JObject run = runToken as JObject;
+				if (run is null) continue;
+
+				if (run.ContainsKey("bold"))
+				{
+					str += "<b>" + run["text"] + "</b>";
+				}
+				else if (run.ContainsKey("navigationEndpoint"))
+				{
+					if (run?["navigationEndpoint"]?["urlEndpoint"] is not null)
+					{
+						string url = run["navigationEndpoint"]?["urlEndpoint"]?["url"]?.ToString() ?? "";
+						if (url.StartsWith("https://www.youtube.com/redirect"))
+						{
+							NameValueCollection qsl = HttpUtility.ParseQueryString(url.Split("?")[1]);
+							url = qsl["url"];
+						}
+
+						str += url;
+					}
+					else if (run?["navigationEndpoint"]?["commandMetadata"] is not null)
+					{
+						string url = run["navigationEndpoint"]?["commandMetadata"]?["webCommandMetadata"]?["url"]
+							?.ToString() ?? "";
+						if (url.StartsWith("/"))
+							url = "https://youtube.com" + url;
+						str += url;
+					}
+				}
+				else
+				{
+					str += run["text"];
+				}
+			}
+
+			return str;
+		}
+
+		public static Thumbnail ParseThumbnails(JToken arg) => new()
+		{
+			Height = arg["height"]?.ToObject<long>() ?? -1,
+			Url = new Uri(arg["url"]?.ToString() ?? string.Empty),
+			Width = arg["width"]?.ToObject<long>() ?? -1
+		};
 	}
 }

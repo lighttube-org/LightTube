@@ -1,4 +1,4 @@
-using YTProxy.Models;
+using InnerTube.Models;
 
 namespace LightTube.Contexts
 {

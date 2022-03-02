@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using YTProxy;
-using YTProxy.Models;
+using InnerTube;
+using InnerTube.Models;
 
 namespace LightTube.Controllers
 {
@@ -24,7 +24,8 @@ namespace LightTube.Controllers
 		{
 			Task[] tasks = {
 				_youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
-				_youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion())
+				_youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				ReturnYouTubeDislike.GetDislikes(v)
 			};
 			await Task.WhenAll(tasks);
 
@@ -32,6 +33,7 @@ namespace LightTube.Controllers
 			{
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
+				Engagement = (tasks[2] as Task<YoutubeDislikes>)?.Result,
 				Resolution = quality,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
@@ -43,10 +45,9 @@ namespace LightTube.Controllers
 		{
 			SearchContext context = new()
 			{
-				Results = await _youtube.SearchAsync(search_query, HttpContext.GetLanguage(), HttpContext.GetRegion(),
-					continuation),
+				Results = await _youtube.SearchAsync(search_query, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
 				Query = search_query,
-				ContinuationToken = continuation,
+				ContinuationKey = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
 			return View(context);
@@ -57,8 +58,7 @@ namespace LightTube.Controllers
 		{
 			PlaylistContext context = new()
 			{
-				Playlist = await _youtube.GetPlaylistAsync(list, HttpContext.GetLanguage(), HttpContext.GetRegion(),
-					continuation),
+				Playlist = await _youtube.GetPlaylistAsync(list, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
 				Id = list,
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
@@ -71,8 +71,7 @@ namespace LightTube.Controllers
 		{
 			ChannelContext context = new()
 			{
-				Channel = await _youtube.GetChannelAsync(id, HttpContext.GetLanguage(), HttpContext.GetRegion(),
-					continuation),
+				Channel = await _youtube.GetChannelAsync(id, ChannelTabs.Videos, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
 				Id = id,
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)

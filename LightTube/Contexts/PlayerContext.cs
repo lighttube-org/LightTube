@@ -1,4 +1,5 @@
-using YTProxy.Models;
+using InnerTube;
+using InnerTube.Models;
 
 namespace LightTube.Contexts
 {
@@ -6,6 +7,7 @@ namespace LightTube.Contexts
 	{
 		public YoutubePlayer Player;
 		public YoutubeVideo Video;
+		public YoutubeDislikes Engagement;
 		public string Resolution;
 	}
 }

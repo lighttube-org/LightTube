@@ -1,4 +1,4 @@
-@using YTProxy.Models
+@using InnerTube.Models
 @using System.Web
 @model LightTube.Contexts.PlaylistContext
 
@@ -33,11 +33,11 @@
 		</div>
 	</div>
 	<div class="video-list playlist-video-list">
-		@foreach (VideoPreview video in Model.Playlist.Videos)
+		@foreach (PlaylistVideoItem video in Model.Playlist.Videos.Cast<PlaylistVideoItem>())
 		{
 			<div class="playlist-video">
 				<a href="/watch?v=@video.Id&list=@Model.Id" class="index">
-					@video.Views
+					@video.Index
 				</a>
 				<a href="/watch?v=@video.Id&list=@Model.Id" class="thumbnail"
 				   style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')">
@@ -63,8 +63,8 @@
 	<div class="divider"></div>
 	<span>•</span>
 	<div class="divider"></div>
-	@if (!string.IsNullOrWhiteSpace(Model.Playlist.ContinuationToken))
+	@if (!string.IsNullOrWhiteSpace(Model.Playlist.ContinuationKey))
 	{
-		<a href="/playlist?list=@Model.Id&continuation=@Model.Playlist.ContinuationToken">Next Page</a>
+		<a href="/playlist?list=@Model.Id&continuation=@Model.Playlist.ContinuationKey">Next Page</a>
 	}
 </div>

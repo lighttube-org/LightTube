@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using YTProxy;
+using InnerTube;
 
 namespace LightTube
 {
@@ -23,7 +23,7 @@ namespace LightTube
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllersWithViews();
-			services.AddSingleton(new Youtube("http://yt-proxy-api.herokuapp.com/"));
+			services.AddSingleton(new Youtube());
 			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"));
 		}
 

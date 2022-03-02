@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using YTProxy.Models;
+using InnerTube.Models;
 
 namespace LightTube.Contexts
 {

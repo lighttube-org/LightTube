@@ -8,8 +8,8 @@ using LightTube.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using YTProxy;
-using YTProxy.Models;
+using InnerTube;
+using InnerTube.Models;
 
 namespace LightTube.Controllers
 {
@@ -179,7 +179,7 @@ namespace LightTube.Controllers
 
 			try
 			{
-				YoutubeChannel youtubeChannel = await _youtube.GetChannelAsync(channel, "en", "US");
+				YoutubeChannel youtubeChannel = await _youtube.GetChannelAsync(channel, ChannelTabs.About);
 				
 				(LTChannel channel, bool subscribed) result;
 				result.channel = await DatabaseManager.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
