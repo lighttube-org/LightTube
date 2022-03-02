@@ -4,6 +4,7 @@ namespace InnerTube.Models
 {
 	public class YoutubePlaylist
 	{
+		public string Id;
 		public string Title;
 		public string Description;
 		public string VideoCount;
@@ -20,6 +21,7 @@ namespace InnerTube.Models
 		{
 			XmlDocument doc = new();
 			XmlElement playlist = doc.CreateElement("Playlist");
+			playlist.SetAttribute("id", Id);
 			playlist.SetAttribute("continuation", ContinuationKey);
 			
 			XmlElement metadata = doc.CreateElement("Metadata");

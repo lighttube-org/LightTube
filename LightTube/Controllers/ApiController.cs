@@ -20,6 +20,8 @@ namespace LightTube.Controllers
 	public class ApiController : Controller
 	{
 		private const string VideoIdRegex = @"[a-zA-Z0-9_-]{11}";
+		private const string ChannelIdRegex = @"[a-zA-Z0-9_-]{24}";
+		private const string PlaylistIdRegex = @"[a-zA-Z0-9_-]{34}";
 		private readonly ILogger<ApiController> _logger;
 		private readonly Youtube _youtube;
 
@@ -131,6 +133,13 @@ namespace LightTube.Controllers
 		[Route("playlist")]
 		public async Task<IActionResult> Playlist(string id, string continuation = null)
 		{
+			Regex regex = new(PlaylistIdRegex);
+			if (!regex.IsMatch(id) || id.Length != 24)
+			{
+				return GetErrorVideoPlayer(id, "Invalid playlist ID " + id);
+			}
+
+
 			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
 			{
 				XmlDocument doc = new();
@@ -143,6 +152,31 @@ namespace LightTube.Controllers
 			}
 
 			YoutubePlaylist player = await _youtube.GetPlaylistAsync(id, continuation);
+			XmlDocument xml = player.GetXmlDocument();
+			return Xml(xml);
+		}
+
+		[Route("channel")]
+		public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home, string continuation = null)
+		{
+			Regex regex = new(ChannelIdRegex);
+			if (!regex.IsMatch(id) || id.Length != 24)
+			{
+				return GetErrorVideoPlayer(id, "Invalid channel ID " + id);
+			}
+
+			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
+			{
+				XmlDocument doc = new();
+				XmlElement item = doc.CreateElement("Error");
+
+				item.InnerText = "Invalid ID " + id;
+
+				doc.AppendChild(item);
+				return Xml(doc);
+			}
+
+			YoutubeChannel player = await _youtube.GetChannelAsync(id, tab, continuation);
 			XmlDocument xml = player.GetXmlDocument();
 			return Xml(xml);
 		}

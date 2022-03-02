@@ -50,7 +50,8 @@ namespace InnerTube.Models
 			XmlElement title = doc.CreateElement("Title");
 			title.InnerText = Title;
 			item.AppendChild(title);
-			item.AppendChild(Channel.GetXmlElement(doc));
+			if (Channel is not null)
+				item.AppendChild(Channel.GetXmlElement(doc));
 
 			foreach (Thumbnail t in Thumbnails ?? Array.Empty<Thumbnail>()) 
 			{
@@ -174,7 +175,7 @@ namespace InnerTube.Models
 		public override XmlElement GetXmlElement(XmlDocument doc)
 		{
 			XmlElement item = doc.CreateElement("Continuation");
-			item.SetAttribute("token", Id);
+			item.SetAttribute("key", Id);
 			return item;
 		}
 	}
@@ -259,6 +260,54 @@ namespace InnerTube.Models
 			}
 
 			return item;
+		}
+	}
+
+	public class ItemSectionItem : DynamicItem
+	{
+		public DynamicItem[] Contents;
+
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement section = doc.CreateElement("ItemSection");
+			foreach (DynamicItem item in Contents) section.AppendChild(item.GetXmlElement(doc));
+			return section;
+		}
+	}
+
+	public class MessageItem : DynamicItem
+	{
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement message = doc.CreateElement("Message");
+			message.InnerText = Title;
+			return message;
+		}
+	}
+
+	public class ChannelAboutItem : DynamicItem
+	{
+		public string Description;
+		public string Country;
+		public string Joined;
+		public string ViewCount;
+		
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement about = doc.CreateElement("About");
+			XmlElement description = doc.CreateElement("Description");
+			description.InnerText = Description;
+			about.AppendChild(description);
+			XmlElement country = doc.CreateElement("Location");
+			country.InnerText = Country;
+			about.AppendChild(country);
+			XmlElement joined = doc.CreateElement("Joined");
+			joined.InnerText = Joined;
+			about.AppendChild(joined);
+			XmlElement viewCount = doc.CreateElement("ViewCount");
+			viewCount.InnerText = ViewCount;
+			about.AppendChild(viewCount);
+			return about;
 		}
 	}
 }
