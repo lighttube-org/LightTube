@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using InnerTube;
+using YTProxy;
 
 namespace LightTube.Controllers
 {

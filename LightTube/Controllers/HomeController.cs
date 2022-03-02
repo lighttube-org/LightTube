@@ -12,8 +12,8 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
-using InnerTube;
-using InnerTube.Models;
+using YTProxy;
+using YTProxy.Models;
 using ErrorContext = LightTube.Contexts.ErrorContext;
 
 namespace LightTube.Controllers
@@ -29,8 +29,9 @@ namespace LightTube.Controllers
 			_youtube = youtube;
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
+			await _youtube.GetAllEndpoints();
 			return View(new BaseContext
 			{
 				MobileLayout = Utils.IsClientMobile(Request)

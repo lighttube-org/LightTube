@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
-using InnerTube.Models;
-using Newtonsoft.Json.Linq;
+using YTProxy.Models;
 
-namespace InnerTube
+namespace YTProxy
 {
 	public static class Utils
 	{
@@ -183,55 +181,5 @@ namespace InnerTube
 			mpdRoot.AppendChild(period);
 			return doc.OuterXml.Replace(" schemaLocation=\"", " xsi:schemaLocation=\"");
 		}
-
-		public static string ReadRuns(JArray runs)
-		{
-			string str = "";
-			foreach (JToken runToken in runs)
-			{
-				JObject run = runToken as JObject;
-				if (run is null) continue;
-
-				if (run.ContainsKey("bold"))
-				{
-					str += "<b>" + run["text"] + "</b>";
-				}
-				else if (run.ContainsKey("navigationEndpoint"))
-				{
-					if (run?["navigationEndpoint"]?["urlEndpoint"] is not null)
-					{
-						string url = run["navigationEndpoint"]?["urlEndpoint"]?["url"]?.ToString() ?? "";
-						if (url.StartsWith("https://www.youtube.com/redirect"))
-						{
-							NameValueCollection qsl = HttpUtility.ParseQueryString(url.Split("?")[1]);
-							url = qsl["url"];
-						}
-
-						str += url;
-					}
-					else if (run?["navigationEndpoint"]?["commandMetadata"] is not null)
-					{
-						string url = run["navigationEndpoint"]?["commandMetadata"]?["webCommandMetadata"]?["url"]
-							?.ToString() ?? "";
-						if (url.StartsWith("/"))
-							url = "https://youtube.com" + url;
-						str += url;
-					}
-				}
-				else
-				{
-					str += run["text"];
-				}
-			}
-
-			return str;
-		}
-
-		public static Thumbnail ParseThumbnails(JToken arg) => new()
-		{
-			Height = arg["height"]?.ToObject<long>() ?? -1,
-			Url = new Uri(arg["url"]?.ToString() ?? string.Empty),
-			Width = arg["width"]?.ToObject<long>() ?? -1
-		};
 	}
 }
