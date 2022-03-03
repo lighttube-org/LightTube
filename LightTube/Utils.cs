@@ -21,9 +21,11 @@ namespace LightTube
 		}
 
 		public static string GetRegion(this HttpContext context) =>
+			context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) ? h.ToString() :
 			context.Request.Cookies.TryGetValue("gl", out string region) ? region : "US";
 
 		public static string GetLanguage(this HttpContext context) =>
+			context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) ? h.ToString() :
 			context.Request.Cookies.TryGetValue("hl", out string language) ? language : "en";
 	}
 }
