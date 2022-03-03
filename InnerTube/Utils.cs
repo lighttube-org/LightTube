@@ -13,26 +13,7 @@ namespace InnerTube
 {
 	public static class Utils
 	{
-		public static string GetHtmlDescription(string description)
-		{
-			const string urlPattern = @"(http[s]*)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?";
-			const string hashtagPattern = @"#[\w]*";
-			string html = description.Replace("\n", "<br>");
-
-			// turn URLs into hyperlinks
-			Regex urlRegex = new(urlPattern, RegexOptions.IgnoreCase);
-			Match m;
-			for (m = urlRegex.Match(html); m.Success; m = m.NextMatch())
-				html = html.Replace(m.Groups[0].ToString(),
-					$"<a href=\"{m.Groups[0]}\">{m.Groups[0]}</a>");
-
-			// turn hashtags into hyperlinks
-			Regex chr = new(hashtagPattern, RegexOptions.IgnoreCase);
-			for (m = chr.Match(html); m.Success; m = m.NextMatch())
-				html = html.Replace(m.Groups[0].ToString(),
-					$"<a href=\"/hashtag/{m.Groups[0].ToString().Replace("#", "")}\">{m.Groups[0]}</a>");
-			return html;
-		}
+		public static string GetHtmlDescription(string description) => description.Replace("\n", "<br>");
 
 		public static string GetMpdManifest(this YoutubePlayer player, string proxyUrl)
 		{
@@ -187,10 +168,10 @@ namespace InnerTube
 						if (url.StartsWith("https://www.youtube.com/redirect"))
 						{
 							NameValueCollection qsl = HttpUtility.ParseQueryString(url.Split("?")[1]);
-							url = qsl["url"];
+							url = qsl["url"] ?? qsl["q"];
 						}
 
-						str += url;
+						str += $"<a href=\"{url}\">{run["text"]}</a>";
 					}
 					else if (run?["navigationEndpoint"]?["commandMetadata"] is not null)
 					{
@@ -198,7 +179,7 @@ namespace InnerTube
 							?.ToString() ?? "";
 						if (url.StartsWith("/"))
 							url = "https://youtube.com" + url;
-						str += url;
+						str += $"<a href=\"{url}\">{run["text"]}</a>";
 					}
 				}
 				else

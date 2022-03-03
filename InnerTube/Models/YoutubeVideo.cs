@@ -12,6 +12,8 @@ namespace InnerTube.Models
 		public string UploadDate;
 		public DynamicItem[] Recommended;
 
+		public string GetHtmlDescription() => InnerTube.Utils.GetHtmlDescription(Description);
+
 		public XmlDocument GetXmlDocument()
 		{
 			XmlDocument doc = new();
