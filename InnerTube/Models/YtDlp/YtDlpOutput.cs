@@ -100,7 +100,7 @@ namespace InnerTube.Models.YtDlp
 			Dictionary<string, (Range InitRange, Range IndexRange)> ranges = new();
 
 			// ReSharper disable once PossibleNullReferenceException
-			foreach (JToken format in ytPlayer["streamingData"]?["adaptiveFormats"])
+			foreach (JToken format in ytPlayer["streamingData"]?["adaptiveFormats"] ?? new JArray())
 			{
 				Range initRange = new(format?["initRange"]?["start"]?.ToString(),
 					format?["initRange"]?["end"]?.ToString());
