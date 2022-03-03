@@ -12,7 +12,7 @@ namespace InnerTube.Models
 		public string UploadDate;
 		public DynamicItem[] Recommended;
 
-		public virtual XmlDocument GetXmlDocument()
+		public XmlDocument GetXmlDocument()
 		{
 			XmlDocument doc = new();
 			XmlElement item = doc.CreateElement("Video");

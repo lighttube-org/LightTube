@@ -8,7 +8,6 @@ using System.Xml;
 using InnerTube;
 using InnerTube.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace LightTube.Controllers
 {
@@ -18,12 +17,10 @@ namespace LightTube.Controllers
 		private const string VideoIdRegex = @"[a-zA-Z0-9_-]{11}";
 		private const string ChannelIdRegex = @"[a-zA-Z0-9_-]{24}";
 		private const string PlaylistIdRegex = @"[a-zA-Z0-9_-]{34}";
-		private readonly ILogger<ApiController> _logger;
 		private readonly Youtube _youtube;
 
-		public ApiController(ILogger<ApiController> logger, Youtube youtube)
+		public ApiController(Youtube youtube)
 		{
-			_logger = logger;
 			_youtube = youtube;
 		}
 
@@ -38,6 +35,9 @@ namespace LightTube.Controllers
 		[Route("player")]
 		public async Task<IActionResult> GetPlayerInfo(string v)
 		{
+			if (v is null)
+				return GetErrorVideoPlayer("", "Missing YouTube ID (query parameter `v`)");
+		
 			Regex regex = new(VideoIdRegex);
 			if (!regex.IsMatch(v) || v.Length != 11)
 				return GetErrorVideoPlayer(v, "Invalid YouTube ID " + v);
@@ -91,6 +91,9 @@ namespace LightTube.Controllers
 		[Route("video")]
 		public async Task<IActionResult> GetVideoInfo(string v)
 		{
+			if (v is null)
+				return GetErrorVideoPlayer("", "Missing YouTube ID (query parameter `v`)");
+		
 			Regex regex = new(VideoIdRegex);
 			if (!regex.IsMatch(v) || v.Length != 11)
 			{
