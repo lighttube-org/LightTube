@@ -149,7 +149,7 @@ namespace InnerTube
 			period.AppendChild(videoAdaptationSet);
 
 			period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
-			foreach (Subtitle subtitle in player.Subtitles)
+			foreach (Subtitle subtitle in player.Subtitles ?? Array.Empty<Subtitle>())
 			{
 				period.AppendChild(doc.CreateComment(subtitle.Language));
 				XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
