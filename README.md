@@ -14,9 +14,9 @@
 
 ## Screenshots
 
-![Search Page](https://gitlab.com/kuylar/lighttube/-/raw/master/screnshots/search.png)
+![Search Page](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/search.png?inline=false)
 
-![Watch Page](https://gitlab.com/kuylar/lighttube/-/raw/master/screnshots/watch.png)
+![Watch Page](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/watch.png?inline=false)
 
 ---
 
