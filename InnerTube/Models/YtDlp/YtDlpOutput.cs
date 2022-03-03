@@ -84,19 +84,7 @@ namespace InnerTube.Models.YtDlp
 
 		public async Task<YoutubePlayer> GetYoutubePlayer()
 		{
-			HttpRequestMessage hrm = new(HttpMethod.Post,
-				"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-			
-			byte[] buffer = Encoding.UTF8.GetBytes(
-				RequestContext.BuildRequestContextJson(new Dictionary<string, object>
-				{
-					["videoId"] = Id
-				}));
-			ByteArrayContent byteContent = new(buffer);
-			byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-			hrm.Content = byteContent;
-			HttpResponseMessage ytPlayerRequest = await Client.SendAsync(hrm);
-			JObject ytPlayer = JObject.Parse(await ytPlayerRequest.Content.ReadAsStringAsync());
+			JObject ytPlayer = await Utils.GetAuthorizedPlayer(Id, Client);
 			Dictionary<string, (Range InitRange, Range IndexRange)> ranges = new();
 
 			// ReSharper disable once PossibleNullReferenceException
