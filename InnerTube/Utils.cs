@@ -170,7 +170,7 @@ namespace InnerTube
 		public static string ReadRuns(JArray runs)
 		{
 			string str = "";
-			foreach (JToken runToken in runs)
+			foreach (JToken runToken in runs ?? new JArray())
 			{
 				JObject run = runToken as JObject;
 				if (run is null) continue;
