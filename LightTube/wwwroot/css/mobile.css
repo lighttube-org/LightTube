@@ -426,6 +426,10 @@ a.icon-link, a.icon-link > img {
     row-gap: 8px;
 }
 
+.playlist > .thumbnail > div > * {
+    color: #fff;
+}
+
 .playlist > .thumbnail > div > *:nth-child(1) {
     font-size: x-large;
 }
