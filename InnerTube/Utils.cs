@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
@@ -17,7 +16,7 @@ namespace InnerTube
 {
 	public static class Utils
 	{
-		public static string GetHtmlDescription(string description) => description.Replace("\n", "<br>");
+		public static string GetHtmlDescription(string description) => description?.Replace("\n", "<br>") ?? "";
 
 		public static string GetMpdManifest(this YoutubePlayer player, string proxyUrl)
 		{
