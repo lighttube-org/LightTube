@@ -1,7 +1,6 @@
 @if (Context.TryGetUser(out LTUser user))
 {
 	<div class="guide-item"><a>@user.Email.Split("@")[0]</a></div>
-	<div class="guide-item"><a href="/Account/ContentSettings">Settings</a></div>
 	@if (user.PasswordHash != "local_account")
 	{
 		<div class="guide-item"><a href="/Account/Logins">Active logins</a></div>
@@ -13,4 +12,4 @@ else
 	<div class="guide-item"><a href="/Account/Login">Log in</a></div>
 	<div class="guide-item"><a href="/Account/Register">Register</a></div>
 }
-
+<div class="guide-item"><a href="/Account/ContentSettings">Settings</a></div>

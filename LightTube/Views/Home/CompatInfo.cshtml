@@ -1,0 +1,27 @@
+@using System.Web
+@model LightTube.Contexts.BaseContext
+
+@{
+	ViewBag.Title = "Compatibility Mode";
+	Layout = "_Layout";
+
+	bool compatibility = false;
+	if (Context.Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+		bool.TryParse(compatibilityString, out compatibility);
+}
+
+<div class="login-container">
+	<div>
+		<div>
+			<h1>Compatibility Mode Info:</h1>
+			<p>Compatibility mode disabled DASH playback, which allows you to stream videos in all resolutions. Unfortunately, no browser can play DASH videos by itself, and we need some extended code for them to work.</p>
+			<p>Unfortunately, no code is perfect, and this extended code can somethimes crash (e.g: when your browser doesn't support a video codec). Whenever this happens, you will get a notification asking if you want to try with compatibility mode on.</p>
+			<p>When compatibility mode is on, DASH playback is disabled, and you can only stream videos in 360p and 720p. This is because those 2 resolutions are the only resolutions that can be played without need for a DASH player.</p>
+			<p>You can enable or disable the compatibility mode here, or from the account dropdown from the top left corner.</p>
+		</div>
+	</div>	
+	<div>
+		<h2>Compatibility mode is currently @(compatibility ? "enabled" : "disabled")</h2>
+		<a href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))" class="login-button">Click here to @(compatibility ? "disable" : "enable") compatibility mode</a>
+	</div>
+</div>

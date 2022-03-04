@@ -29,7 +29,16 @@ namespace LightTube.Controllers
 			_youtube = youtube;
 		}
 
-		public async Task<IActionResult> Index()
+		public IActionResult Index()
+		{
+			return View(new BaseContext
+			{
+				MobileLayout = Utils.IsClientMobile(Request)
+			});
+		}
+
+		[Route("/compatibility_info")]
+		public IActionResult CompatInfo()
 		{
 			return View(new BaseContext
 			{
