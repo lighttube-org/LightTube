@@ -119,7 +119,7 @@ namespace InnerTube
 			return new YoutubeSearchResults
 			{
 				Refinements = search?["refinements"]?.ToObject<string[]>() ?? Array.Empty<string>(),
-				EstimatedResults = search?["estimatedResults"]?.ToObject<int>() ?? 0,
+				EstimatedResults = search?["estimatedResults"]?.ToObject<long>() ?? 0,
 				Results = ParseRenderers(
 					search?["contents"]?["twoColumnSearchResultsRenderer"]?["primaryContents"]?["sectionListRenderer"]?
 						["contents"]?[0]?["itemSectionRenderer"]?["contents"]?.ToObject<JArray>() ??
@@ -221,6 +221,46 @@ namespace InnerTube
 					                        ["continuationItems"]?.ToObject<JArray>() ?? new JArray()),
 				Subscribers = channel?["header"]?["c4TabbedHeaderRenderer"]?["subscriberCountText"]?["simpleText"]
 					?.ToString()
+			};
+		}
+
+		public async Task<YoutubeTrends> GetExploreAsync(string browseId = null, string continuation = null, string language = "en", string region = "US")
+		{
+			Dictionary<string, object> data = new();
+			if (string.IsNullOrWhiteSpace(continuation))
+			{
+				data.Add("browseId", browseId ?? "FEexplore");
+			}
+			else
+			{
+				data.Add("continuation", continuation);
+			}
+
+			JObject explore = await MakeRequest("browse", data, language, region);
+			JToken[] token =
+				(explore?["contents"]?["twoColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?
+					["sectionListRenderer"]?["contents"]?.ToObject<JArray>() ?? new JArray()).Skip(1).ToArray();
+
+			JArray mainArray = new(token.Select(x => x is JObject obj ? obj : null).Where(x => x is not null));
+
+			return new YoutubeTrends
+			{
+				Categories = explore?["contents"]?["twoColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?["sectionListRenderer"]?["contents"]?[0]?["itemSectionRenderer"]?["contents"]?[0]?["destinationShelfRenderer"]?["destinationButtons"]?.Select(
+					x =>
+					{
+						JToken rendererObject = x?["destinationButtonRenderer"];
+						TrendCategory category = new()
+						{
+							Label = rendererObject?["label"]?["simpleText"]?.ToString(),
+							BackgroundImage = (rendererObject?["backgroundImage"]?["thumbnails"]?.ToObject<JArray>() ??
+							                   new JArray()).Select(Utils.ParseThumbnails).ToArray(),
+							Icon = (rendererObject?["iconImage"]?["thumbnails"]?.ToObject<JArray>() ??
+							        new JArray()).Select(Utils.ParseThumbnails).ToArray(),
+							Id = $"{rendererObject?["onTap"]?["browseEndpoint"]?["browseId"]}"
+						};
+						return category;
+					}).ToArray(),
+				Videos = ParseRenderers(mainArray)
 			};
 		}
 
@@ -389,15 +429,25 @@ namespace InnerTube
 					case "shelfRenderer":
 						items.Add(new ShelfItem
 						{
-							Title = rendererItem?["title"]?["simpleText"]?.ToString() ??
-							        rendererItem?["title"]?["runs"]?[0]?["text"]?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]
+								        ?.ToString() ??
+							        rendererItem?["title"]?["runs"]?[0]?["text"]
+								        ?.ToString(),
+							Thumbnails = (rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
+							              new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							Items = ParseRenderers(
-								rendererItem?["content"]?["verticalListRenderer"]?["items"]?.ToObject<JArray>() ??
-								rendererItem?["content"]?["horizontalListRenderer"]?["items"]?.ToObject<JArray>() ??
+								rendererItem?["content"]?["verticalListRenderer"]?["items"]
+									?.ToObject<JArray>() ??
+								rendererItem?["content"]?["horizontalListRenderer"]?["items"]
+									?.ToObject<JArray>() ??
+								rendererItem?["content"]?["expandedShelfContentsRenderer"]?["items"]
+									?.ToObject<JArray>() ??
 								new JArray()),
 							CollapsedItemCount =
 								rendererItem?["content"]?["verticalListRenderer"]?["collapsedItemCount"]
-									?.ToObject<int>() ?? 0
+									?.ToObject<int>() ?? 0,
+							Badges = ParseRenderers(rendererItem?["badges"]?.ToObject<JArray>() ?? new JArray())
+								.Where(x => x is BadgeItem).Cast<BadgeItem>().ToArray(),
 						});
 						break;
 					case "horizontalCardListRenderer":
@@ -546,14 +596,32 @@ namespace InnerTube
 							ViewCount = rendererItem?["viewCountText"]?["simpleText"]?.ToString()
 						});
 						break;
+					case "compactStationRenderer":
+						items.Add(new StationItem
+						{
+							Id = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["playlistId"]?.ToString(),
+							Title = rendererItem?["title"]?["simpleText"]?.ToString(),
+							Thumbnails = 
+								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
+								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
+							VideoCount = rendererItem?["videoCountText"]?["runs"]?[0]?["text"].ToObject<int>() ?? 0,
+							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]?.ToString(),
+							Description = rendererItem?["description"]?["simpleText"]?.ToString()
+						});
+						break;
+					case "metadataBadgeRenderer":
+						items.Add(new BadgeItem
+						{
+							Title = rendererItem?["label"]?.ToString(),
+							Style = rendererItem?["style"]?.ToString()
+						});
+						break;
 					default:
-#if DEBUG
 						items.Add(new DynamicItem
 						{
 							Id = rendererName,
 							Title = rendererItem?.ToString()
 						});
-#endif
 						break;
 				}
 			}

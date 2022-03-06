@@ -1,5 +1,6 @@
 using System;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnerTube.Models
 {
@@ -23,7 +24,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -58,7 +59,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -96,7 +97,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -125,7 +126,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -162,7 +163,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Avatar");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -184,6 +185,7 @@ namespace InnerTube.Models
 	{
 		public DynamicItem[] Items;
 		public int CollapsedItemCount;
+		public BadgeItem[] Badges;
 
 		public override XmlElement GetXmlElement(XmlDocument doc)
 		{
@@ -191,7 +193,25 @@ namespace InnerTube.Models
 			item.SetAttribute("title", Title);
 			item.SetAttribute("collapsedItemCount", CollapsedItemCount.ToString());
 
-			foreach (DynamicItem dynamicItem in Items) item.AppendChild(dynamicItem.GetXmlElement(doc));
+			foreach (Thumbnail t in Thumbnails ?? Array.Empty<Thumbnail>()) 
+			{
+				XmlElement thumbnail = doc.CreateElement("Thumbnail");
+				thumbnail.SetAttribute("width", t.Width.ToString());
+				thumbnail.SetAttribute("height", t.Height.ToString());
+				thumbnail.InnerText = t.Url;
+				item.AppendChild(thumbnail);
+			}
+
+			if (Badges.Length > 0)
+			{
+				XmlElement badges = doc.CreateElement("Badges");
+				foreach (BadgeItem badge in Badges) badges.AppendChild(badge.GetXmlElement(doc));
+				item.AppendChild(badges);
+			}
+
+			XmlElement items = doc.CreateElement("Items");
+			foreach (DynamicItem dynamicItem in Items) items.AppendChild(dynamicItem.GetXmlElement(doc));
+			item.AppendChild(items);
 
 			return item;
 		}
@@ -224,7 +244,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -255,7 +275,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				item.AppendChild(thumbnail);
 			}
 
@@ -308,6 +328,53 @@ namespace InnerTube.Models
 			viewCount.InnerText = ViewCount;
 			about.AppendChild(viewCount);
 			return about;
+		}
+	}
+
+	public class BadgeItem : DynamicItem
+	{
+		public string Style;
+
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement badge = doc.CreateElement("Badge");
+			badge.SetAttribute("style", Style);
+			badge.InnerText = Title;
+			return badge;
+		}
+	}
+
+	public class StationItem : DynamicItem
+	{
+		public int VideoCount;
+		public string FirstVideoId;
+		public string Description;
+
+		public override XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("Station");
+			item.SetAttribute("id", Id);
+			item.SetAttribute("videoCount", VideoCount.ToString());
+			item.SetAttribute("firstVideoId", FirstVideoId);
+
+			XmlElement title = doc.CreateElement("Title");
+			title.InnerText = Title;
+			item.AppendChild(title);
+
+			XmlElement description = doc.CreateElement("Description");
+			description.InnerText = Description;
+			item.AppendChild(description);
+
+			foreach (Thumbnail t in Thumbnails ?? Array.Empty<Thumbnail>()) 
+			{
+				XmlElement thumbnail = doc.CreateElement("Thumbnail");
+				thumbnail.SetAttribute("width", t.Width.ToString());
+				thumbnail.SetAttribute("height", t.Height.ToString());
+				thumbnail.InnerText = t.Url;
+				item.AppendChild(thumbnail);
+			}
+
+			return item;
 		}
 	}
 }

@@ -178,5 +178,15 @@ namespace LightTube.Controllers
 			XmlDocument xml = player.GetXmlDocument();
 			return Xml(xml);
 		}
+
+		[Route("trending")]
+		public async Task<IActionResult> Trending(string id, string continuation = null)
+		{
+			YoutubeTrends player = await _youtube.GetExploreAsync(id, continuation,
+				HttpContext.GetLanguage(),
+				HttpContext.GetRegion());
+			XmlDocument xml = player.GetXmlDocument();
+			return Xml(xml);
+		}
 	}
 }
