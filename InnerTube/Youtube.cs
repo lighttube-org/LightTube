@@ -51,6 +51,7 @@ namespace InnerTube
 			}
 
 			YoutubePlayer player = await YtDlp.GetVideo(videoId).GetYoutubePlayer();
+			PlayerCache.Remove(videoId);
 			PlayerCache.Add(videoId,
 				new CacheItem<YoutubePlayer>(player,
 					TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds ?? "21600")).Subtract(TimeSpan.FromHours(1))));
