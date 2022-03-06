@@ -38,7 +38,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				avatars.AppendChild(thumbnail);
 			}
 			metadata.AppendChild(avatars);
@@ -49,7 +49,7 @@ namespace InnerTube.Models
 				XmlElement thumbnail = doc.CreateElement("Thumbnail");
 				thumbnail.SetAttribute("width", t.Width.ToString());
 				thumbnail.SetAttribute("height", t.Height.ToString());
-				thumbnail.InnerText = t.Url.ToString();
+				thumbnail.InnerText = t.Url;
 				banners.AppendChild(thumbnail);
 			}
 			metadata.AppendChild(banners);

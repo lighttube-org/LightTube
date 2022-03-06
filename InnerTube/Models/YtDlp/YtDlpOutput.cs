@@ -23,19 +23,19 @@ namespace InnerTube.Models.YtDlp
 		[JsonProperty("title")] public string Title { get; set; }
 		[JsonProperty("formats")] public Format[] Formats { get; set; }
 		[JsonProperty("thumbnails")] public Thumbnail[] Thumbnails { get; set; }
-		[JsonProperty("thumbnail")] public Uri Thumbnail { get; set; }
+		[JsonProperty("thumbnail")] public string Thumbnail { get; set; }
 		[JsonProperty("description")] public string Description { get; set; }
 		[JsonProperty("upload_date")] public string UploadDate { get; set; }
 		[JsonProperty("uploader")] public string Uploader { get; set; }
 		[JsonProperty("uploader_id")] public string UploaderId { get; set; }
-		[JsonProperty("uploader_url")] public Uri UploaderUrl { get; set; }
+		[JsonProperty("uploader_url")] public string UploaderUrl { get; set; }
 		[JsonProperty("channel_id")] public string ChannelId { get; set; }
-		[JsonProperty("channel_url")] public Uri ChannelUrl { get; set; }
+		[JsonProperty("channel_url")] public string ChannelUrl { get; set; }
 		[JsonProperty("duration")] public long Duration { get; set; }
 		[JsonProperty("view_count")] public long ViewCount { get; set; }
 		[JsonProperty("average_rating")] public object AverageRating { get; set; }
 		[JsonProperty("age_limit")] public long AgeLimit { get; set; }
-		[JsonProperty("webpage_url")] public Uri WebpageUrl { get; set; }
+		[JsonProperty("webpage_url")] public string WebpageUrl { get; set; }
 		[JsonProperty("categories")] public string[] Categories { get; set; }
 		[JsonProperty("tags")] public string[] Tags { get; set; }
 		[JsonProperty("playable_in_embed")] public bool PlayableInEmbed { get; set; }
@@ -49,7 +49,7 @@ namespace InnerTube.Models.YtDlp
 		[JsonProperty("like_count")] public long LikeCount { get; set; }
 		[JsonProperty("channel")] public string Channel { get; set; }
 		[JsonProperty("availability")] public string Availability { get; set; }
-		[JsonProperty("original_url")] public Uri OriginalUrl { get; set; }
+		[JsonProperty("original_url")] public string OriginalUrl { get; set; }
 		[JsonProperty("webpage_url_basename")] public string WebpageUrlBasename { get; set; }
 		[JsonProperty("webpage_url_domain")] public string WebpageUrlDomain { get; set; }
 		[JsonProperty("extractor")] public string Extractor { get; set; }
@@ -187,7 +187,7 @@ namespace InnerTube.Models.YtDlp
 	public class Subtitle
 	{
 		[JsonProperty("ext")] public string Ext { get; set; }
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("url")] public string Url { get; set; }
 		[JsonProperty("name")] public string Name { get; set; }
 	}
 
@@ -199,7 +199,7 @@ namespace InnerTube.Models.YtDlp
 		[JsonProperty("protocol")] public string Protocol { get; set; }
 		[JsonProperty("acodec")] public string AudioCodec { get; set; }
 		[JsonProperty("vcodec")] public string VideoCodec { get; set; }
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("url")] public string Url { get; set; }
 		[JsonProperty("width")] public long? Width { get; set; }
 		[JsonProperty("height")] public long? Height { get; set; }
 
@@ -255,7 +255,7 @@ namespace InnerTube.Models.YtDlp
 
 	public class Fragment
 	{
-		[JsonProperty("path")] public Uri Path { get; set; }
+		[JsonProperty("path")] public string Path { get; set; }
 		[JsonProperty("duration")] public long Duration { get; set; }
 	}
 
@@ -269,7 +269,7 @@ namespace InnerTube.Models.YtDlp
 
 	public class Thumbnail
 	{
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("url")] public string Url { get; set; }
 		[JsonProperty("preference")] public long Preference { get; set; }
 		[JsonProperty("id")] public string Id { get; set; }
 

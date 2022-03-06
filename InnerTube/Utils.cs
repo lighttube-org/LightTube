@@ -35,7 +35,7 @@ namespace InnerTube
 			mpdRoot.SetAttribute("type", "static");
 			mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
 			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility
-				.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Query)
+				.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Split("?")[1])
 				.Get("dur") ?? "0"));
 			StringBuilder duration = new("PT");
 			if (durationTs.TotalHours > 0)
@@ -57,7 +57,7 @@ namespace InnerTube
 				.Select(x => x.Last())
 				.ToList();
 			audioAdaptationSet.SetAttribute("mimeType",
-				HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+				HttpUtility.ParseQueryString(audios.First().Url.Split("?")[1]).Get("mime"));
 			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			audioAdaptationSet.SetAttribute("contentType", "audio");
 			foreach (Format format in audios)
@@ -77,9 +77,9 @@ namespace InnerTube
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
 				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = format.Url.ToString();
+					baseUrl.InnerText = format.Url;
 				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
+					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url);
 				representation.AppendChild(baseUrl);
 
 				if (format.IndexRange != null && format.InitRange != null)
@@ -103,7 +103,7 @@ namespace InnerTube
 			period.AppendChild(doc.CreateComment("Video Adaptation Set"));
 			XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
 			videoAdaptationSet.SetAttribute("mimeType",
-				HttpUtility.ParseQueryString(player.AdaptiveFormats.Last(x => x.Resolution != "audio only").Url.Query)
+				HttpUtility.ParseQueryString(player.AdaptiveFormats.Last(x => x.Resolution != "audio only").Url.Split("?")[1])
 					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			videoAdaptationSet.SetAttribute("contentType", "video");
@@ -124,9 +124,9 @@ namespace InnerTube
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
 				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = format.Url.ToString();
+					baseUrl.InnerText = format.Url;
 				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url.ToString());
+					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url);
 				representation.AppendChild(baseUrl);
 
 				if (format.IndexRange != null && format.InitRange != null)
@@ -161,9 +161,9 @@ namespace InnerTube
 				
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
 				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = subtitle.Url.ToString();
+					baseUrl.InnerText = subtitle.Url;
 				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(subtitle.Url.ToString());
+					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(subtitle.Url);
 
 				representation.AppendChild(baseUrl);
 				adaptationSet.AppendChild(representation);
@@ -220,7 +220,7 @@ namespace InnerTube
 		public static Thumbnail ParseThumbnails(JToken arg) => new()
 		{
 			Height = arg["height"]?.ToObject<long>() ?? -1,
-			Url = new Uri(arg["url"]?.ToString() ?? string.Empty),
+			Url = arg["url"]?.ToString() ?? string.Empty,
 			Width = arg["width"]?.ToObject<long>() ?? -1
 		};
 

@@ -79,7 +79,7 @@ namespace InnerTube.Models
 					XmlElement thumbnail = doc.CreateElement("Thumbnail");
 					thumbnail.SetAttribute("width", t.Width.ToString());
 					thumbnail.SetAttribute("height", t.Height.ToString());
-					thumbnail.InnerText = t.Url.ToString();
+					thumbnail.InnerText = t.Url;
 					thumbnails.AppendChild(thumbnail);
 				}
 				player.AppendChild(thumbnails);
@@ -126,7 +126,7 @@ namespace InnerTube.Models
 		[JsonProperty("video_codec")] public string VideoCodec { get; set; }
 		[JsonProperty("audio_sample_rate")] public long? AudioSampleRate { get; set; }
 		[JsonProperty("resolution")] public string Resolution { get; set; }
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("url")] public string Url { get; set; }
 		[JsonProperty("init_range")] public Range InitRange { get; set; }
 		[JsonProperty("index_range")] public Range IndexRange { get; set; }
 
@@ -145,7 +145,7 @@ namespace InnerTube.Models
 			format.SetAttribute("resolution", Resolution);
 
 			XmlElement url = doc.CreateElement("URL");
-			url.InnerText = Url.ToString();
+			url.InnerText = Url;
 			format.AppendChild(url);
 
 			if (InitRange != null && IndexRange != null)
@@ -200,7 +200,7 @@ namespace InnerTube.Models
 				XmlElement avatar = doc.CreateElement("Avatar");
 				avatar.SetAttribute("width", avatarThumb.Width.ToString());
 				avatar.SetAttribute("height", avatarThumb.Height.ToString());
-				avatar.InnerText = avatarThumb.Url.ToString();
+				avatar.InnerText = avatarThumb.Url;
 				channel.AppendChild(avatar);
 			}
 
@@ -212,14 +212,14 @@ namespace InnerTube.Models
 	{
 		[JsonProperty("ext")] public string Ext { get; set; }
 		[JsonProperty("name")] public string Language { get; set; }
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("url")] public string Url { get; set; }
 
 		public XmlElement GetXmlElement(XmlDocument doc)
 		{
 			XmlElement subtitle = doc.CreateElement("Subtitle");
 			subtitle.SetAttribute("ext", Ext);
 			subtitle.SetAttribute("language", Language);
-			subtitle.InnerText = Url.ToString();
+			subtitle.InnerText = Url;
 			return subtitle;
 		}
 	}
@@ -227,7 +227,7 @@ namespace InnerTube.Models
 	public class Thumbnail
 	{
 		[JsonProperty("height")] public long Height { get; set; }
-		[JsonProperty("url")] public Uri Url { get; set; }
+		[JsonProperty("url")] public string Url { get; set; }
 		[JsonProperty("width")] public long Width { get; set; }
 	}
 }
