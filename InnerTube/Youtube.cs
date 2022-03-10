@@ -616,6 +616,10 @@ namespace InnerTube
 							Style = rendererItem?["style"]?.ToString()
 						});
 						break;
+					case "promotedSparklesWebRenderer":
+						// this is an ad
+						// no one likes ads
+						break;
 					default:
 						items.Add(new DynamicItem
 						{
