@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -65,37 +66,42 @@ namespace InnerTube
 				["videoId"] = videoId
 			}, language, region);
 
+			JToken[] contents =
+				(player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]
+						?.ToObject<JArray>() ?? new JArray())
+					.SkipWhile(x => !x.First.Path.EndsWith("videoPrimaryInfoRenderer")).ToArray();
+
 			YoutubeVideo video = new()
 			{
-				Id = player?["currentVideoEndpoint"]?["watchEndpoint"]?["videoId"]?.ToString(),
+				Id = player["currentVideoEndpoint"]?["watchEndpoint"]?["videoId"]?.ToString(),
 				Title = Utils.ReadRuns(
-					player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[0]?
+					contents[0]
 						["videoPrimaryInfoRenderer"]?["title"]?["runs"]?.ToObject<JArray>()),
 				Description =
 					Utils.ReadRuns(
-						player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[1]?
+						contents[1]
 							["videoSecondaryInfoRenderer"]?["description"]?["runs"]?.ToObject<JArray>()),
 				Channel = new Channel
 				{
 					Name =
-						player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[1]?
+						contents[1]
 							["videoSecondaryInfoRenderer"]?["owner"]?["videoOwnerRenderer"]?["title"]?["runs"]?[0]?[
 								"text"]?.ToString(),
-					Id = player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[1]?
+					Id = contents[1]
 						["videoSecondaryInfoRenderer"]?["owner"]?["videoOwnerRenderer"]?["title"]?["runs"]?[0]?
 						["navigationEndpoint"]?["browseEndpoint"]?["browseId"]?.ToString(),
 					SubscriberCount =
-						player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[1]?
+						contents[1]
 							["videoSecondaryInfoRenderer"]?["owner"]?["videoOwnerRenderer"]?["subscriberCountText"]?[
 								"simpleText"]?.ToString(),
 					Avatars =
-						(player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[1]?[
+						(contents[1][
 								"videoSecondaryInfoRenderer"]?["owner"]?["videoOwnerRenderer"]?["thumbnail"]?[
 								"thumbnails"]
 							?.ToObject<JArray>() ?? new JArray()).Select(Utils.ParseThumbnails).ToArray()
 				},
 				UploadDate =
-					player?["contents"]?["twoColumnWatchNextResults"]?["results"]?["results"]?["contents"]?[0]?[
+					contents[0][
 						"videoPrimaryInfoRenderer"]?["dateText"]?["simpleText"]?.ToString(),
 				Recommended =
 					ParseRenderers(
