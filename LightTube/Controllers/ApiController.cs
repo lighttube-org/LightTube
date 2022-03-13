@@ -29,6 +29,7 @@ namespace LightTube.Controllers
 			MemoryStream ms = new();
 			ms.Write(Encoding.UTF8.GetBytes(xmlDocument.OuterXml));
 			ms.Position = 0;
+			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
 			return File(ms, "application/xml");
 		}
 
