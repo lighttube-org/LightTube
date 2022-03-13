@@ -20,4 +20,4 @@
 
 ---
 
-[XML API Documentation](https://gitlab.com/kuylar/lighttube/-/blob/master/API.md) - [Used libraries](https://gitlab.com/kuylar/lighttube/-/blob/master/OTHERLIBS.md) 
+[XML API Documentation](https://gitlab.com/kuylar/lighttube/-/blob/master/API.md) - [Used libraries](https://gitlab.com/kuylar/lighttube/-/blob/master/OTHERLIBS.md)  - [Public instances](https://gitlab.com/kuylar/lighttube/-/blob/master/INSTANCES.md) 

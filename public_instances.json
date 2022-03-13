@@ -1,0 +1,7 @@
+[
+  {
+    "host": "https://lighttube.herokuapp.com",
+    "api": true,
+    "accounts": true
+  }
+]
