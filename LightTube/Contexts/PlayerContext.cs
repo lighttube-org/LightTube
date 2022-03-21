@@ -9,5 +9,6 @@ namespace LightTube.Contexts
 		public YoutubeVideo Video;
 		public YoutubeDislikes Engagement;
 		public string Resolution;
+		public bool CompatibilityMode;
 	}
 }
