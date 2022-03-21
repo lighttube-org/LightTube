@@ -51,12 +51,42 @@ namespace InnerTube
 				return item.Item;
 			}
 
-			YoutubePlayer player = await YtDlp.GetVideo(videoId).GetYoutubePlayer();
-			PlayerCache.Remove(videoId);
-			PlayerCache.Add(videoId,
-				new CacheItem<YoutubePlayer>(player,
-					TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds ?? "21600")).Subtract(TimeSpan.FromHours(1))));
-			return player;
+			try {
+				YoutubePlayer player = await YtDlp.GetVideo(videoId).GetYoutubePlayer();
+				PlayerCache.Remove(videoId);
+				PlayerCache.Add(videoId,
+					new CacheItem<YoutubePlayer>(player,
+						TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds ?? "21600")).Subtract(TimeSpan.FromHours(1))));
+				return player;
+			} 
+			catch (YtDlpException e)
+			{
+				return new YoutubePlayer
+				{
+					Id = "",
+					Title = "",
+					Description = "",
+					Categories = Array.Empty<string>(),
+					Tags = Array.Empty<string>(),
+					Channel = new Channel
+					{
+						Name = "",
+						Id = "",
+						SubscriberCount = "",
+						Avatars = Array.Empty<Thumbnail>()
+					},
+					UploadDate = "",
+					Duration = 0,
+					Chapters = Array.Empty<Chapter>(),
+					Thumbnails = Array.Empty<Thumbnail>(),
+					Formats = Array.Empty<Format>(),
+					AdaptiveFormats = Array.Empty<Format>(),
+					Subtitles = Array.Empty<Subtitle>(),
+					Storyboards = Array.Empty<Format>(),
+					ExpiresInSeconds = "0",
+					ErrorMessage = e.ErrorMessage
+				};
+			}
 		}
 
 		public async Task<YoutubeVideo> GetVideoAsync(string videoId, string language = "en", string region = "US")
