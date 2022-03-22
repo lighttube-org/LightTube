@@ -104,7 +104,7 @@
 			<div class="video-title">@Model.Video.Title</div>
 			<div class="video-info-bar">
 				<span>@Model.Engagement.Views views</span>
-				<span>Published @DateTimeOffset.Parse(Model.Player.UploadDate, null, DateTimeStyles.RoundtripKind).ToString("MMM dd, yyyy")</span>
+				<span>Published @Model.Video.UploadDate</span>
 				<div class="divider"></div>
 				<div class="engagement-container">
 					<div class="engagement-info">

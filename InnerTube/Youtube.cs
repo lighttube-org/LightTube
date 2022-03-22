@@ -51,7 +51,8 @@ namespace InnerTube
 				return item.Item;
 			}
 
-			try {
+			try
+			{
 				YoutubePlayer player = await YtDlp.GetVideo(videoId).GetYoutubePlayer();
 				PlayerCache.Remove(videoId);
 				PlayerCache.Add(videoId,
@@ -75,7 +76,7 @@ namespace InnerTube
 						SubscriberCount = "",
 						Avatars = Array.Empty<Thumbnail>()
 					},
-					UploadDate = "",
+					UploadDate = "1970-01-01",
 					Duration = 0,
 					Chapters = Array.Empty<Chapter>(),
 					Thumbnails = Array.Empty<Thumbnail>(),
