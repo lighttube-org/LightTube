@@ -52,7 +52,7 @@ namespace InnerTube
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 			List<Format> audios = player.AdaptiveFormats
-				.Where(x => x.Resolution == "audio only")
+				.Where(x => x.Resolution == "audio only" && x.FormatId != "17")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList();
@@ -107,7 +107,7 @@ namespace InnerTube
 					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			videoAdaptationSet.SetAttribute("contentType", "video");
-			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only")
+			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17")
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList())

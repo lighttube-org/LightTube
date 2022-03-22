@@ -14,7 +14,7 @@ namespace InnerTube.Models.YtDlp
 	{
 		private static string[] MuxedFormats =
 		{
-			"17", "18", "59", "22", "37"
+			"18", "59", "22", "37"
 		};
 
 		private static HttpClient Client = new();
