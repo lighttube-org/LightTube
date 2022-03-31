@@ -102,17 +102,18 @@ namespace InnerTube
 						?.ToObject<JArray>() ?? new JArray())
 					.SkipWhile(x => !x.First.Path.EndsWith("videoPrimaryInfoRenderer")).ToArray();
 
-			YoutubeVideo video = new()
+			YoutubeVideo video = new();
+			video.Id = player["currentVideoEndpoint"]?["watchEndpoint"]?["videoId"]?.ToString();
+			try
 			{
-				Id = player["currentVideoEndpoint"]?["watchEndpoint"]?["videoId"]?.ToString(),
-				Title = Utils.ReadRuns(
+
+				video.Title = Utils.ReadRuns(
 					contents[0]
-						["videoPrimaryInfoRenderer"]?["title"]?["runs"]?.ToObject<JArray>()),
-				Description =
-					Utils.ReadRuns(
-						contents[1]
-							["videoSecondaryInfoRenderer"]?["description"]?["runs"]?.ToObject<JArray>()),
-				Channel = new Channel
+						["videoPrimaryInfoRenderer"]?["title"]?["runs"]?.ToObject<JArray>());
+				video.Description = Utils.ReadRuns(
+					contents[1]
+						["videoSecondaryInfoRenderer"]?["description"]?["runs"]?.ToObject<JArray>());
+				video.Channel = new Channel
 				{
 					Name =
 						contents[1]
@@ -130,15 +131,26 @@ namespace InnerTube
 								"videoSecondaryInfoRenderer"]?["owner"]?["videoOwnerRenderer"]?["thumbnail"]?[
 								"thumbnails"]
 							?.ToObject<JArray>() ?? new JArray()).Select(Utils.ParseThumbnails).ToArray()
-				},
-				UploadDate =
-					contents[0][
-						"videoPrimaryInfoRenderer"]?["dateText"]?["simpleText"]?.ToString(),
-				Recommended =
-					ParseRenderers(
-						player?["contents"]?["twoColumnWatchNextResults"]?["secondaryResults"]?["secondaryResults"]?
-							["results"]?.ToObject<JArray>() ?? new JArray())
-			};
+				};
+				video.UploadDate = contents[0][
+					"videoPrimaryInfoRenderer"]?["dateText"]?["simpleText"]?.ToString();
+			}
+			catch
+			{
+				video.Title ??= "";
+				video.Description ??= "";
+				video.Channel ??= new Channel
+				{
+					Name = "",
+					Id = "",
+					SubscriberCount = "",
+					Avatars = Array.Empty<Thumbnail>()
+                };
+				video.UploadDate ??= "";
+			}
+			video.Recommended = ParseRenderers(
+				player?["contents"]?["twoColumnWatchNextResults"]?["secondaryResults"]?["secondaryResults"]?
+					["results"]?.ToObject<JArray>() ?? new JArray());
 
 			return video;
 		}
