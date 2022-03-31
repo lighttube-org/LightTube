@@ -48,181 +48,88 @@
     }
     <meta property="theme-color" content="#AA0000"/>
     <title>@ViewData["Title"] - lighttube</title>
+    <link rel="stylesheet" href="~/css/bootstrap-icons/bootstrap-icons.css"/>
     <link rel="stylesheet" href="~/css/desktop.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/videojs/video-js.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/videojs/quality-selector.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/videojs/tube.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/lt-video/player-desktop.css" asp-append-version="true"/>
     <link rel="icon" href="~/favicon.ico">
 </head>
 <body>
-<div style="position:absolute;top:0;left:0;right:0;bottom:0;">
-    @if (Model.Player.Formats.Length > 0 || live && !Model.CompatibilityMode)
-    {
-        @if (live)
-        {
-            <video id="player" class="video-js player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
-                @foreach (Format format in Model.Player.AdaptiveFormats.Reverse())
-                {
-                    @:<source label='@format.Resolution.Split("x")[1]P' src='/proxy/hls?url=@HttpUtility.UrlEncode(format.Url.ToString())' type="application/x-mpegURL">
-                }
 
-                @foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
-                {
-                    @:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
-                }
-            </video>
-        }
-        else
-        {
-            <video id="player" class="video-js player" src="/proxy/video?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url" controls>
-                @foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
-                {
-                    @:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url.ToString())" label="@subtitle.Language" kind="subtitles">
-                }
-            </video>
-        }
-    }
-    else if (live && Model.CompatibilityMode)
-    {
-        <div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
-            <span style="text-align: center">
-                Livestreams cannot be played in compatibility mode<br>
-                <a style="color: #77F" href='@($"{Context.Request.Path}{Context.Request.QueryString}".Replace("compatibility=true", "compatibility=false", StringComparison.OrdinalIgnoreCase))'>Click here</a> to disable compatibility mode
-            </span>
-        </div>
-    }
-    else
-    {
-        <div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
-            @if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
-            {
-                <span>
-                    No playable streams returned from the API (@Model.Player.Formats.Length/@Model.Player.AdaptiveFormats.Length)
-                </span>
-            }
-            else
-            {
-                <span>
-                    @Model.Player.ErrorMessage
-                </span>
-            }
-        </div>
-    }
-</div>
-
-@if (Model.Player.Formats.Length > 0 || live && !Model.CompatibilityMode)
+@if (Model.Player.Formats.Length > 0 || live)
 {
-    @if (!Model.CompatibilityMode && !live)
+    @if (live)
     {
-        <script src="~/js/shaka-player/shaka-player.compiled.min.js"></script>
-        <script src="~/js/videojs/video.js"></script>
-        <script src="~/js/videojs/videojs-shaka.js"></script>
-        <script src="~/js/videojs/videojs-hotkeys.js"></script>
-        <script>
-		var player = videojs('player', {
-            techOrder: ['shaka'],
-            shaka: {
-              debug: false,
-              sideload: true,
-              configuration: {
-                manifest:
-                {
-					dash:{
-						ignoreEmptyAdaptationSet:true
-					}
-				}
-              }   
-            },
-			controlBar: {
-   				children: [
-   					'playToggle',
-   					'volumePanel',
-   					'currentTimeDisplay',
-   					'timeDivider',
-   					'durationDisplay',
-   					'liveDisplay',
-   					'seekToLive',
-   					'progressControl',
-   					'spacer',
-   					'chaptersButton',
-   					'subsCapsButton',
-   					'playbackRateMenuButton',
-   					'qualitySelector',
-   					'pictureInPictureToggle',
-   					'fullscreenToggle',
-   				],
-   			}
-        }).ready(function() {
-			this.qualityPickerPlugin();
-			this.src([{
-				type: 'application/dash+xml',
-            	src: '/manifest/@(Model.Video.Id).mpd'
-            }]);
-			this.hotkeys({
-				volumeStep: 0.1,
-				seekStep: 5,
-				enableModifiersForNumbers: false,
-				enableVolumeScroll: false
-			});
-			this.on("error", () => {if (confirm("Something has gone wrong while trying to play this video. Enable compatibility mode?")) {window.location = "/toggles/compatibility?redirectUrl=" + encodeURIComponent(window.location.href)}})
-		});
-		</script>
+        <video class="embed" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+            @foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
+            {
+                @:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url)" label="@subtitle.Language" kind="subtitles">
+            }
+        </video>
     }
     else
     {
-        <script src="~/js/videojs/video.js"></script>
-        <script src="~/js/videojs/videojs-quality-selector.js"></script>
-        <script src="~/js/videojs/videojs-hotkeys.js"></script>
-
-        <script>
-		const player = videojs('player', {
-			controlBar: {
-				children: [
-					'playToggle',
-					'volumePanel',
-					'currentTimeDisplay',
-					'timeDivider',
-					'durationDisplay',
-					'liveDisplay',
-					'seekToLive',
-					'progressControl',
-					'spacer',
-					'chaptersButton',
-					'subsCapsButton',
-					'playbackRateMenuButton',
-					'qualitySelector',
-					'pictureInPictureToggle',
-					'fullscreenToggle',
-				],
-			}
-		}).ready(function() {
-			this.src([
-				@if (live)
-				{
-				    foreach (Format format in Model.Player.AdaptiveFormats.Reverse().GroupBy(x => x.FormatNote).Select(g => g.First()))
-				    {
-				        @:{src: '/proxy/hls?url=@HttpUtility.UrlEncode(format.Url.ToString())'},
-				    }
-				}
-				else
-				{
-				    foreach (Format format in Model.Player.Formats.Reverse().GroupBy(x => x.FormatNote).Select(g => g.First()))
-				    {
-				        NameValueCollection query = HttpUtility.ParseQueryString(format.Url.Split("?")[1]);
-
-				        @:{src: '/proxy/video?url=@HttpUtility.UrlEncode(format.Url.ToString())',type: '@query.Get("mime")',label: '@format.FormatNote', selected: @(format.FormatNote.StartsWith("720p") ? "true" : "false")},
-				    }
-				}
-			]);
-			this.hotkeys({
-				volumeStep: 0.1,
-				seekStep: 5,
-				enableModifiersForNumbers: false,
-				enableVolumeScroll: false
-			});
-		  });
-	</script>
+        <video class="embed" controls src="/proxy/video?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+	        @foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
+	        {
+		        @:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url)" label="@subtitle.Language" kind="subtitles">
+	        }
+        </video>
     }
+}
+
+
+<script src="/js/shaka-player/shaka-player.compiled.min.js"></script>
+<script src="/js/lt-video/player-desktop.js"></script>
+@if (!Model.CompatibilityMode && !live)
+{
+    <script>
+    const player = loadPlayerWithShaka("video", {
+        "id": "@Model.Video.Id",
+        "title": "@Model.Video.Title",
+        "embed": true,
+        "live": false,
+        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+    }, [
+        @foreach(Format f in Model.Player.Formats.Reverse())
+        {
+            @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
+        }
+    ], "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).mpd");
+</script>
+}
+else if (live)
+{
+    <script>
+    const player = loadPlayerWithShaka("video", {
+        "id": "@Model.Video.Id",
+        "title": "@Model.Video.Title",
+        "embed": true,
+        "live": true,
+        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+    }, [
+        @foreach(Format f in Model.Player.AdaptiveFormats.Reverse())
+        {
+            @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/hls?url=@HttpUtility.UrlEncode(f.Url)"},
+        }
+    ], "/proxy/hls?url=@HttpUtility.UrlEncode(Model.Player.AdaptiveFormats.TakeWhile(x => int.Parse(x.FormatId) < 96).First().Url)");
+</script>
+}
+else
+{
+<script>
+    const player = new Player("video", {
+        "id": "@Model.Video.Id",
+        "title": "@Model.Video.Title",
+        "embed": true,
+        "live": false,
+        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+    }, [
+        @foreach(Format f in Model.Player.Formats.Reverse())
+        {
+            @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
+        }
+    ]);
+</script>
 }
 </body>
 </html>
