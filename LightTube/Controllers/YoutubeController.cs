@@ -48,7 +48,11 @@ namespace LightTube.Controllers
 				_youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
 				ReturnYouTubeDislike.GetDislikes(v)
 			};
-			await Task.WhenAll(tasks);
+			try
+			{
+				await Task.WhenAll(tasks);
+			}
+			catch { }
 
 			
 			bool cookieCompatibility = false;

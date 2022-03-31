@@ -23,6 +23,7 @@
     {
     }
     bool live = Model.Player.Formats.Length == 0 && Model.Player.AdaptiveFormats.Length > 0;
+    bool canPlay = true;
 }
 
 <!DOCTYPE html>
@@ -78,7 +79,8 @@
 }
 else
 {
-	<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
+    canPlay = false;
+	<div id="player" class="player error embed" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
 		@if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
 		{
 			<span>
@@ -94,56 +96,58 @@ else
 	</div>
 }
 
-
-<script src="/js/lt-video/player-desktop.js"></script>
-@if (!Model.CompatibilityMode && !live)
+@if (canPlay)
 {
-<script src="/js/shaka-player/shaka-player.compiled.min.js"></script>
-<script>
-    let player = undefined;
-    loadPlayerWithShaka("video", {
-        "id": "@Model.Video.Id",
-        "title": "@Model.Video.Title",
-        "embed": true,
-        "live": false,
-        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
-    }, [
-        @foreach(Format f in Model.Player.Formats.Reverse())
-        {
-            @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
-        }
-    ], "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).mpd").then(x => player = x).catch(alert);;
-</script>
-}
-else if (live)
-{
-<script src="/js/hls.js/hls.min.js"></script>
-<script>
-    let player = undefined;
-    loadPlayerWithHls("video", {
-        "id": "@(Model.Video.Id)",
-        "title": "@(Model.Video.Title)",
-        "embed": true,
-        "live": true
-    }, "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).m3u8").then(x => player = x).catch(alert);
-</script>
-}
-else
-{
-<script>
-    const player = new Player("video", {
-        "id": "@Model.Video.Id",
-        "title": "@Model.Video.Title",
-        "embed": true,
-        "live": false,
-        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
-    }, [
-        @foreach(Format f in Model.Player.Formats.Reverse())
-        {
-            @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
-        }
-    ]);
-</script>
+    <script src="/js/lt-video/player-desktop.js"></script>
+    @if (!Model.CompatibilityMode && !live)
+    {
+    <script src="/js/shaka-player/shaka-player.compiled.min.js"></script>
+    <script>
+        let player = undefined;
+        loadPlayerWithShaka("video", {
+            "id": "@Model.Video.Id",
+            "title": "@Model.Video.Title",
+            "embed": true,
+            "live": false,
+            "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+        }, [
+            @foreach(Format f in Model.Player.Formats.Reverse())
+            {
+                @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
+            }
+        ], "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).mpd").then(x => player = x).catch(alert);;
+    </script>
+    }
+    else if (live)
+    {
+    <script src="/js/hls.js/hls.min.js"></script>
+    <script>
+        let player = undefined;
+        loadPlayerWithHls("video", {
+            "id": "@(Model.Video.Id)",
+            "title": "@(Model.Video.Title)",
+            "embed": true,
+            "live": true
+        }, "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).m3u8").then(x => player = x).catch(alert);
+    </script>
+    }
+    else
+    {
+    <script>
+        const player = new Player("video", {
+            "id": "@Model.Video.Id",
+            "title": "@Model.Video.Title",
+            "embed": true,
+            "live": false,
+            "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+        }, [
+            @foreach(Format f in Model.Player.Formats.Reverse())
+            {
+                @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
+            }
+        ]);
+    </script>
+    }
 }
 </body>
 </html>
