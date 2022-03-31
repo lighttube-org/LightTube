@@ -76,6 +76,23 @@
         </video>
     }
 }
+else
+{
+	<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
+		@if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
+		{
+			<span>
+				No playable streams returned from the API (@Model.Player.Formats.Length/@Model.Player.AdaptiveFormats.Length)
+			</span>
+		}
+		else
+		{
+			<span>
+				@Model.Player.ErrorMessage
+			</span>
+		}
+	</div>
+}
 
 
 <script src="/js/lt-video/player-desktop.js"></script>
