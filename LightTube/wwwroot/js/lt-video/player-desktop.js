@@ -1,12 +1,13 @@
 ﻿class Player {
-    constructor(query, info, sources, shakaVideo) {
+    constructor(query, info, sources, externalPlayer, externalPlayerType) {
         // vars
+        this.externalPlayerType = externalPlayerType ?? "html5";
         this.muted = false;
         this.info = info;
         this.sources = sources;
         this.__videoElement = document.querySelector(query);
         this.__videoElement.removeAttribute("controls");
-        this.__shaka = shakaVideo;
+        this.__externalPlayer = externalPlayer;
 
         // container
         const container = document.createElement("div");
@@ -20,15 +21,23 @@
         }
 
         // default source
-        if (shakaVideo === undefined) {
-            for (let source of sources) {
-                if (source.height <= 720) {
-                    console.log("source set to " + source.label)
-                    this.__videoElement.src = source.src;
-                    break;
+        switch (this.externalPlayerType) {
+            case "html5":
+                for (let source of sources) {
+                    if (source.height <= 720) {
+                        this.__videoElement.src = source.src;
+                        break;
+                    }
                 }
-            }
-        } else {
+                break;
+            case "hls.js":
+                for (let level = this.__externalPlayer.levels.length - 1; level >= 0; level--) {
+                    if (this.__externalPlayer.levels[level].height <= 720) {
+                        this.__externalPlayer.currentLevel = level;
+                        break;
+                    }
+                }
+                break;
             //todo: fix for shaka
         }
 
@@ -195,12 +204,18 @@
             d.setSeconds(d.getSeconds() + 3);
             this.controlsDisappearTimeout = d.getTime();
         }
-        
-        if (shakaVideo !== undefined) {
-            shakaVideo.addEventListener("variantchanged", () => {
-                this.updateMenu();
-            })
+
+        switch (this.externalPlayerType) {
+            case "shaka":
+                externalPlayer.addEventListener("variantchanged", () => {
+                    this.updateMenu();
+                });
+                break;
+            case "hls.js":
+                // uhhhhhh...
+                break;
         }
+
 
         // menu
         this.controls.settings.onclick = e => this.menuButtonClick(e);
@@ -268,31 +283,57 @@ Player.prototype.updateMenu = function () {
         }
     ]
 
-    if (this.__shaka === undefined) {
-        for (const index in this.sources) {
-            resButtons.push({
-                icon: this.sources[index].src === this.__videoElement.src ? "check2" : "",
-                label: this.sources[index].label,
-                action: "videosrc " + index
-            });
-        }
-    } else {
-        resButtons.pop();
-        let tracks = this.__shaka.getVariantTracks();
-        for (const index in tracks) {
-            if (tracks[index].audioId === 2)
-                resButtons.unshift({
-                    icon: tracks[index].active ? "check2" : "",
-                    label: tracks[index].height,
-                    action: "shakavariant " + index
+    switch (this.externalPlayerType) {
+        case "html5":
+            for (const index in this.sources) {
+                resButtons.push({
+                    icon: this.sources[index].src === this.__videoElement.src ? "check2" : "",
+                    label: this.sources[index].label,
+                    action: "videosrc " + index
                 });
-        }
-        resButtons.unshift(
-            {
-                icon: "arrow-left",
-                label: "Back",
-                action: "menu main"
-            });
+            }
+            ;
+            break;
+        case "shaka":
+            resButtons.pop();
+            let tracks = this.__externalPlayer.getVariantTracks();
+            for (const index in tracks) {
+                if (tracks[index].audioId === 2)
+                    resButtons.unshift({
+                        icon: tracks[index].active ? "check2" : "",
+                        label: tracks[index].height + "p",
+                        action: "shakavariant " + index
+                    });
+            }
+            resButtons.unshift(
+                {
+                    icon: "arrow-left",
+                    label: "Back",
+                    action: "menu main"
+                });
+            break;
+        case "hls.js":
+            resButtons.pop();
+            for (const level in this.__externalPlayer.levels) {
+                resButtons.unshift({
+                    icon: level === this.__externalPlayer.currentLevel ? "check2" : "",
+                    label: this.__externalPlayer.levels[level].height + "p",
+                    action: "hlslevel " + level
+                });
+            }
+            resButtons.unshift(
+                {
+                    icon: -1 === this.__externalPlayer.currentLevel ? "check2" : "",
+                    label: "Auto",
+                    action: "hlslevel -1"
+                });
+            resButtons.unshift(
+                {
+                    icon: "arrow-left",
+                    label: "Back",
+                    action: "menu main"
+                });
+            break;
     }
     this.menuElement.appendChild(makeMenu("menu-res", resButtons));
     const subButtons = [
@@ -416,7 +457,10 @@ Player.prototype.menuButtonClick = function (e) {
             this.updateMenu();
             break;
         case "shakavariant":
-            this.__shaka.selectVariantTrack(this.__shaka.getVariantTracks()[Number.parseFloat(args[0])], true)
+            this.__externalPlayer.selectVariantTrack(this.__externalPlayer.getVariantTracks()[Number.parseFloat(args[0])], true)
+            break;
+        case "hlslevel":
+            this.__externalPlayer.nextLevel = Number.parseInt(args[0]);
             break;
     }
     if (closeMenu)
@@ -507,14 +551,14 @@ const loadPlayerWithShaka = async (query, info, sources, manifestUri) => {
     if (manifestUri !== undefined) {
         shaka.polyfill.installAll();
         let shakaUsable = shaka.Player.isBrowserSupported();
-    
+
         if (shakaUsable) {
             const video = document.querySelector(query);
             player = new shaka.Player(video);
-            window.shaka=player;
+            window.shaka = player;
 
             player.addEventListener('error', console.log);
-    
+
             try {
                 await player.load(manifestUri);
             } catch (e) {
@@ -524,5 +568,23 @@ const loadPlayerWithShaka = async (query, info, sources, manifestUri) => {
         }
     }
 
-    return new Player(query, info, sources, await player);
+    return new Player(query, info, sources, await player, "shaka");
+}
+
+const loadPlayerWithHls = (query, info, manifestUri) => {
+    return new Promise((res, rej) => {
+        let hls;
+
+        const video = document.querySelector(query);
+
+        if (Hls.isSupported()) {
+            hls = new Hls();
+            hls.loadSource(manifestUri);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                res(new Player(query, info, [], hls, "hls.js"));
+            });
+        } else
+            rej("You can't watch livestreams / premieres because hls.js is not supported in your browser.")
+    })
 }

@@ -54,6 +54,14 @@ namespace LightTube.Controllers
 			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
 		}
 
+		[Route("/manifest/{v}.m3u8")]
+		public async Task<IActionResult> HlsManifest(string v)
+		{
+			YoutubePlayer player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			string manifest = player.GetHlsManifest($"https://{Request.Host}/proxy/hls?url=");
+			return File(Encoding.UTF8.GetBytes(manifest), "application/vnd.apple.mpegurl");
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
