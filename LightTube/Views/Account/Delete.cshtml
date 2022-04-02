@@ -17,7 +17,7 @@
 		<div>
 			@if (Context.Request.Cookies.TryGetValue("account_data", out string _))
 			{
-				Context.TryGetUser(out LTUser user);
+				Context.TryGetUser(out LTUser user, "web");
 				<form asp-action="Delete" method="POST" class="login-form">
 					<h1>Delete Account</h1>
 					<p>Deleting a local account</p>

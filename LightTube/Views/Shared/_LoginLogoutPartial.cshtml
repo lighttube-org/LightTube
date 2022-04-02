@@ -1,4 +1,4 @@
-@if (Context.TryGetUser(out LTUser user))
+@if (Context.TryGetUser(out LTUser user, "web"))
 {
 	<div class="guide-item"><a>@user.Email.Split("@")[0]</a></div>
 	@if (user.PasswordHash != "local_account")

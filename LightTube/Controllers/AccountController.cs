@@ -34,7 +34,7 @@ namespace LightTube.Controllers
 		[HttpGet]
 		public IActionResult Login(string err = null)
 		{
-			if (HttpContext.TryGetUser(out LTUser _))
+			if (HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			return View(new MessageContext
@@ -47,12 +47,12 @@ namespace LightTube.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Login(string email, string password)
 		{
-			if (HttpContext.TryGetUser(out LTUser _))
+			if (HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			try
 			{
-				LTLogin login = await DatabaseManager.CreateToken(email, password, Request.Headers["user-agent"]);
+				LTLogin login = await DatabaseManager.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = DateTimeOffset.MaxValue
@@ -85,7 +85,7 @@ namespace LightTube.Controllers
 		[HttpGet]
 		public IActionResult Register(string err = null)
 		{
-			if (HttpContext.TryGetUser(out LTUser _))
+			if (HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			return View(new MessageContext
@@ -98,13 +98,13 @@ namespace LightTube.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Register(string email, string password)
 		{
-			if (HttpContext.TryGetUser(out LTUser _))
+			if (HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			try
 			{
 				await DatabaseManager.CreateUser(email, password);
-				LTLogin login = await DatabaseManager.CreateToken(email, password, Request.Headers["user-agent"]);
+				LTLogin login = await DatabaseManager.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = DateTimeOffset.MaxValue
@@ -120,7 +120,7 @@ namespace LightTube.Controllers
 
 		public IActionResult RegisterLocal()
 		{
-			if (!HttpContext.TryGetUser(out LTUser _))
+			if (!HttpContext.TryGetUser(out LTUser _, "web"))
 				HttpContext.CreateLocalAccount();
 			
 			return Redirect("/");
@@ -129,7 +129,7 @@ namespace LightTube.Controllers
 		[HttpGet]
 		public IActionResult Delete(string err = null)
 		{
-			if (!HttpContext.TryGetUser(out LTUser _))
+			if (!HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			return View(new MessageContext
@@ -174,7 +174,7 @@ namespace LightTube.Controllers
 
 		public async Task<IActionResult> Subscribe(string channel)
 		{
-			if (!HttpContext.TryGetUser(out LTUser user))
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
 				return Unauthorized();
 
 			try
@@ -217,7 +217,7 @@ namespace LightTube.Controllers
 
 		public IActionResult SubscriptionsJson()
 		{
-			if (!HttpContext.TryGetUser(out LTUser user))
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
 				return Json(Array.Empty<string>());
 			try
 			{

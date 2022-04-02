@@ -27,7 +27,7 @@ namespace LightTube
 			_channelCacheCollection = database.GetCollection<LTChannel>("channelCache");
 		}
 
-		public static async Task<LTLogin> CreateToken(string email, string password, string userAgent)
+		public static async Task<LTLogin> CreateToken(string email, string password, string userAgent, IEnumerable<string> scopes)
 		{
 			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
 			if (!await users.AnyAsync())
@@ -41,7 +41,8 @@ namespace LightTube
 				Identifier = Guid.NewGuid().ToString(),
 				Email = email,
 				Token = GenerateToken(256),
-				UserAgent = userAgent
+				UserAgent = userAgent,
+				Scopes = scopes.ToArray()
 			};
 			await _tokenCollection.InsertOneAsync(login);
 			return login;
@@ -68,6 +69,12 @@ namespace LightTube
 		{
 			string email = (await _tokenCollection.FindAsync(x => x.Token == token)).First().Email;
 			return (await _userCollection.FindAsync(u => u.Email == email)).First();
+		}
+
+		public static async Task<LTLogin> GetLoginFromToken(string token)
+		{
+			var res = await _tokenCollection.FindAsync(x => x.Token == token);
+			return res.First();
 		}
 
 		public static async Task<List<LTLogin>> GetAllUserTokens(string token)
@@ -157,7 +164,7 @@ namespace LightTube
 			return sb.ToString();
 		}
 
-		public static bool TryGetUser(this HttpContext context, out LTUser user)
+		public static bool TryGetUser(this HttpContext context, out LTUser user, string requiredScope)
 		{
 			// Check local account
 			if (context.Request.Cookies.TryGetValue("account_data", out string accountJson))
@@ -189,7 +196,7 @@ namespace LightTube
 					if (token != null)
 					{
 						user = GetUserFromToken(token).Result;
-						return true;
+						return GetLoginFromToken(token).Result.Scopes.Contains(requiredScope);
 					}
 				}
 				catch
@@ -254,6 +261,7 @@ namespace LightTube
 		public string Email;
 		public string Token;
 		public string UserAgent;
+		public string[] Scopes;
 	}
 
 	[BsonIgnoreExtraElements]

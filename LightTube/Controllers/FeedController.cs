@@ -23,7 +23,7 @@ namespace LightTube.Controllers
 		[Route("subscriptions")]
 		public async Task<IActionResult> Subscriptions()
 		{
-			if (!HttpContext.TryGetUser(out LTUser user))
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
 				return Redirect("/Account/Login");
 
 			try
@@ -47,7 +47,7 @@ namespace LightTube.Controllers
 		[Route("channels")]
 		public IActionResult Channels()
 		{
-			if (!HttpContext.TryGetUser(out LTUser user))
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
 				return Redirect("/Account/Login");
 
 			try
