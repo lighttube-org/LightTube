@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using InnerTube;
+using InnerTube.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
 namespace LightTube.Controllers
@@ -13,12 +17,21 @@ namespace LightTube.Controllers
 	[Route("/proxy")]
 	public class ProxyController : Controller
 	{
+		private readonly ILogger<YoutubeController> _logger;
+		private readonly Youtube _youtube;
 		private string[] BlockedHeaders =
 		{
 			"host"
 		};
 
+		public ProxyController(ILogger<YoutubeController> logger, Youtube youtube)
+		{
+			_logger = logger;
+			_youtube = youtube;
+		}
+
 		[Route("video")]
+		[Obsolete("Use /media instead. Will be removed when the new player is 100% done.")]
 		public async Task Proxy(string url)
 		{
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
@@ -64,6 +77,89 @@ namespace LightTube.Controllers
 			}
 
 			await Response.StartAsync();
+		}
+
+		[Route("media/{videoId}/{formatId}")]
+		public async Task Media(string videoId, string formatId)
+		{
+			try
+			{
+				YoutubePlayer player = await _youtube.GetPlayerAsync(videoId);
+				if (!string.IsNullOrWhiteSpace(player.ErrorMessage))
+				{
+					Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+					await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(player.ErrorMessage));
+					await Response.StartAsync();
+					return;
+				}
+
+				List<Format> formats = new();
+
+				formats.AddRange(player.Formats);
+				formats.AddRange(player.AdaptiveFormats);
+
+				if (!formats.Any(x => x.FormatId == formatId))
+				{
+					Response.StatusCode = (int) HttpStatusCode.NotFound;
+					await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(
+						$"Format with ID {formatId} not found.\nAvailable IDs are: {string.Join(", ", formats.Select(x => x.FormatId.ToString()))}"));
+					await Response.StartAsync();
+					return;
+				}
+
+				string url = formats.First(x => x.FormatId == formatId).Url;
+
+				if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+					url = "https://" + url;
+
+				HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
+				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+				request.Method = Request.Method;
+
+				foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+					!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+				HttpWebResponse response;
+
+				try
+				{
+					response = (HttpWebResponse) request.GetResponse();
+				}
+				catch (WebException e)
+				{
+					response = e.Response as HttpWebResponse;
+				}
+
+				if (response == null)
+					await Response.StartAsync();
+
+				foreach (string header in response.Headers.AllKeys)
+					if (Response.Headers.ContainsKey(header))
+						Response.Headers[header] = response.Headers.Get(header);
+					else
+						Response.Headers.Add(header, response.Headers.Get(header));
+				Response.StatusCode = (int) response.StatusCode;
+
+				await using Stream stream = response.GetResponseStream();
+				try
+				{
+					await stream.CopyToAsync(Response.Body, HttpContext.RequestAborted);
+				}
+				catch (Exception)
+				{
+					// an exception is thrown if the client suddenly stops streaming
+				}
+
+				await Response.StartAsync();
+			}
+			catch (Exception e)
+			{
+				Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+				await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(e.ToString()));
+				await Response.StartAsync();
+			}
 		}
 
 		[Route("subtitle")]
