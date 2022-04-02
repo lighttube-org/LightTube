@@ -21,7 +21,7 @@ push_to_heroku:
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker pull registry.gitlab.com/kuylar/lighttube:latest
-    - docker login --username=_ --password=<a password> registry.heroku.com
+    - docker login --username=_ --password=$HEROKU_TOKEN registry.heroku.com
     - docker tag registry.gitlab.com/kuylar/lighttube:latest registry.heroku.com/lighttube/web:latest
     - docker push registry.heroku.com/lighttube/web:latest
 
