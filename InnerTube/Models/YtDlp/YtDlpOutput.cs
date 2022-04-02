@@ -113,6 +113,7 @@ namespace InnerTube.Models.YtDlp
 				},
 				UploadDate = UploadDate[..4] + "-" + UploadDate[4..6] + "-" + UploadDate[6..8],
 				Duration = Duration,
+				IsLive = IsLive,
 				Chapters = Array.Empty<Models.Chapter>(),
 				Subtitles = Array.Empty<Models.Subtitle>()
 			};

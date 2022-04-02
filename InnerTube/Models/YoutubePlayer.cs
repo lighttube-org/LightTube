@@ -6,22 +6,23 @@ namespace InnerTube.Models
 {
 	public class YoutubePlayer
 	{
-		[JsonProperty("id")] public string Id { get; set; }
-		[JsonProperty("title")] public string Title { get; set; }
-		[JsonProperty("description")] public string Description { get; set; }
-		[JsonProperty("categories")] public string[] Categories { get; set; }
-		[JsonProperty("tags")] public string[] Tags { get; set; }
-		[JsonProperty("channel")] public Channel Channel { get; set; }
-		[JsonProperty("upload_date")] public string UploadDate { get; set; }
-		[JsonProperty("duration")] public long? Duration { get; set; }
-		[JsonProperty("chapters")] public Chapter[] Chapters { get; set; }
-		[JsonProperty("thumbnails")] public Thumbnail[] Thumbnails { get; set; }
-		[JsonProperty("formats")] public Format[] Formats { get; set; }
-		[JsonProperty("adaptive_formats")] public Format[] AdaptiveFormats { get; set; }
-		[JsonProperty("subtitles")] public Subtitle[] Subtitles { get; set; }
-		[JsonProperty("storyboards")] public Format[] Storyboards { get; set; }
-		[JsonProperty("expires_in_seconds")] public string ExpiresInSeconds { get; set; }
-		[JsonProperty("error")] public string ErrorMessage { get; set; }
+		public string Id { get; set; }
+		public string Title { get; set; }
+		public string Description { get; set; }
+		public string[] Categories { get; set; }
+		public string[] Tags { get; set; }
+		public Channel Channel { get; set; }
+		public string UploadDate { get; set; }
+		public long? Duration { get; set; }
+		public bool IsLive { get; set; }
+		public Chapter[] Chapters { get; set; }
+		public Thumbnail[] Thumbnails { get; set; }
+		public Format[] Formats { get; set; }
+		public Format[] AdaptiveFormats { get; set; }
+		public Subtitle[] Subtitles { get; set; }
+		public Format[] Storyboards { get; set; }
+		public string ExpiresInSeconds { get; set; }
+		public string ErrorMessage { get; set; }
 
 		public string GetHtmlDescription()
 		{

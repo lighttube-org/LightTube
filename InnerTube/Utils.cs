@@ -18,7 +18,7 @@ namespace InnerTube
 	{
 		public static string GetHtmlDescription(string description) => description?.Replace("\n", "<br>") ?? "";
 
-		public static string GetMpdManifest(this YoutubePlayer player, string proxyUrl)
+		public static string GetMpdManifest(this YoutubePlayer player, string proxyUrl, string videoCodec = null, string audioCodec = null)
 		{
 			XmlDocument doc = new();
 
@@ -52,7 +52,7 @@ namespace InnerTube
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 			List<Format> audios = player.AdaptiveFormats
-				.Where(x => x.Resolution == "audio only" && x.FormatId != "17")
+				.Where(x => x.Resolution == "audio only" && x.FormatId != "17" && (audioCodec == null || x.AudioCodec.ToLower().Contains(audioCodec.ToLower())))
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList();
@@ -107,7 +107,8 @@ namespace InnerTube
 					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			videoAdaptationSet.SetAttribute("contentType", "video");
-			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17")
+			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17" &&
+			                                                            (videoCodec == null || x.VideoCodec.ToLower().Contains(videoCodec.ToLower())))
 				.GroupBy(x => x.FormatNote)
 				.Select(x => x.Last())
 				.ToList())
