@@ -27,7 +27,7 @@ push_to_heroku:
 
 deploy_to_heroku:
   image: node:latest
-  stage: deploy
+  stage: release
   services:
   - docker:dind
   script:
