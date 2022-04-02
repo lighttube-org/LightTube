@@ -1,0 +1,35 @@
+stages:
+ - build
+ - push
+ - release
+
+build_image:
+  image: docker:latest
+  services:
+  - docker:dind
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build -t registry.gitlab.com/kuylar/lighttube .
+    - docker push registry.gitlab.com/kuylar/lighttube:latest
+    
+push_to_heroku:
+  image: docker:latest
+  stage: push
+  services:
+  - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/kuylar/lighttube:latest
+    - docker login --username=_ --password=<a password> registry.heroku.com
+    - docker tag registry.gitlab.com/kuylar/lighttube:latest registry.heroku.com/lighttube/web:latest
+    - docker push registry.heroku.com/lighttube/web:latest
+
+deploy_to_heroku:
+  image: node:latest
+  stage: deploy
+  services:
+  - docker:dind
+  script:
+    - npm install -g heroku
+    - heroku container:release web --app lighttube
