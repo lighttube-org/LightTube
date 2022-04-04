@@ -51,11 +51,19 @@ namespace InnerTube
 
 			period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
-			List<Format> audios = player.AdaptiveFormats
-				.Where(x => x.Resolution == "audio only" && x.FormatId != "17" && (audioCodec == null || x.AudioCodec.ToLower().Contains(audioCodec.ToLower())))
-				.GroupBy(x => x.FormatNote)
-				.Select(x => x.Last())
-				.ToList();
+			List<Format> audios;
+			if (audioCodec != "all")
+				audios = player.AdaptiveFormats
+					.Where(x => x.Resolution == "audio only" && x.FormatId != "17" &&
+					            (audioCodec == null || x.AudioCodec.ToLower().Contains(audioCodec.ToLower())))
+					.GroupBy(x => x.FormatNote)
+					.Select(x => x.Last())
+					.ToList();
+			else
+				audios = player.AdaptiveFormats
+					.Where(x => x.Resolution == "audio only" && x.FormatId != "17")
+					.ToList();
+
 			audioAdaptationSet.SetAttribute("mimeType",
 				HttpUtility.ParseQueryString(audios.First().Url.Split("?")[1]).Get("mime"));
 			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
@@ -107,11 +115,19 @@ namespace InnerTube
 					.Get("mime"));
 			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			videoAdaptationSet.SetAttribute("contentType", "video");
-			foreach (Format format in player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17" &&
-			                                                            (videoCodec == null || x.VideoCodec.ToLower().Contains(videoCodec.ToLower())))
-				.GroupBy(x => x.FormatNote)
-				.Select(x => x.Last())
-				.ToList())
+
+			List<Format> videos;
+			if (videoCodec != "all")
+				videos = player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17" &&
+				                                           (videoCodec == null || x.VideoCodec.ToLower()
+					                                           .Contains(videoCodec.ToLower())))
+					.GroupBy(x => x.FormatNote)
+					.Select(x => x.Last())
+					.ToList();
+			else
+				videos = player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17").ToList();
+
+			foreach (Format format in videos)
 			{
 				XmlElement representation = doc.CreateElement("Representation");
 				representation.SetAttribute("id", format.FormatId);
