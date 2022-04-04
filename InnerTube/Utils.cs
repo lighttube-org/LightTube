@@ -109,12 +109,6 @@ namespace InnerTube
 			period.AppendChild(audioAdaptationSet);
 
 			period.AppendChild(doc.CreateComment("Video Adaptation Set"));
-			XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
-			videoAdaptationSet.SetAttribute("mimeType",
-				HttpUtility.ParseQueryString(player.AdaptiveFormats.Last(x => x.Resolution != "audio only").Url.Split("?")[1])
-					.Get("mime"));
-			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
-			videoAdaptationSet.SetAttribute("contentType", "video");
 
 			List<Format> videos;
 			if (videoCodec != "all")
@@ -126,6 +120,14 @@ namespace InnerTube
 					.ToList();
 			else
 				videos = player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17").ToList();
+
+
+			XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
+			videoAdaptationSet.SetAttribute("mimeType",
+				HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url?.Split("?")[1] ?? "mime=video/mp4")
+					.Get("mime"));
+			videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+			videoAdaptationSet.SetAttribute("contentType", "video");
 
 			foreach (Format format in videos)
 			{
