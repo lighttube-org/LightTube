@@ -339,5 +339,57 @@ namespace LightTube.Controllers
 			return File(new MemoryStream(Encoding.UTF8.GetBytes(proxyManifest.ToString())),
 				"application/vnd.apple.mpegurl");
 		}
+
+		[Route("manifest/{videoId}/{formatId}")]
+		public async Task<IActionResult> ManifestProxy(string videoId, string formatId)
+		{
+			YoutubePlayer player = await _youtube.GetPlayerAsync(videoId);
+			if (!string.IsNullOrWhiteSpace(player.ErrorMessage))
+			{
+				Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+				return File(new MemoryStream(Encoding.UTF8.GetBytes(player.ErrorMessage)),
+					"text/plain");
+			}
+
+			if (player.AdaptiveFormats.All(x => x.FormatId != formatId))
+			{
+				Response.StatusCode = (int) HttpStatusCode.NotFound;
+				return File(
+					new MemoryStream(Encoding.UTF8.GetBytes(
+						$"Format with ID {formatId} not found.\nAvailable IDs are: {string.Join(", ", player.AdaptiveFormats.Select(x => x.FormatId.ToString()))}")),
+					"text/plain");
+			}
+
+			string url = player.AdaptiveFormats.First(x => x.FormatId == formatId).Url;
+			
+			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+				url = "https://" + url;
+
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			await using Stream stream = response.GetResponseStream();
+			using StreamReader reader = new(stream);
+			string manifest = await reader.ReadToEndAsync();
+			StringBuilder proxyManifest = new ();
+			
+			foreach (string s in manifest.Split("\n"))
+			{
+				// also check if proxy enabled
+				proxyManifest.AppendLine(!s.StartsWith("http")
+					? s
+					: $"https://{Request.Host}/proxy/video?url={HttpUtility.UrlEncode(s)}");
+			}
+
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(proxyManifest.ToString())),
+				"application/vnd.apple.mpegurl");
+		}
 	}
 }
