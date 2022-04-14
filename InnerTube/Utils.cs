@@ -202,7 +202,7 @@ namespace InnerTube
 				if (string.IsNullOrWhiteSpace(proxyUrl))
 					sb.AppendLine(format.Url);
 				else
-					sb.AppendLine(proxyUrl + HttpUtility.UrlEncode(format.Url));
+					sb.AppendLine($"{proxyUrl}/manifest/{player.Id}/{format.FormatId}");
 			}
 
 			return sb.ToString();

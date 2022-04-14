@@ -37,7 +37,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> HlsManifest(string v, bool useProxy)
 		{
 			YoutubePlayer player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			string manifest = player.GetHlsManifest(useProxy ? $"https://{Request.Host}/proxy/video?url=" : null);
+			string manifest = player.GetHlsManifest(useProxy ? $"https://{Request.Host}/proxy/" : null);
 			return File(Encoding.UTF8.GetBytes(manifest), "application/vnd.apple.mpegurl");
 		}
 	}
