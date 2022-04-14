@@ -185,6 +185,47 @@ namespace LightTube.Controllers
 				"text/vtt");
 		}
 
+		[Route("caption/{videoId}/{language}")]
+		public async Task<FileStreamResult> SubtitleProxy(string videoId, string language)
+		{
+			YoutubePlayer player = await _youtube.GetPlayerAsync(videoId);
+			if (!string.IsNullOrWhiteSpace(player.ErrorMessage))
+			{
+				Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+				return File(new MemoryStream(Encoding.UTF8.GetBytes(player.ErrorMessage)),
+					"text/plain");
+			}
+
+			if (!player.Subtitles.Any(x => x.Ext == "vtt" && string.Equals(x.Language, language, StringComparison.InvariantCultureIgnoreCase)))
+			{
+				Response.StatusCode = (int) HttpStatusCode.NotFound;
+				return File(
+					new MemoryStream(Encoding.UTF8.GetBytes(
+						$"There are no available subtitles for {language}. Available language codes are: {string.Join(", ", player.Subtitles.Select(x => $"\"{x.Language}\""))}")),
+					"text/plain");
+			}
+			string url = player.Subtitles.First(x => x.Ext == "vtt" && string.Equals(x.Language, language, StringComparison.InvariantCultureIgnoreCase)).Url;
+			
+			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+				url = "https://" + url;
+
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			await using Stream stream = response.GetResponseStream();
+			using StreamReader reader = new(stream);
+
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(await reader.ReadToEndAsync())),
+				"text/vtt");
+		}
+
 		[Route("image")]
 		public async Task ImageProxy(string url)
 		{
