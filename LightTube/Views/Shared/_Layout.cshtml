@@ -32,10 +32,6 @@
 	}
 	<meta property="theme-color" content="#AA0000" />
 	<title>@ViewData["Title"] - lighttube</title>
-	@if ((ViewData["DisableOldCss"] ?? false).Equals(false))
-	{
-		<link rel="stylesheet" href="~/css/site.css"/>
-	}
 	@if ((ViewData["HideGuide"] ?? false).Equals(true))
 	{
 		<style> .guide { display: none !important; } </style>

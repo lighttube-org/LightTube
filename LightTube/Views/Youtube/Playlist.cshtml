@@ -11,7 +11,6 @@
 	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Playlist.Thumbnail.LastOrDefault()?.Url?.ToString())}";
 	ViewBag.Metadata["og:description"] = Model.Playlist.Description;
 	Layout = "_Layout";
-	ViewData["DisableOldCss"] = true;
 }
 
 <div class="playlist-page">
