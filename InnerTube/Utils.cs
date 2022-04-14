@@ -286,7 +286,6 @@ namespace InnerTube
 			
 			if (SAPISID is not null && PSID is not null)
 			{
-				Console.WriteLine("Using the authorized /player endpoint");
 				hrm.Headers.Add("Cookie", $"SAPISID={SAPISID}; __Secure-3PAPISID={SAPISID}; __Secure-3PSID={PSID};");
 				hrm.Headers.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0");
 				hrm.Headers.Add("Authorization", GenerateAuthHeader(SAPISID));
