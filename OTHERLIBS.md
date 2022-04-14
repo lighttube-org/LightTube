@@ -10,5 +10,5 @@
 | videojs-quality-selector | \<no description provided in GitHub repo><br />Used to change resolutions in compatibility mode                         | https://github.com/silvermine/videojs-quality-selector |
 | shaka-player             | JavaScript player library / DASH & HLS client / MSE-EME player<br />Used to play videos of all resolutions              | https://github.com/google/shaka-player                 |
 | videojs-shaka            | Shaka player integration with video.js<br />Used to integrate video.js with shaka-player                                | https://github.com/davidjamesherzog/videojs-shaka      |
-| System UIcons            | A growing collection of simple and consistent icons specifically designed for systems and products.<br />Used for icons | https://systemuicons.com/                              |
+| Bootstrap Icons          | Official open source SVG icon library for Bootstrap. <br />Used for the icons throughout the website                    | https://github.com/twbs/icons/                          |
 

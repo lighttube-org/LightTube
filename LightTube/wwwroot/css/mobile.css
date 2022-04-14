@@ -119,9 +119,11 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--app-background);
 }
 
-a.icon-link, a.icon-link > img {
+a.icon-link, a.icon-link > i {
     width: 32px;
     height: 32px;
+    line-height: 32px;
+    text-align: center;
 }
 
 .noguide > .guide {
@@ -146,6 +148,9 @@ a.icon-link, a.icon-link > img {
 
 .guide-item > a > .icon {
     width: 24px;
+    height: 24px;
+    line-height: 24px;
+    font-size: initial;
     margin-right: 0;
 }
 
@@ -953,6 +958,16 @@ a.icon-link, a.icon-link > img {
 }
 
 .horizontal-channel-list > .channel > img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--thumbnail-background);
+}
+
+.horizontal-channel-list > .channel > i {
+    font-size: 24px;
+    line-height: 48px;
+    text-align: center;
     width: 48px;
     height: 48px;
     border-radius: 50%;

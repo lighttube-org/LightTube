@@ -12,7 +12,7 @@
 
 <div class="horizontal-channel-list" style="max-width: @(!Model.MobileLayout ? $"calc(100vw - {(minMode ? 80 : 312)}px);" : "")">
 	<a href="/feed/channels" class="channel">
-		<img src="/icons/settings.svg">
+		<i class="bi bi-gear"></i>
 		<div class="name max-lines-2">Manage Channels</div>
 	</a>
 	@foreach (LTChannel channel in Model.Channels)

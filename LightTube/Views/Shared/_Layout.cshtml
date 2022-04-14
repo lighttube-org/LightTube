@@ -56,6 +56,7 @@
 	<link rel="stylesheet" href="~/css/videojs/video-js.css" asp-append-version="true"/>
 	<link rel="stylesheet" href="~/css/videojs/quality-selector.css" asp-append-version="true"/>
 	<link rel="stylesheet" href="~/css/videojs/tube.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/bootstrap-icons/bootstrap-icons.css" asp-append-version="true"/>
 	<link rel="icon" href="~/favicon.ico">
 </head>
 <body>
@@ -76,12 +77,12 @@
 	<div class="divider"></div>
 	<div class="search-button">
 		<a class="icon-link" href="/results">
-			<img src="/icons/search.svg">
+			<i class="bi bi-search"></i>
 		</a>
 	</div>
 	<div class="account" tabindex="-1">
 		<a class="icon-link" href="/Account">
-			<img src="/icons/profile.svg">
+			<i class="bi bi-person-circle"></i>
 		</a>
 		<div class="account-menu">
 			<div class="guide-item"><a href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Compatibility Mode</a></div>
@@ -94,31 +95,31 @@
 <div class="guide @(minMode ? "minmode" : "")">
 	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "home" ? "active" : "")">
 		<a href="/">
-			<i class="icon"><img src="/icons/home.svg"></i>
+			<i class="icon bi bi-house-door"></i>
 			Home
 		</a>
 	</div>
 	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "explore" ? "active" : "")">
 		<a href="/feed/explore">
-			<i class="icon"><img src="/icons/compass.svg"></i>
+			<i class="icon bi bi-compass"></i>
 			Explore
 		</a>
 	</div>
 	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "subs" ? "active" : "")">
 		<a href="/feed/subscriptions">
-			<i class="icon"><img src="/icons/subscriptions.svg"></i>
+			<i class="icon bi bi-inboxes"></i>
 			Subscriptions
 		</a>
 	</div>
 	<div class="hide-on-minmode guide-item">
 		<a href="/toggles/collapse_guide?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">
-			<i class="icon"><img src="/icons/collapse_guide.svg"></i>
+			<i class="icon"><i class="bi bi-arrow-left-square"></i></i>
 			Collapse Guide
 		</a>
 	</div>
 	<div class="show-on-minmode guide-item">
 		<a href="/toggles/collapse_guide?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">
-			<i class="icon"><img src="/icons/uncollapse_guide.svg"></i>
+			<i class="icon"><i class="bi bi-arrow-right-square"></i></i>
 			Expand
 		</a>
 	</div>
