@@ -48,14 +48,15 @@
 	@if (Model.MobileLayout)
 	{
 		<link rel="stylesheet" href="~/css/mobile.css" asp-append-version="true"/>
+		<link rel="stylesheet" href="~/css/videojs/video-js.css" asp-append-version="true"/>
+		<link rel="stylesheet" href="~/css/videojs/quality-selector.css" asp-append-version="true"/>
+		<link rel="stylesheet" href="~/css/videojs/tube.css" asp-append-version="true"/>
 	}
 	else
 	{
 		<link rel="stylesheet" href="~/css/desktop.css" asp-append-version="true"/>
+		<link rel="stylesheet" href="~/css/lt-video/player-desktop.css" asp-append-version="true"/>
 	}
-	<link rel="stylesheet" href="~/css/videojs/video-js.css" asp-append-version="true"/>
-	<link rel="stylesheet" href="~/css/videojs/quality-selector.css" asp-append-version="true"/>
-	<link rel="stylesheet" href="~/css/videojs/tube.css" asp-append-version="true"/>
 	<link rel="stylesheet" href="~/css/bootstrap-icons/bootstrap-icons.css" asp-append-version="true"/>
 	<link rel="icon" href="~/favicon.ico">
 </head>

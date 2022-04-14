@@ -55,12 +55,15 @@
             pause: createButton("div", "pause-fill"),
             volume: createButton("div", "volume-up-fill"),
             time: document.createElement("span"),
+            skipToLive: createButton("div", "skip-forward-btn-fill"),
             div: document.createElement("div"),
             settings: createButton("div", "gear-fill"),
             embed: createButton("a", ""),
             pip: createButton("div", "pip"),
             fullscreen: createButton("div", "fullscreen")
         }
+
+        if (!info.live) this.controls.skipToLive.style.display = "none"
 
         const controlHolder = document.createElement("div");
         controlHolder.classList.add("player-controls");
@@ -89,6 +92,7 @@
         this.controls.volume.onclick = e => this.mute(e);
         this.controls.volume.classList.add("player-volume");
         this.controls.fullscreen.onclick = () => this.fullscreen();
+        this.controls.skipToLive.onclick = () => this.skipToLive();
 
         if (document.pictureInPictureEnabled === true)
             this.controls.pip.onclick = () => this.pip();
@@ -129,7 +133,7 @@
             this.playbackBar.hover.classList.add("player-playback-bar-hover");
             this.playbackBar.sb.classList.add("player-storyboard-image");
             this.playbackBar.sbC.classList.add("player-storyboard-image-container");
-            this.playbackBar.sb.style.backgroundImage = `url("${info.storyboard}")`;
+            this.playbackBar.sb.style.backgroundImage = `url("/proxy/storyboard/${info.id}")`;
 
             let playbackBarContainer = document.createElement("div");
             playbackBarContainer.classList.add("player-playback-bar-container")
@@ -195,11 +199,9 @@
         updatePlayButtons();
         this.__videoElement.onclick = () => this.togglePlayPause();
         this.__videoElement.ondblclick = () => this.fullscreen();
+        this.container.onkeydown = e => this.keyboardHandler(e);
 
-        this.container.onmouseenter = () => {
-            this.controlsDisappearTimeout = Number.MAX_SAFE_INTEGER;
-        }
-        this.container.onmouseleave = () => {
+        this.container.onmousemove = () => {
             let d = new Date();
             d.setSeconds(d.getSeconds() + 3);
             this.controlsDisappearTimeout = d.getTime();
@@ -537,6 +539,71 @@ Player.prototype.moveHover = function (e) {
     this.playbackBar.hover.style.top = (this.playbackBar.bg.getBoundingClientRect().y - 4 - this.playbackBar.hover.offsetHeight) + 'px';
     this.playbackBar.hover.style.left = (e.clientX - this.playbackBar.hover.offsetWidth / 2) + 'px';
     this.playbackBar.hoverText.innerText = this.getTimeString(this.__videoElement.duration * (percentage / 100));
+}
+
+Player.prototype.skipToLive = function () {
+    this.__videoElement.currentTime = this.__videoElement.duration;
+}
+
+Player.prototype.keyboardHandler = function (e) {
+    let pd = true;
+    switch (e.code) {
+        case "Space":
+            this.togglePlayPause();
+            break;
+        case "Digit1":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.1;
+            break;
+        case "Digit2":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.2;
+            break;
+        case "Digit3":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.3;
+            break;
+        case "Digit4":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.4;
+            break;
+        case "Digit5":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.5;
+            break;
+        case "Digit6":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.6;
+            break;
+        case "Digit7":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.7;
+            break;
+        case "Digit8":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.8;
+            break;
+        case "Digit9":
+            this.__videoElement.currentTime = this.__videoElement.duration * 0.9;
+            break;
+        case "Digit0":
+            this.__videoElement.currentTime = 0;
+            break;
+        case "ArrowLeft":
+            this.__videoElement.currentTime -= 5;
+            break;
+        case "ArrowRight":
+            this.__videoElement.currentTime += 5;
+            break;
+        case "ArrowUp":
+            this.__videoElement.volume += 0.1;
+            break;
+        case "ArrowDown":
+            this.__videoElement.volume -= 0.1;
+            break;
+        case "KeyF":
+            this.fullscreen();
+            break;
+        case "KeyM":
+            this.mute({target:{tagName: ""}});
+            break;
+        default:
+            pd = false;
+            break;
+    }
+    if (pd) e.preventDefault();
 }
 
 Player.prototype.getTimeString = function (s) {

@@ -29,13 +29,18 @@ namespace LightTube.Controllers
 			};
 			await Task.WhenAll(tasks);
 
+			bool cookieCompatibility = false;
+			if (Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+				bool.TryParse(compatibilityString, out cookieCompatibility);
+
 			PlayerContext context = new()
 			{
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
 				Engagement = (tasks[2] as Task<YoutubeDislikes>)?.Result,
 				Resolution = quality,
-				MobileLayout = Utils.IsClientMobile(Request)
+				MobileLayout = Utils.IsClientMobile(Request),
+				CompatibilityMode = cookieCompatibility
 			};
 			return View(context);
 		}

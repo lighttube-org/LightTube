@@ -3,7 +3,7 @@
 }
 
 .player {
-    background-color: #000;
+    background-color: #000 !important;
     display: grid;
     grid-template-columns: 1fr min-content;
     grid-template-rows: max-content 1fr max-content max-content max-content;
@@ -12,15 +12,16 @@
     height: 100%;
 }
 
+.player * {
+    color: #fff;
+}
+
 .player.embed, video.embed {
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
 }
 
 .player * {
@@ -42,8 +43,9 @@
 .player.hide-controls > .player-controls,
 .player.hide-controls > .player-playback-bar-container,
 .player.hide-controls > .player-menu {
-    display: none;
+    display: none !important;
 }
+
 .player-title {
     grid-area: 1 / 1 / 2 / 3;
     color: white;
@@ -51,11 +53,17 @@
     font-size: 27px;
     background-image: linear-gradient(180deg, #0007 0%, #0000 100%);
     padding: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
 }
 
 .player-controls {
     padding-top: 4px;
-    color: #ddd;
+    color: #ddd !important;
     width: 100%;
     height: min-content;
     position: relative;
@@ -91,8 +99,8 @@
     line-height: 48px;
 }
 
-a.player-button {
-    color: #dddddd;
+.player-button, .player-button * {
+    color: #dddddd !important;
     text-decoration: none;
 }
 
@@ -100,8 +108,8 @@ a.player-button {
     min-width: 48px;
 }
 
-.player-button:hover {
-    color: #fff;
+.player-button:hover, .player-button:hover * {
+    color: #fff !important;
 }
 
 .player-volume {
@@ -124,7 +132,7 @@ a.player-button {
     grid-area: 3 / 2 / 4 / 3;
     z-index: 3;
     position: relative;
-    background-color: #000a;
+    background-color: #000a !important;
     width: 150px;
 }
 
@@ -148,7 +156,7 @@ a.player-button {
 }
 
 .player-menu-item:hover {
-    background-color: #fff3;
+    background-color: #fff3 !important;
 }
 
 .player-playback-bar {
@@ -164,7 +172,7 @@ a.player-button {
 }
 
 .player-playback-bar-bg {
-    background-color: #fff3;
+    background-color: #fff3 !important;
     width: calc(100% - 24px);
     margin: auto;
     height: 100%;
@@ -183,14 +191,14 @@ a.player-button {
 }
 
 .player-playback-bar-buffer {
-    background-color: #fffa;
+    background-color: #fffa !important;
     height: 100%;
     width: 0;
     z-index: 3;
 }
 
 .player-playback-bar-fg {
-    background-color: #f00;
+    background-color: #f00 !important;
     height: 100%;
     width: 0;
     z-index: 4;
@@ -206,7 +214,7 @@ a.player-button {
 }
 
 .player-playback-bar-hover > span {
-    background-color: #000;
+    background-color: #000 !important;
     padding: 4px;
 }
 
@@ -222,8 +230,8 @@ a.player-button {
     display: inline-block;
     width: 48px;
     height: 27px;
-    background-position-x: 0px;
-    background-position-y: 0px;
+    background-position-x: 0;
+    background-position-y: 0;
     transform: scale(3);
     position: relative;
     box-sizing: content-box;
