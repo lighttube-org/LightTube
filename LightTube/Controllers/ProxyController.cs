@@ -213,6 +213,59 @@ namespace LightTube.Controllers
 			await Response.StartAsync();
 		}
 
+		[Route("storyboard/{videoId}")]
+		public async Task StoryboardProxy(string videoId)
+		{
+			try
+			{
+				YoutubePlayer player = await _youtube.GetPlayerAsync(videoId);
+				if (!string.IsNullOrWhiteSpace(player.ErrorMessage))
+				{
+					Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+					await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(player.ErrorMessage));
+					await Response.StartAsync();
+					return;
+				}
+
+				if (player.Storyboards.All(x => x.FormatId != "sb2"))
+				{
+					Response.StatusCode = (int) HttpStatusCode.NotFound;
+					await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("No usable storyboard found."));
+					await Response.StartAsync();
+					return;
+				}
+
+				string url = player.Storyboards.First(x => x.FormatId == "sb2").Url;
+
+				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+				foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+					!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+					foreach (string value in values)
+						request.Headers.Add(header, value);
+
+				using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+				foreach (string header in response.Headers.AllKeys)
+					if (Response.Headers.ContainsKey(header))
+						Response.Headers[header] = response.Headers.Get(header);
+					else
+						Response.Headers.Add(header, response.Headers.Get(header));
+				Response.StatusCode = (int)response.StatusCode;
+
+				await using Stream stream = response.GetResponseStream();
+				await stream.CopyToAsync(Response.Body);
+				await Response.StartAsync();
+			}
+			catch (Exception e)
+			{
+				Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+				await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(e.ToString()));
+				await Response.StartAsync();
+			}
+		}
+
 		[Route("hls")]
 		public async Task<IActionResult> HlsProxy(string url)
 		{
