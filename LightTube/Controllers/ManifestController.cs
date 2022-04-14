@@ -29,7 +29,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> DashManifest(string v, string videoCodec = null, string audioCodec = null, bool useProxy = true)
 		{
 			YoutubePlayer player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			string manifest = player.GetMpdManifest(useProxy ? $"https://{Request.Host}/proxy/video?url=" : null, videoCodec, audioCodec);
+			string manifest = player.GetMpdManifest(useProxy ? $"https://{Request.Host}/proxy/" : null, videoCodec, audioCodec);
 			return File(Encoding.UTF8.GetBytes(manifest), "application/dash+xml");
 		}
 

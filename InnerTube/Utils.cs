@@ -84,10 +84,7 @@ namespace InnerTube
 				representation.AppendChild(audioChannelConfiguration);
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = format.Url;
-				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url);
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl) ? format.Url : $"{proxyUrl}media/{player.Id}/{format.FormatId}";
 				representation.AppendChild(baseUrl);
 
 				if (format.IndexRange != null && format.InitRange != null)
@@ -142,10 +139,7 @@ namespace InnerTube
 					Math.Floor((format.Filesize ?? 1) / (double)player.Duration).ToString());
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = format.Url;
-				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(format.Url);
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl) ? format.Url : $"{proxyUrl}media/{player.Id}/{format.FormatId}";
 				representation.AppendChild(baseUrl);
 
 				if (format.IndexRange != null && format.InitRange != null)
@@ -179,10 +173,7 @@ namespace InnerTube
 				representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
 				
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					baseUrl.InnerText = subtitle.Url;
-				else
-					baseUrl.InnerText = proxyUrl + HttpUtility.UrlEncode(subtitle.Url);
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl) ? subtitle.Url : $"{proxyUrl}caption/{player.Id}/{subtitle.Language}";
 
 				representation.AppendChild(baseUrl);
 				adaptationSet.AppendChild(representation);
