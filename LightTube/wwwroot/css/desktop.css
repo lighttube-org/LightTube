@@ -753,8 +753,36 @@ a.icon-button, a.icon-button > img {
     background-color: var(--channel-contents-background);
 }
 
-/* channel video grid */
+/* card list item */
 
+.card-list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: scroll;
+    column-gap: 16px;
+}
+
+.card {
+    width: 150px;
+    background: var(--context-menu-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.card > img {
+    aspect-ratio: 16 / 9;
+    width: 150px;
+    height: fit-content;
+}
+
+.card > span {
+    text-decoration: none;
+    color: var(--text-primary);
+    margin: 0 8px;
+}
+
+/* channel video grid */
 
 .video-grid {
     display: flex;

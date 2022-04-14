@@ -24,6 +24,7 @@ namespace LightTube
 		{
 			services.AddControllersWithViews();
 			services.AddSingleton(new Youtube());
+			DynamicItemExtensions.RegisterRenderers();
 			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"));
 		}
 
