@@ -113,6 +113,8 @@ namespace InnerTube
 				video.Description = Utils.ReadRuns(
 					contents[1]
 						["videoSecondaryInfoRenderer"]?["description"]?["runs"]?.ToObject<JArray>());
+				video.Views = contents[0]
+					["videoPrimaryInfoRenderer"]?["viewCount"]?["videoViewCountRenderer"]?["viewCount"]?["simpleText"]?.ToString();
 				video.Channel = new Channel
 				{
 					Name =

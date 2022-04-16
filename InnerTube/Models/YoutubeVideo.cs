@@ -11,6 +11,7 @@ namespace InnerTube.Models
 		public Channel Channel;
 		public string UploadDate;
 		public DynamicItem[] Recommended;
+		public string Views;
 
 		public string GetHtmlDescription() => InnerTube.Utils.GetHtmlDescription(Description);
 
@@ -20,6 +21,7 @@ namespace InnerTube.Models
 			XmlElement item = doc.CreateElement("Video");
 
 			item.SetAttribute("id", Id);
+			item.SetAttribute("views", Views);
 			item.SetAttribute("uploadDate", UploadDate);
 
 			XmlElement title = doc.CreateElement("Title");

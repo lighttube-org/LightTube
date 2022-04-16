@@ -44,6 +44,7 @@ namespace InnerTube.Models
 				player.SetAttribute("id", Id);
 				player.SetAttribute("uploadDate", UploadDate);
 				player.SetAttribute("duration", Duration.ToString());
+				player.SetAttribute("isLive", IsLive.ToString());
 				player.SetAttribute("expiresInSeconds", ExpiresInSeconds);
 
 				XmlElement title = doc.CreateElement("Title");
