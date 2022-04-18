@@ -39,7 +39,7 @@ namespace InnerTube
 			Process process = Process.Start(new ProcessStartInfo
 			{
 				FileName = "yt-dlp",
-				Arguments = $"--dump-single-json {url} --force-ipv4 --cookies cookies.txt --extractor-args \"youtube:player_skip=webpage\"",
+				Arguments = $"--dump-single-json https://youtube.com/watch?v={url} --force-ipv4 --cookies cookies.txt --extractor-args \"youtube:player_skip=webpage\"",
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
 				RedirectStandardInput = true
