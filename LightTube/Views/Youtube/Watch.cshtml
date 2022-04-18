@@ -109,7 +109,7 @@
 				{
 					@if (live)
 					{
-						<video class="embed" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+						<video class="player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
 							@foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
 							{
 								@:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url)" label="@subtitle.Language" kind="subtitles">
@@ -118,7 +118,7 @@
 					}
 					else
 					{
-						<video class="embed" controls src="/proxy/video?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+						<video class="player" controls src="/proxy/video?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
 							@foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
 							{
 								@:<track src="/proxy/subtitle?url=@HttpUtility.UrlEncode(subtitle.Url)" label="@subtitle.Language" kind="subtitles">
@@ -129,7 +129,7 @@
 				else
 				{
 					canPlay = false;
-					<div id="player" class="player error embed" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
+					<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
 						@if (string.IsNullOrWhiteSpace(Model.Player.ErrorMessage))
 						{
 							<span>
