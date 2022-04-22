@@ -149,23 +149,25 @@
 		<div class="video-info">
 			<div class="video-title">@Model.Video.Title</div>
 			<div class="video-info-bar">
-				<span>@Model.Engagement.Views views</span>
+				<span>@Model.Video.Views</span>
 				<span>Published @Model.Video.UploadDate</span>
 				<div class="divider"></div>
-				<div class="engagement-container">
-					<div class="engagement-info">
-						<span class="likes">
-							<i class="bi bi-hand-thumbs-up"></i>@Model.Engagement.Likes
-						</span>
-						<span class="dislikes">
-							<i class="bi bi-hand-thumbs-down"></i>@Model.Engagement.Dislikes
-						</span>
-					</div>
-					<div class="engagement-bar">
-						<div style="width: @(Model.Engagement.GetLikePercentage().ToString().Split(".")[0])%"></div>
-					</div>
-				</div>
-				<a href="https://www.youtube.com/watch?v=@Model.Player.Id">YouTube link</a>
+				<div class="video-info-buttons">
+	                <div>
+                		<i class="bi bi-hand-thumbs-up"></i><span>@Model.Engagement.Likes</span>
+	                </div>
+	                <div>
+                		<i class="bi bi-hand-thumbs-down"></i><span>@Model.Engagement.Dislikes</span>
+	                </div>
+	                <a href="/download?v=@Model.Video.Id">
+                		<i class="bi bi-download"></i>
+                		Download
+	                </a>
+	                <a href="https://www.youtube.com/watch?v=@Model.Video.Id">
+                		<i class="bi bi-share"></i>
+                		YouTube link
+	                </a>
+	            </div>
 			</div>
 			<div class="channel-info">
 				<a href="/channel/@Model.Video.Channel.Id" class="avatar">

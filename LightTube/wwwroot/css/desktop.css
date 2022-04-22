@@ -313,6 +313,7 @@ a.icon-button, a.icon-button > img {
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
+    padding: 8px 0;
 }
 
 .video-info-bar > a {
@@ -320,25 +321,17 @@ a.icon-button, a.icon-button > img {
     text-decoration: none;
 }
 
-.engagement-info {
+.video-info-buttons {
     display: flex;
     flex-direction: row;
-    column-gap: 16px;
-    padding: 8px 0;
+    column-gap: 8px;
 }
 
-.engagement-info > * {
+.video-info-buttons > * {
     display: flex;
-}
-
-.engagement-bar {
-    height: 2px;
-    background-color: var(--engagement-bar-background);
-}
-
-.engagement-bar > div {
-    height: 2px;
-    background-color: var(--engagement-bar-foreground);
+    justify-content: center;
+    column-gap: 4px;
+    text-decoration: none;
 }
 
 .channel-info {

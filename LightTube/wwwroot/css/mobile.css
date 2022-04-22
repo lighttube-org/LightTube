@@ -558,8 +558,8 @@ a.icon-link, a.icon-link > i {
     grid-template-rows: max-content max-content;
     gap: 0 8px;
     grid-template-areas:
-    "views . uploaddate divider divider"
-    "engagementbar engagementbar engagementbar engagementbar ytlink";
+    "views . uploaddate divider"
+    "buttons buttons buttons buttons";
 }
 
 .video-info-bar > span:nth-child(1) {
@@ -574,42 +574,29 @@ a.icon-link, a.icon-link > i {
     grid-area: uploaddate;
 }
 
-.video-info-bar > .engagement-container {
-    grid-area: engagementbar;
+.video-info-bar > .video-info-buttons {
+    grid-area: buttons;
 }
 
-.engagement-bar {
-    display: none;
-}
-
-.engagement-info {
+.video-info-buttons {
     display: flex;
-    flex-direction: row;
-    column-gap: 16px;
-    padding: 8px 0;
     justify-content: space-evenly;
+    flex-direction: row;
+    column-gap: 8px;
+    padding: 8px 0;
 }
 
-.engagement-info > * {
+.video-info-buttons > * {
     display: flex;
     flex-direction: column;
-    column-gap: 16px;
-    padding: 8px 0;
+    justify-content: center;
     align-items: center;
-}
-
-.engagement-info > * > img {
-    width: 24px;
-    height: 24px;
-}
-
-.video-info-bar > a {
-    grid-area: ytlink;
-    height: 100%;
-    line-height: 60px;
-
-    color: var(--text-primary);
+    column-gap: 4px;
     text-decoration: none;
+}
+
+.video-info-buttons > * > i.bi {
+    font-size: x-large;
 }
 
 .channel-info {
