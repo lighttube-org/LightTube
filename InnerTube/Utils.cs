@@ -308,5 +308,28 @@ namespace InnerTube
 			foreach (byte b in hash) sb.Append(b.ToString("X2"));
 			return sb.ToString();
 		}
+
+		public static string GetExtension(this Format format)
+		{
+			if (format.VideoCodec != "none") return "mp4";
+			else
+				switch (format.FormatId)
+				{
+					case "139":
+					case "140":
+					case "141":
+					case "256":
+					case "258":
+					case "327":
+						return "mp3";
+					case "249":
+					case "250":
+					case "251":
+					case "338":
+						return "opus";
+				}
+
+			return "mp4";
+		}
 	}
 }

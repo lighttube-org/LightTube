@@ -1075,3 +1075,31 @@ a.icon-button, a.icon-button > img {
     background-color: var(--item-active-background);
     border-radius: 5px;
 }
+
+/* download page */
+
+.download-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: 32px;
+}
+
+.download-format {
+    max-width: 400px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+}
+
+.download-format > div {
+    color: var(--text-primary);
+}
+
+.download-format > a {
+    padding: 8px;
+    background-color: var(--channel-contents-background);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+}

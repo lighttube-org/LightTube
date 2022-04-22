@@ -45,6 +45,31 @@ namespace LightTube.Controllers
 			return View(context);
 		}
 
+		[Route("/download")]
+		public async Task<IActionResult> Download(string v)
+		{
+			Task[] tasks = {
+				_youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				_youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				ReturnYouTubeDislike.GetDislikes(v)
+			};
+			await Task.WhenAll(tasks);
+
+			bool cookieCompatibility = false;
+			if (Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+				bool.TryParse(compatibilityString, out cookieCompatibility);
+
+			PlayerContext context = new()
+			{
+				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
+				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
+				Engagement = null,
+				MobileLayout = Utils.IsClientMobile(Request),
+				CompatibilityMode = cookieCompatibility
+			};
+			return View(context);
+		}
+
 		[Route("/embed/{v}")]
 		public async Task<IActionResult> Embed(string v, string quality = null, bool compatibility = false)
 		{
