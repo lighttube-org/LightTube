@@ -36,7 +36,7 @@ namespace InnerTube
 			mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
 			TimeSpan durationTs = TimeSpan.FromSeconds(double.Parse(HttpUtility
 				.ParseQueryString(player.AdaptiveFormats.First(x => x.Resolution == "audio only").Url.Split("?")[1])
-				.Get("dur") ?? "0"));
+				.Get("dur")?.Replace('.', ',') ?? "0"));
 			StringBuilder duration = new("PT");
 			if (durationTs.TotalHours > 0)
 				duration.Append($"{durationTs.Hours}H");
