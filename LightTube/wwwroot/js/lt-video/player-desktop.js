@@ -311,6 +311,11 @@ Player.prototype.updateMenu = function () {
                         action: "shakavariant " + index
                     });
             }
+            resButtons.unshift({
+                icon: this.__externalPlayer.getConfiguration().abr.enabled ? "check2" : "",
+                label: "Auto",
+                action: "shakavariant -1"
+            });
             resButtons.unshift(
                 {
                     icon: "arrow-left",
@@ -463,7 +468,9 @@ Player.prototype.menuButtonClick = function (e) {
             this.updateMenu();
             break;
         case "shakavariant":
-            this.__externalPlayer.selectVariantTrack(this.__externalPlayer.getVariantTracks()[Number.parseFloat(args[0])], true)
+            if (args[0]!=="-1")
+                this.__externalPlayer.selectVariantTrack(this.__externalPlayer.getVariantTracks()[Number.parseFloat(args[0])], true, 2)
+            this.__externalPlayer.configure({abr:{enabled:args[0]==="-1"}})
             break;
         case "hlslevel":
             this.__externalPlayer.nextLevel = Number.parseInt(args[0]);
