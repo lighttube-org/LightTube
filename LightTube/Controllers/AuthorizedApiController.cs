@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -86,6 +87,21 @@ namespace LightTube.Controllers
 			{
 				videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels)
 			};
+
+			return Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
+		}
+
+		[Route("subscriptions/channels")]
+		public IActionResult SubscriptionsChannels()
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.read"))
+				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+
+			SubscriptionChannels feed = new()
+			{
+				Channels = user.SubscribedChannels.Select(DatabaseManager.Channels.GetChannel).ToArray()
+			};
+			Array.Sort(feed.Channels, (p, q) => string.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
 
 			return Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
 		}

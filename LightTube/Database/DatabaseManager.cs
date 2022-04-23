@@ -167,5 +167,22 @@ namespace LightTube.Database
 		public string Name;
 		public string Subscribers;
 		public string IconUrl;
+
+		public XmlNode GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("Channel");
+			item.SetAttribute("id", ChannelId);
+			item.SetAttribute("subscribers", Subscribers);
+
+			XmlElement title = doc.CreateElement("Name");
+			title.InnerText = Name;
+			item.AppendChild(title);
+
+			XmlElement thumbnail = doc.CreateElement("Avatar");
+			thumbnail.InnerText = IconUrl;
+			item.AppendChild(thumbnail);
+
+			return item;
+		}
 	}
 }
