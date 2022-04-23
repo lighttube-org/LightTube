@@ -79,7 +79,7 @@ namespace LightTube.Database
 		public async Task<(LTChannel channel, bool subscribed)> SubscribeToChannel(LTUser user, YoutubeChannel channel)
 		{
 			LTChannel ltChannel = await DatabaseManager.Channels.UpdateChannel(channel.Id, channel.Name, channel.Subscribers,
-				channel.Avatars.First().Url);
+				channel.Avatars.FirstOrDefault()?.Url);
 
 			if (user.SubscribedChannels.Contains(ltChannel.ChannelId))
 				user.SubscribedChannels.Remove(ltChannel.ChannelId);

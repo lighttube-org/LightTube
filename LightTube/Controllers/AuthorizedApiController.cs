@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using InnerTube;
+using InnerTube.Models;
 using LightTube.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -91,6 +92,7 @@ namespace LightTube.Controllers
 			return Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
 		}
 
+		[HttpGet]
 		[Route("subscriptions/channels")]
 		public IActionResult SubscriptionsChannels()
 		{
@@ -104,6 +106,70 @@ namespace LightTube.Controllers
 			Array.Sort(feed.Channels, (p, q) => string.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
 
 			return Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
+		}
+
+		[HttpPut]
+		[Route("subscriptions/channels")]
+		public async Task<IActionResult> Subscribe()
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.write"))
+				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+
+			Request.Form.TryGetValue("id", out StringValues ids);
+			string id = ids.ToString();
+
+			if (user.SubscribedChannels.Contains(id))
+				return StatusCode((int)HttpStatusCode.NotModified);
+
+			try
+			{
+				YoutubeChannel channel = await _youtube.GetChannelAsync(id);
+
+				if (channel.Id is null)
+					return StatusCode((int)HttpStatusCode.NotFound);
+				
+				(LTChannel ltChannel, bool _) = await DatabaseManager.Logins.SubscribeToChannel(user, channel);
+
+				XmlDocument doc = new();
+				doc.AppendChild(ltChannel.GetXmlElement(doc));
+				return Xml(doc, HttpStatusCode.OK);
+			}
+			catch (Exception e)
+			{
+				return Xml(BuildErrorXml(e.Message), HttpStatusCode.InternalServerError);
+			}
+		}
+
+		[HttpDelete]
+		[Route("subscriptions/channels")]
+		public async Task<IActionResult> Unsubscribe()
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.write"))
+				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+
+			Request.Form.TryGetValue("id", out StringValues ids);
+			string id = ids.ToString();
+
+			if (!user.SubscribedChannels.Contains(id))
+				return StatusCode((int)HttpStatusCode.NotModified);
+
+			try
+			{
+				YoutubeChannel channel = await _youtube.GetChannelAsync(id);
+
+				if (channel.Id is null)
+					return StatusCode((int)HttpStatusCode.NotFound);
+				
+				(LTChannel ltChannel, bool _) = await DatabaseManager.Logins.SubscribeToChannel(user, channel);
+
+				XmlDocument doc = new();
+				doc.AppendChild(ltChannel.GetXmlElement(doc));
+				return Xml(doc, HttpStatusCode.OK);
+			}
+			catch (Exception e)
+			{
+				return Xml(BuildErrorXml(e.Message), HttpStatusCode.InternalServerError);
+			}
 		}
 	}
 }

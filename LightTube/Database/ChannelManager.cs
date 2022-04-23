@@ -33,6 +33,8 @@ namespace LightTube.Database
 				Subscribers = subscribers,
 				IconUrl = iconUrl
 			};
+			if (channel.IconUrl is null && !string.IsNullOrWhiteSpace(GetChannel(id).IconUrl))
+				channel.IconUrl = GetChannel(id).IconUrl;
 			if (await _channelCacheCollection.CountDocumentsAsync(x => x.ChannelId == id) > 0)
 				await _channelCacheCollection.ReplaceOneAsync(x => x.ChannelId == id, channel);
 			else
