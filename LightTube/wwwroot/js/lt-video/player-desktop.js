@@ -99,13 +99,18 @@
         else
             this.controls.pip.style.display = "none";
 
+        let vol = null;
+        if (localStorage !== undefined)
+            vol = localStorage?.getItem("ltvideo.volume");
         let volumeRange = document.createElement("input");
         volumeRange.oninput = e => this.setVolume(e);
         volumeRange.setAttribute("min", "0");
         volumeRange.setAttribute("max", "1");
         volumeRange.setAttribute("step", "0.01");
-        volumeRange.setAttribute("value", "1");
+        volumeRange.setAttribute("value", vol ?? "1");
         volumeRange.setAttribute("type", "range");
+        if (vol != null)
+            this.setVolume({target:{value:Number(vol)}});
         this.controls.volume.appendChild(volumeRange);
 
         this.controls.div.classList.add("player-button-divider")
@@ -217,7 +222,6 @@
                 // uhhhhhh...
                 break;
         }
-
 
         // menu
         this.controls.settings.onclick = e => this.menuButtonClick(e);
@@ -510,7 +514,9 @@ Player.prototype.timeUpdate = function (e) {
 }
 
 Player.prototype.setVolume = function (e) {
+    console.log("volume changed to " + e.target.value)
     this.__videoElement.volume = e.target.value;
+    localStorage.setItem("ltvideo.volume", e.target.value);
 }
 
 Player.prototype.getLoadEnd = function () {
