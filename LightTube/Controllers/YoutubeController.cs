@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using InnerTube;
 using InnerTube.Models;
+using LightTube.Database;
 
 namespace LightTube.Controllers
 {
@@ -137,7 +138,7 @@ namespace LightTube.Controllers
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
-			await DatabaseManager.UpdateChannel(context.Channel.Id, context.Channel.Name, context.Channel.Subscribers,
+			await DatabaseManager.Channels.UpdateChannel(context.Channel.Id, context.Channel.Name, context.Channel.Subscribers,
 				context.Channel.Avatars.First().Url.ToString());
 			return View(context);
 		}

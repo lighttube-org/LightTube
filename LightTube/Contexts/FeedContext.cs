@@ -1,3 +1,5 @@
+using LightTube.Database;
+
 namespace LightTube.Contexts
 {
 	public class FeedContext : BaseContext

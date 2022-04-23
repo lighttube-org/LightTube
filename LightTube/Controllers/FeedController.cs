@@ -5,6 +5,7 @@ using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using InnerTube;
+using LightTube.Database;
 
 namespace LightTube.Controllers
 {
@@ -30,7 +31,7 @@ namespace LightTube.Controllers
 			{
 				FeedContext context = new()
 				{
-					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
+					Channels = user.SubscribedChannels.Select(DatabaseManager.Channels.GetChannel).ToArray(),
 					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels),
 					MobileLayout = Utils.IsClientMobile(Request)
 				};
@@ -54,7 +55,7 @@ namespace LightTube.Controllers
 			{
 				FeedContext context = new()
 				{
-					Channels = user.SubscribedChannels.Select(DatabaseManager.GetChannel).ToArray(),
+					Channels = user.SubscribedChannels.Select(DatabaseManager.Channels.GetChannel).ToArray(),
 					Videos = null,
 					MobileLayout = Utils.IsClientMobile(Request)
 				};

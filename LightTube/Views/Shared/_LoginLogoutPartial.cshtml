@@ -1,3 +1,4 @@
+@using LightTube.Database
 @if (Context.TryGetUser(out LTUser user, "web"))
 {
 	<div class="guide-item"><a>@user.Email.Split("@")[0]</a></div>

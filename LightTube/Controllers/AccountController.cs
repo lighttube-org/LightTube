@@ -4,12 +4,13 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using InnerTube;
+using InnerTube.Models;
 using LightTube.Contexts;
+using LightTube.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using InnerTube;
-using InnerTube.Models;
 
 namespace LightTube.Controllers
 {
@@ -52,7 +53,7 @@ namespace LightTube.Controllers
 
 			try
 			{
-				LTLogin login = await DatabaseManager.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
+				LTLogin login = await DatabaseManager.Logins.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = DateTimeOffset.MaxValue
@@ -74,7 +75,7 @@ namespace LightTube.Controllers
 		{
 			if (HttpContext.Request.Cookies.TryGetValue("token", out string token))
 			{
-				await DatabaseManager.RemoveToken(token);
+				await DatabaseManager.Logins.RemoveToken(token);
 			}
 
 			HttpContext.Response.Cookies.Delete("token");
@@ -103,8 +104,8 @@ namespace LightTube.Controllers
 
 			try
 			{
-				await DatabaseManager.CreateUser(email, password);
-				LTLogin login = await DatabaseManager.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
+				await DatabaseManager.Logins.CreateUser(email, password);
+				LTLogin login = await DatabaseManager.Logins.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = DateTimeOffset.MaxValue
@@ -147,7 +148,7 @@ namespace LightTube.Controllers
 				if (email == "Local Account" && password == "local_account")
 					Response.Cookies.Delete("account_data");
 				else
-					await DatabaseManager.DeleteUser(email, password);
+					await DatabaseManager.Logins.DeleteUser(email, password);
 				return Redirect("/Account/Register?err=Account+deleted");
 			}
 			catch (KeyNotFoundException e)
@@ -167,7 +168,7 @@ namespace LightTube.Controllers
 
 			return View(new LoginsContext
 			{
-				Logins = await DatabaseManager.GetAllUserTokens(token),
+				Logins = await DatabaseManager.Logins.GetAllUserTokens(token),
 				MobileLayout = Utils.IsClientMobile(Request)
 			});
 		}
@@ -182,13 +183,13 @@ namespace LightTube.Controllers
 				YoutubeChannel youtubeChannel = await _youtube.GetChannelAsync(channel, ChannelTabs.About);
 				
 				(LTChannel channel, bool subscribed) result;
-				result.channel = await DatabaseManager.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
-					youtubeChannel.Avatars.First().Url.ToString());
+				result.channel = await DatabaseManager.Channels.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
+					youtubeChannel.Avatars.First().Url);
 				
 				if (user.PasswordHash == "local_account")
 				{
-					LTChannel ltChannel = await DatabaseManager.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
-						youtubeChannel.Avatars.First().Url.ToString());
+					LTChannel ltChannel = await DatabaseManager.Channels.UpdateChannel(youtubeChannel.Id, youtubeChannel.Name, youtubeChannel.Subscribers,
+						youtubeChannel.Avatars.First().Url);
 					if (user.SubscribedChannels.Contains(ltChannel.ChannelId))
 						user.SubscribedChannels.Remove(ltChannel.ChannelId);
 					else
@@ -205,8 +206,9 @@ namespace LightTube.Controllers
 				else
 				{
 					result =
-						await DatabaseManager.SubscribeToChannel(user, youtubeChannel);
+						await DatabaseManager.Logins.SubscribeToChannel(user, youtubeChannel);
 				}
+
 				return Ok(result.subscribed ? "true" : "false");
 			}
 			catch
