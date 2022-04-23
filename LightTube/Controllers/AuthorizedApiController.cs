@@ -33,7 +33,7 @@ namespace LightTube.Controllers
 		private IActionResult Xml(XmlNode xmlDocument, HttpStatusCode statusCode)
 		{
 			MemoryStream ms = new();
-			ms.Write(Encoding.UTF8.GetBytes(XDocument.Parse(xmlDocument.OuterXml).ToString()));
+			ms.Write(Encoding.UTF8.GetBytes(xmlDocument.OuterXml));
 			ms.Position = 0;
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
 			Response.StatusCode = (int)statusCode;
