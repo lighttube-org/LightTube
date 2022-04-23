@@ -521,7 +521,6 @@ Player.prototype.timeUpdate = function (e) {
 }
 
 Player.prototype.setVolume = function (e) {
-    console.log("volume changed to " + e.target.value)
     this.__videoElement.volume = e.target.value;
     localStorage.setItem("ltvideo.volume", e.target.value);
 }
