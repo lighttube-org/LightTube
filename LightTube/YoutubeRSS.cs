@@ -35,7 +35,7 @@ namespace LightTube
 				Id = x.Descendants().First(p => p.Name.LocalName == "videoId").Value,
 				Title = x.Descendants().First(p => p.Name.LocalName == "title").Value,
 				Description = x.Descendants().First(p => p.Name.LocalName == "description").Value,
-				ViewCount = int.Parse(x.Descendants().First(p => p.Name.LocalName == "statistics").Attribute("views")?.Value ?? "-1"),
+				ViewCount = long.Parse(x.Descendants().First(p => p.Name.LocalName == "statistics").Attribute("views")?.Value ?? "-1"),
 				Thumbnail = x.Descendants().First(p => p.Name.LocalName == "thumbnail").Attribute("url")?.Value,
 				ChannelName = x.Descendants().First(p => p.Name.LocalName == "name").Value,
 				ChannelId = x.Descendants().First(p => p.Name.LocalName == "channelId").Value,
@@ -70,7 +70,7 @@ namespace LightTube
 		public string Id;
 		public string Title;
 		public string Description;
-		public int ViewCount;
+		public long ViewCount;
 		public string Thumbnail;
 		public string ChannelName;
 		public string ChannelId;
