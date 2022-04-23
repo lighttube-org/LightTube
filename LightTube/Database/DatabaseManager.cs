@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -88,21 +90,27 @@ namespace LightTube.Database
 			}
 			
 			// Check cloud account
-			if (context.Request.Cookies.TryGetValue("token", out string token))
-			{
-				try
-				{
-					if (token != null)
-					{
-						user = Logins.GetUserFromToken(token).Result;
-						return Logins.GetLoginFromToken(token).Result.Scopes.Contains(requiredScope);
-					}
-				}
-				catch
+			if (!context.Request.Cookies.TryGetValue("token", out string token))
+				if (context.Request.Headers.TryGetValue("Authorization", out StringValues tokens))
+					token = tokens.ToString();
+				else
 				{
 					user = null;
 					return false;
 				}
+
+			try
+			{
+				if (token != null)
+				{
+					user = Logins.GetUserFromToken(token).Result;
+					return Logins.GetLoginFromToken(token).Result.Scopes.Contains(requiredScope);
+				}
+			}
+			catch
+			{
+				user = null;
+				return false;
 			}
 
 			user = null;
@@ -126,6 +134,30 @@ namespace LightTube.Database
 		public string Token;
 		public string UserAgent;
 		public string[] Scopes;
+
+		public XmlDocument GetXmlElement()
+		{
+			XmlDocument doc = new();
+			XmlElement login = doc.CreateElement("Login");
+			login.SetAttribute("id", Identifier);
+			login.SetAttribute("user", Email);
+
+			XmlElement token = doc.CreateElement("Token");
+			token.InnerText = Token;
+			login.AppendChild(token);
+
+			XmlElement scopes = doc.CreateElement("Scopes");
+			foreach (string scope in Scopes)
+			{
+				XmlElement scopeElement = doc.CreateElement("Scope");
+				scopeElement.InnerText = scope;
+				login.AppendChild(scopeElement);
+			}
+			login.AppendChild(scopes);
+			
+			doc.AppendChild(login);
+			return doc;
+		}
 	}
 
 	[BsonIgnoreExtraElements]

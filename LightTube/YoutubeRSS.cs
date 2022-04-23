@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace LightTube
@@ -75,5 +76,38 @@ namespace LightTube
 		public string ChannelName;
 		public string ChannelId;
 		public DateTimeOffset PublishedDate;
+
+		public XmlElement GetXmlElement(XmlDocument doc)
+		{
+			XmlElement item = doc.CreateElement("Video");
+			item.SetAttribute("id", Id);
+			item.SetAttribute("views", ViewCount.ToString());
+			item.SetAttribute("uploadedAt", PublishedDate.ToUnixTimeSeconds().ToString());
+
+			XmlElement title = doc.CreateElement("Title");
+			title.InnerText = Title;
+			item.AppendChild(title);
+			XmlElement channel = doc.CreateElement("Channel");
+			channel.SetAttribute("id", ChannelId);
+
+			XmlElement channelTitle = doc.CreateElement("Name");
+			channelTitle.InnerText = ChannelName;
+			channel.AppendChild(channelTitle);
+
+			item.AppendChild(channel);
+
+			XmlElement thumbnail = doc.CreateElement("Thumbnail");
+			thumbnail.InnerText = Thumbnail;
+			item.AppendChild(thumbnail);
+
+			if (!string.IsNullOrWhiteSpace(Description))
+			{
+				XmlElement description = doc.CreateElement("Description");
+				description.InnerText = Description;
+				item.AppendChild(description);
+			}
+
+			return item;
+		}
 	}
 }
