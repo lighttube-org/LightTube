@@ -18,6 +18,8 @@ namespace LightTube.Database
 {
 	public static class DatabaseManager
 	{
+		public static readonly string ApiUaRegex = "LightTubeApiClient\\/([0-9.]*) ([\\S]+?)\\/([0-9.]*) \\(([\\s\\S]+?)\\)";
+
 		private static IMongoCollection<LTUser> _userCollection;
 		private static IMongoCollection<LTLogin> _tokenCollection;
 		private static IMongoCollection<LTChannel> _channelCacheCollection;
@@ -142,7 +144,6 @@ namespace LightTube.Database
 	[BsonIgnoreExtraElements]
 	public class LTLogin
 	{
-		private static string _apiUaRegex = "LightTubeApiClient\\/([0-9.]*) ([\\S]+?)\\/([0-9.]*) \\(([\\s\\S]+?)\\)";
 		public string Identifier;
 		public string Email;
 		public string Token;
@@ -177,7 +178,7 @@ namespace LightTube.Database
 
 		public string GetTitle()
 		{
-			Match match = Regex.Match(UserAgent, _apiUaRegex);
+			Match match = Regex.Match(UserAgent, DatabaseManager.ApiUaRegex);
 			if (match.Success)
 				return $"API App: {match.Groups[2]} {match.Groups[3]}";
 
@@ -194,7 +195,7 @@ namespace LightTube.Database
 			sb.AppendLine($"Created: {Created.Humanize(DateTimeOffset.Now)}");
 			sb.AppendLine($"Last seen: {LastSeen.Humanize(DateTimeOffset.Now)}");
 
-			Match match = Regex.Match(UserAgent, _apiUaRegex);
+			Match match = Regex.Match(UserAgent, DatabaseManager.ApiUaRegex);
 			if (match.Success)
 			{
 				sb.AppendLine($"API version: {HttpUtility.HtmlEncode(match.Groups[1])}");

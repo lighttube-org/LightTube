@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
 using InnerTube;
 using InnerTube.Models;
 using LightTube.Database;
@@ -52,28 +52,31 @@ namespace LightTube.Controllers
 
 		[HttpPost]
 		[Route("getToken")]
-		public async Task<IActionResult> GetToken(
-			[Bind("user")] string user, 
-			[Bind("password")] string password,
-			[Bind("scopes")] string scopes)
+		public async Task<IActionResult> GetToken()
 		{
 			if (!Request.Headers.TryGetValue("User-Agent", out StringValues userAgent))
 				return Xml(BuildErrorXml("Missing User-Agent header"), HttpStatusCode.BadRequest);
 
-			if (user is null)
+			Match match = Regex.Match(userAgent.ToString(), DatabaseManager.ApiUaRegex);
+			if (!match.Success)
+				return Xml(BuildErrorXml("Bad User-Agent header. Please see 'Documentation/API requests'"), HttpStatusCode.BadRequest);
+			if (match.Groups[1].ToString() != "1.0")
+				return Xml(BuildErrorXml($"Unknown API version {match.Groups[1]}"), HttpStatusCode.BadRequest);
+
+			if (!Request.Form.TryGetValue("user", out StringValues user))
 				return Xml(BuildErrorXml("Missing request value: 'user'"), HttpStatusCode.BadRequest);
-			if (password is null)
+			if (!Request.Form.TryGetValue("password", out StringValues password))
 				return Xml(BuildErrorXml("Missing request value: 'password'"), HttpStatusCode.BadRequest);
-			if (scopes is null)
+			if (!Request.Form.TryGetValue("scopes", out StringValues scopes))
 				return Xml(BuildErrorXml("Missing request value: 'scopes'"), HttpStatusCode.BadRequest);
 
-			string[] newScopes = scopes.Split(",");
+			string[] newScopes = scopes.First().Split(",");
 			foreach (string s in newScopes)
 				if (!_scopes.Contains(s))
 					return Xml(BuildErrorXml($"Unknown scope '{s}'"), HttpStatusCode.BadRequest);
 
 			LTLogin ltLogin =
-				await DatabaseManager.Logins.CreateToken(user, password, userAgent.ToString(), scopes.Split(","));
+				await DatabaseManager.Logins.CreateToken(user, password, userAgent.ToString(), scopes.First().Split(","));
 
 			return Xml(ltLogin.GetXmlElement(), HttpStatusCode.Created);
 		}
