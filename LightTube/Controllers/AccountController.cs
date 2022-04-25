@@ -10,6 +10,7 @@ using LightTube.Contexts;
 using LightTube.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 
 namespace LightTube.Controllers
@@ -254,6 +255,58 @@ namespace LightTube.Controllers
 				CurrentLanguage = HttpContext.GetLanguage(),
 				CurrentRegion = HttpContext.GetRegion(),
 				MobileLayout = Utils.IsClientMobile(Request)
+			});
+		}
+
+		public async Task<IActionResult> Settings()
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
+				Redirect("/Account/Login");
+
+			if (Request.Method == "POST")
+			{
+				foreach ((string key, StringValues value) in Request.Form)
+				{
+					switch (key)
+					{
+						case "theme":
+							Response.Cookies.Append("theme", value);
+							break;
+						case "hl":
+							Response.Cookies.Append("hl", value);
+							break;
+						case "gl":
+							Response.Cookies.Append("gl", value);
+							break;
+						case "compatibility":
+							Response.Cookies.Append("compatibility", value);
+							break;
+						case "api-access":
+							await DatabaseManager.Logins.SetApiAccess(user, bool.Parse(value));
+							break;
+					}
+				}
+				return Redirect("/Account");
+			}
+
+			YoutubeLocals locals = await _youtube.GetLocalsAsync();
+
+			Request.Cookies.TryGetValue("theme", out string theme);
+
+			bool compatibility = false;
+			if (Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
+				bool.TryParse(compatibilityString, out compatibility);
+
+			return View(new SettingsContext
+			{
+				Languages = locals.Languages,
+				Regions = locals.Regions,
+				CurrentLanguage = HttpContext.GetLanguage(),
+				CurrentRegion = HttpContext.GetRegion(),
+				MobileLayout = Utils.IsClientMobile(Request),
+				Theme = theme ?? "light",
+				CompatibilityMode = compatibility,
+				ApiAccess = user.ApiAccess
 			});
 		}
 

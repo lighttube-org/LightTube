@@ -75,10 +75,21 @@ namespace LightTube.Controllers
 				if (!_scopes.Contains(s))
 					return Xml(BuildErrorXml($"Unknown scope '{s}'"), HttpStatusCode.BadRequest);
 
-			LTLogin ltLogin =
-				await DatabaseManager.Logins.CreateToken(user, password, userAgent.ToString(), scopes.First().Split(","));
-
-			return Xml(ltLogin.GetXmlElement(), HttpStatusCode.Created);
+			try
+			{
+				LTLogin ltLogin =
+					await DatabaseManager.Logins.CreateToken(user, password, userAgent.ToString(),
+						scopes.First().Split(","));
+				return Xml(ltLogin.GetXmlElement(), HttpStatusCode.Created);
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return Xml(BuildErrorXml("Invalid credentials"), HttpStatusCode.Unauthorized);
+			}
+			catch (InvalidOperationException)
+			{
+				return Xml(BuildErrorXml("User has API access disabled"), HttpStatusCode.Forbidden);
+			}
 		}
 
 		[Route("subscriptions/feed")]

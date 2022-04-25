@@ -21,14 +21,16 @@ namespace LightTube.Database
 			_tokenCollection = tokenCollection;
 		}
 
-		public async Task<LTLogin> CreateToken(string email, string password, string userAgent, IEnumerable<string> scopes)
+		public async Task<LTLogin> CreateToken(string email, string password, string userAgent, string[] scopes)
 		{
 			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
 			if (!await users.AnyAsync())
-				throw new KeyNotFoundException("Invalid credentials");
+				throw new UnauthorizedAccessException("Invalid credentials");
 			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
 				throw new UnauthorizedAccessException("Invalid credentials");
+			if (!scopes.Contains("web") && !user.ApiAccess)
+				throw new InvalidOperationException("This user has API access disabled");
 
 			LTLogin login = new()
 			{
@@ -116,6 +118,12 @@ namespace LightTube.Database
 			
 			await _userCollection.ReplaceOneAsync(x => x.Email == user.Email, user);
 			return (ltChannel, user.SubscribedChannels.Contains(ltChannel.ChannelId));
+		}
+
+		public async Task SetApiAccess(LTUser user, bool access)
+		{
+			user.ApiAccess = access;
+			await _userCollection.ReplaceOneAsync(x => x.Email == user.Email, user);
 		}
 
 		public async Task DeleteUser(string email, string password)

@@ -139,6 +139,7 @@ namespace LightTube.Database
 		public string Email;
 		public string PasswordHash;
 		public List<string> SubscribedChannels;
+		public bool ApiAccess;
 	}
 
 	[BsonIgnoreExtraElements]

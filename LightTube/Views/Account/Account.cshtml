@@ -1,5 +1,5 @@
-@using System.Web
 @using LightTube.Database
+@using System.Web
 @model LightTube.Contexts.BaseContext
 
 @{
@@ -13,8 +13,8 @@
 		"light" => "dark",
 		"dark" => "light",
 		var _ => "dark"
-	};
-	
+		};
+
 	bool compatibility = false;
 	if (Context.Request.Cookies.TryGetValue("compatibility", out string compatibilityString))
 		bool.TryParse(compatibilityString, out compatibility);
@@ -24,24 +24,38 @@
 	<div>
 		<div class="fullscreen-account-menu">
 			<h1>Settings</h1>
-            <br>
-            <div class="guide-item"><a href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">@(compatibility ? "Disable" : "Enable") compatibility mode</a></div>
-            <div class="guide-item"><a href="/toggles/theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Switch to @(newTheme) theme</a></div>
-            <br>
-            @if (Context.TryGetUser(out LTUser user, "web"))
-            {
-            	<div class="guide-item"><a href="/Account/ContentSettings">Content Settings</a></div>
-            	@if (user.PasswordHash != "local_account")
-            	{
-            		<div class="guide-item"><a href="/Account/Logins">Active logins</a></div>
-            	}
-            	<div class="guide-item"><a href="/Account/Logout">Log out</a></div>
-            }
-            else
-            {
-            	<div class="guide-item"><a href="/Account/Login">Log in</a></div>
-            	<div class="guide-item"><a href="/Account/Register">Register</a></div>
-            }
+			<br>
+			<div class="guide-item">
+				<a href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">@(compatibility ? "Disable" : "Enable") compatibility mode</a>
+			</div>
+			<div class="guide-item">
+				<a href="/toggles/theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Switch to @(newTheme) theme</a>
+			</div>
+			<br>
+			@if (Context.TryGetUser(out LTUser user, "web"))
+			{
+				<div class="guide-item">
+					<a href="/Account/ContentSettings">Content Settings</a>
+				</div>
+				@if (user.PasswordHash != "local_account")
+				{
+					<div class="guide-item">
+						<a href="/Account/Logins">Active logins</a>
+					</div>
+				}
+				<div class="guide-item">
+					<a href="/Account/Logout">Log out</a>
+				</div>
+			}
+			else
+			{
+				<div class="guide-item">
+					<a href="/Account/Login">Log in</a>
+				</div>
+				<div class="guide-item">
+					<a href="/Account/Register">Register</a>
+				</div>
+			}
 		</div>
 	</div>
 	<div>
