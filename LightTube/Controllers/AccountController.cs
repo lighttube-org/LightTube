@@ -163,14 +163,27 @@ namespace LightTube.Controllers
 
 		public async Task<IActionResult> Logins()
 		{
-			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+			if (!HttpContext.TryGetUser(out LTUser _, "web") || !HttpContext.Request.Cookies.TryGetValue("token", out string token))
 				return Redirect("/Account/Login");
 
 			return View(new LoginsContext
 			{
+				CurrentLogin = await DatabaseManager.Logins.GetCurrentLoginId(token),
 				Logins = await DatabaseManager.Logins.GetAllUserTokens(token),
 				MobileLayout = Utils.IsClientMobile(Request)
 			});
+		}
+
+		public async Task<IActionResult> DisableLogin(string id)
+		{
+			if (!HttpContext.Request.Cookies.TryGetValue("token", out string token))
+				return Redirect("/Account/Login");
+
+			try
+			{
+				await DatabaseManager.Logins.RemoveTokenFromId(token, id);
+			} catch { }
+			return Redirect("/Account/Logins");
 		}
 
 		public async Task<IActionResult> Subscribe(string channel)

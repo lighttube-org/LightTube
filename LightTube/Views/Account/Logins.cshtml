@@ -6,9 +6,13 @@
 }
 
 
-<ul>
+<div class="logins-container">
 	@foreach (LTLogin login in Model.Logins)
 	{
-		<li>@login.Identifier - @login.UserAgent</li>
+		<div class="login">
+			<h2 class="max-lines-1">@(login.Identifier == Model.CurrentLogin ? "(This window) " : "")@login.GetTitle()</h2>
+			<p>@Html.Raw(login.GetDescription().Replace("\n", "<br>"))</p>
+			<a href="/Account/DisableLogin?id=@login.Identifier" class="login-button" style="color:red;">Disable</a>
+		</div>
 	}
-</ul>
+</div>

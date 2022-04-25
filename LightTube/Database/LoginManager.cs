@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -35,10 +36,19 @@ namespace LightTube.Database
 				Email = email,
 				Token = GenerateToken(256),
 				UserAgent = userAgent,
-				Scopes = scopes.ToArray()
+				Scopes = scopes.ToArray(),
+				Created = DateTimeOffset.Now,
+				LastSeen = DateTimeOffset.Now
 			};
 			await _tokenCollection.InsertOneAsync(login);
 			return login;
+		}
+
+		public async Task UpdateLastAccess(string id, DateTimeOffset offset)
+		{
+			LTLogin login = (await _tokenCollection.FindAsync(x => x.Identifier == id)).First();
+			login.LastSeen = offset;
+			await _tokenCollection.ReplaceOneAsync(x => x.Identifier == id, login);
 		}
 
 		public async Task RemoveToken(string token)
@@ -58,6 +68,19 @@ namespace LightTube.Database
 			await _tokenCollection.FindOneAndDeleteAsync(t => t.Identifier == identifier && t.Email == user.Email);
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public async Task RemoveTokenFromId(string sourceToken, string identifier)
+		{
+			LTLogin login = (await _tokenCollection.FindAsync(x => x.Token == sourceToken)).First();
+			LTLogin deletedLogin = (await _tokenCollection.FindAsync(x => x.Identifier == identifier)).First();
+
+			if (login.Email == deletedLogin.Email)
+				await _tokenCollection.FindOneAndDeleteAsync(t => t.Identifier == identifier);
+			else
+				throw new UnauthorizedAccessException(
+					"Logged in user does not match the token that is supposed to be deleted");
+		}
+
 		public async Task<LTUser> GetUserFromToken(string token)
 		{
 			string email = (await _tokenCollection.FindAsync(x => x.Token == token)).First().Email;
@@ -74,6 +97,11 @@ namespace LightTube.Database
 		{
 			string email = (await _tokenCollection.FindAsync(x => x.Token == token)).First().Email;
 			return await (await _tokenCollection.FindAsync(u => u.Email == email)).ToListAsync();
+		}
+
+		public async Task<string> GetCurrentLoginId(string token)
+		{
+			return (await _tokenCollection.FindAsync(t => t.Token == token)).First().Identifier;
 		}
 
 		public async Task<(LTChannel channel, bool subscribed)> SubscribeToChannel(LTUser user, YoutubeChannel channel)

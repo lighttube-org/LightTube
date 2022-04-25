@@ -1103,3 +1103,63 @@ a.icon-button, a.icon-button > img {
     border: 1px solid var(--border-color);
     text-decoration: none;
 }
+
+/* settings page */
+
+.settings-categories {
+    background-color: var(--context-menu-background);
+    display: flex;
+    column-gap: 16px;
+    padding: 0 16px;
+}
+
+.settings-categories > a {
+    height: 3rem;
+    line-height: 3rem;
+    padding: 0 8px;
+    text-decoration: none;
+}
+
+.settings-content {
+    max-width: 400px;
+    margin: auto;
+}
+
+.settings-content > div {
+    width: 100%;
+    padding: 8px;
+}
+
+.settings-content > div > label {
+    width: 40%;
+    display: inline-block;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.settings-content > div > select {
+    width: 50%;
+    display: inline-block;
+    border: 1px solid var(--border-color);
+    padding: 4px;
+    background-color: var(--context-menu-background);
+    color: var(--text-primary);
+}
+
+/* logins page */
+
+.logins-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 16px;
+    padding: 16px;
+}
+
+.login {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 500px;
+    padding: 8px;
+}
