@@ -245,19 +245,6 @@ namespace LightTube.Controllers
 			}
 		}
 
-		public async Task<IActionResult> ContentSettings()
-		{
-			YoutubeLocals locals = await _youtube.GetLocalsAsync();
-			return View(new LocalsContext
-			{
-				Languages = locals.Languages,
-				Regions = locals.Regions,
-				CurrentLanguage = HttpContext.GetLanguage(),
-				CurrentRegion = HttpContext.GetRegion(),
-				MobileLayout = Utils.IsClientMobile(Request)
-			});
-		}
-
 		public async Task<IActionResult> Settings()
 		{
 			if (!HttpContext.TryGetUser(out LTUser user, "web"))
@@ -308,20 +295,6 @@ namespace LightTube.Controllers
 				CompatibilityMode = compatibility,
 				ApiAccess = user.ApiAccess
 			});
-		}
-
-		public IActionResult SetContentSettings(string type, string value)
-		{
-			switch (type)
-			{
-				case "language":
-					HttpContext.Response.Cookies.Append("hl", value);
-					break;
-				case "region":
-					HttpContext.Response.Cookies.Append("gl", value);
-					break;
-			}
-			return Redirect("/Account/ContentSettings");
 		}
 	}
 }

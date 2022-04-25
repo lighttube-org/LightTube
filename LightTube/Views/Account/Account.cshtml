@@ -35,7 +35,7 @@
 			@if (Context.TryGetUser(out LTUser user, "web"))
 			{
 				<div class="guide-item">
-					<a href="/Account/ContentSettings">Content Settings</a>
+					<a href="/Account/Settings">Settings</a>
 				</div>
 				@if (user.PasswordHash != "local_account")
 				{
