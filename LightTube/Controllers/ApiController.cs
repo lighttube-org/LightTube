@@ -136,7 +136,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Playlist(string id, string continuation = null)
 		{
 			Regex regex = new(PlaylistIdRegex);
-			if (!regex.IsMatch(id) || id.Length != 24) return GetErrorVideoPlayer(id, "Invalid playlist ID " + id);
+			if (!regex.IsMatch(id) || id.Length != 34) return GetErrorVideoPlayer(id, "Invalid playlist ID " + id);
 
 
 			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
