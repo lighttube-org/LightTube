@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
@@ -107,7 +108,16 @@ namespace LightTube.Controllers
 		{
 			SearchContext context = new()
 			{
-				Results = await _youtube.SearchAsync(search_query, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				Results = string.IsNullOrWhiteSpace(search_query)
+					? new YoutubeSearchResults
+					{
+						Refinements = Array.Empty<string>(),
+						EstimatedResults = 0,
+						Results = Array.Empty<DynamicItem>(),
+						ContinuationKey = null
+					}
+					: await _youtube.SearchAsync(search_query, continuation, HttpContext.GetLanguage(),
+						HttpContext.GetRegion()),
 				Query = search_query,
 				ContinuationKey = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
