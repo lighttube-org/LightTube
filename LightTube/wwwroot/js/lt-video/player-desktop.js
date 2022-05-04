@@ -632,7 +632,7 @@ Player.prototype.getTimeString = function (s) {
 }
 
 Player.prototype.update = function () {
-    if (this.info.live)
+    if (!this.info.live)
         this.timeUpdate();
 
     switch (this.__videoElement.readyState) {
