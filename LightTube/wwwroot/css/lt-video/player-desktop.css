@@ -22,8 +22,6 @@
     bottom: 0;
     left: 0;
     right: 0;
-    width: 100vw;
-    height: 100vh;
 }
 
 .player * {
@@ -51,7 +49,7 @@
 .player-title {
     grid-area: 1 / 1 / 2 / 3;
     color: white;
-    z-index: 1;
+    z-index: 2;
     font-size: 27px;
     background-image: linear-gradient(180deg, #0007 0%, #0000 100%);
     padding: 8px;
@@ -70,8 +68,8 @@
     height: min-content;
     position: relative;
     bottom: 0;
-    z-index: 1;
-    background-image: linear-gradient(0deg, #0007 0%, #0000 100%);
+    z-index: 2;
+    background-image: linear-gradient(0deg, #0007 0%, #0007 80%, #0000 100%);
     grid-area: 5 / 1 / 6 / 3;
 }
 
@@ -170,7 +168,7 @@
     height: 4px;
     transition: height linear 100ms;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
 }
 
 .player-playback-bar-bg {
@@ -239,4 +237,18 @@
     box-sizing: content-box;
     border: 1px solid white;
     top: 10px;
+}
+
+.player-buffering {
+    grid-area: 1 / 1 / 6 / 3;
+    background-color: #000A;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-buffering-spinner {
+    width: 80px;
+    height: 80px;
 }
