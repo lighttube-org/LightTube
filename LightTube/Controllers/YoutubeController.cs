@@ -152,5 +152,12 @@ namespace LightTube.Controllers
 				context.Channel.Avatars.First().Url.ToString());
 			return View(context);
 		}
+
+		[Route("/shorts/{id}")]
+		public IActionResult Shorts(string id)
+		{
+			// yea no fuck shorts
+			return Redirect("/watch?v=" + id);
+		}
 	}
 }
