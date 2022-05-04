@@ -252,21 +252,25 @@ namespace LightTube.Controllers
 
 			if (Request.Method == "POST")
 			{
+				CookieOptions opts = new()
+				{
+					Expires = DateTimeOffset.MaxValue
+				};
 				foreach ((string key, StringValues value) in Request.Form)
 				{
 					switch (key)
 					{
 						case "theme":
-							Response.Cookies.Append("theme", value);
+							Response.Cookies.Append("theme", value, opts);
 							break;
 						case "hl":
-							Response.Cookies.Append("hl", value);
+							Response.Cookies.Append("hl", value, opts);
 							break;
 						case "gl":
-							Response.Cookies.Append("gl", value);
+							Response.Cookies.Append("gl", value, opts);
 							break;
 						case "compatibility":
-							Response.Cookies.Append("compatibility", value);
+							Response.Cookies.Append("compatibility", value, opts);
 							break;
 						case "api-access":
 							await DatabaseManager.Logins.SetApiAccess(user, bool.Parse(value));
