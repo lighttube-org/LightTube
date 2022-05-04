@@ -110,7 +110,7 @@
         volumeRange.setAttribute("value", vol ?? "1");
         volumeRange.setAttribute("type", "range");
         if (vol != null)
-            this.setVolume({target:{value:Number(vol)}});
+            this.setVolume({target: {value: Number(vol)}});
         this.controls.volume.appendChild(volumeRange);
 
         this.controls.div.classList.add("player-button-divider")
@@ -173,12 +173,6 @@
         if (!info.embed)
             this.titleElement.style.display = "none";
 
-        // update the time text
-        if (!info.live) {
-            this.__videoElement.ontimeupdate = e => this.timeUpdate(e);
-            this.__videoElement.ondurationchange = e => this.timeUpdate(e);
-        }
-
         // events
         container.onfullscreenchange = () => {
             if (!document.fullscreenElement) {
@@ -228,6 +222,18 @@
         this.controls.settings.setAttribute("data-action", "toggle");
         this.controls.settings.querySelector("i").setAttribute("data-action", "toggle");
         this.updateMenu(sources);
+
+        // buffering
+        this.bufferingScreen = document.createElement("div");
+        this.bufferingScreen.classList.add("player-buffering");
+        this.container.appendChild(this.bufferingScreen);
+
+        let bufferingSpinner = document.createElement("img");
+        bufferingSpinner.classList.add("player-buffering-spinner");
+        bufferingSpinner.src = "/img/spinner.gif";
+        this.bufferingScreen.appendChild(bufferingSpinner);
+
+        setInterval(() => this.update(), 100);
     }
 }
 
@@ -468,9 +474,9 @@ Player.prototype.menuButtonClick = function (e) {
             this.updateMenu();
             break;
         case "shakavariant":
-            if (args[0]!=="-1")
+            if (args[0] !== "-1")
                 this.__externalPlayer.selectVariantTrack(this.__externalPlayer.getVariantTracks()[Number.parseFloat(args[0])], true, 2)
-            this.__externalPlayer.configure({abr:{enabled:args[0]==="-1"}})
+            this.__externalPlayer.configure({abr: {enabled: args[0] === "-1"}})
             break;
         case "hlslevel":
             this.__externalPlayer.nextLevel = Number.parseInt(args[0]);
@@ -505,9 +511,9 @@ Player.prototype.pip = function () {
 }
 
 Player.prototype.timeUpdate = function (e) {
-    this.controls.time.innerHTML = this.getTimeString(e.target.currentTime) + " / " + this.getTimeString(e.target.duration);
-    this.playbackBar.played.style.width = ((e.target.currentTime / e.target.duration) * 100) + "%";
-    this.playbackBar.buffered.style.width = ((this.getLoadEnd() / e.target.duration) * 100) + "%";
+    this.controls.time.innerHTML = this.getTimeString(this.__videoElement.currentTime) + " / " + this.getTimeString(this.__videoElement.duration);
+    this.playbackBar.played.style.width = ((this.__videoElement.currentTime / this.__videoElement.duration) * 100) + "%";
+    this.playbackBar.buffered.style.width = ((this.getLoadEnd() / this.__videoElement.duration) * 100) + "%";
 
     if (this.controlsDisappearTimeout - Date.now() < 0 && !this.container.classList.contains("hide-controls") && !this.__videoElement.paused)
         this.container.classList.add("hide-controls");
@@ -609,7 +615,7 @@ Player.prototype.keyboardHandler = function (e) {
             this.fullscreen();
             break;
         case "KeyM":
-            this.mute({target:{tagName: ""}});
+            this.mute({target: {tagName: ""}});
             break;
         default:
             pd = false;
@@ -623,6 +629,20 @@ Player.prototype.getTimeString = function (s) {
     if (res.startsWith("0"))
         res = res.substr(1);
     return res;
+}
+
+Player.prototype.update = function () {
+    if (this.info.live)
+        this.timeUpdate();
+
+    switch (this.__videoElement.readyState) {
+        case 1:
+            this.bufferingScreen.style.display = "flex";
+            break;
+        default:
+            this.bufferingScreen.style.display = "none";
+            break;
+    }
 }
 
 const loadPlayerWithShaka = async (query, info, sources, manifestUri) => {
