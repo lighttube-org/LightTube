@@ -15,8 +15,8 @@
 
 <div class="playlist-page">
 	<div class="playlist-info">
-		<div class="thumbnail" style="background-image: url('@Model.Playlist.Thumbnail.Last().Url')">
-			<a href="/watch?v=@Model.Playlist.Videos.First().Id&list=@Model.Id">Play all</a>
+		<div class="thumbnail" style="background-image: url('@Model.Playlist.Thumbnail.LastOrDefault()?.Url')">
+			<a href="/watch?v=@Model.Playlist.Videos.FirstOrDefault()?.Id&list=@Model.Id">Play all</a>
 		</div>
 		<p class="title">@Model.Playlist.Title</p>
 		<span class="info">@Model.Playlist.VideoCount videos • @Model.Playlist.ViewCount views • @Model.Playlist.LastUpdated</span>

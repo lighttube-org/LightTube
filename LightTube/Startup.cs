@@ -23,10 +23,11 @@ namespace LightTube
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			Youtube yt = new();
 			services.AddControllersWithViews();
-			services.AddSingleton(new Youtube());
+			services.AddSingleton(yt);
 			DynamicItemExtensions.RegisterRenderers();
-			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"));
+			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"), yt);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

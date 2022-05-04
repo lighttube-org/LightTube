@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using InnerTube;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using MongoDB.Driver;
@@ -15,18 +16,24 @@ namespace LightTube.Database
 		private static IMongoCollection<LTUser> _userCollection;
 		private static IMongoCollection<LTLogin> _tokenCollection;
 		private static IMongoCollection<LTChannel> _channelCacheCollection;
+		private static IMongoCollection<LTPlaylist> _playlistCollection;
+		private static IMongoCollection<LTVideo> _videoCacheCollection;
 		public static LoginManager Logins { get; private set; }
 		public static ChannelManager Channels { get; private set; }
+		public static PlaylistManager Playlists { get; private set; }
 
-		public static void Init(string connstr)
+		public static void Init(string connstr, Youtube youtube)
 		{
 			MongoClient client = new(connstr);
 			IMongoDatabase database = client.GetDatabase("lighttube");
 			_userCollection = database.GetCollection<LTUser>("users");
 			_tokenCollection = database.GetCollection<LTLogin>("tokens");
+			_playlistCollection = database.GetCollection<LTPlaylist>("playlists");
 			_channelCacheCollection = database.GetCollection<LTChannel>("channelCache");
+			_videoCacheCollection = database.GetCollection<LTVideo>("videoCache");
 			Logins = new LoginManager(_userCollection, _tokenCollection);
 			Channels = new ChannelManager(_channelCacheCollection);
+			Playlists = new PlaylistManager(_userCollection, _playlistCollection, _videoCacheCollection, youtube);
 		}
 
 		public static void CreateLocalAccount(this HttpContext context)

@@ -130,7 +130,9 @@ namespace LightTube.Controllers
 		{
 			PlaylistContext context = new()
 			{
-				Playlist = await _youtube.GetPlaylistAsync(list, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				Playlist = list.StartsWith("LT-PL")
+					? await (await DatabaseManager.Playlists.GetPlaylist(list)).ToYoutubePlaylist()
+					: await _youtube.GetPlaylistAsync(list, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
 				Id = list,
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request)
