@@ -6,6 +6,8 @@ namespace LightTube.Contexts
 	{
 		public YoutubePlaylist Playlist;
 		public string Id;
+		public string Message;
+		public bool Editable;
 		public string ContinuationToken;
 	}
 }

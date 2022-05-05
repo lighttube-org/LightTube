@@ -22,27 +22,29 @@ namespace LightTube.Database
 			List<Thumbnail> t = new();
 			if (VideoIds.Count > 0)
 				t.Add(new Thumbnail { Url = $"https://i.ytimg.com/vi_webp/{VideoIds.First()}/maxresdefault.webp" });
-			YoutubePlaylist playlist = new();
-			playlist.Id = Id;
-			playlist.Title = Name;
-			playlist.Description = Description;
-			playlist.VideoCount = VideoIds.Count.ToString();
-			playlist.ViewCount = "0";
-			playlist.LastUpdated = "Last updated " + LastUpdated.ToString(); //todo: format this
-			playlist.Thumbnail = t.ToArray();
-			playlist.Channel = new Channel
+			YoutubePlaylist playlist = new()
 			{
-				Name = Author,
-				Id = GenerateChannelId(),
-				SubscriberCount = "0 subscribers",
-				Avatars = Array.Empty<Thumbnail>()
+				Id = Id,
+				Title = Name,
+				Description = Description,
+				VideoCount = VideoIds.Count.ToString(),
+				ViewCount = "0",
+				LastUpdated = "Last updated " + LastUpdated.ToString("MMMM dd, yyyy"),
+				Thumbnail = t.ToArray(),
+				Channel = new Channel
+				{
+					Name = Author,
+					Id = GenerateChannelId(),
+					SubscriberCount = "0 subscribers",
+					Avatars = Array.Empty<Thumbnail>()
+				},
+				Videos = (await DatabaseManager.Playlists.GetPlaylistVideos(Id)).Select(x =>
+				{
+					x.Index = VideoIds.IndexOf(x.Id) + 1;
+					return x;
+				}).Cast<DynamicItem>().ToArray(),
+				ContinuationKey = null
 			};
-			playlist.Videos = (await DatabaseManager.Playlists.GetPlaylistVideos(Id)).Select(x =>
-			{
-				x.Index = VideoIds.IndexOf(x.Id) + 1;
-				return x;
-			}).Cast<DynamicItem>().ToArray();
-			playlist.ContinuationKey = null;
 			return playlist;
 		}
 

@@ -13,6 +13,12 @@
 	Layout = "_Layout";
 }
 
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+	<div class="playlist-message" style="padding: 16px;background-color: var(--border-color); color: var(--text-primary);">
+		@Model.Message
+	</div>
+}
 <div class="playlist-page">
 	<div class="playlist-info">
 		<div class="thumbnail" style="background-image: url('@Model.Playlist.Thumbnail.LastOrDefault()?.Url')">
@@ -50,6 +56,12 @@
 						<a href="/channel/@video.Channel.Name">@video.Channel.Name</a>
 					</div>
 				</div>
+				@if (Model.Editable)
+				{
+					<a href="/playlist?list=@Model.Id&delete=@(video.Index - 1)" class="edit">
+						<i class="bi bi-trash"></i>
+	                </a>
+				}
 			</div>
 		}
 	</div>

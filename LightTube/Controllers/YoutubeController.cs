@@ -126,16 +126,40 @@ namespace LightTube.Controllers
 		}
 
 		[Route("/playlist")]
-		public async Task<IActionResult> Playlist(string list, string continuation = null)
+		public async Task<IActionResult> Playlist(string list, string continuation = null, int? delete = null, string add = null)
 		{
+			HttpContext.TryGetUser(out LTUser user, "web");
+			
+			YoutubePlaylist pl = list.StartsWith("LT-PL")
+				? await (await DatabaseManager.Playlists.GetPlaylist(list)).ToYoutubePlaylist()
+				: await _youtube.GetPlaylistAsync(list, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+
+			string message = "";
+
+			if (list.StartsWith("LT-PL") && pl.Channel.Name == user?.Email)
+			{
+				if (delete != null)
+				{
+					LTVideo removed = await DatabaseManager.Playlists.RemoveVideoFromPlaylist(list, delete.Value);
+					message += $"Removed video '{removed.Title}'";
+				}
+
+				if (add != null)
+				{
+					LTVideo added = await DatabaseManager.Playlists.AddVideoToPlaylist(list, add);
+					message += $"Added video '{added.Title}'";
+				}
+				pl = await (await DatabaseManager.Playlists.GetPlaylist(list)).ToYoutubePlaylist();
+			}
+
 			PlaylistContext context = new()
 			{
-				Playlist = list.StartsWith("LT-PL")
-					? await (await DatabaseManager.Playlists.GetPlaylist(list)).ToYoutubePlaylist()
-					: await _youtube.GetPlaylistAsync(list, continuation, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				Playlist = pl,
 				Id = list,
 				ContinuationToken = continuation,
-				MobileLayout = Utils.IsClientMobile(Request)
+				MobileLayout = Utils.IsClientMobile(Request),
+				Message = message,
+				Editable = list.StartsWith("LT-PL") && pl.Channel.Name == user?.Email
 			};
 			return View(context);
 		}

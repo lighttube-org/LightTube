@@ -395,6 +395,13 @@ a.icon-link, a.icon-link > i {
     display: none;
 }
 
+.playlist-video > .edit {
+    grid-area: edit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* list playlist item */
 
 .playlist a {
@@ -867,11 +874,11 @@ a.icon-link, a.icon-link > i {
 .video-list > .playlist-video {
     text-decoration: none;
     display: grid;
-    grid-template-columns: 160px 1fr;
+    grid-template-columns: 160px 1fr 50px;
     grid-template-rows: 90px;
     grid-auto-flow: row;
     grid-gap: 0 16px;
-    grid-template-areas: "thumbnail info";
+    grid-template-areas: "thumbnail info edit";
 
     color: var(--text-secondary);
     font-size: small;

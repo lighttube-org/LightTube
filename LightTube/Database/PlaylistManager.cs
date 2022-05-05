@@ -68,7 +68,7 @@ namespace LightTube.Database
 			return videos;
 		}
 
-		public async Task<LTPlaylist> AddVideoToPlaylist(string playlistId, string videoId)
+		public async Task<LTVideo> AddVideoToPlaylist(string playlistId, string videoId)
 		{
 			LTPlaylist pl = await GetPlaylist(playlistId);
 			YoutubeVideo vid = await _youtube.GetVideoAsync(videoId);
@@ -102,26 +102,26 @@ namespace LightTube.Database
 				.Push(x => x.VideoIds, vid.Id);
 			_playlistCollection.FindOneAndUpdate(x => x.Id == playlistId, update);
 
-			return pl;
+			return v;
 		}
 
-		public async Task<LTPlaylist> RemoveVideoFromPlaylist(string playlistId, string videoId)
+		public async Task<LTVideo> RemoveVideoFromPlaylist(string playlistId, int videoIndex)
 		{
 			LTPlaylist pl = await GetPlaylist(playlistId);
 
-			pl.VideoIds.Remove(videoId);
+			IAsyncCursor<LTVideo> cursor = await _videoCacheCollection.FindAsync(x => x.Id == pl.VideoIds[videoIndex]);
+			LTVideo v = await cursor.FirstAsync();
+			pl.VideoIds.RemoveAt(videoIndex);
 
-			UpdateDefinition<LTPlaylist> update = Builders<LTPlaylist>.Update
-				.Pull(x => x.VideoIds, videoId);
-			_playlistCollection.FindOneAndUpdate(x => x.Id == playlistId, update);
+			await _playlistCollection.FindOneAndReplaceAsync(x => x.Id == playlistId, pl);
 			
-			return pl;
+			return v;
 		}
 
 		private string GetDurationString(long length)
 		{
 			string s = TimeSpan.FromSeconds(length).ToString();
-			while (s.StartsWith("00:")) s = s[3..];
+			while (s.StartsWith("00:") && s.Length > 5) s = s[3..];
 			return s;
 		}
 
