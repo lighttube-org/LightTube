@@ -118,6 +118,13 @@ namespace LightTube.Database
 			return v;
 		}
 
+		public async Task<IEnumerable<LTPlaylist>> GetUserPlaylists(string userId)
+		{
+			IAsyncCursor<LTPlaylist> cursor = await _playlistCollection.FindAsync(x => x.Author == userId);
+			
+			return cursor.ToEnumerable();
+		}
+
 		private string GetDurationString(long length)
 		{
 			string s = TimeSpan.FromSeconds(length).ToString();

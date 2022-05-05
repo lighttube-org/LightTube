@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using InnerTube;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LightTube.Controllers
 {
@@ -298,6 +300,22 @@ namespace LightTube.Controllers
 				Theme = theme ?? "light",
 				CompatibilityMode = compatibility,
 				ApiAccess = user.ApiAccess
+			});
+		}
+
+		public async Task<IActionResult> AddVideoToPlaylist(string v)
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
+				Redirect("/Account/Login");
+
+			JObject ytPlayer = await InnerTube.Utils.GetAuthorizedPlayer(v, new HttpClient());
+			return View(new AddToPlaylistContext
+			{
+				Id = v,
+				Video = await _youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
+				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.Email),
+				Thumbnail = ytPlayer?["videoDetails"]?["thumbnail"]?["thumbnails"]?[0]?["url"]?.ToString() ?? $"https://i.ytimg.com/vi_webp/{v}/maxresdefault.webp",
+				MobileLayout = Utils.IsClientMobile(Request),
 			});
 		}
 	}

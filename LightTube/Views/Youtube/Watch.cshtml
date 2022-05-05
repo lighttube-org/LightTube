@@ -153,15 +153,19 @@
 				<span>Published @Model.Video.UploadDate</span>
 				<div class="divider"></div>
 				<div class="video-info-buttons">
-	                <div>
-                		<i class="bi bi-hand-thumbs-up"></i><span>@Model.Engagement.Likes</span>
-	                </div>
+					<div>
+						<i class="bi bi-hand-thumbs-up"></i><span>@Model.Engagement.Likes</span>
+					</div>
 	                <div>
                 		<i class="bi bi-hand-thumbs-down"></i><span>@Model.Engagement.Dislikes</span>
 	                </div>
 	                <a href="/download?v=@Model.Video.Id">
                 		<i class="bi bi-download"></i>
                 		Download
+	                </a>
+	                <a href="/Account/AddVideoToPlaylist?v=@Model.Video.Id">
+                		<i class="bi bi-folder-plus"></i>
+                		@(Model.MobileLayout ? "Add" : "Add to playlist")
 	                </a>
 	                <a href="https://www.youtube.com/watch?v=@Model.Video.Id">
                 		<i class="bi bi-share"></i>
