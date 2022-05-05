@@ -1039,6 +1039,24 @@ a.icon-link, a.icon-link > i {
     margin: auto;
 }
 
+.playlist-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    row-gap: 10px;
+    margin: auto;
+}
+
+.playlist-form > input, .playlist-form > select, .login-button {
+    background-color: var(--item-active-background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    width: 80%;
+    row-gap: 10px;
+    margin: auto;
+}
+
 .login-button {
     background-color: var(--item-active-background);
     color: var(--text-primary);

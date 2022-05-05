@@ -318,5 +318,34 @@ namespace LightTube.Controllers
 				MobileLayout = Utils.IsClientMobile(Request),
 			});
 		}
+
+		[HttpGet]
+		public IActionResult CreatePlaylist(string returnUrl = null)
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
+				Redirect("/Account/Login");
+
+			return View(new BaseContext
+			{
+				MobileLayout = Utils.IsClientMobile(Request),
+			});
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> CreatePlaylist()
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
+				Redirect("/Account/Login");
+			
+			if (!Request.Form.ContainsKey("name") || string.IsNullOrWhiteSpace(Request.Form["name"])) return BadRequest();
+
+			LTPlaylist pl = await DatabaseManager.Playlists.CreatePlaylist(
+				user,
+				Request.Form["name"],
+				string.IsNullOrWhiteSpace(Request.Form["description"]) ? "" : Request.Form["description"],
+				Enum.Parse<PlaylistVisibility>(string.IsNullOrWhiteSpace(Request.Form["visibility"]) ? "UNLISTED" : Request.Form["visibility"]));
+
+			return Redirect($"/playlist?list={pl.Id}");
+		}
 	}
 }
