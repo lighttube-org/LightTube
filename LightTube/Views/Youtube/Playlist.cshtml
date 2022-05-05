@@ -27,6 +27,10 @@
 		<p class="title">@Model.Playlist.Title</p>
 		<span class="info">@Model.Playlist.VideoCount videos • @Model.Playlist.ViewCount views • @Model.Playlist.LastUpdated</span>
 		<span class="description">@Html.Raw(Model.Playlist.GetHtmlDescription())</span>
+		<a href="/playlist?list=@Model.Id&remove=true" class="login-button" style="margin:unset;">
+			<i class="bi bi-trash"></i>
+			Delete playlist
+		</a>
 		<div class="channel-info">
 			<a href="/channel/@Model.Playlist.Channel.Id" class="avatar">
 				<img src="@Model.Playlist.Channel.Avatars.LastOrDefault()?.Url">

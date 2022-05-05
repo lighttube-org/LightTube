@@ -51,7 +51,16 @@ namespace LightTube.Database
 		public async Task<LTPlaylist> GetPlaylist(string id)
 		{
 			IAsyncCursor<LTPlaylist> cursor = await _playlistCollection.FindAsync(x => x.Id == id);
-			return await cursor.FirstAsync();
+			return await cursor.FirstOrDefaultAsync() ?? new LTPlaylist
+			{
+				Id = null,
+				Name = "",
+				Description = "",
+				Visibility = PlaylistVisibility.VISIBLE,
+				VideoIds = new List<string>(),
+				Author = "",
+				LastUpdated = DateTimeOffset.MinValue
+			};
 		}
 
 		public async Task<List<LTVideo>> GetPlaylistVideos(string id)

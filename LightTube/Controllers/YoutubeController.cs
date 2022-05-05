@@ -126,7 +126,7 @@ namespace LightTube.Controllers
 		}
 
 		[Route("/playlist")]
-		public async Task<IActionResult> Playlist(string list, string continuation = null, int? delete = null, string add = null)
+		public async Task<IActionResult> Playlist(string list, string continuation = null, int? delete = null, string add = null, string remove = null)
 		{
 			HttpContext.TryGetUser(out LTUser user, "web");
 			
@@ -149,6 +149,13 @@ namespace LightTube.Controllers
 					LTVideo added = await DatabaseManager.Playlists.AddVideoToPlaylist(list, add);
 					message += $"Added video '{added.Title}'";
 				}
+
+				if (!string.IsNullOrWhiteSpace(remove))
+				{
+					await DatabaseManager.Playlists.DeletePlaylist(list);
+					message = "Playlist deleted";
+				}
+				
 				pl = await (await DatabaseManager.Playlists.GetPlaylist(list)).ToYoutubePlaylist();
 			}
 
