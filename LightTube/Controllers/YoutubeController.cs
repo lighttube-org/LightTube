@@ -136,6 +136,29 @@ namespace LightTube.Controllers
 
 			string message = "";
 
+			if (list.StartsWith("LT-PL") && (await DatabaseManager.Playlists.GetPlaylist(list)).Visibility == PlaylistVisibility.PRIVATE && pl.Channel.Name != user?.Email)
+				pl = new YoutubePlaylist
+				{
+					Id = null,
+					Title = "",
+					Description = "",
+					VideoCount = "",
+					ViewCount = "",
+					LastUpdated = "",
+					Thumbnail = Array.Empty<Thumbnail>(),
+					Channel = new Channel
+					{
+						Name = "",
+						Id = "",
+						SubscriberCount = "",
+						Avatars = Array.Empty<Thumbnail>()
+					},
+					Videos = Array.Empty<DynamicItem>(),
+					ContinuationKey = null
+				};
+
+			if (string.IsNullOrWhiteSpace(pl.Title)) message = "Playlist unavailable";
+
 			if (list.StartsWith("LT-PL") && pl.Channel.Name == user?.Email)
 			{
 				if (delete != null)
