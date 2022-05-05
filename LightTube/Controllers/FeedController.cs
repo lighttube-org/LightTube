@@ -77,5 +77,18 @@ namespace LightTube.Controllers
 				MobileLayout = Utils.IsClientMobile(Request)
 			});
 		}
+
+		[Route("/feed/library")]
+		public async Task<IActionResult> Playlists()
+		{
+			if (!HttpContext.TryGetUser(out LTUser user, "web"))
+				Redirect("/Account/Login");
+
+			return View(new PlaylistsContext
+			{
+				MobileLayout = Utils.IsClientMobile(Request),
+				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.Email)
+			});
+		}
 	}
 }

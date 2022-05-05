@@ -108,6 +108,12 @@
 			Subscriptions
 		</a>
 	</div>
+	<div class="guide-item @(ViewData["SelectedGuideItem"] as string == "library" ? "active" : "")">
+		<a href="/feed/library">
+			<i class="icon bi bi-list-ul"></i>
+			Library
+		</a>
+	</div>
 	<div class="hide-on-minmode guide-item">
 		<a href="/toggles/collapse_guide?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">
 			<i class="icon"><i class="bi bi-arrow-left-square"></i></i>

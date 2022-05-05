@@ -34,7 +34,7 @@ namespace LightTube.Database
 
 			LTPlaylist pl = new()
 			{
-				Id = GenerateId(idPrefix),
+				Id = GenerateAuthorId(idPrefix),
 				Name = name,
 				Description = description,
 				Visibility = visibility,
@@ -141,7 +141,7 @@ namespace LightTube.Database
 			return s;
 		}
 
-		private string GenerateId(string prefix)
+		public static string GenerateAuthorId(string prefix)
 		{
 			StringBuilder sb = new(string.IsNullOrWhiteSpace(prefix) || prefix.Trim().Length > 20
 				? "LT-PL"
