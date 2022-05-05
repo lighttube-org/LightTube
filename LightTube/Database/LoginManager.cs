@@ -137,6 +137,8 @@ namespace LightTube.Database
 
 			await _userCollection.DeleteOneAsync(x => x.Email == email);
 			await _tokenCollection.DeleteManyAsync(x => x.Email == email);
+			foreach (LTPlaylist pl in await DatabaseManager.Playlists.GetUserPlaylists(email))
+				await DatabaseManager.Playlists.DeletePlaylist(pl.Id);
 		}
 
 		public async Task CreateUser(string email, string password)

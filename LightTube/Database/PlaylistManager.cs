@@ -143,5 +143,10 @@ namespace LightTube.Database
 			while (sb.Length < 32) sb.Append(alphabet[rng.Next(0, alphabet.Length)]);
 			return sb.ToString();
 		}
+
+		public async Task DeletePlaylist(string playlistId)
+		{
+			await _playlistCollection.DeleteOneAsync(x => x.Id == playlistId);
+		}
 	}
 }
