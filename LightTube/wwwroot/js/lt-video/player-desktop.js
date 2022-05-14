@@ -303,7 +303,6 @@
                         action: "videosrc " + index
                     });
                 }
-                ;
                 break;
             case "shaka":
                 resButtons.pop();
@@ -540,22 +539,21 @@
     }
 
     playbackBarSeek(e) {
-        let percentage = (e.offsetX / (this.playbackBar.bg.offsetLeft + this.playbackBar.bg.offsetWidth - 24));
+        let percentage = (e.offsetX / (this.playbackBar.bg.clientLeft + this.playbackBar.bg.clientWidth));
         this.playbackBar.played.style.width = (percentage * 100) + "%";
         this.__videoElement.currentTime = this.__videoElement.duration * percentage;
     }
 
     moveHover(e) {
-        let percentage = Math.round((e.offsetX / (this.playbackBar.bg.offsetLeft + this.playbackBar.bg.offsetWidth)) * 100);
-        let pString = percentage.toString().split("");
+        let percentage = (e.offsetX / (this.playbackBar.bg.clientLeft + this.playbackBar.bg.clientWidth));
+        let rPercent = Math.round(percentage * 100);
 
-        // todo: please get a better way for this
-        this.playbackBar.sb.style.backgroundPositionX = `-${Number.parseInt(pString.pop()) * 48}px`;
-        this.playbackBar.sb.style.backgroundPositionY = `-${pString.join("") * 27}px`;
+        this.playbackBar.sb.style.backgroundPositionX = `-${rPercent % 10 * 48}px`;
+        this.playbackBar.sb.style.backgroundPositionY = `-${Math.floor(rPercent / 10) * 27}px`;
 
-        this.playbackBar.hover.style.top = (this.playbackBar.bg.getBoundingClientRect().y - 4 - this.playbackBar.hover.offsetHeight) + 'px';
-        this.playbackBar.hover.style.left = (e.clientX - this.playbackBar.hover.offsetWidth / 2) + 'px';
-        this.playbackBar.hoverText.innerText = this.getTimeString(this.__videoElement.duration * (percentage / 100));
+        this.playbackBar.hover.style.top = (this.playbackBar.bg.getBoundingClientRect().y - 4 - this.playbackBar.hover.clientHeight) + 'px';
+        this.playbackBar.hover.style.left = (e.clientX - this.playbackBar.hover.clientWidth / 2) + 'px';
+        this.playbackBar.hoverText.innerText = this.getTimeString(this.__videoElement.duration * percentage);
     }
 
     skipToLive() {
