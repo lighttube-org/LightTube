@@ -235,413 +235,413 @@
 
         setInterval(() => this.update(), 100);
     }
-}
 
-Player.prototype.togglePlayPause = function () {
-    if (this.__videoElement.paused)
-        this.__videoElement.play();
-    else
-        this.__videoElement.pause();
-};
-
-Player.prototype.updateMenu = function () {
-    const makeButton = (label, action, icon) => {
-        const b = document.createElement("div");
-        //todo: yes fix this
-        b.innerHTML = `<i class="bi bi-${icon}"></i>${label}`;
-        b.onclick = e => this.menuButtonClick(e);
-        b.setAttribute("data-action", action)
-        b.classList.add("player-menu-item")
-        return b;
+    togglePlayPause() {
+        if (this.__videoElement.paused)
+            this.__videoElement.play();
+        else
+            this.__videoElement.pause();
     }
 
-    const makeMenu = function (id, buttons) {
-        const menu = document.createElement("div");
-        menu.id = id;
-        for (const button of buttons) {
-            menu.appendChild(makeButton(button.label, button.action, button.icon));
+    updateMenu() {
+        const makeButton = (label, action, icon) => {
+            const b = document.createElement("div");
+            //todo: yes fix this
+            b.innerHTML = `<i class="bi bi-${icon}"></i>${label}`;
+            b.onclick = e => this.menuButtonClick(e);
+            b.setAttribute("data-action", action)
+            b.classList.add("player-menu-item")
+            return b;
         }
-        return menu;
-    }
 
-    if (this.menuElement) {
-        this.menuElement.remove();
-        this.menuElement = undefined;
-    }
-    this.menuElement = document.createElement("div");
-    this.menuElement.classList.add("player-menu");
-    this.menuElement.appendChild(makeMenu("menu-main", [
-        {
-            icon: "sliders",
-            label: "Quality",
-            action: "menu res"
-        },
-        {
-            icon: "badge-cc",
-            label: "Subtitles",
-            action: "menu sub"
-        },
-        {
-            icon: "speedometer2",
-            label: "Speed",
-            action: "menu speed"
-        }
-    ]))
-    const resButtons = [
-        {
-            icon: "arrow-left",
-            label: "Back",
-            action: "menu main"
-        }
-    ]
-
-    switch (this.externalPlayerType) {
-        case "html5":
-            for (const index in this.sources) {
-                resButtons.push({
-                    icon: this.sources[index].src === this.__videoElement.src ? "check2" : "",
-                    label: this.sources[index].label,
-                    action: "videosrc " + index
-                });
+        const makeMenu = (id, buttons) => {
+            const menu = document.createElement("div");
+            menu.id = id;
+            for (const button of buttons) {
+                menu.appendChild(makeButton(button.label, button.action, button.icon));
             }
-            ;
-            break;
-        case "shaka":
-            resButtons.pop();
-            let tracks = this.__externalPlayer.getVariantTracks();
-            for (const index in tracks) {
-                if (tracks[index].audioId === 2)
-                    resButtons.unshift({
-                        icon: tracks[index].active ? "check2" : "",
-                        label: tracks[index].height + "p",
-                        action: "shakavariant " + index
+            return menu;
+        }
+
+        if (this.menuElement) {
+            this.menuElement.remove();
+            this.menuElement = undefined;
+        }
+        this.menuElement = document.createElement("div");
+        this.menuElement.classList.add("player-menu");
+        this.menuElement.appendChild(makeMenu("menu-main", [
+            {
+                icon: "sliders",
+                label: "Quality",
+                action: "menu res"
+            },
+            {
+                icon: "badge-cc",
+                label: "Subtitles",
+                action: "menu sub"
+            },
+            {
+                icon: "speedometer2",
+                label: "Speed",
+                action: "menu speed"
+            }
+        ]))
+        const resButtons = [
+            {
+                icon: "arrow-left",
+                label: "Back",
+                action: "menu main"
+            }
+        ]
+
+        switch (this.externalPlayerType) {
+            case "html5":
+                for (const index in this.sources) {
+                    resButtons.push({
+                        icon: this.sources[index].src === this.__videoElement.src ? "check2" : "",
+                        label: this.sources[index].label,
+                        action: "videosrc " + index
                     });
-            }
-            resButtons.unshift({
-                icon: this.__externalPlayer.getConfiguration().abr.enabled ? "check2" : "",
-                label: "Auto",
-                action: "shakavariant -1"
-            });
-            resButtons.unshift(
-                {
-                    icon: "arrow-left",
-                    label: "Back",
-                    action: "menu main"
-                });
-            break;
-        case "hls.js":
-            resButtons.pop();
-            for (const level in this.__externalPlayer.levels) {
+                }
+                ;
+                break;
+            case "shaka":
+                resButtons.pop();
+                let tracks = this.__externalPlayer.getVariantTracks();
+                for (const index in tracks) {
+                    if (tracks[index].audioId === 2)
+                        resButtons.unshift({
+                            icon: tracks[index].active ? "check2" : "",
+                            label: tracks[index].height + "p",
+                            action: "shakavariant " + index
+                        });
+                }
                 resButtons.unshift({
-                    icon: level === this.__externalPlayer.currentLevel ? "check2" : "",
-                    label: this.__externalPlayer.levels[level].height + "p",
-                    action: "hlslevel " + level
-                });
-            }
-            resButtons.unshift(
-                {
-                    icon: -1 === this.__externalPlayer.currentLevel ? "check2" : "",
+                    icon: this.__externalPlayer.getConfiguration().abr.enabled ? "check2" : "",
                     label: "Auto",
-                    action: "hlslevel -1"
+                    action: "shakavariant -1"
                 });
-            resButtons.unshift(
-                {
-                    icon: "arrow-left",
-                    label: "Back",
-                    action: "menu main"
-                });
-            break;
-    }
-    this.menuElement.appendChild(makeMenu("menu-res", resButtons));
-    const subButtons = [
-        {
-            icon: "arrow-left",
-            label: "Back",
-            action: "menu main"
+                resButtons.unshift(
+                    {
+                        icon: "arrow-left",
+                        label: "Back",
+                        action: "menu main"
+                    });
+                break;
+            case "hls.js":
+                resButtons.pop();
+                for (const level in this.__externalPlayer.levels) {
+                    resButtons.unshift({
+                        icon: level === this.__externalPlayer.currentLevel ? "check2" : "",
+                        label: this.__externalPlayer.levels[level].height + "p",
+                        action: "hlslevel " + level
+                    });
+                }
+                resButtons.unshift(
+                    {
+                        icon: -1 === this.__externalPlayer.currentLevel ? "check2" : "",
+                        label: "Auto",
+                        action: "hlslevel -1"
+                    });
+                resButtons.unshift(
+                    {
+                        icon: "arrow-left",
+                        label: "Back",
+                        action: "menu main"
+                    });
+                break;
         }
-    ]
-
-    for (let index = 0; index < this.__videoElement.textTracks.length; index++) {
-        if (this.__videoElement.textTracks[index].label.includes("Shaka Player")) continue;
-        subButtons.push({
-            icon: this.__videoElement.textTracks[index].mode === "showing" ? "check2" : "",
-            label: this.__videoElement.textTracks[index].label,
-            action: "texttrack " + index
-        });
-    }
-    this.menuElement.appendChild(makeMenu("menu-sub", subButtons));
-    this.menuElement.appendChild(makeMenu("menu-speed", [
-        {
-            icon: "arrow-left",
-            label: "Back",
-            action: "menu main"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 0.25 ? "check2" : "",
-            label: "0.25",
-            action: "speed 0.25"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 0.50 ? "check2" : "",
-            label: "0.50",
-            action: "speed 0.5"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 0.75 ? "check2" : "",
-            label: "0.75",
-            action: "speed 0.75"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 1 ? "check2" : "",
-            label: "Normal",
-            action: "speed 1"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 1.25 ? "check2" : "",
-            label: "1.25",
-            action: "speed 1.25"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 1.50 ? "check2" : "",
-            label: "1.50",
-            action: "speed 1.5"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 1.75 ? "check2" : "",
-            label: "1.75",
-            action: "speed 1.75"
-        },
-        {
-            icon: this.__videoElement.playbackRate === 2 ? "check2" : "",
-            label: "2",
-            action: "speed 2"
-        },
-    ]))
-
-    this.container.appendChild(this.menuElement);
-    for (const child of this.menuElement.children) {
-        if (child.tagName === "DIV")
-            child.style.display = "none";
-    }
-}
-
-Player.prototype.openMenu = function (id) {
-    for (const child of this.menuElement.children) {
-        if (child.tagName === "DIV")
-            child.style.display = "none";
-    }
-    try {
-        this.menuElement.querySelector("#menu-" + id).style.display = "block";
-    } catch {
-        // intended
-    }
-}
-
-Player.prototype.menuButtonClick = function (e) {
-    let args = (e.target.getAttribute("data-action") ?? e.target.parentElement.getAttribute("data-action")).split(" ");
-    let command = args.shift();
-    let closeMenu = true;
-    switch (command) {
-        case "toggle":
-            closeMenu = this.menuElement.clientHeight !== 0;
-            if (!closeMenu)
-                this.openMenu("main");
-            break;
-        case "menu":
-            this.openMenu(args[0]);
-            closeMenu = false;
-            break;
-        case "speed":
-            this.__videoElement.playbackRate = Number.parseFloat(args[0]);
-            this.updateMenu();
-            break;
-        case "texttrack":
-            let i = Number.parseFloat(args[0]);
-            for (let index = 0; index < this.__videoElement.textTracks.length; index++) {
-                this.__videoElement.textTracks[index].mode = "hidden";
-
+        this.menuElement.appendChild(makeMenu("menu-res", resButtons));
+        const subButtons = [
+            {
+                icon: "arrow-left",
+                label: "Back",
+                action: "menu main"
             }
-            this.__videoElement.textTracks[i].mode = "showing";
-            this.updateMenu();
-            break;
-        case "videosrc":
-            let time = this.__videoElement.currentTime;
-            let shouldPlay = !this.__videoElement.paused;
-            this.__videoElement.src = this.sources[Number.parseFloat(args[0])].src;
-            this.__videoElement.currentTime = time;
-            if (shouldPlay)
-                this.__videoElement.play();
-            this.updateMenu();
-            break;
-        case "shakavariant":
-            if (args[0] !== "-1")
-                this.__externalPlayer.selectVariantTrack(this.__externalPlayer.getVariantTracks()[Number.parseFloat(args[0])], true, 2)
-            this.__externalPlayer.configure({abr: {enabled: args[0] === "-1"}})
-            break;
-        case "hlslevel":
-            this.__externalPlayer.nextLevel = Number.parseInt(args[0]);
-            break;
+        ]
+
+        for (let index = 0; index < this.__videoElement.textTracks.length; index++) {
+            if (this.__videoElement.textTracks[index].label.includes("Shaka Player")) continue;
+            subButtons.push({
+                icon: this.__videoElement.textTracks[index].mode === "showing" ? "check2" : "",
+                label: this.__videoElement.textTracks[index].label,
+                action: "texttrack " + index
+            });
+        }
+        this.menuElement.appendChild(makeMenu("menu-sub", subButtons));
+        this.menuElement.appendChild(makeMenu("menu-speed", [
+            {
+                icon: "arrow-left",
+                label: "Back",
+                action: "menu main"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 0.25 ? "check2" : "",
+                label: "0.25",
+                action: "speed 0.25"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 0.50 ? "check2" : "",
+                label: "0.50",
+                action: "speed 0.5"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 0.75 ? "check2" : "",
+                label: "0.75",
+                action: "speed 0.75"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 1 ? "check2" : "",
+                label: "Normal",
+                action: "speed 1"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 1.25 ? "check2" : "",
+                label: "1.25",
+                action: "speed 1.25"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 1.50 ? "check2" : "",
+                label: "1.50",
+                action: "speed 1.5"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 1.75 ? "check2" : "",
+                label: "1.75",
+                action: "speed 1.75"
+            },
+            {
+                icon: this.__videoElement.playbackRate === 2 ? "check2" : "",
+                label: "2",
+                action: "speed 2"
+            },
+        ]))
+
+        this.container.appendChild(this.menuElement);
+        for (const child of this.menuElement.children) {
+            if (child.tagName === "DIV")
+                child.style.display = "none";
+        }
     }
-    if (closeMenu)
-        this.openMenu();
-};
 
-Player.prototype.mute = function (e) {
-    if (e.target.tagName === "INPUT") return;
-    this.muted = !this.muted;
-    if (this.muted) {
-        this.controls.volume.querySelector("i").setAttribute("class", "bi bi-volume-mute-fill");
-        this.__videoElement.volume = 0;
-    } else {
-        this.controls.volume.querySelector("i").setAttribute("class", "bi bi-volume-up-fill");
-        this.__videoElement.volume = this.controls.volume.querySelector("input").value;
+    openMenu(id) {
+        for (const child of this.menuElement.children) {
+            if (child.tagName === "DIV")
+                child.style.display = "none";
+        }
+        try {
+            this.menuElement.querySelector("#menu-" + id).style.display = "block";
+        } catch {
+            // intended
+        }
     }
-}
 
-Player.prototype.fullscreen = function () {
-    if (!document.fullscreenElement) {
-        this.container.requestFullscreen();
-    } else {
-        document.exitFullscreen();
+    menuButtonClick(e) {
+        let args = (e.target.getAttribute("data-action") ?? e.target.parentElement.getAttribute("data-action")).split(" ");
+        let command = args.shift();
+        let closeMenu = true;
+        switch (command) {
+            case "toggle":
+                closeMenu = this.menuElement.clientHeight !== 0;
+                if (!closeMenu)
+                    this.openMenu("main");
+                break;
+            case "menu":
+                this.openMenu(args[0]);
+                closeMenu = false;
+                break;
+            case "speed":
+                this.__videoElement.playbackRate = Number.parseFloat(args[0]);
+                this.updateMenu();
+                break;
+            case "texttrack":
+                let i = Number.parseFloat(args[0]);
+                for (let index = 0; index < this.__videoElement.textTracks.length; index++) {
+                    this.__videoElement.textTracks[index].mode = "hidden";
+
+                }
+                this.__videoElement.textTracks[i].mode = "showing";
+                this.updateMenu();
+                break;
+            case "videosrc":
+                let time = this.__videoElement.currentTime;
+                let shouldPlay = !this.__videoElement.paused;
+                this.__videoElement.src = this.sources[Number.parseFloat(args[0])].src;
+                this.__videoElement.currentTime = time;
+                if (shouldPlay)
+                    this.__videoElement.play();
+                this.updateMenu();
+                break;
+            case "shakavariant":
+                if (args[0] !== "-1")
+                    this.__externalPlayer.selectVariantTrack(this.__externalPlayer.getVariantTracks()[Number.parseFloat(args[0])], true, 2)
+                this.__externalPlayer.configure({abr: {enabled: args[0] === "-1"}})
+                break;
+            case "hlslevel":
+                this.__externalPlayer.nextLevel = Number.parseInt(args[0]);
+                break;
+        }
+        if (closeMenu)
+            this.openMenu();
+    };
+
+    mute(e) {
+        if (e.target.tagName === "INPUT") return;
+        this.muted = !this.muted;
+        if (this.muted) {
+            this.controls.volume.querySelector("i").setAttribute("class", "bi bi-volume-mute-fill");
+            this.__videoElement.volume = 0;
+        } else {
+            this.controls.volume.querySelector("i").setAttribute("class", "bi bi-volume-up-fill");
+            this.__videoElement.volume = this.controls.volume.querySelector("input").value;
+        }
     }
-}
 
-Player.prototype.pip = function () {
-    this.__videoElement.requestPictureInPicture();
-}
-
-Player.prototype.timeUpdate = function (e) {
-    this.controls.time.innerHTML = this.getTimeString(this.__videoElement.currentTime) + " / " + this.getTimeString(this.__videoElement.duration);
-    this.playbackBar.played.style.width = ((this.__videoElement.currentTime / this.__videoElement.duration) * 100) + "%";
-    this.playbackBar.buffered.style.width = ((this.getLoadEnd() / this.__videoElement.duration) * 100) + "%";
-
-    if (this.controlsDisappearTimeout - Date.now() < 0 && !this.container.classList.contains("hide-controls") && !this.__videoElement.paused)
-        this.container.classList.add("hide-controls");
-
-
-    if (this.controlsDisappearTimeout - Date.now() > 0 && this.container.classList.contains("hide-controls"))
-        this.container.classList.remove("hide-controls");
-
-    if (this.__videoElement.paused && this.container.classList.contains("hide-controls"))
-        this.container.classList.add("hide-controls");
-}
-
-Player.prototype.setVolume = function (e) {
-    this.__videoElement.volume = e.target.value;
-    localStorage.setItem("ltvideo.volume", e.target.value);
-}
-
-Player.prototype.getLoadEnd = function () {
-    let longest = -1;
-    for (let i = 0; i < this.__videoElement.buffered.length; i++) {
-        const end = this.__videoElement.buffered.end(i);
-        if (end > longest) longest = end;
+    fullscreen() {
+        if (!document.fullscreenElement) {
+            this.container.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
     }
-    return longest;
-}
 
-Player.prototype.playbackBarSeek = function (e) {
-    let percentage = (e.offsetX / (this.playbackBar.bg.offsetLeft + this.playbackBar.bg.offsetWidth - 24));
-    this.playbackBar.played.style.width = (percentage * 100) + "%";
-    this.__videoElement.currentTime = this.__videoElement.duration * percentage;
-}
-
-Player.prototype.moveHover = function (e) {
-    let percentage = Math.round((e.offsetX / (this.playbackBar.bg.offsetLeft + this.playbackBar.bg.offsetWidth)) * 100);
-    let pString = percentage.toString().split("");
-
-    // todo: please get a better way for this
-    this.playbackBar.sb.style.backgroundPositionX = `-${Number.parseInt(pString.pop()) * 48}px`;
-    this.playbackBar.sb.style.backgroundPositionY = `-${pString.join("") * 27}px`;
-
-    this.playbackBar.hover.style.top = (this.playbackBar.bg.getBoundingClientRect().y - 4 - this.playbackBar.hover.offsetHeight) + 'px';
-    this.playbackBar.hover.style.left = (e.clientX - this.playbackBar.hover.offsetWidth / 2) + 'px';
-    this.playbackBar.hoverText.innerText = this.getTimeString(this.__videoElement.duration * (percentage / 100));
-}
-
-Player.prototype.skipToLive = function () {
-    this.__videoElement.currentTime = this.__videoElement.duration;
-}
-
-Player.prototype.keyboardHandler = function (e) {
-    let pd = true;
-    switch (e.code) {
-        case "Space":
-            this.togglePlayPause();
-            break;
-        case "Digit1":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.1;
-            break;
-        case "Digit2":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.2;
-            break;
-        case "Digit3":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.3;
-            break;
-        case "Digit4":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.4;
-            break;
-        case "Digit5":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.5;
-            break;
-        case "Digit6":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.6;
-            break;
-        case "Digit7":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.7;
-            break;
-        case "Digit8":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.8;
-            break;
-        case "Digit9":
-            this.__videoElement.currentTime = this.__videoElement.duration * 0.9;
-            break;
-        case "Digit0":
-            this.__videoElement.currentTime = 0;
-            break;
-        case "ArrowLeft":
-            this.__videoElement.currentTime -= 5;
-            break;
-        case "ArrowRight":
-            this.__videoElement.currentTime += 5;
-            break;
-        case "ArrowUp":
-            this.__videoElement.volume += 0.1;
-            break;
-        case "ArrowDown":
-            this.__videoElement.volume -= 0.1;
-            break;
-        case "KeyF":
-            this.fullscreen();
-            break;
-        case "KeyM":
-            this.mute({target: {tagName: ""}});
-            break;
-        default:
-            pd = false;
-            break;
+    pip() {
+        this.__videoElement.requestPictureInPicture();
     }
-    if (pd) e.preventDefault();
-}
 
-Player.prototype.getTimeString = function (s) {
-    let res = s < 3600 ? new Date(s * 1000).toISOString().substr(14, 5) : new Date(s * 1000).toISOString().substr(11, 8);
-    if (res.startsWith("0"))
-        res = res.substr(1);
-    return res;
-}
+    timeUpdate() {
+        this.controls.time.innerHTML = this.getTimeString(this.__videoElement.currentTime) + " / " + this.getTimeString(this.__videoElement.duration);
+        this.playbackBar.played.style.width = ((this.__videoElement.currentTime / this.__videoElement.duration) * 100) + "%";
+        this.playbackBar.buffered.style.width = ((this.getLoadEnd() / this.__videoElement.duration) * 100) + "%";
 
-Player.prototype.update = function () {
-    if (!this.info.live)
+        if (this.controlsDisappearTimeout - Date.now() < 0 && !this.container.classList.contains("hide-controls") && !this.__videoElement.paused)
+            this.container.classList.add("hide-controls");
+
+
+        if (this.controlsDisappearTimeout - Date.now() > 0 && this.container.classList.contains("hide-controls"))
+            this.container.classList.remove("hide-controls");
+
+        if (this.__videoElement.paused && this.container.classList.contains("hide-controls"))
+            this.container.classList.add("hide-controls");
+    }
+
+    setVolume(e) {
+        this.__videoElement.volume = e.target.value;
+        localStorage.setItem("ltvideo.volume", e.target.value);
+    }
+
+    getLoadEnd() {
+        let longest = -1;
+        for (let i = 0; i < this.__videoElement.buffered.length; i++) {
+            const end = this.__videoElement.buffered.end(i);
+            if (end > longest) longest = end;
+        }
+        return longest;
+    }
+
+    playbackBarSeek(e) {
+        let percentage = (e.offsetX / (this.playbackBar.bg.offsetLeft + this.playbackBar.bg.offsetWidth - 24));
+        this.playbackBar.played.style.width = (percentage * 100) + "%";
+        this.__videoElement.currentTime = this.__videoElement.duration * percentage;
+    }
+
+    moveHover(e) {
+        let percentage = Math.round((e.offsetX / (this.playbackBar.bg.offsetLeft + this.playbackBar.bg.offsetWidth)) * 100);
+        let pString = percentage.toString().split("");
+
+        // todo: please get a better way for this
+        this.playbackBar.sb.style.backgroundPositionX = `-${Number.parseInt(pString.pop()) * 48}px`;
+        this.playbackBar.sb.style.backgroundPositionY = `-${pString.join("") * 27}px`;
+
+        this.playbackBar.hover.style.top = (this.playbackBar.bg.getBoundingClientRect().y - 4 - this.playbackBar.hover.offsetHeight) + 'px';
+        this.playbackBar.hover.style.left = (e.clientX - this.playbackBar.hover.offsetWidth / 2) + 'px';
+        this.playbackBar.hoverText.innerText = this.getTimeString(this.__videoElement.duration * (percentage / 100));
+    }
+
+    skipToLive() {
+        this.__videoElement.currentTime = this.__videoElement.duration;
+    }
+
+    keyboardHandler(e) {
+        let pd = true;
+        if (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+        switch (e.code) {
+            case "Space":
+                this.togglePlayPause();
+                break;
+            case "Digit1":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.1;
+                break;
+            case "Digit2":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.2;
+                break;
+            case "Digit3":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.3;
+                break;
+            case "Digit4":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.4;
+                break;
+            case "Digit5":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.5;
+                break;
+            case "Digit6":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.6;
+                break;
+            case "Digit7":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.7;
+                break;
+            case "Digit8":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.8;
+                break;
+            case "Digit9":
+                this.__videoElement.currentTime = this.__videoElement.duration * 0.9;
+                break;
+            case "Digit0":
+                this.__videoElement.currentTime = 0;
+                break;
+            case "ArrowLeft":
+                this.__videoElement.currentTime -= 5;
+                break;
+            case "ArrowRight":
+                this.__videoElement.currentTime += 5;
+                break;
+            case "ArrowUp":
+                this.__videoElement.volume += 0.1;
+                break;
+            case "ArrowDown":
+                this.__videoElement.volume -= 0.1;
+                break;
+            case "KeyF":
+                this.fullscreen();
+                break;
+            case "KeyM":
+                this.mute({target: {tagName: ""}});
+                break;
+            default:
+                pd = false;
+                break;
+        }
+        if (pd) e.preventDefault();
+    }
+
+    getTimeString(s) {
+        let res = s < 3600 ? new Date(s * 1000).toISOString().substr(14, 5) : new Date(s * 1000).toISOString().substr(11, 8);
+        if (res.startsWith("0"))
+            res = res.substr(1);
+        return res;
+    }
+
+    update() {
         this.timeUpdate();
 
-    switch (this.__videoElement.readyState) {
-        case 1:
-            this.bufferingScreen.style.display = "flex";
-            break;
-        default:
-            this.bufferingScreen.style.display = "none";
-            break;
+        switch (this.__videoElement.readyState) {
+            case 1:
+                this.bufferingScreen.style.display = "flex";
+                break;
+            default:
+                this.bufferingScreen.style.display = "none";
+                break;
+        }
     }
 }
 
