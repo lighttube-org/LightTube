@@ -55,7 +55,7 @@
             pause: createButton("div", "pause-fill"),
             volume: createButton("div", "volume-up-fill"),
             time: document.createElement("span"),
-            skipToLive: createButton("div", "skip-forward-btn-fill"),
+            skipToLive: createButton("div", "skip-forward-fill"),
             div: document.createElement("div"),
             settings: createButton("div", "gear-fill"),
             embed: createButton("a", ""),
@@ -116,54 +116,56 @@
         this.controls.div.classList.add("player-button-divider")
 
         // playback bar
-        if (!info.live) {
-            this.playbackBar = {
-                bg: document.createElement("div"),
-                played: document.createElement("div"),
-                buffered: document.createElement("div"),
-                hover: document.createElement("div"),
-                sb: document.createElement("div"),
-                sbC: document.createElement("div"),
-                hoverText: document.createElement("span")
-            }
-            this.playbackBar.bg.classList.add("player-playback-bar");
-            this.playbackBar.bg.classList.add("player-playback-bar-bg");
-            this.playbackBar.played.classList.add("player-playback-bar");
-            this.playbackBar.played.classList.add("player-playback-bar-fg");
-            this.playbackBar.buffered.classList.add("player-playback-bar");
-            this.playbackBar.buffered.classList.add("player-playback-bar-buffer");
-            this.playbackBar.bg.appendChild(this.playbackBar.buffered);
-            this.playbackBar.bg.appendChild(this.playbackBar.played);
+        this.playbackBar = {
+            bg: document.createElement("div"),
+            played: document.createElement("div"),
+            buffered: document.createElement("div"),
+            hover: document.createElement("div"),
+            sb: document.createElement("div"),
+            sbC: document.createElement("div"),
+            hoverText: document.createElement("span")
+        }
+        this.playbackBar.bg.classList.add("player-playback-bar");
+        this.playbackBar.bg.classList.add("player-playback-bar-bg");
+        this.playbackBar.played.classList.add("player-playback-bar");
+        this.playbackBar.played.classList.add("player-playback-bar-fg");
+        this.playbackBar.buffered.classList.add("player-playback-bar");
+        this.playbackBar.buffered.classList.add("player-playback-bar-buffer");
+        this.playbackBar.bg.appendChild(this.playbackBar.buffered);
+        this.playbackBar.bg.appendChild(this.playbackBar.played);
 
-            this.playbackBar.hover.classList.add("player-playback-bar-hover");
+        this.playbackBar.hover.classList.add("player-playback-bar-hover");
+        if (!this.info.live) {
             this.playbackBar.sb.classList.add("player-storyboard-image");
             this.playbackBar.sbC.classList.add("player-storyboard-image-container");
             this.playbackBar.sb.style.backgroundImage = `url("/proxy/storyboard/${info.id}")`;
-
-            let playbackBarContainer = document.createElement("div");
-            playbackBarContainer.classList.add("player-playback-bar-container")
-            this.playbackBar.bg.onclick = e => {
-                this.playbackBarSeek(e)
-            }
-            this.playbackBar.bg.ondragover = e => {
-                this.playbackBarSeek(e)
-            }
-            this.playbackBar.bg.onmouseenter = () => {
-                this.playbackBar.hover.style.display = "block";
-            }
-            this.playbackBar.bg.onmouseleave = () => {
-                this.playbackBar.hover.style.display = "none";
-            }
-            this.playbackBar.bg.onmousemove = e => {
-                this.moveHover(e)
-            }
-            playbackBarContainer.appendChild(this.playbackBar.bg);
-            this.playbackBar.sbC.appendChild(this.playbackBar.sb)
-            this.playbackBar.hover.appendChild(this.playbackBar.sbC)
-            this.playbackBar.hover.appendChild(this.playbackBar.hoverText)
-            playbackBarContainer.appendChild(this.playbackBar.hover);
-            container.appendChild(playbackBarContainer);
+            this.playbackBar.sbC.appendChild(this.playbackBar.sb);
+        } else {
+            this.playbackBar.sb.remove();
         }
+
+        let playbackBarContainer = document.createElement("div");
+        playbackBarContainer.classList.add("player-playback-bar-container")
+        this.playbackBar.bg.onclick = e => {
+            this.playbackBarSeek(e)
+        }
+        this.playbackBar.bg.ondragover = e => {
+            this.playbackBarSeek(e)
+        }
+        this.playbackBar.bg.onmouseenter = () => {
+            this.playbackBar.hover.style.display = "block";
+        }
+        this.playbackBar.bg.onmouseleave = () => {
+            this.playbackBar.hover.style.display = "none";
+        }
+        this.playbackBar.bg.onmousemove = e => {
+            this.moveHover(e)
+        }
+        playbackBarContainer.appendChild(this.playbackBar.bg);
+        this.playbackBar.hover.appendChild(this.playbackBar.sbC)
+        this.playbackBar.hover.appendChild(this.playbackBar.hoverText)
+        playbackBarContainer.appendChild(this.playbackBar.hover);
+        container.appendChild(playbackBarContainer);
 
         // title
         this.titleElement = document.createElement("div");
@@ -509,7 +511,12 @@
     }
 
     timeUpdate() {
-        this.controls.time.innerHTML = this.getTimeString(this.__videoElement.currentTime) + " / " + this.getTimeString(this.__videoElement.duration);
+        if (this.info.live) {
+            let timeBack = this.__videoElement.duration - this.__videoElement.currentTime;
+            this.controls.time.innerHTML = timeBack > 10 ? this.getTimeString(timeBack) : "LIVE";
+        }
+        else 
+            this.controls.time.innerHTML = this.getTimeString(this.__videoElement.currentTime) + " / " + this.getTimeString(this.__videoElement.duration);
         this.playbackBar.played.style.width = ((this.__videoElement.currentTime / this.__videoElement.duration) * 100) + "%";
         this.playbackBar.buffered.style.width = ((this.getLoadEnd() / this.__videoElement.duration) * 100) + "%";
 
@@ -548,8 +555,10 @@
         let percentage = (e.offsetX / (this.playbackBar.bg.clientLeft + this.playbackBar.bg.clientWidth));
         let rPercent = Math.round(percentage * 100);
 
-        this.playbackBar.sb.style.backgroundPositionX = `-${rPercent % 10 * 48}px`;
-        this.playbackBar.sb.style.backgroundPositionY = `-${Math.floor(rPercent / 10) * 27}px`;
+        if (!this.info.live) {
+            this.playbackBar.sb.style.backgroundPositionX = `-${rPercent % 10 * 48}px`;
+            this.playbackBar.sb.style.backgroundPositionY = `-${Math.floor(rPercent / 10) * 27}px`;
+        }
 
         this.playbackBar.hover.style.top = (this.playbackBar.bg.getBoundingClientRect().y - 4 - this.playbackBar.hover.clientHeight) + 'px';
         this.playbackBar.hover.style.left = (e.clientX - this.playbackBar.hover.clientWidth / 2) + 'px';
@@ -568,46 +577,60 @@
                 this.togglePlayPause();
                 break;
             case "Digit1":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.1;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.1;
                 break;
             case "Digit2":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.2;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.2;
                 break;
             case "Digit3":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.3;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.3;
                 break;
             case "Digit4":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.4;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.4;
                 break;
             case "Digit5":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.5;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.5;
                 break;
             case "Digit6":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.6;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.6;
                 break;
             case "Digit7":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.7;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.7;
                 break;
             case "Digit8":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.8;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.8;
                 break;
             case "Digit9":
-                this.__videoElement.currentTime = this.__videoElement.duration * 0.9;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = this.__videoElement.duration * 0.9;
                 break;
             case "Digit0":
-                this.__videoElement.currentTime = 0;
+                if (!this.info.live)
+                    this.__videoElement.currentTime = 0;
                 break;
             case "ArrowLeft":
-                this.__videoElement.currentTime -= 5;
+                if (!this.info.live)
+                    this.__videoElement.currentTime -= 5;
                 break;
             case "ArrowRight":
-                this.__videoElement.currentTime += 5;
+                if (!this.info.live)
+                    this.__videoElement.currentTime += 5;
                 break;
             case "ArrowUp":
-                this.__videoElement.volume += 0.1;
+                if (!this.info.live)
+                    this.__videoElement.volume += 0.1;
                 break;
             case "ArrowDown":
-                this.__videoElement.volume -= 0.1;
+                if (!this.info.live)
+                    this.__videoElement.volume -= 0.1;
                 break;
             case "KeyF":
                 this.fullscreen();
@@ -632,13 +655,18 @@
     update() {
         this.timeUpdate();
 
-        switch (this.__videoElement.readyState) {
-            case 1:
-                this.bufferingScreen.style.display = "flex";
-                break;
-            default:
-                this.bufferingScreen.style.display = "none";
-                break;
+        if (this.info.live) {
+            let timeBack = Math.abs(this.__videoElement.currentTime - this.__videoElement.buffered.end(this.__videoElement.buffered.length - 1));
+            this.bufferingScreen.style.display = timeBack < .1 ? "flex" : "none";
+        } else {
+            switch (this.__videoElement.readyState) {
+                case 1:
+                    this.bufferingScreen.style.display = "flex";
+                    break;
+                default:
+                    this.bufferingScreen.style.display = "none";
+                    break;
+            }
         }
     }
 }

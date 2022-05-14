@@ -199,10 +199,9 @@ namespace InnerTube
 				string bw = Math.Floor((format.Filesize ?? 1) / (double) player.Duration).ToString();
 				sb.AppendLine($"#EXT-X-STREAM-INF:BANDWIDTH={bw},AVERAGE-BANDWIDTH={bw},CODECS=\"{format.VideoCodec},{format.AudioCodec}\",RESOLUTION={format.Resolution}");
 
-				if (string.IsNullOrWhiteSpace(proxyUrl))
-					sb.AppendLine(format.Url);
-				else
-					sb.AppendLine($"{proxyUrl}/manifest/{player.Id}/{format.FormatId}");
+				sb.AppendLine(string.IsNullOrWhiteSpace(proxyUrl)
+					? format.Url
+					: $"{proxyUrl}/manifest/{player.Id}/{format.FormatId}");
 			}
 
 			return sb.ToString();
