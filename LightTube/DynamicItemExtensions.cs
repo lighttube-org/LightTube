@@ -42,7 +42,7 @@ namespace LightTube
 		private static void RenderDynamicItem(DynamicItem item, IHtmlContentBuilder b)
 		{
 			#if DEBUG
-			b.AppendHtml($"<h1>{item.GetType().Name} {item.Title}</h1>");
+			b.AppendHtml($"<h1>{item.GetType().Name}</h1> <pre>{item.Title}</pre>");
 			#endif
 		}
 

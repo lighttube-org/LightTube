@@ -464,7 +464,7 @@ namespace InnerTube
 							Title = rendererItem?["title"]?["simpleText"]
 								?.ToString(),
 							Thumbnails =
-								(rendererItem?["thumbnails"]?[0]?["thumbnails"]?.ToObject<JArray>() ??
+								(rendererItem?["thumbnail"]?["thumbnails"]?.ToObject<JArray>() ??
 								 new JArray()).Select(Utils.ParseThumbnails).ToArray(),
 							FirstVideoId = rendererItem?["navigationEndpoint"]?["watchEndpoint"]?["videoId"]
 								?.ToString(),
