@@ -146,45 +146,91 @@
 				}
 			}
 		</div>
-		<div class="video-info">
-			<div class="video-title">@Model.Video.Title</div>
-			<div class="video-info-bar">
-				<span>@Model.Video.Views</span>
-				<span>Published @Model.Video.UploadDate</span>
-				<div class="divider"></div>
+		@if (Model.MobileLayout)
+		{
+			<div class="video-info">
+				<div class="video-title">@Model.Video.Title</div>
+				<div class="video-info-bar">
+					<span>@Model.Video.Views</span>
+					<span>Published @Model.Video.UploadDate</span>
+					<div class="divider"></div>
+					<div class="video-info-buttons">
+						<div>
+							<i class="bi bi-hand-thumbs-up"></i><span>@Model.Engagement.Likes</span>
+						</div>
+		                <div>
+                			<i class="bi bi-hand-thumbs-down"></i><span>@Model.Engagement.Dislikes</span>
+		                </div>
+		                <a href="/download?v=@Model.Video.Id">
+                			<i class="bi bi-download"></i>
+                			Download
+		                </a>
+		                <a href="/Account/AddVideoToPlaylist?v=@Model.Video.Id">
+                			<i class="bi bi-folder-plus"></i>
+                			Save
+		                </a>
+		                <a href="https://www.youtube.com/watch?v=@Model.Video.Id">
+                			<i class="bi bi-share"></i>
+                			YouTube link
+		                </a>
+		            </div>
+				</div>
+				<div class="channel-info">
+					<a href="/channel/@Model.Video.Channel.Id" class="avatar">
+						<img src="@Model.Video.Channel.Avatars.LastOrDefault()?.Url">
+					</a>
+					<div class="name">
+						<a href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Name</a>
+					</div>
+					<button class="subscribe-button" data-cid="@Model.Video.Channel.Id">Subscribe</button>
+				</div>
+				<p class="description">@Html.Raw(description)</p>
+			</div>
+			<hr>
+		}
+		else
+		{
+			<div class="video-info">
+				<div class="video-title">@Model.Video.Title</div>
+				<p class="video-sub-info description">
+					<span>@Model.Video.Views&nbsp; @Model.Video.UploadDate</span>&nbsp; @Html.Raw(description)
+				</p>
 				<div class="video-info-buttons">
 					<div>
-						<i class="bi bi-hand-thumbs-up"></i><span>@Model.Engagement.Likes</span>
+						<i class="bi bi-hand-thumbs-up"></i>
+						@Model.Engagement.Likes
 					</div>
-	                <div>
-                		<i class="bi bi-hand-thumbs-down"></i><span>@Model.Engagement.Dislikes</span>
-	                </div>
-	                <a href="/download?v=@Model.Video.Id">
-                		<i class="bi bi-download"></i>
-                		Download
-	                </a>
-	                <a href="/Account/AddVideoToPlaylist?v=@Model.Video.Id">
-                		<i class="bi bi-folder-plus"></i>
-                		Save
-	                </a>
-	                <a href="https://www.youtube.com/watch?v=@Model.Video.Id">
-                		<i class="bi bi-share"></i>
-                		YouTube link
-	                </a>
-	            </div>
+					<div>
+						<i class="bi bi-hand-thumbs-down"></i>
+						@Model.Engagement.Dislikes
+					</div>
+					<a href="/download?v=@Model.Player.Id">
+						<i class="bi bi-download"></i>
+						Download
+					</a>
+					<a href="/Account/AddVideoToPlaylist?v=@Model.Video.Id">
+						<i class="bi bi-folder-plus"></i>
+						Save
+					</a>
+					<a href="https://www.youtube.com/watch?v=@Model.Video.Id">
+						<i class="bi bi-share"></i>
+						YouTube link
+					</a>
+				</div>
 			</div>
 			<div class="channel-info">
 				<a href="/channel/@Model.Video.Channel.Id" class="avatar">
-					<img src="@Model.Video.Channel.Avatars.LastOrDefault()?.Url">
+					<img src="@Model.Video.Channel.Avatars.FirstOrDefault()?.Url">
 				</a>
 				<div class="name">
 					<a href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Name</a>
 				</div>
+				<div class="subscriber-count">
+					@Model.Video.Channel.SubscriberCount
+				</div>
 				<button class="subscribe-button" data-cid="@Model.Video.Channel.Id">Subscribe</button>
 			</div>
-			<p class="description">@Html.Raw(description)</p>
-		</div>
-		<hr>
+		}
 	</div>
 	<div class="secondary">
 		<noscript>

@@ -262,8 +262,28 @@ a.icon-button, a.icon-button > img {
         flex-direction: column;
     }
 
+    .video-info {
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: 1fr;
+        grid-template-rows: max-content max-content max-content;
+        gap: 8px;
+        grid-template-areas: "title" "info" "buttons";
+    }
+
     .recommended-list {
         width: calc(100vw - 48px) !important;
+    }
+}
+
+@media screen and (min-width: 1000px) {
+    .video-info {
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: 615px 1fr max-content;
+        grid-template-rows: max-content max-content;
+        gap: 8px;
+        grid-template-areas: "title title title" "info . buttons";
     }
 }
 
@@ -302,6 +322,7 @@ a.icon-button, a.icon-button > img {
 }
 
 .video-title {
+    grid-area: title;
     color: var(--text-primary);
     font-size: larger;
     margin-top: 8px;
@@ -322,28 +343,43 @@ a.icon-button, a.icon-button > img {
 }
 
 .video-info-buttons {
+    grid-area: buttons;
     display: flex;
     flex-direction: row;
     column-gap: 8px;
 }
 
 .video-info-buttons > * {
+    color: var(--text-primary);
     display: flex;
     justify-content: center;
+    align-content: center;
     column-gap: 4px;
     text-decoration: none;
+    height: 36px;
+    line-height: 32px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.video-info-buttons > * > .bi {
+    color: var(--text-primary);
+    width: 24px;
+    font-size: 18px
 }
 
 .channel-info {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     display: grid;
     grid-template-columns: 48px max-content 1fr min-content;
-    grid-template-rows: 48px;
+    grid-template-rows: 16px 16px;
     grid-auto-columns: 1fr;
-    gap: 8px;
+    column-gap: 8px;
+    row-gap: 4px;
     grid-auto-flow: row;
-    grid-template-areas: "avatar name . subscribe-button";
-
-    padding-top: 16px;
+    grid-template-areas: "avatar name . subscribe-button" "avatar subs . subscribe-button";
+    padding: 8px;
 }
 
 .avatar {
@@ -351,8 +387,8 @@ a.icon-button, a.icon-button > img {
 }
 
 .avatar > img {
-    width: 100%;
-    height: 100%;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
 }
 
@@ -369,6 +405,10 @@ a.icon-button, a.icon-button > img {
     text-decoration: none;
 }
 
+.subscriber-count {
+    grid-area: subs;
+}
+
 .subscribe-button {
     grid-area: subscribe-button;
 
@@ -378,8 +418,9 @@ a.icon-button, a.icon-button > img {
     font-weight: bold;
     padding: 10px 16px;
     border: none;
+    margin: auto;
 
-    height: 40px;
+    height: 37px;
 }
 
 .subscribe-button.subscribed {
@@ -387,13 +428,21 @@ a.icon-button, a.icon-button > img {
     color: var(--text-secondary);
 }
 
-.description {
-    padding-left: 56px;
+.video-sub-info {
+    grid-area: info;
+    font-weight: lighter;
+    font-size: 95%;
+    max-width: 615px;
+}
+
+.video-sub-info > span {
+    color: var(--text-primary);
+    font-weight: bold;
 }
 
 .description > a {
     text-decoration: none;
-    color: #065fd4;
+    color: var(--text-link);
 }
 
 .watch-page > .secondary {
@@ -600,13 +649,6 @@ a.icon-button, a.icon-button > img {
 
 .playlist-video > .index {
     grid-area: index;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.playlist-video > .edit {
-    grid-area: edit;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -851,11 +893,11 @@ a.icon-button, a.icon-button > img {
 .video-list > .playlist-video {
     text-decoration: none;
     display: grid;
-    grid-template-columns: 36px 160px 1fr 50px;
+    grid-template-columns: 36px 160px 1fr;
     grid-template-rows: 90px;
     grid-auto-flow: row;
     grid-gap: 0 16px;
-    grid-template-areas: "index thumbnail info edit";
+    grid-template-areas: "index thumbnail info";
 
     color: var(--text-secondary);
     font-size: small;
@@ -1052,24 +1094,6 @@ a.icon-button, a.icon-button > img {
     border: 1px solid var(--border-color);
     padding: 10px;
     max-width: 400px;
-    row-gap: 10px;
-    margin: auto;
-}
-
-.playlist-form {
-    display: flex;
-    flex-direction: column;
-    max-width: 400px;
-    row-gap: 10px;
-    margin: auto;
-}
-
-.playlist-form > input, .playlist-form > select, .login-button {
-    background-color: var(--item-active-background);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    width: 80%;
     row-gap: 10px;
     margin: auto;
 }
