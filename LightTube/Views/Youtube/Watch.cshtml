@@ -458,7 +458,7 @@ else
         let player = undefined;
         loadPlayerWithShaka("video", {
             "id": "@Model.Video.Id",
-            "title": "@Html.Raw(Model.Video.Title)",
+            "title": "@Html.Raw(Model.Video.Title.Replace("\"", "\\\""))",
             "embed": false,
             "live": false,
             "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
@@ -477,7 +477,7 @@ else
         let player = undefined;
         loadPlayerWithHls("video", {
             "id": "@(Model.Video.Id)",
-            "title": "@Html.Raw(Model.Video.Title)",
+            "title": "@Html.Raw(Model.Video.Title.Replace("\"", "\\\""))",
             "embed": false,
             "live": true
         }, "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).m3u8").then(x => player = x).catch(alert);
@@ -488,7 +488,7 @@ else
 			<script>
         const player = new Player("video", {
             "id": "@Model.Video.Id",
-            "title": "@Html.Raw(Model.Video.Title)",
+            "title": "@Html.Raw(Model.Video.Title.Replace("\"", "\\\""))",
             "embed": false,
             "live": false,
             "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
