@@ -8,12 +8,12 @@ namespace InnerTube.Models
 		[JsonProperty("context")] public Context Context;
 
 		public static string BuildRequestContextJson(Dictionary<string, object> additionalFields, string language = "en",
-			string region = "US")
+			string region = "US", string clientName = "WEB", string clientVersion = "2.20220224.07.00")
 		{
 			RequestContext ctx = new()
 			{
 				Context = new Context(
-					new RequestClient(language, region, "WEB", "2.20220224.07.00"),
+					new RequestClient(language, region, clientName, clientVersion),
 					new RequestUser(false))
 			};
 
@@ -43,6 +43,7 @@ namespace InnerTube.Models
 		[JsonProperty("gl")] public string Region { get; set; }
 		[JsonProperty("clientName")] public string ClientName { get; set; }
 		[JsonProperty("clientVersion")] public string ClientVersion { get; set; }
+		[JsonProperty("deviceModel")] public string DeviceModel { get; set; }
 
 		public RequestClient(string language, string region, string clientName, string clientVersion)
 		{
@@ -50,6 +51,7 @@ namespace InnerTube.Models
 			Region = region;
 			ClientName = clientName;
 			ClientVersion = clientVersion;
+			if (clientName == "IOS") DeviceModel = "iPhone14,3";
 		}
 	}
 
