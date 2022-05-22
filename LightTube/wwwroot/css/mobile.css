@@ -606,7 +606,7 @@ a.icon-link, a.icon-link > i {
     font-size: x-large;
 }
 
-.channel-info {
+.channel-info, .channel-info__bordered {
     display: grid;
     grid-template-columns: 34px max-content 1fr min-content;
     grid-template-rows: 34px;
