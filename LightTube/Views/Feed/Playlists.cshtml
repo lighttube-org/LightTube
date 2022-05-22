@@ -18,7 +18,7 @@
 				</div>
 			</a>
 			<div class="info">
-				<a href="/watch?v=@playlist.Id" class="title max-lines-2">@playlist.Name</a>
+				<a href="/watch?v=@playlist.VideoIds.FirstOrDefault()&list=@playlist.Id" class="title max-lines-2">@playlist.Name</a>
 				<div>
 					<a href="/channel/@PlaylistManager.GenerateAuthorId(playlist.Author)">@playlist.Author</a>
 					<ul>
