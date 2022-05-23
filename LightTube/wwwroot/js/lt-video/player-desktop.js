@@ -213,6 +213,7 @@
                 externalPlayer.addEventListener("variantchanged", () => {
                     this.updateMenu();
                 });
+                externalPlayer.addEventListener('error', this.fallbackFromShaka);
                 break;
             case "hls.js":
                 // uhhhhhh...
@@ -514,8 +515,7 @@
         if (this.info.live) {
             let timeBack = this.__videoElement.duration - this.__videoElement.currentTime;
             this.controls.time.innerHTML = timeBack > 10 ? this.getTimeString(timeBack) : "LIVE";
-        }
-        else 
+        } else
             this.controls.time.innerHTML = this.getTimeString(this.__videoElement.currentTime) + " / " + this.getTimeString(this.__videoElement.duration);
         this.playbackBar.played.style.width = ((this.__videoElement.currentTime / this.__videoElement.duration) * 100) + "%";
         this.playbackBar.buffered.style.width = ((this.getLoadEnd() / this.__videoElement.duration) * 100) + "%";
@@ -669,6 +669,20 @@
             }
         }
     }
+
+    async fallbackFromShaka() {
+        if (this.externalPlayerType !== "shaka") return;
+        this.externalPlayerType = "html5";
+        console.log("Shaka player crashed, falling back");
+        let cTime = this.__videoElement.currentTime;
+        await this.__externalPlayer.detach();
+        await this.__externalPlayer.destroy();
+        this.__videoElement.src = this.sources[0].src;
+        this.__externalPlayer = undefined;
+        this.__videoElement.currentTime = cTime;
+        this.updateMenu();
+        console.log("Fallback complete!");
+    }
 }
 
 const loadPlayerWithShaka = async (query, info, sources, manifestUri) => {
@@ -680,15 +694,12 @@ const loadPlayerWithShaka = async (query, info, sources, manifestUri) => {
         if (shakaUsable) {
             const video = document.querySelector(query);
             player = new shaka.Player(video);
-            window.shaka = player;
-
-            player.addEventListener('error', console.log);
 
             try {
                 await player.load(manifestUri);
             } catch (e) {
-                // todo: fallback to mp4 urls
-                console.log(e);
+                await player.destroy();
+                return new Player(query, info, sources, undefined, "html5");
             }
         }
     }
