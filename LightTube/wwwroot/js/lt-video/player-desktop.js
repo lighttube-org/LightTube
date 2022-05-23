@@ -38,7 +38,16 @@
                     }
                 }
                 break;
-            //todo: fix for shaka
+            case "shaka":
+                let variants = this.__externalPlayer.getVariantTracks();
+                for (let variant = variants.length - 1; variant >= 0; variant--) {
+                    let v = variants[variant];
+                    if (v.height <= 720) {
+                        this.__externalPlayer.selectVariantTrack(v, true);
+                        break;
+                    }
+                }
+                break;
         }
 
         // controls
