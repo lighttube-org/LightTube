@@ -59,13 +59,7 @@
 <body>
 
 <div class="top-bar @(ViewData["UseFullSizeSearchBar"]?.Equals(true) ?? false ? "full-size-search" : "")">
-	<a class="logo" href="/">light<b>tube</b></a> 
-	@if (compatibility)
-	{
-		<a href="/compatibility_info" class="logo">
-			@(Model.MobileLayout ? "(compat.)" : "(compatibility mode)")
-		</a>
-	}
+	<a class="logo" href="/">light<b>tube</b></a>
 	<div class="divider"></div>
 	<form action="/results">
 		<input type="text" placeholder="Search" name="search_query">
@@ -82,7 +76,6 @@
 			<i class="bi bi-person-circle"></i>
 		</a>
 		<div class="account-menu">
-			<div class="guide-item"><a href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Compatibility Mode</a></div>
 			@Html.Partial("_LoginLogoutPartial")
 			<div class="guide-item"><a href="/toggles/theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Toggle Theme</a></div>
 		</div>

@@ -37,15 +37,6 @@ namespace LightTube.Controllers
 			});
 		}
 
-		[Route("/compatibility_info")]
-		public IActionResult CompatInfo()
-		{
-			return View(new BaseContext
-			{
-				MobileLayout = Utils.IsClientMobile(Request)
-			});
-		}
-
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

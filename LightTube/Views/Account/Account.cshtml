@@ -26,9 +26,6 @@
 			<h1>Settings</h1>
 			<br>
 			<div class="guide-item">
-				<a href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">@(compatibility ? "Disable" : "Enable") compatibility mode</a>
-			</div>
-			<div class="guide-item">
 				<a href="/toggles/theme?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Switch to @(newTheme) theme</a>
 			</div>
 			<br>

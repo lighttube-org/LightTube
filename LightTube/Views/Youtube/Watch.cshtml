@@ -81,7 +81,7 @@
 					<div id="player" class="player error" style="background-image: url('@Model.Player.Thumbnails.LastOrDefault()?.Url')">
 						<span style="text-align: center">
 							Livestreams cannot be played in compatibility mode<br>
-							<a style="color: #77F" href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Click here</a> to disable compatibility mode
+							<a style="color: var(--text-link)" href="/toggles/compatibility?redirectUrl=@(HttpUtility.UrlEncode($"{Context.Request.Path}{Context.Request.QueryString}"))">Click here</a> to disable compatibility mode
 						</span>
 					</div>
 				}
