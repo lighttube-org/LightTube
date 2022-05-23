@@ -57,7 +57,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: #0004 0 2px 5px;
     background-color: var(--top-bar-background);
 
-    z-index: 1;
+    z-index: 9999;
 }
 
 .top-bar > form {
@@ -523,6 +523,7 @@ a.icon-link, a.icon-link > i {
 
 .video-player-container {
     max-width: 100%;
+    padding-top: 48px;
     margin: auto;
     max-height: 75vh;
     aspect-ratio: 16 / 9;

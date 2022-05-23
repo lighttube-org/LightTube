@@ -59,6 +59,7 @@ body.noguide {
     align-items: center;
     background-color: var(--top-bar-background);
     color: var(--text-primary);
+    z-index: 9999;
 }
 
 .divider {
