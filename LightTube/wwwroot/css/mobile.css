@@ -117,6 +117,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .app {
     background-color: var(--app-background);
+    margin-top: 48px;
 }
 
 a.icon-link, a.icon-link > i {
@@ -523,7 +524,6 @@ a.icon-link, a.icon-link > i {
 
 .video-player-container {
     max-width: 100%;
-    padding-top: 48px;
     margin: auto;
     max-height: 75vh;
     aspect-ratio: 16 / 9;
