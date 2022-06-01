@@ -57,9 +57,6 @@ namespace LightTube.Controllers
 			
 			//todo: cache
 
-			string sapisid = Environment.GetEnvironmentVariable("SAPISID");
-			string psid = Environment.GetEnvironmentVariable("PSID");
-			
 			HttpRequestMessage hrm = new(HttpMethod.Post,
 				"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
 			
@@ -73,16 +70,16 @@ namespace LightTube.Controllers
 			hrm.Content = byteContent;
 			
 			long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-			string hashInput = $"{timestamp} {sapisid} https://www.youtube.com";
+			string hashInput = $"{timestamp} {Configuration.Instance.Credentials.Sapisid} https://www.youtube.com";
 			using SHA1Managed sha1 = new();
 			byte[] hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
 			StringBuilder sb = new(hash.Length * 2);
 			foreach (byte b in hash) sb.Append(b.ToString("X2"));
 			string hashDigest = sb.ToString();
 			
-			if (sapisid is not null && psid is not null)
+			if (Configuration.Instance.Credentials.CanUseAuthorizedEndpoints())
 			{
-				hrm.Headers.Add("Cookie", $"SAPISID={sapisid}; __Secure-3PAPISID={sapisid}; __Secure-3PSID={psid};");
+				hrm.Headers.Add("Cookie", $"SAPISID={Configuration.Instance.Credentials.Sapisid}; __Secure-3PAPISID={Configuration.Instance.Credentials.Sapisid}; __Secure-3PSID={Configuration.Instance.Credentials.Psid};");
 				hrm.Headers.Add("Authorization", $"SAPISIDHASH {timestamp}_{hashDigest}");
 				hrm.Headers.Add("X-Origin", "https://www.youtube.com");
 				hrm.Headers.Add("X-Youtube-Client-Name", "5");

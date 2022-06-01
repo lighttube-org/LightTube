@@ -16,6 +16,10 @@ namespace InnerTube
 {
 	public static class Utils
 	{
+		private static string Sapisid;
+		private static string Psid;
+		private static bool UseAuthorization;
+
 		public static string GetHtmlDescription(string description) => description?.Replace("\n", "<br>") ?? "";
 
 		public static string GetMpdManifest(this YoutubePlayer player, string proxyUrl, string videoCodec = null, string audioCodec = null)
@@ -259,9 +263,6 @@ namespace InnerTube
 
 		public static async Task<JObject> GetAuthorizedPlayer(string id, HttpClient client)
 		{
-			string sapisid = Environment.GetEnvironmentVariable("SAPISID");
-			string psid = Environment.GetEnvironmentVariable("PSID");
-			
 			HttpRequestMessage hrm = new(HttpMethod.Post,
 				"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
 			
@@ -274,11 +275,11 @@ namespace InnerTube
 			byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 			hrm.Content = byteContent;
 			
-			if (sapisid is not null && psid is not null)
+			if (UseAuthorization)
 			{
-				hrm.Headers.Add("Cookie", $"SAPISID={sapisid}; __Secure-3PAPISID={sapisid}; __Secure-3PSID={psid};");
+				hrm.Headers.Add("Cookie", $"SAPISID={Sapisid}; __Secure-3PAPISID={Sapisid}; __Secure-3PSID={Psid};");
 				hrm.Headers.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0");
-				hrm.Headers.Add("Authorization", GenerateAuthHeader(sapisid));
+				hrm.Headers.Add("Authorization", GenerateAuthHeader(Sapisid));
 				hrm.Headers.Add("X-Origin", "https://www.youtube.com");
 				hrm.Headers.Add("X-Youtube-Client-Name", "1");
 				hrm.Headers.Add("X-Youtube-Client-Version", "2.20210721.00.00");
@@ -329,6 +330,13 @@ namespace InnerTube
 				}
 
 			return "mp4";
+		}
+
+		public static void SetAuthorization(bool canUseAuthorizedEndpoints, string sapisid, string psid)
+		{
+			UseAuthorization = canUseAuthorizedEndpoints;
+			Sapisid = sapisid;
+			Psid = psid;
 		}
 	}
 }

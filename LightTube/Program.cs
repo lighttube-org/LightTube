@@ -13,6 +13,9 @@ namespace LightTube
 	{
 		public static void Main(string[] args)
 		{
+			Configuration.LoadConfiguration();
+			InnerTube.Utils.SetAuthorization(Configuration.Instance.Credentials.CanUseAuthorizedEndpoints(),
+				Configuration.Instance.Credentials.Sapisid, Configuration.Instance.Credentials.Psid);
 			CreateHostBuilder(args).Build().Run();
 		}
 

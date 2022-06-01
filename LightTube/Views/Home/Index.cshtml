@@ -11,5 +11,5 @@
 }
 
 <div style="text-align: center">
-	<h1>@(Environment.GetEnvironmentVariable("LIGHTTUBE_MOTD") ?? "Search something to get started")</h1>
+	<h1>@Configuration.Instance.Interface.MessageOfTheDay</h1>
 </div>
