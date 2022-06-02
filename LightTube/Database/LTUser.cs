@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -54,6 +55,10 @@ namespace LightTube.Database
 				XmlElement link = document.CreateElement("link");
 				link.InnerText = $"https://{hostUrl}/watch?v={video.Id}";
 				item.AppendChild(link);
+
+				XmlElement published = document.CreateElement("pubDate");
+				published.InnerText = video.PublishedDate.ToString("R");
+				item.AppendChild(published);
 
 				XmlElement author = document.CreateElement("author");
 				
