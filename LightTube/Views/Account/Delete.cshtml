@@ -21,7 +21,7 @@
 				<form asp-action="Delete" method="POST" class="login-form">
 					<h1>Delete Account</h1>
 					<p>Deleting a local account</p>
-					<input name="email" type="hidden" value="@user.Email">
+					<input name="email" type="hidden" value="@user.UserID">
 					<input name="password" type="hidden" value="@user.PasswordHash">
 					<input type="submit" value="Delete Account" class="login-button danger">
 				</form>
@@ -30,7 +30,7 @@
 			{
 				<form asp-action="Delete" method="POST" class="login-form">
 					<h1>Delete Account</h1>
-					<input name="email" type="email" placeholder="Email">
+					<input name="userid" type="text" placeholder="UserID">
 					<input name="password" type="password" placeholder="Password">
 					<input type="submit" value="Delete Account" class="login-button danger">
 				</form>

@@ -48,7 +48,7 @@ namespace LightTube.Database
 					if (accountJson != null)
 					{
 						LTUser tempUser = JsonConvert.DeserializeObject<LTUser>(accountJson) ?? new LTUser();
-						if (tempUser.Email == "Local Account" && tempUser.PasswordHash == "local_account")
+						if (tempUser.UserID == "Local Account" && tempUser.PasswordHash == "local_account")
 							accountExists = true;
 					}
 				}
@@ -60,7 +60,7 @@ namespace LightTube.Database
 
 			LTUser user = new()
 			{
-				Email = "Local Account",
+				UserID = "Local Account",
 				PasswordHash = "local_account",
 				SubscribedChannels = new List<string>()
 			};
@@ -81,7 +81,7 @@ namespace LightTube.Database
 					if (accountJson != null)
 					{
 						LTUser tempUser = JsonConvert.DeserializeObject<LTUser>(accountJson) ?? new LTUser();
-						if (tempUser.Email == "Local Account" && tempUser.PasswordHash == "local_account")
+						if (tempUser.UserID == "Local Account" && tempUser.PasswordHash == "local_account")
 						{
 							user = tempUser;
 							return true;

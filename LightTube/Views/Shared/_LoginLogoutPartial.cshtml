@@ -1,7 +1,7 @@
 @using LightTube.Database
 @if (Context.TryGetUser(out LTUser user, "web"))
 {
-	<div class="guide-item"><a>@user.Email.Split("@")[0]</a></div>
+	<div class="guide-item"><a>@user.UserID.Split("@")[0]</a></div>
 	@if (user.PasswordHash != "local_account")
 	{
 		<div class="guide-item"><a href="/Account/Logins">Active logins</a></div>

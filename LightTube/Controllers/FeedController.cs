@@ -87,7 +87,7 @@ namespace LightTube.Controllers
 			return View(new PlaylistsContext
 			{
 				MobileLayout = Utils.IsClientMobile(Request),
-				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.Email)
+				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.UserID)
 			});
 		}
 

@@ -23,10 +23,10 @@ namespace LightTube.Database
 
 		public async Task<LTLogin> CreateToken(string email, string password, string userAgent, string[] scopes)
 		{
-			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
+			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.UserID == email);
 			if (!await users.AnyAsync())
 				throw new UnauthorizedAccessException("Invalid credentials");
-			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
+			LTUser user = (await _userCollection.FindAsync(x => x.UserID == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
 				throw new UnauthorizedAccessException("Invalid credentials");
 			if (!scopes.Contains("web") && !user.ApiAccess)
@@ -60,14 +60,14 @@ namespace LightTube.Database
 
 		public async Task RemoveToken(string email, string password, string identifier)
 		{
-			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
+			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.UserID == email);
 			if (!await users.AnyAsync())
 				throw new KeyNotFoundException("Invalid credentials");
-			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
+			LTUser user = (await _userCollection.FindAsync(x => x.UserID == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
 				throw new UnauthorizedAccessException("Invalid credentials");
 
-			await _tokenCollection.FindOneAndDeleteAsync(t => t.Identifier == identifier && t.Email == user.Email);
+			await _tokenCollection.FindOneAndDeleteAsync(t => t.Identifier == identifier && t.Email == user.UserID);
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -86,7 +86,7 @@ namespace LightTube.Database
 		public async Task<LTUser> GetUserFromToken(string token)
 		{
 			string email = (await _tokenCollection.FindAsync(x => x.Token == token)).First().Email;
-			return (await _userCollection.FindAsync(u => u.Email == email)).First();
+			return (await _userCollection.FindAsync(u => u.UserID == email)).First();
 		}
 
 		public async Task<LTUser> GetUserFromRssToken(string token) => (await _userCollection.FindAsync(u => u.RssToken == token)).First();
@@ -118,26 +118,26 @@ namespace LightTube.Database
 			else
 				user.SubscribedChannels.Add(ltChannel.ChannelId);
 			
-			await _userCollection.ReplaceOneAsync(x => x.Email == user.Email, user);
+			await _userCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
 			return (ltChannel, user.SubscribedChannels.Contains(ltChannel.ChannelId));
 		}
 
 		public async Task SetApiAccess(LTUser user, bool access)
 		{
 			user.ApiAccess = access;
-			await _userCollection.ReplaceOneAsync(x => x.Email == user.Email, user);
+			await _userCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
 		}
 
 		public async Task DeleteUser(string email, string password)
 		{
-			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
+			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.UserID == email);
 			if (!await users.AnyAsync())
 				throw new KeyNotFoundException("Invalid credentials");
-			LTUser user = (await _userCollection.FindAsync(x => x.Email == email)).First();
+			LTUser user = (await _userCollection.FindAsync(x => x.UserID == email)).First();
 			if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
 				throw new UnauthorizedAccessException("Invalid credentials");
 
-			await _userCollection.DeleteOneAsync(x => x.Email == email);
+			await _userCollection.DeleteOneAsync(x => x.UserID == email);
 			await _tokenCollection.DeleteManyAsync(x => x.Email == email);
 			foreach (LTPlaylist pl in await DatabaseManager.Playlists.GetUserPlaylists(email))
 				await DatabaseManager.Playlists.DeletePlaylist(pl.Id);
@@ -145,13 +145,13 @@ namespace LightTube.Database
 
 		public async Task CreateUser(string email, string password)
 		{
-			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.Email == email);
+			IAsyncCursor<LTUser> users = await _userCollection.FindAsync(x => x.UserID == email);
 			if (await users.AnyAsync())
 				throw new DuplicateNameException("A user with that email already exists");
 
 			LTUser user = new()
 			{
-				Email = email,
+				UserID = email,
 				PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
 				SubscribedChannels = new List<string>(),
 				RssToken = GenerateToken(32)

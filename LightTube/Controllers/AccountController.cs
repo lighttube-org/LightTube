@@ -49,14 +49,14 @@ namespace LightTube.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Login(string email, string password)
+		public async Task<IActionResult> Login(string userid, string password)
 		{
 			if (HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			try
 			{
-				LTLogin login = await DatabaseManager.Logins.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
+				LTLogin login = await DatabaseManager.Logins.CreateToken(userid, password, Request.Headers["user-agent"], new []{"web"});
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = DateTimeOffset.MaxValue
@@ -100,15 +100,15 @@ namespace LightTube.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Register(string email, string password)
+		public async Task<IActionResult> Register(string userid, string password)
 		{
 			if (HttpContext.TryGetUser(out LTUser _, "web"))
 				return Redirect("/");
 
 			try
 			{
-				await DatabaseManager.Logins.CreateUser(email, password);
-				LTLogin login = await DatabaseManager.Logins.CreateToken(email, password, Request.Headers["user-agent"], new []{"web"});
+				await DatabaseManager.Logins.CreateUser(userid, password);
+				LTLogin login = await DatabaseManager.Logins.CreateToken(userid, password, Request.Headers["user-agent"], new []{"web"});
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = DateTimeOffset.MaxValue
@@ -144,14 +144,14 @@ namespace LightTube.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Delete(string email, string password)
+		public async Task<IActionResult> Delete(string userid, string password)
 		{
 			try
 			{
-				if (email == "Local Account" && password == "local_account")
+				if (userid == "Local Account" && password == "local_account")
 					Response.Cookies.Delete("account_data");
 				else
-					await DatabaseManager.Logins.DeleteUser(email, password);
+					await DatabaseManager.Logins.DeleteUser(userid, password);
 				return Redirect("/Account/Register?err=Account+deleted");
 			}
 			catch (KeyNotFoundException e)
@@ -313,7 +313,7 @@ namespace LightTube.Controllers
 			{
 				Id = v,
 				Video = await _youtube.GetVideoAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion()),
-				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.Email),
+				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.UserID),
 				Thumbnail = ytPlayer?["videoDetails"]?["thumbnail"]?["thumbnails"]?[0]?["url"]?.ToString() ?? $"https://i.ytimg.com/vi_webp/{v}/maxresdefault.webp",
 				MobileLayout = Utils.IsClientMobile(Request),
 			});

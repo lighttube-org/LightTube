@@ -29,7 +29,7 @@ namespace LightTube.Database
 		public async Task<LTPlaylist> CreatePlaylist(LTUser user, string name, string description,
 			PlaylistVisibility visibility, string idPrefix = null)
 		{
-			if (await _userCollection.CountDocumentsAsync(x => x.Email == user.Email) == 0)
+			if (await _userCollection.CountDocumentsAsync(x => x.UserID == user.UserID) == 0)
 				throw new UnauthorizedAccessException("Local accounts cannot create playlists");
 
 			LTPlaylist pl = new()
@@ -39,7 +39,7 @@ namespace LightTube.Database
 				Description = description,
 				Visibility = visibility,
 				VideoIds = new List<string>(),
-				Author = user.Email,
+				Author = user.UserID,
 				LastUpdated = DateTimeOffset.Now
 			};
 			

@@ -136,7 +136,7 @@ namespace LightTube.Controllers
 
 			string message = "";
 
-			if (list.StartsWith("LT-PL") && (await DatabaseManager.Playlists.GetPlaylist(list)).Visibility == PlaylistVisibility.PRIVATE && pl.Channel.Name != user?.Email)
+			if (list.StartsWith("LT-PL") && (await DatabaseManager.Playlists.GetPlaylist(list)).Visibility == PlaylistVisibility.PRIVATE && pl.Channel.Name != user?.UserID)
 				pl = new YoutubePlaylist
 				{
 					Id = null,
@@ -159,7 +159,7 @@ namespace LightTube.Controllers
 
 			if (string.IsNullOrWhiteSpace(pl.Title)) message = "Playlist unavailable";
 
-			if (list.StartsWith("LT-PL") && pl.Channel.Name == user?.Email)
+			if (list.StartsWith("LT-PL") && pl.Channel.Name == user?.UserID)
 			{
 				if (delete != null)
 				{
@@ -189,7 +189,7 @@ namespace LightTube.Controllers
 				ContinuationToken = continuation,
 				MobileLayout = Utils.IsClientMobile(Request),
 				Message = message,
-				Editable = list.StartsWith("LT-PL") && pl.Channel.Name == user?.Email
+				Editable = list.StartsWith("LT-PL") && pl.Channel.Name == user?.UserID
 			};
 			return View(context);
 		}

@@ -10,7 +10,7 @@ namespace LightTube.Database
 	[BsonIgnoreExtraElements]
 	public class LTUser
 	{
-		public string Email;
+		public string UserID;
 		public string PasswordHash;
 		public List<string> SubscribedChannels;
 		public bool ApiAccess;
@@ -25,11 +25,11 @@ namespace LightTube.Database
 			XmlElement channel = document.CreateElement("channel");
 
 			XmlElement title = document.CreateElement("title");
-			title.InnerText = "LightTube subscriptions RSS feed for " + Email;
+			title.InnerText = "LightTube subscriptions RSS feed for " + UserID;
 			channel.AppendChild(title);
 
 			XmlElement description = document.CreateElement("description");
-			description.InnerText = $"LightTube subscriptions RSS feed for {Email} with {SubscribedChannels.Count} channels";
+			description.InnerText = $"LightTube subscriptions RSS feed for {UserID} with {SubscribedChannels.Count} channels";
 			channel.AppendChild(description);
 
 			FeedVideo[] feeds = await YoutubeRSS.GetMultipleFeeds(SubscribedChannels);
