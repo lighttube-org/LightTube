@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
@@ -96,9 +97,7 @@ namespace LightTube.Controllers
 		{
 			if (!DatabaseManager.TryGetRssUser(token, out LTUser user))
 				return Unauthorized();
-
-//			Response.ContentType = "application/xml";
-			return Ok(await user.GenerateRssFeed(Request.Host.ToString(), Math.Clamp(limit, 0, 50)));
+			return File(Encoding.UTF8.GetBytes(await user.GenerateRssFeed(Request.Host.ToString(), Math.Clamp(limit, 0, 50))), "application/xml");
 		}
 	}
 }

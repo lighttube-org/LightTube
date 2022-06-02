@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -71,7 +72,7 @@ namespace LightTube.Database
 				author.AppendChild(uri);
 				
 				item.AppendChild(author);
-
+/*
 				XmlElement mediaGroup = document.CreateElement("media_group");
 				
 				XmlElement mediaTitle = document.CreateElement("media_title");
@@ -88,14 +89,14 @@ namespace LightTube.Database
 				mediaGroup.AppendChild(mediaContent);
 				
 				item.AppendChild(mediaGroup);
-
+*/
 				channel.AppendChild(item);
 			}
 
 			rss.AppendChild(channel);
 			
 			document.AppendChild(rss);
-			return document.OuterXml.Replace("<media_", "<media:").Replace("</media_", "</media:");
+			return document.OuterXml;//.Replace("<media_", "<media:").Replace("</media_", "</media:");
 		}
 	}
 }
