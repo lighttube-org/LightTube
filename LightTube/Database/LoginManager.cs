@@ -89,6 +89,8 @@ namespace LightTube.Database
 			return (await _userCollection.FindAsync(u => u.Email == email)).First();
 		}
 
+		public async Task<LTUser> GetUserFromRssToken(string token) => (await _userCollection.FindAsync(u => u.RssToken == token)).First();
+
 		public async Task<LTLogin> GetLoginFromToken(string token)
 		{
 			var res = await _tokenCollection.FindAsync(x => x.Token == token);
@@ -151,7 +153,8 @@ namespace LightTube.Database
 			{
 				Email = email,
 				PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-				SubscribedChannels = new List<string>()
+				SubscribedChannels = new List<string>(),
+				RssToken = GenerateToken(32)
 			};
 			await _userCollection.InsertOneAsync(user);
 		}

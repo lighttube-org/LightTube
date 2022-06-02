@@ -90,5 +90,15 @@ namespace LightTube.Controllers
 				Playlists = await DatabaseManager.Playlists.GetUserPlaylists(user.Email)
 			});
 		}
+
+		[Route("/rss")]
+		public async Task<IActionResult> Playlists(string token, int limit = 15)
+		{
+			if (!DatabaseManager.TryGetRssUser(token, out LTUser user))
+				return Unauthorized();
+
+//			Response.ContentType = "application/xml";
+			return Ok(await user.GenerateRssFeed(Request.Host.ToString(), Math.Clamp(limit, 0, 50)));
+		}
 	}
 }

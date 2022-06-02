@@ -130,5 +130,25 @@ namespace LightTube.Database
 			user = null;
 			return false;
 		}
+
+		public static bool TryGetRssUser(string token, out LTUser user)
+		{
+			if (token is null)
+			{
+				user = null;
+				return false;
+			}
+
+			try
+			{
+				user = Logins.GetUserFromRssToken(token).Result;
+				return true;
+			}
+			catch
+			{
+				user = null;	
+				return false;
+			}
+		}
 	}
 }
