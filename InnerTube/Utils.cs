@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
@@ -277,9 +278,9 @@ namespace InnerTube
 			
 			if (UseAuthorization)
 			{
-				hrm.Headers.Add("Cookie", $"SAPISID={Sapisid}; __Secure-3PAPISID={Sapisid}; __Secure-3PSID={Psid};");
+				hrm.Headers.Add("Cookie", GenerateAuthCookie());
 				hrm.Headers.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0");
-				hrm.Headers.Add("Authorization", GenerateAuthHeader(Sapisid));
+				hrm.Headers.Add("Authorization", GenerateAuthHeader());
 				hrm.Headers.Add("X-Origin", "https://www.youtube.com");
 				hrm.Headers.Add("X-Youtube-Client-Name", "1");
 				hrm.Headers.Add("X-Youtube-Client-Version", "2.20210721.00.00");
@@ -292,13 +293,16 @@ namespace InnerTube
 			return JObject.Parse(await ytPlayerRequest.Content.ReadAsStringAsync());
 		}
 
-		private static string GenerateAuthHeader(string sapisid)
+		internal static string GenerateAuthHeader()
 		{
+			if (!UseAuthorization) return "None none";
 			long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-			string hashInput = timestamp + " " + sapisid + " https://www.youtube.com";
+			string hashInput = timestamp + " " + Sapisid + " https://www.youtube.com";
 			string hashDigest = GenerateSha1Hash(hashInput);
 			return $"SAPISIDHASH {timestamp}_{hashDigest}";
 		}
+
+		internal static string GenerateAuthCookie() => UseAuthorization ? $"SAPISID={Sapisid}; __Secure-3PAPISID={Sapisid}; __Secure-3PSID={Psid};" : ";";
 
 		private static string GenerateSha1Hash(string input)
 		{
@@ -337,6 +341,112 @@ namespace InnerTube
 			UseAuthorization = canUseAuthorizedEndpoints;
 			Sapisid = sapisid;
 			Psid = psid;
+		}
+
+		internal static string GetCodec(string mimetypeString, bool audioCodec)
+		{
+			string acodec = "";
+			string vcodec = "";
+
+			Match match = Regex.Match(mimetypeString, "codecs=\"([\\s\\S]+?)\"");
+
+			string[] g = match.Groups[1].ToString().Split(",");
+			foreach (string codec in g)
+			{
+				switch (codec.Split(".")[0].Trim())
+				{
+					case "avc1":
+					case "av01":
+					case "vp9":
+					case "mp4v":
+						vcodec = codec;
+						break;
+					case "mp4a":
+					case "opus":
+						acodec = codec;
+						break;
+					default:
+						Console.WriteLine("Unknown codec type: " + codec.Split(".")[0].Trim());
+						break;
+				}
+			}
+
+			return (audioCodec ? acodec : vcodec).Trim();
+		}
+
+		public static string GetFormatName(JToken formatToken)
+		{
+			string format = formatToken["itag"]?.ToString() switch
+			{
+				"160" => "144p",
+				"278" => "144p",
+				"330" => "144p",
+				"394" => "144p",
+				"694" => "144p",
+				
+				"133" => "240p",
+				"242" => "240p",
+				"331" => "240p",
+				"395" => "240p",
+				"695" => "240p",
+				
+				"134" => "360p",
+				"243" => "360p",
+				"332" => "360p",
+				"396" => "360p",
+				"696" => "360p",
+
+				"135" => "480p",
+				"244" => "480p",
+				"333" => "480p",
+				"397" => "480p",
+				"697" => "480p",
+				
+				"136" => "720p",
+				"247" => "720p",
+				"298" => "720p",
+				"302" => "720p",
+				"334" => "720p",
+				"398" => "720p",
+				"698" => "720p",
+				
+				"137" => "1080p",
+				"299" => "1080p",
+				"248" => "1080p",
+				"303" => "1080p",
+				"335" => "1080p",
+				"399" => "1080p",
+				"699" => "1080p",
+				
+				"264" => "1440p",
+				"271" => "1440p",
+				"304" => "1440p",
+				"308" => "1440p",
+				"336" => "1440p",
+				"400" => "1440p",
+				"700" => "1440p",
+				
+				"266" => "2160p",
+				"305" => "2160p",
+				"313" => "2160p",
+				"315" => "2160p",
+				"337" => "2160p",
+				"401" => "2160p",
+				"701" => "2160p",
+				
+				"138" => "4320p",
+				"272" => "4320p",
+				"402" => "4320p",
+				"571" => "4320p",
+				
+				var _ => $"{formatToken["height"]}p",
+			};
+
+			return format == "p" 
+				? formatToken["audioQuality"]?.ToString().ToLowerInvariant()
+				: (formatToken["fps"]?.ToObject<int>() ?? 0) > 30 
+					? $"{format}{formatToken["fps"]}" 
+					: format;
 		}
 	}
 }

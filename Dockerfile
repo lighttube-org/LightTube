@@ -15,10 +15,5 @@ RUN dotnet publish "LightTube.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-# this might be a bad way to install yt-dlp, but idc, if it works, it works
-RUN apt update
-RUN apt install python3 curl -y
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /bin/yt-dlp
-RUN chmod a+rx /bin/yt-dlp
 COPY --from=publish /app/publish .
 CMD ASPNETCORE_URLS=http://*:$PORT dotnet LightTube.dll

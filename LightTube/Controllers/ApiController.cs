@@ -50,10 +50,6 @@ namespace LightTube.Controllers
 				XmlDocument xml = player.GetXmlDocument();
 				return Xml(xml);
 			}
-			catch (YtDlpException e)
-			{
-				return GetErrorVideoPlayer(v, e.ErrorMessage.Split(": ").Last());
-			}
 			catch (Exception e)
 			{
 				return GetErrorVideoPlayer(v, e.Message);
@@ -67,7 +63,6 @@ namespace LightTube.Controllers
 				Id = videoId,
 				Title = "",
 				Description = "",
-				Categories = Array.Empty<string>(),
 				Tags = Array.Empty<string>(),
 				Channel = new Channel
 				{
@@ -75,7 +70,6 @@ namespace LightTube.Controllers
 					Id = "",
 					Avatars = Array.Empty<Thumbnail>()
 				},
-				UploadDate = "1970-01-01",
 				Duration = 0,
 				Chapters = Array.Empty<Chapter>(),
 				Thumbnails = Array.Empty<Thumbnail>(),

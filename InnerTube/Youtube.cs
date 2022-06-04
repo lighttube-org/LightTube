@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -28,13 +27,21 @@ namespace InnerTube
 		};
 
 		private async Task<JObject> MakeRequest(string endpoint, Dictionary<string, object> postData, string language,
-			string region)
+			string region, string clientName = "WEB", string clientId = "1", string clientVersion = "2.20220405", bool authorized = false)
 		{
 			HttpRequestMessage hrm = new(HttpMethod.Post,
 				@$"https://www.youtube.com/youtubei/v1/{endpoint}?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
 
-			byte[] buffer = Encoding.UTF8.GetBytes(RequestContext.BuildRequestContextJson(postData, language, region));
+			byte[] buffer = Encoding.UTF8.GetBytes(RequestContext.BuildRequestContextJson(postData, language, region, clientName, clientVersion));
 			ByteArrayContent byteContent = new(buffer);
+			if (authorized)
+			{
+				hrm.Headers.Add("Cookie", Utils.GenerateAuthCookie());
+				hrm.Headers.Add("Authorization", Utils.GenerateAuthHeader());
+				hrm.Headers.Add("X-Youtube-Client-Name", clientId);
+				hrm.Headers.Add("X-Youtube-Client-Version", clientVersion);
+				hrm.Headers.Add("Origin", "https://www.youtube.com");
+			}
 			byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 			hrm.Content = byteContent;
 			HttpResponseMessage ytPlayerRequest = await Client.SendAsync(hrm);
@@ -42,7 +49,7 @@ namespace InnerTube
 			return JObject.Parse(await ytPlayerRequest.Content.ReadAsStringAsync());
 		}
 
-		public async Task<YoutubePlayer> GetPlayerAsync(string videoId, string language = "en", string region = "US")
+		public async Task<YoutubePlayer> GetPlayerAsync(string videoId, string language = "en", string region = "US", bool iOS = false)
 		{
 			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now))
 			{
@@ -51,42 +58,129 @@ namespace InnerTube
 				return item.Item;
 			}
 
-			try
+			JObject player = await MakeRequest("player", new Dictionary<string, object>
 			{
-				YoutubePlayer player = await YtDlp.GetVideo(videoId).GetYoutubePlayer();
-				PlayerCache.Remove(videoId);
-				PlayerCache.Add(videoId,
-					new CacheItem<YoutubePlayer>(player,
-						TimeSpan.FromSeconds(int.Parse(player.ExpiresInSeconds ?? "21600")).Subtract(TimeSpan.FromHours(1))));
-				return player;
-			} 
-			catch (YtDlpException e)
+				["videoId"] = videoId
+			}, language, region, iOS ? "IOS" : "ANDROID", iOS ? "5" : "3", "17.13.3", true);
+
+			switch (player["playabilityStatus"]?["status"]?.ToString())
 			{
-				return new YoutubePlayer
-				{
-					Id = "",
-					Title = "",
-					Description = "",
-					Categories = Array.Empty<string>(),
-					Tags = Array.Empty<string>(),
-					Channel = new Channel
+				case "OK":
+					YoutubePlayer video = new()
 					{
-						Name = "",
+						Id = player["videoDetails"]?["videoId"]?.ToString(),
+						Title = player["videoDetails"]?["title"]?.ToString(),
+						Description = player["videoDetails"]?["shortDescription"]?.ToString(),
+						Tags = player["videoDetails"]?["keywords"]?.ToObject<string[]>(),
+						Channel = new Channel
+						{
+							Name = player["videoDetails"]?["author"]?.ToString(),
+							Id = player["videoDetails"]?["channelId"]?.ToString(),
+							Avatars = Array.Empty<Thumbnail>()
+						},
+						Duration = player["videoDetails"]?["lengthSeconds"]?.ToObject<long>(),
+						IsLive = player["videoDetails"]?["isLiveContent"]?.ToObject<bool>() ?? false,
+						Chapters = Array.Empty<Chapter>(),
+						Thumbnails = player["videoDetails"]?["thumbnail"]?["thumbnails"]?.Select(x => new Thumbnail
+						{
+							Height = x["height"]?.ToObject<int>() ?? -1,
+							Url = x["url"]?.ToString(),
+							Width = x["width"]?.ToObject<int>() ?? -1
+						}).ToArray(),
+						Formats = player["streamingData"]?["formats"]?.Select(x => new Format
+						{
+							FormatName = Utils.GetFormatName(x),
+							FormatId = x["itag"]?.ToString(),
+							FormatNote = x["quality"]?.ToString(),
+							Filesize = x["contentLength"]?.ToObject<long>(),
+							Bitrate = x["bitrate"]?.ToObject<long>() ?? 0,
+							AudioCodec = Utils.GetCodec(x["mimeType"]?.ToString(), true),
+							VideoCodec = Utils.GetCodec(x["mimeType"]?.ToString(), false),
+							AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
+							Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
+							Url = x["url"]?.ToString()
+						}).ToArray() ?? Array.Empty<Format>(),
+						AdaptiveFormats = player["streamingData"]?["adaptiveFormats"]?.Select(x => new Format
+						{
+							FormatName = Utils.GetFormatName(x),
+							FormatId = x["itag"]?.ToString(),
+							FormatNote = x["quality"]?.ToString(),
+							Filesize = x["contentLength"]?.ToObject<long>(),
+							Bitrate = x["bitrate"]?.ToObject<long>() ?? 0,
+							AudioCodec = Utils.GetCodec(x["mimeType"].ToString(), true),
+							VideoCodec = Utils.GetCodec(x["mimeType"].ToString(), false),
+							AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
+							Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
+							Url = x["url"]?.ToString(),
+							InitRange = x["initRange"].ToObject<Models.Range>(),
+							IndexRange = x["indexRange"].ToObject<Models.Range>()
+						}).ToArray() ?? Array.Empty<Format>(),
+						Subtitles = new Subtitle[]
+						{
+						},
+						Storyboards = new Format[]
+						{
+						},
+						ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToString(),
+						ErrorMessage = null
+					};
+					PlayerCache.Remove(videoId);
+					PlayerCache.Add(videoId,
+						new CacheItem<YoutubePlayer>(video,
+							TimeSpan.FromSeconds(int.Parse(video.ExpiresInSeconds ?? "21600"))
+								.Subtract(TimeSpan.FromHours(1))));
+					return video;
+				case "LOGIN_REQUIRED":
+					return new YoutubePlayer
+					{
 						Id = "",
-						SubscriberCount = "",
-						Avatars = Array.Empty<Thumbnail>()
-					},
-					UploadDate = "1970-01-01",
-					Duration = 0,
-					Chapters = Array.Empty<Chapter>(),
-					Thumbnails = Array.Empty<Thumbnail>(),
-					Formats = Array.Empty<Format>(),
-					AdaptiveFormats = Array.Empty<Format>(),
-					Subtitles = Array.Empty<Subtitle>(),
-					Storyboards = Array.Empty<Format>(),
-					ExpiresInSeconds = "0",
-					ErrorMessage = e.ErrorMessage
-				};
+						Title = "",
+						Description = "",
+						Tags = Array.Empty<string>(),
+						Channel = new Channel
+						{
+							Name = "",
+							Id = "",
+							SubscriberCount = "",
+							Avatars = Array.Empty<Thumbnail>()
+						},
+						Duration = 0,
+						IsLive = false,
+						Chapters = Array.Empty<Chapter>(),
+						Thumbnails = Array.Empty<Thumbnail>(),
+						Formats = Array.Empty<Format>(),
+						AdaptiveFormats = Array.Empty<Format>(),
+						Subtitles = Array.Empty<Subtitle>(),
+						Storyboards = Array.Empty<Format>(),
+						ExpiresInSeconds = "0",
+						ErrorMessage =
+							"This video is age-restricted. Please contact this instances authors to update their configuration"
+					};
+				default:
+					return new YoutubePlayer
+					{
+						Id = "",
+						Title = "",
+						Description = "",
+						Tags = Array.Empty<string>(),
+						Channel = new Channel
+						{
+							Name = "",
+							Id = "",
+							SubscriberCount = "",
+							Avatars = Array.Empty<Thumbnail>()
+						},
+						Duration = 0,
+						IsLive = false,
+						Chapters = Array.Empty<Chapter>(),
+						Thumbnails = Array.Empty<Thumbnail>(),
+						Formats = Array.Empty<Format>(),
+						AdaptiveFormats = Array.Empty<Format>(),
+						Subtitles = Array.Empty<Subtitle>(),
+						Storyboards = Array.Empty<Format>(),
+						ExpiresInSeconds = "0",
+						ErrorMessage = player["playabilityStatus"]?["reason"]?.ToString() ?? "Something has gone *really* wrong"
+					};
 			}
 		}
 

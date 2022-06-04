@@ -9,10 +9,8 @@ namespace InnerTube.Models
 		public string Id { get; set; }
 		public string Title { get; set; }
 		public string Description { get; set; }
-		public string[] Categories { get; set; }
 		public string[] Tags { get; set; }
 		public Channel Channel { get; set; }
-		public string UploadDate { get; set; }
 		public long? Duration { get; set; }
 		public bool IsLive { get; set; }
 		public Chapter[] Chapters { get; set; }
@@ -42,7 +40,6 @@ namespace InnerTube.Models
 			{
 				XmlElement player = doc.CreateElement("Player");
 				player.SetAttribute("id", Id);
-				player.SetAttribute("uploadDate", UploadDate);
 				player.SetAttribute("duration", Duration.ToString());
 				player.SetAttribute("isLive", IsLive.ToString());
 				player.SetAttribute("expiresInSeconds", ExpiresInSeconds);
@@ -54,15 +51,6 @@ namespace InnerTube.Models
 				XmlElement description = doc.CreateElement("Description");
 				description.InnerText = Description;
 				player.AppendChild(description);
-
-				XmlElement categories = doc.CreateElement("Categories");
-				foreach (string category in Categories)
-				{
-					XmlElement categoryElement = doc.CreateElement("Category");
-					categoryElement.InnerText = category;
-					categories.AppendChild(categoryElement);
-				}
-				player.AppendChild(categories);
 
 				XmlElement tags = doc.CreateElement("Tags");
 				foreach (string tag in Tags)
@@ -137,14 +125,15 @@ namespace InnerTube.Models
 			XmlElement format = doc.CreateElement("Format");
 
 			format.SetAttribute("id", FormatId);
-			format.SetAttribute("label", FormatNote);
+			format.SetAttribute("label", FormatName);
 			format.SetAttribute("filesize", Filesize.ToString());
 			format.SetAttribute("quality", Bitrate.ToString());
 			format.SetAttribute("audioCodec", AudioCodec);
 			format.SetAttribute("videoCodec", VideoCodec);
 			if (AudioSampleRate != null)
 				format.SetAttribute("audioSampleRate", AudioSampleRate.ToString());
-			format.SetAttribute("resolution", Resolution);
+			else
+				format.SetAttribute("resolution", Resolution);
 
 			XmlElement url = doc.CreateElement("URL");
 			url.InnerText = Url;
