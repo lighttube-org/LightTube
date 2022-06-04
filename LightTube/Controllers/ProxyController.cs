@@ -283,7 +283,9 @@ namespace LightTube.Controllers
 					"text/plain");
 			}
 
-			if (!player.Subtitles.Any(x => x.Ext == "vtt" && string.Equals(x.Language, language, StringComparison.InvariantCultureIgnoreCase)))
+			string url = null;
+			Subtitle? subtitle = player.Subtitles.FirstOrDefault(x => string.Equals(x.Language, language, StringComparison.InvariantCultureIgnoreCase));
+			if (subtitle is null)
 			{
 				Response.StatusCode = (int) HttpStatusCode.NotFound;
 				return File(
@@ -291,7 +293,7 @@ namespace LightTube.Controllers
 						$"There are no available subtitles for {language}. Available language codes are: {string.Join(", ", player.Subtitles.Select(x => $"\"{x.Language}\""))}")),
 					"text/plain");
 			}
-			string url = player.Subtitles.First(x => x.Ext == "vtt" && string.Equals(x.Language, language, StringComparison.InvariantCultureIgnoreCase)).Url;
+			url = subtitle.Url.Replace("fmt=srv3", "fmt=vtt");
 			
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;

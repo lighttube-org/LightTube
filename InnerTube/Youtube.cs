@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using InnerTube.Models;
 using Newtonsoft.Json.Linq;
 
@@ -66,64 +67,66 @@ namespace InnerTube
 			switch (player["playabilityStatus"]?["status"]?.ToString())
 			{
 				case "OK":
-					YoutubePlayer video = new()
+					YoutubePlayer video = new();
+					video.Id = player["videoDetails"]?["videoId"]?.ToString();
+					video.Title = player["videoDetails"]?["title"]?.ToString();
+					video.Description = player["videoDetails"]?["shortDescription"]?.ToString();
+					video.Tags = player["videoDetails"]?["keywords"]?.ToObject<string[]>();
+					video.Channel = new Channel
 					{
-						Id = player["videoDetails"]?["videoId"]?.ToString(),
-						Title = player["videoDetails"]?["title"]?.ToString(),
-						Description = player["videoDetails"]?["shortDescription"]?.ToString(),
-						Tags = player["videoDetails"]?["keywords"]?.ToObject<string[]>(),
-						Channel = new Channel
-						{
-							Name = player["videoDetails"]?["author"]?.ToString(),
-							Id = player["videoDetails"]?["channelId"]?.ToString(),
-							Avatars = Array.Empty<Thumbnail>()
-						},
-						Duration = player["videoDetails"]?["lengthSeconds"]?.ToObject<long>(),
-						IsLive = player["videoDetails"]?["isLiveContent"]?.ToObject<bool>() ?? false,
-						Chapters = Array.Empty<Chapter>(),
-						Thumbnails = player["videoDetails"]?["thumbnail"]?["thumbnails"]?.Select(x => new Thumbnail
-						{
-							Height = x["height"]?.ToObject<int>() ?? -1,
-							Url = x["url"]?.ToString(),
-							Width = x["width"]?.ToObject<int>() ?? -1
-						}).ToArray(),
-						Formats = player["streamingData"]?["formats"]?.Select(x => new Format
-						{
-							FormatName = Utils.GetFormatName(x),
-							FormatId = x["itag"]?.ToString(),
-							FormatNote = x["quality"]?.ToString(),
-							Filesize = x["contentLength"]?.ToObject<long>(),
-							Bitrate = x["bitrate"]?.ToObject<long>() ?? 0,
-							AudioCodec = Utils.GetCodec(x["mimeType"]?.ToString(), true),
-							VideoCodec = Utils.GetCodec(x["mimeType"]?.ToString(), false),
-							AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
-							Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
-							Url = x["url"]?.ToString()
-						}).ToArray() ?? Array.Empty<Format>(),
-						AdaptiveFormats = player["streamingData"]?["adaptiveFormats"]?.Select(x => new Format
-						{
-							FormatName = Utils.GetFormatName(x),
-							FormatId = x["itag"]?.ToString(),
-							FormatNote = x["quality"]?.ToString(),
-							Filesize = x["contentLength"]?.ToObject<long>(),
-							Bitrate = x["bitrate"]?.ToObject<long>() ?? 0,
-							AudioCodec = Utils.GetCodec(x["mimeType"].ToString(), true),
-							VideoCodec = Utils.GetCodec(x["mimeType"].ToString(), false),
-							AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
-							Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
-							Url = x["url"]?.ToString(),
-							InitRange = x["initRange"].ToObject<Models.Range>(),
-							IndexRange = x["indexRange"].ToObject<Models.Range>()
-						}).ToArray() ?? Array.Empty<Format>(),
-						Subtitles = new Subtitle[]
-						{
-						},
-						Storyboards = new Format[]
-						{
-						},
-						ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToString(),
-						ErrorMessage = null
+						Name = player["videoDetails"]?["author"]?.ToString(),
+						Id = player["videoDetails"]?["channelId"]?.ToString(),
+						Avatars = Array.Empty<Thumbnail>()
 					};
+					video.Duration = player["videoDetails"]?["lengthSeconds"]?.ToObject<long>();
+					video.IsLive = player["videoDetails"]?["isLiveContent"]?.ToObject<bool>() ?? false;
+					video.Chapters = Array.Empty<Chapter>();
+					video.Thumbnails = player["videoDetails"]?["thumbnail"]?["thumbnails"]?.Select(x => new Thumbnail
+					{
+						Height = x["height"]?.ToObject<int>() ?? -1,
+						Url = x["url"]?.ToString(),
+						Width = x["width"]?.ToObject<int>() ?? -1
+					}).ToArray();
+					video.Formats = player["streamingData"]?["formats"]?.Select(x => new Format
+					{
+						FormatName = Utils.GetFormatName(x),
+						FormatId = x["itag"]?.ToString(),
+						FormatNote = x["quality"]?.ToString(),
+						Filesize = x["contentLength"]?.ToObject<long>(),
+						Bitrate = x["bitrate"]?.ToObject<long>() ?? 0,
+						AudioCodec = Utils.GetCodec(x["mimeType"]?.ToString(), true),
+						VideoCodec = Utils.GetCodec(x["mimeType"]?.ToString(), false),
+						AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
+						Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
+						Url = x["url"]?.ToString()
+					}).ToArray() ?? Array.Empty<Format>();
+					video.AdaptiveFormats = player["streamingData"]?["adaptiveFormats"]?.Select(x => new Format
+					{
+						FormatName = Utils.GetFormatName(x),
+						FormatId = x["itag"]?.ToString(),
+						FormatNote = x["quality"]?.ToString(),
+						Filesize = x["contentLength"]?.ToObject<long>(),
+						Bitrate = x["bitrate"]?.ToObject<long>() ?? 0,
+						AudioCodec = Utils.GetCodec(x["mimeType"].ToString(), true),
+						VideoCodec = Utils.GetCodec(x["mimeType"].ToString(), false),
+						AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
+						Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
+						Url = x["url"]?.ToString(),
+						InitRange = x["initRange"].ToObject<Models.Range>(),
+						IndexRange = x["indexRange"].ToObject<Models.Range>()
+					}).ToArray() ?? Array.Empty<Format>();
+					video.Subtitles = player["captions"]?["playerCaptionsTracklistRenderer"]?["captionTracks"]?.Select(
+						x => new Subtitle
+						{
+							Ext = HttpUtility.ParseQueryString(x["baseUrl"].ToString()).Get("fmt"),
+							Language = Utils.ReadRuns(x["name"]?["runs"]?.ToObject<JArray>()),
+							Url = x["baseUrl"].ToString()
+						}).ToArray();
+					video.Storyboards = new Format[]
+					{
+					};
+					video.ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToString();
+					video.ErrorMessage = null;
 					PlayerCache.Remove(videoId);
 					PlayerCache.Add(videoId,
 						new CacheItem<YoutubePlayer>(video,

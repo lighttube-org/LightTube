@@ -59,14 +59,14 @@ namespace InnerTube
 			List<Format> audios;
 			if (audioCodec != "all")
 				audios = player.AdaptiveFormats
-					.Where(x => x.Resolution == "audio only" && x.FormatId != "17" &&
+					.Where(x => x.AudioSampleRate.HasValue && x.FormatId != "17" &&
 					            (audioCodec == null || x.AudioCodec.ToLower().Contains(audioCodec.ToLower())))
 					.GroupBy(x => x.FormatNote)
 					.Select(x => x.Last())
 					.ToList();
 			else
 				audios = player.AdaptiveFormats
-					.Where(x => x.Resolution == "audio only" && x.FormatId != "17")
+					.Where(x => x.AudioSampleRate.HasValue && x.FormatId != "17")
 					.ToList();
 
 			audioAdaptationSet.SetAttribute("mimeType",
@@ -114,7 +114,7 @@ namespace InnerTube
 
 			List<Format> videos;
 			if (videoCodec != "all")
-				videos = player.AdaptiveFormats.Where(x => x.Resolution != "audio only" && x.FormatId != "17" &&
+				videos = player.AdaptiveFormats.Where(x => !x.AudioSampleRate.HasValue && x.FormatId != "17" &&
 				                                           (videoCodec == null || x.VideoCodec.ToLower()
 					                                           .Contains(videoCodec.ToLower())))
 					.GroupBy(x => x.FormatNote)
@@ -178,7 +178,9 @@ namespace InnerTube
 				representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
 				
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
-				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl) ? subtitle.Url : $"{proxyUrl}caption/{player.Id}/{subtitle.Language}";
+				string url = subtitle.Url;
+				url = url.Replace("fmt=srv3", "fmt=vtt");
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl) ? url : $"{proxyUrl}caption/{player.Id}/{subtitle.Language}";
 
 				representation.AppendChild(baseUrl);
 				adaptationSet.AppendChild(representation);
