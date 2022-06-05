@@ -31,55 +31,6 @@ namespace LightTube.Controllers
 			_youtube = youtube;
 		}
 
-		[Route("video")]
-		[Obsolete("Use /media instead. Will be removed when the new player is 100% done.")]
-		public async Task Proxy(string url)
-		{
-			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-				url = "https://" + url;
-
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			request.Method = Request.Method;
-
-			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
-				foreach (string value in values)
-					request.Headers.Add(header, value);
-
-			HttpWebResponse response;
-
-			try
-			{
-				response = (HttpWebResponse)request.GetResponse();
-			}
-			catch (WebException e)
-			{
-				response = e.Response as HttpWebResponse;
-			}
-			
-			if (response == null) 
-				await Response.StartAsync();
-
-			foreach (string header in response.Headers.AllKeys)
-				if (Response.Headers.ContainsKey(header))
-					Response.Headers[header] = response.Headers.Get(header);
-				else
-					Response.Headers.Add(header, response.Headers.Get(header));
-			Response.StatusCode = (int)response.StatusCode;
-
-			await using Stream stream = response.GetResponseStream();
-			try
-			{
-				await stream.CopyToAsync(Response.Body, HttpContext.RequestAborted);
-			}
-			catch (Exception)
-			{
-			}
-
-			await Response.StartAsync();
-		}
-
 		[Route("media/{videoId}/{formatId}")]
 		public async Task Media(string videoId, string formatId)
 		{
@@ -162,8 +113,6 @@ namespace LightTube.Controllers
 				await Response.StartAsync();
 			}
 		}
-		
-		
 
 		[Route("download/{videoId}/{formatId}/{filename}")]
 		public async Task Download(string videoId, string formatId, string filename)
@@ -247,29 +196,6 @@ namespace LightTube.Controllers
 				await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(e.ToString()));
 				await Response.StartAsync();
 			}
-		}
-
-		[Route("subtitle")]
-		public async Task<FileStreamResult> SubtitleProxy(string url)
-		{
-			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-				url = "https://" + url;
-
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
-				foreach (string value in values)
-					request.Headers.Add(header, value);
-
-			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-			await using Stream stream = response.GetResponseStream();
-			using StreamReader reader = new(stream);
-
-			return File(new MemoryStream(Encoding.UTF8.GetBytes(await reader.ReadToEndAsync())),
-				"text/vtt");
 		}
 
 		[Route("caption/{videoId}/{language}")]

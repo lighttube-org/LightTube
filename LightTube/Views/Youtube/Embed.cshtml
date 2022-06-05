@@ -65,7 +65,7 @@
     }
     else
     {
-        <video class="embed" controls src="/proxy/video?url=@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).Url.ToString())" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+        <video class="embed" controls src="/proxy/media/@Model.Player.Id/@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution).FormatId)" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
 	        @foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
 	        {
 	            @:<track src="/proxy/caption/@Model.Player.Id/@HttpUtility.UrlEncode(subtitle.Language).Replace("+", "%20")" label="@subtitle.Language" kind="subtitles">

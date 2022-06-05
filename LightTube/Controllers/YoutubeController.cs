@@ -40,7 +40,7 @@ namespace LightTube.Controllers
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
 				Engagement = (tasks[2] as Task<YoutubeDislikes>)?.Result,
-				Resolution = quality,
+				Resolution = quality ?? (tasks[0] as Task<YoutubePlayer>)?.Result.Formats.First(x => x.FormatId != "17").FormatNote,
 				MobileLayout = Utils.IsClientMobile(Request),
 				CompatibilityMode = cookieCompatibility
 			};
@@ -96,7 +96,7 @@ namespace LightTube.Controllers
 				Player = (tasks[0] as Task<YoutubePlayer>)?.Result,
 				Video = (tasks[1] as Task<YoutubeVideo>)?.Result,
 				Engagement = (tasks[2] as Task<YoutubeDislikes>)?.Result,
-				Resolution = quality,
+				Resolution = quality ?? (tasks[0] as Task<YoutubePlayer>)?.Result.Formats.First(x => x.FormatId != "17").FormatNote,
 				CompatibilityMode = compatibility || cookieCompatibility,
 				MobileLayout = Utils.IsClientMobile(Request)
 			};
