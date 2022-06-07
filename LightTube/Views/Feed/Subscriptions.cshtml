@@ -1,5 +1,6 @@
 ﻿@using Humanizer
 @using LightTube.Database
+@using System.Web
 @model LightTube.Contexts.FeedContext
 @{
 	ViewData["Title"] = "Subscriptions";
@@ -14,6 +15,10 @@
 	<a href="/feed/channels" class="channel">
 		<i class="bi bi-gear"></i>
 		<div class="name max-lines-2">Manage Channels</div>
+	</a>
+	<a href="/rss?token=@HttpUtility.UrlEncode(Model.RssToken)" class="channel">
+		<i class="bi bi-rss"></i>
+		<div class="name max-lines-2">RSS Feed</div>
 	</a>
 	@foreach (LTChannel channel in Model.Channels)
 	{

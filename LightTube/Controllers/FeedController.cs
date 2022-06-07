@@ -34,6 +34,7 @@ namespace LightTube.Controllers
 				{
 					Channels = user.SubscribedChannels.Select(DatabaseManager.Channels.GetChannel).ToArray(),
 					Videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels),
+					RssToken = user.RssToken,
 					MobileLayout = Utils.IsClientMobile(Request)
 				};
 				Array.Sort(context.Channels, (p, q) => string.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));

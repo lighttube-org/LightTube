@@ -6,5 +6,6 @@ namespace LightTube.Contexts
 	{
 		public LTChannel[] Channels;
 		public FeedVideo[] Videos;
+		public string RssToken;
 	}
 }
