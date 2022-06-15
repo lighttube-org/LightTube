@@ -286,7 +286,7 @@
         "title": "@Html.Raw(Model.Video.Title.Replace("\"", "\\\""))",
         "embed": false,
         "live": false,
-        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault())"
     }, [
         @foreach (Format f in Model.Player.Formats.Reverse())
         {
@@ -316,7 +316,7 @@
         "title": "@Html.Raw(Model.Video.Title.Replace("\"", "\\\""))",
         "embed": false,
         "live": false,
-        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault(x => x.FormatId == "sb2")?.Url)"
+        "storyboard": "/proxy/image?url=@HttpUtility.UrlEncode(Model.Player.Storyboards.FirstOrDefault())"
     }, [
         @foreach (Format f in Model.Player.Formats.Reverse())
         {

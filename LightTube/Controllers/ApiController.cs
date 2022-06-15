@@ -76,7 +76,7 @@ namespace LightTube.Controllers
 				Formats = Array.Empty<Format>(),
 				AdaptiveFormats = Array.Empty<Format>(),
 				Subtitles = Array.Empty<Subtitle>(),
-				Storyboards = Array.Empty<Format>(),
+				Storyboards = Array.Empty<string>(),
 				ExpiresInSeconds = "0",
 				ErrorMessage = message
 			};

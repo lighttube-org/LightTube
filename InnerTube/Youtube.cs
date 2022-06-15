@@ -52,7 +52,7 @@ namespace InnerTube
 
 		public async Task<YoutubePlayer> GetPlayerAsync(string videoId, string language = "en", string region = "US", bool iOS = false)
 		{
-			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now))
+			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now) && false)
 			{
 				CacheItem<YoutubePlayer> item = PlayerCache[videoId];
 				item.Item.ExpiresInSeconds = ((int)(item.ExpireTime - DateTimeOffset.Now).TotalSeconds).ToString();
@@ -67,6 +67,8 @@ namespace InnerTube
 			switch (player["playabilityStatus"]?["status"]?.ToString())
 			{
 				case "OK":
+					YoutubeStoryboardSpec storyboardSpec =
+						new(player["storyboards"]?["playerStoryboardSpecRenderer"]?["spec"]?.ToString(), player["videoDetails"]?["lengthSeconds"]?.ToObject<long>() ?? 0);
 					YoutubePlayer video = new()
 					{
 						Id = player["videoDetails"]?["videoId"]?.ToString(),
@@ -123,7 +125,7 @@ namespace InnerTube
 								Language = Utils.ReadRuns(x["name"]?["runs"]?.ToObject<JArray>()),
 								Url = x["baseUrl"].ToString()
 							}).ToArray(),
-						Storyboards = Array.Empty<Format>(), //todo: storyboards
+						Storyboards = new[] { storyboardSpec.Urls["L0"] },
 						ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToString(),
 						ErrorMessage = null
 					};
@@ -154,7 +156,7 @@ namespace InnerTube
 						Formats = Array.Empty<Format>(),
 						AdaptiveFormats = Array.Empty<Format>(),
 						Subtitles = Array.Empty<Subtitle>(),
-						Storyboards = Array.Empty<Format>(),
+						Storyboards = Array.Empty<string>(),
 						ExpiresInSeconds = "0",
 						ErrorMessage =
 							"This video is age-restricted. Please contact this instances authors to update their configuration"
@@ -180,7 +182,7 @@ namespace InnerTube
 						Formats = Array.Empty<Format>(),
 						AdaptiveFormats = Array.Empty<Format>(),
 						Subtitles = Array.Empty<Subtitle>(),
-						Storyboards = Array.Empty<Format>(),
+						Storyboards = Array.Empty<string>(),
 						ExpiresInSeconds = "0",
 						ErrorMessage = player["playabilityStatus"]?["reason"]?.ToString() ?? "Something has gone *really* wrong"
 					};

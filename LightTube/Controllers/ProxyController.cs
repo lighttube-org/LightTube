@@ -283,7 +283,7 @@ namespace LightTube.Controllers
 					return;
 				}
 
-				if (player.Storyboards.All(x => x.FormatId != "sb2"))
+				if (!player.Storyboards.Any())
 				{
 					Response.StatusCode = (int) HttpStatusCode.NotFound;
 					await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("No usable storyboard found."));
@@ -291,7 +291,7 @@ namespace LightTube.Controllers
 					return;
 				}
 
-				string url = player.Storyboards.First(x => x.FormatId == "sb2").Url;
+				string url = player.Storyboards.First();
 
 				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;

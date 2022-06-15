@@ -18,7 +18,7 @@ namespace InnerTube.Models
 		public Format[] Formats { get; set; }
 		public Format[] AdaptiveFormats { get; set; }
 		public Subtitle[] Subtitles { get; set; }
-		public Format[] Storyboards { get; set; }
+		public string[] Storyboards { get; set; }
 		public string ExpiresInSeconds { get; set; }
 		public string ErrorMessage { get; set; }
 
@@ -83,7 +83,12 @@ namespace InnerTube.Models
 				player.AppendChild(adaptiveFormats);
 
 				XmlElement storyboards = doc.CreateElement("Storyboards");
-				foreach (Format f in Storyboards ?? Array.Empty<Format>()) storyboards.AppendChild(f.GetXmlElement(doc));
+				foreach (string s in Storyboards) 
+				{
+					XmlElement storyboard = doc.CreateElement("Storyboard");
+					storyboard.InnerText = s;
+					storyboards.AppendChild(storyboard);
+				}
 				player.AppendChild(storyboards);
 
 				XmlElement subtitles = doc.CreateElement("Subtitles");
