@@ -27,7 +27,7 @@ namespace LightTube
 			services.AddControllersWithViews();
 			services.AddSingleton(yt);
 			DynamicItemExtensions.RegisterRenderers();
-			DatabaseManager.Init(Environment.GetEnvironmentVariable("MONGODB_CONNSTR"), yt);
+			DatabaseManager.Init(LightTube.Configuration.Instance.Database.MongoConnectionString, yt);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

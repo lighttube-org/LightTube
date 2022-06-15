@@ -10,6 +10,7 @@ namespace LightTube
 
 		public InterfaceConfig Interface = new();
 		public CredentialsConfig Credentials = new();
+		public DatabaseConfig Database = new();
 
 		public static void LoadConfiguration()
 		{
@@ -71,5 +72,10 @@ namespace LightTube
 		public string Psid = null;
 
 		public bool CanUseAuthorizedEndpoints() => UseCredentials && Sapisid != null && Psid != null;
+	}
+
+	public class DatabaseConfig
+	{
+		public string MongoConnectionString = null;
 	}
 }
