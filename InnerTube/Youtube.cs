@@ -115,8 +115,8 @@ namespace InnerTube
 							AudioSampleRate = x["audioSampleRate"]?.ToObject<long>(),
 							Resolution = $"{x["width"] ?? "0"}x{x["height"] ?? "0"}",
 							Url = x["url"]?.ToString(),
-							InitRange = x["initRange"].ToObject<Models.Range>(),
-							IndexRange = x["indexRange"].ToObject<Models.Range>()
+							InitRange = x["initRange"]?.ToObject<Models.Range>(),
+							IndexRange = x["indexRange"]?.ToObject<Models.Range>()
 						}).ToArray() ?? Array.Empty<Format>(),
 						Subtitles = player["captions"]?["playerCaptionsTracklistRenderer"]?["captionTracks"]?.Select(
 							x => new Subtitle
