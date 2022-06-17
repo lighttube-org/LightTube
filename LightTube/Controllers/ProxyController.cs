@@ -242,8 +242,50 @@ namespace LightTube.Controllers
 		}
 
 		[Route("image")]
+		[Obsolete("Use /proxy/thumbnail instead")]
 		public async Task ImageProxy(string url)
 		{
+			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+				url = "https://" + url;
+
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			foreach (string header in response.Headers.AllKeys)
+				if (Response.Headers.ContainsKey(header))
+					Response.Headers[header] = response.Headers.Get(header);
+				else
+					Response.Headers.Add(header, response.Headers.Get(header));
+			Response.StatusCode = (int)response.StatusCode;
+
+			await using Stream stream = response.GetResponseStream();
+			await stream.CopyToAsync(Response.Body);
+			await Response.StartAsync();
+		}
+
+		[Route("thumbnail/{videoId}/{index:int}")]
+		public async Task ThumbnailProxy(string videoId, int index = 0)
+		{
+			YoutubePlayer player = await _youtube.GetPlayerAsync(videoId);
+			if (index == -1) index = player.Thumbnails.Length - 1;
+			if (index >= player.Thumbnails.Length)
+			{
+				Response.StatusCode = 404;
+				await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(
+					$"Cannot find thumbnail #{index} for {videoId}. The maximum quality is {player.Thumbnails.Length - 1}"));
+				await Response.StartAsync();
+				return;
+			}
+
+			string url = player.Thumbnails.FirstOrDefault()?.Url;
+			
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;
 
