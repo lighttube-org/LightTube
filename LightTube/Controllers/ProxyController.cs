@@ -397,10 +397,10 @@ namespace LightTube.Controllers
 				"application/vnd.apple.mpegurl");
 		}
 
-		[Route("manifest/{videoId}/{formatId}")]
-		public async Task<IActionResult> ManifestProxy(string videoId, string formatId)
+		[Route("manifest/{videoId}")]
+		public async Task<IActionResult> ManifestProxy(string videoId, string formatId, bool useProxy = true)
 		{
-			YoutubePlayer player = await _youtube.GetPlayerAsync(videoId);
+			YoutubePlayer player = await _youtube.GetPlayerAsync(videoId, iOS: true);
 			if (!string.IsNullOrWhiteSpace(player.ErrorMessage))
 			{
 				Response.StatusCode = (int) HttpStatusCode.InternalServerError;
@@ -408,16 +408,14 @@ namespace LightTube.Controllers
 					"text/plain");
 			}
 
-			if (player.AdaptiveFormats.All(x => x.FormatId != formatId))
+			if (player.HlsManifestUrl == null)
 			{
 				Response.StatusCode = (int) HttpStatusCode.NotFound;
-				return File(
-					new MemoryStream(Encoding.UTF8.GetBytes(
-						$"Format with ID {formatId} not found.\nAvailable IDs are: {string.Join(", ", player.AdaptiveFormats.Select(x => x.FormatId.ToString()))}")),
+				return File(new MemoryStream(Encoding.UTF8.GetBytes("This video does not have an HLS manifest URL")),
 					"text/plain");
 			}
 
-			string url = player.AdaptiveFormats.First(x => x.FormatId == formatId).Url;
+			string url = player.HlsManifestUrl;
 			
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;
@@ -436,16 +434,47 @@ namespace LightTube.Controllers
 			using StreamReader reader = new(stream);
 			string manifest = await reader.ReadToEndAsync();
 			StringBuilder proxyManifest = new ();
-			
-			foreach (string s in manifest.Split("\n"))
-			{
-				// also check if proxy enabled
-				proxyManifest.AppendLine(!s.StartsWith("http")
-					? s
-					: $"https://{Request.Host}/proxy/video?url={HttpUtility.UrlEncode(s)}");
-			}
+
+			if (useProxy)
+				foreach (string s in manifest.Split("\n"))
+				{
+					// also check if proxy enabled
+					proxyManifest.AppendLine(!s.StartsWith("http")
+						? s
+						: $"https://{Request.Host}/proxy/ytmanifest?path=" + HttpUtility.UrlEncode(s[46..]));
+				}
+			else
+				proxyManifest.Append(manifest);
 
 			return File(new MemoryStream(Encoding.UTF8.GetBytes(proxyManifest.ToString())),
+				"application/vnd.apple.mpegurl");
+		}
+
+		[Route("ytmanifest")]
+		public async Task<IActionResult> YoutubeManifestProxy(string path)
+		{
+			string url = "https://manifest.googlevideo.com/api/manifest/" + path;
+
+			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+				url = "https://" + url;
+
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			await using Stream stream = response.GetResponseStream();
+			using StreamReader reader = new(stream);
+			string manifest = await reader.ReadToEndAsync();
+
+			// todo: add proxy here
+
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest)),
 				"application/vnd.apple.mpegurl");
 		}
 	}

@@ -17,6 +17,7 @@ namespace InnerTube.Models
 		public Thumbnail[] Thumbnails { get; set; }
 		public Format[] Formats { get; set; }
 		public Format[] AdaptiveFormats { get; set; }
+		public string HlsManifestUrl { get; set; }
 		public Subtitle[] Subtitles { get; set; }
 		public string[] Storyboards { get; set; }
 		public string ExpiresInSeconds { get; set; }

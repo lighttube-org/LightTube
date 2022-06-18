@@ -118,6 +118,7 @@ namespace InnerTube
 							InitRange = x["initRange"]?.ToObject<Models.Range>(),
 							IndexRange = x["indexRange"]?.ToObject<Models.Range>()
 						}).ToArray() ?? Array.Empty<Format>(),
+						HlsManifestUrl = player["streamingData"]?["hlsManifestUrl"]?.ToString(),
 						Subtitles = player["captions"]?["playerCaptionsTracklistRenderer"]?["captionTracks"]?.Select(
 							x => new Subtitle
 							{
