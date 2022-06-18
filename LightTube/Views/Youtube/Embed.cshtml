@@ -109,7 +109,7 @@ else
         }, [
             @foreach(Format f in Model.Player.Formats.Reverse())
             {
-                @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
+                @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatName","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
             }
         ], "https://@(Context.Request.Host)/manifest/@(Model.Video.Id).mpd").then(x => player = x).catch(alert);;
     </script>
@@ -139,7 +139,7 @@ else
         }, [
             @foreach(Format f in Model.Player.Formats.Reverse())
             {
-                @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatNote","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
+                @:{"height": @f.Resolution.Split("x")[1],"label":"@f.FormatName","src": "/proxy/video?url=@HttpUtility.UrlEncode(f.Url)"},
             }
         ]);
     </script>
