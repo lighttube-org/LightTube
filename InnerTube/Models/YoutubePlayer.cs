@@ -54,7 +54,7 @@ namespace InnerTube.Models
 				player.AppendChild(description);
 
 				XmlElement tags = doc.CreateElement("Tags");
-				foreach (string tag in Tags)
+				foreach (string tag in Tags ?? Array.Empty<string>())
 				{
 					XmlElement tagElement = doc.CreateElement("Tag");
 					tagElement.InnerText = tag;
