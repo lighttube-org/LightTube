@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -43,60 +44,19 @@ namespace LightTube.Controllers
 		[Route("{v}.m3u8")]
 		public async Task<IActionResult> HlsManifest(string v, bool useProxy = true)
 		{
-			YoutubePlayer player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			string manifest = player.GetHlsManifest(useProxy ? $"https://{Request.Host}/proxy" : null);
-			return File(Encoding.UTF8.GetBytes(manifest), "application/vnd.apple.mpegurl");
-		}
-
-		[Route("hls/{v}.m3u8")]
-		public async Task<IActionResult> IosHlsManifest(string v, bool useProxy = false) 
-		{
-			//todo: proxy
-			if (useProxy) 
-				return NotFound("Proxies for HLS manifests are not available at the moment.");
+			YoutubePlayer player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion(), true);
+			if (!string.IsNullOrWhiteSpace(player.ErrorMessage))
+				return StatusCode(403, player.ErrorMessage);
 			
-			//todo: cache
-
-			HttpRequestMessage hrm = new(HttpMethod.Post,
-				"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8");
-			
-			byte[] buffer = Encoding.UTF8.GetBytes(
-				RequestContext.BuildRequestContextJson(new Dictionary<string, object>
-				{
-					["videoId"] = v,
-                    ["contentCheckOk"] = true,
-                    ["racyCheckOk"] = true
-				}, clientName: "IOS", clientVersion: "17.13.3"));
-			ByteArrayContent byteContent = new(buffer);
-			byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-			hrm.Content = byteContent;
-			
-			long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-			string hashInput = $"{timestamp} {Configuration.Instance.Credentials.Sapisid} https://www.youtube.com";
-			using SHA1Managed sha1 = new();
-			byte[] hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
-			StringBuilder sb = new(hash.Length * 2);
-			foreach (byte b in hash) sb.Append(b.ToString("X2"));
-			string hashDigest = sb.ToString();
-			
-			if (Configuration.Instance.Credentials.CanUseAuthorizedEndpoints())
+			if (player.IsLive)
 			{
-				hrm.Headers.Add("Cookie", $"SAPISID={Configuration.Instance.Credentials.Sapisid}; __Secure-3PAPISID={Configuration.Instance.Credentials.Sapisid}; __Secure-3PSID={Configuration.Instance.Credentials.Psid};");
-				hrm.Headers.Add("Authorization", $"SAPISIDHASH {timestamp}_{hashDigest}");
-				hrm.Headers.Add("X-Origin", "https://www.youtube.com");
-				hrm.Headers.Add("X-Youtube-Client-Name", "5");
-				hrm.Headers.Add("X-Youtube-Client-Version", "17.13.3");
-				hrm.Headers.Add("Accept-Language", "en-US;q=0.8,en;q=0.7");
-				hrm.Headers.Add("Origin", "https://www.youtube.com");
-				hrm.Headers.Add("Referer", "https://www.youtube.com/watch?v=" + v);
+				string manifest = player.GetHlsManifest(useProxy ? $"https://{Request.Host}/proxy" : null);
+				return File(Encoding.UTF8.GetBytes(manifest), "application/vnd.apple.mpegurl");
 			}
 
-			HttpResponseMessage ytPlayerRequest = await _client.SendAsync(hrm);
-			JObject response = JObject.Parse(await ytPlayerRequest.Content.ReadAsStringAsync());
-
-			if (response["playabilityStatus"]?["status"]?.ToString() == "OK")
-				return Redirect(response["streamingData"]?["hlsManifestUrl"]?.ToString());
-			return NotFound($"{response["playabilityStatus"]?["status"] ?? response}\n{response["playabilityStatus"]?["errorScreen"]?["confirmDialogRenderer"]?["title"]?["runs"]?[0]?["text"]}\n{response["playabilityStatus"]?["errorScreen"]?["confirmDialogRenderer"]?["dialogMessages"]?[0]?["runs"]?[0]?["text"]}");
+			if (useProxy)
+				return StatusCode(400, "HLS proxy for non-live videos are not supported at the moment.");
+			return Redirect(player.HlsManifestUrl);
 		}
 	}
 }
