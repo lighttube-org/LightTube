@@ -2,11 +2,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace LightTube
 {
 	public static class Utils
 	{
+		private static string _version = null;
+
 		public static bool IsClientMobile(HttpRequest request)
 		{
 			request.Headers.TryGetValue("user-agent", out StringValues sv);
@@ -27,5 +31,11 @@ namespace LightTube
 		public static string GetLanguage(this HttpContext context) =>
 			context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) ? h.ToString() :
 			context.Request.Cookies.TryGetValue("hl", out string language) ? language : "en";
+
+		public static string GetVersion()
+		{
+			return _version ??= FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
+				.FileVersion?[2..];
+		}
 	}
 }

@@ -1,14 +1,15 @@
 stages:
- - build
+ - release
 
-build_image:
+publish_image:
   image: docker:latest
   services:
   - docker:dind
-  stage: build
+  stage: release
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker build -t registry.gitlab.com/kuylar/lighttube .
-    - docker push registry.gitlab.com/kuylar/lighttube:latest
-
-# todo: push to docker hub
+    - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+    - docker build -t kuylar/lighttube .
+    - export IMAGE_ID=`docker images -q "kuylar/lighttube"`
+    - docker tag $IMAGE_ID kuylar/lighttube:`date +%Y%m%d`
+    - docker tag $IMAGE_ID kuylar/lighttube:latest
+    - docker push kuylar/lighttube
