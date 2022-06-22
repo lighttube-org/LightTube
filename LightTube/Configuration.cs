@@ -43,6 +43,12 @@ namespace LightTube
 			
 			Console.WriteLine($"Reading configuration from {path}");
 			Instance = new Deserializer().Deserialize<Configuration>(File.ReadAllText(path));
+
+			if (string.IsNullOrEmpty(Instance.Database.MongoConnectionString))
+			{
+				Console.WriteLine("MongoDB Connection String is not provided in the configuration file. Exiting...");
+				Environment.Exit(1);
+			}
 		}
 
 		private static void CreateConfigurationFile(string path)
