@@ -8,6 +8,7 @@ namespace InnerTube.Models
 		public Dictionary<string, string> Urls = new();
 		public YoutubeStoryboardSpec(string specStr, long duration)
 		{
+			if (specStr is null) return;
 			List<string> spec = new(specStr.Split("|"));
 			string baseUrl = spec[0];
 			spec.RemoveAt(0);

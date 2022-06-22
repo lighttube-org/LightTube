@@ -129,7 +129,7 @@ namespace InnerTube
 								Language = Utils.ReadRuns(x["name"]?["runs"]?.ToObject<JArray>()),
 								Url = x["baseUrl"].ToString()
 							}).ToArray(),
-						Storyboards = new[] { storyboardSpec.Urls["L0"] },
+						Storyboards = storyboardSpec.Urls.TryGetValue("L0", out string sb) ? new[] { sb } : Array.Empty<string>(),
 						ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToString(),
 						ErrorMessage = null
 					};

@@ -22,7 +22,8 @@ namespace LightTube.Controllers
 		private readonly Youtube _youtube;
 		private string[] BlockedHeaders =
 		{
-			"host"
+			"host",
+			"cookies"
 		};
 
 		public ProxyController(ILogger<YoutubeController> logger, Youtube youtube)
@@ -453,7 +454,8 @@ namespace LightTube.Controllers
 		[Route("ytmanifest")]
 		public async Task<IActionResult> YoutubeManifestProxy(string path)
 		{
-			string url = "https://manifest.googlevideo.com/api/manifest/" + path;
+			string url = "https://manifest.googlevideo.com" + path;
+			StringBuilder sb = new();
 
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;
@@ -472,10 +474,44 @@ namespace LightTube.Controllers
 			using StreamReader reader = new(stream);
 			string manifest = await reader.ReadToEndAsync();
 
-			// todo: add proxy here
+			foreach (string line in manifest.Split("\n"))
+			{
+				if (string.IsNullOrWhiteSpace(line)) 
+					sb.AppendLine();
+				else if (line.StartsWith("#"))
+					sb.AppendLine(line);
+				else
+				{
+					Uri u = new(line);
+					sb.AppendLine($"https://{Request.Host}/proxy/videoplayback?host={u.Host}&path={HttpUtility.UrlEncode(u.PathAndQuery)}");
+				}
+			}
 
-			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest)),
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(sb.ToString())),
 				"application/vnd.apple.mpegurl");
+		}
+
+		[Route("videoplayback")]
+		public async Task VideoPlaybackProxy(string path, string host)
+		{
+			// make sure this is only used in livestreams
+
+			string url = $"https://{host}{path}";
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
+				!header.Key.StartsWith(":") && !BlockedHeaders.Contains(header.Key.ToLower())))
+				foreach (string value in values)
+					request.Headers.Add(header, value);
+
+			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			await using Stream stream = response.GetResponseStream();
+
+			Response.ContentType = "application/octet-stream";
+			await Response.StartAsync();
+			await stream.CopyToAsync(Response.Body, HttpContext.RequestAborted);
 		}
 	}
 }

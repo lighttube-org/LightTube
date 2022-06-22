@@ -191,7 +191,7 @@ namespace InnerTube
 			return doc.OuterXml.Replace(" schemaLocation=\"", " xsi:schemaLocation=\"");
 		}
 
-		public static string GetHlsManifest(this YoutubePlayer player, string proxyUrl)
+		public static async Task<string> GetHlsManifest(this YoutubePlayer player, string proxyUrl)
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.AppendLine("#EXTM3U");
@@ -200,15 +200,18 @@ namespace InnerTube
 
 			sb.AppendLine("#EXT-X-VERSION:7");
 			sb.AppendLine("#EXT-X-INDEPENDENT-SEGMENTS");
-			
-			foreach (Format format in player.AdaptiveFormats.Where(x => x.Url.EndsWith(".m3u8")))
-			{
-				string bw = Math.Floor((format.Filesize ?? 1) / (double) player.Duration).ToString();
-				sb.AppendLine($"#EXT-X-STREAM-INF:BANDWIDTH={bw},AVERAGE-BANDWIDTH={bw},CODECS=\"{format.VideoCodec},{format.AudioCodec}\",RESOLUTION={format.Resolution}");
 
-				sb.AppendLine(string.IsNullOrWhiteSpace(proxyUrl)
-					? format.Url
-					: $"{proxyUrl}/manifest/{player.Id}/{format.FormatId}");
+			string hls = await new HttpClient().GetStringAsync(player.HlsManifestUrl);
+			string[] hlsLines = hls.Split("\n");
+			foreach (string line in hlsLines)
+			{
+				if (line.StartsWith("#EXT-X-STREAM-INF:"))
+					sb.AppendLine(line);
+				if (line.StartsWith("http"))
+				{
+					Uri u = new(line);
+					sb.AppendLine($"{proxyUrl}/ytmanifest?path={HttpUtility.UrlEncode(u.PathAndQuery)}");
+				}
 			}
 
 			return sb.ToString();

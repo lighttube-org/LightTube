@@ -47,22 +47,19 @@
 	<div class="primary">
 		<div class="video-player-container">
 			
-			@if (Model.Player.Formats.Length > 0 || live)
+			@if (live)
 			{
-				@if (live)
-				{
-					<video class="player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
-					</video>
-				}
-				else
-				{
-					<video class="player" controls src="/proxy/media/@Model.Player.Id/@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution && x.FormatId != "17").FormatId)" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
-						@foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
-						{
-							@:<track src="/proxy/caption/@Model.Player.Id/@HttpUtility.UrlEncode(subtitle.Language).Replace("+", "%20")" label="@subtitle.Language" kind="subtitles">
-						}
-					</video>
-				}
+				<video class="player" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+				</video>
+			} 
+			else if (Model.Player.Formats.Length > 0)
+			{
+				<video class="player" controls src="/proxy/media/@Model.Player.Id/@HttpUtility.UrlEncode(Model.Player.Formats.First(x => x.FormatNote == Model.Resolution && x.FormatId != "17").FormatId)" poster="@Model.Player.Thumbnails.LastOrDefault()?.Url">
+					@foreach (Subtitle subtitle in Model.Player.Subtitles ?? Array.Empty<Subtitle>())
+					{
+						@:<track src="/proxy/caption/@Model.Player.Id/@HttpUtility.UrlEncode(subtitle.Language).Replace("+", "%20")" label="@subtitle.Language" kind="subtitles">
+					}
+				</video>
 			}
 			else
 			{
