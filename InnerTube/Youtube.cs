@@ -53,7 +53,7 @@ namespace InnerTube
 
 		public async Task<YoutubePlayer> GetPlayerAsync(string videoId, string language = "en", string region = "US", bool iOS = false)
 		{
-			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now) && false)
+			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now))
 			{
 				CacheItem<YoutubePlayer> item = PlayerCache[videoId];
 				item.Item.ExpiresInSeconds = ((int)(item.ExpireTime - DateTimeOffset.Now).TotalSeconds).ToString();
