@@ -108,20 +108,27 @@ namespace LightTube.Controllers
 		{
 			SearchContext context = new()
 			{
-				Results = string.IsNullOrWhiteSpace(search_query)
-					? new YoutubeSearchResults
+				Query = search_query,
+				ContinuationKey = continuation,
+				MobileLayout = Utils.IsClientMobile(Request)
+			};
+			if (!string.IsNullOrWhiteSpace(search_query))
+			{
+				context.Results = await _youtube.SearchAsync(search_query, continuation, HttpContext.GetLanguage(),
+					HttpContext.GetRegion());
+				Response.Cookies.Append("search_query", search_query);
+			}
+			else
+			{
+				context.Results =
+					new YoutubeSearchResults
 					{
 						Refinements = Array.Empty<string>(),
 						EstimatedResults = 0,
 						Results = Array.Empty<DynamicItem>(),
 						ContinuationKey = null
-					}
-					: await _youtube.SearchAsync(search_query, continuation, HttpContext.GetLanguage(),
-						HttpContext.GetRegion()),
-				Query = search_query,
-				ContinuationKey = continuation,
-				MobileLayout = Utils.IsClientMobile(Request)
-			};
+					};
+			}
 			return View(context);
 		}
 

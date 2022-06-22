@@ -1,4 +1,5 @@
 ﻿@using System.Web
+@using LightTube.Contexts
 @model LightTube.Contexts.BaseContext
 @{
 	bool compatibility = false;
@@ -60,7 +61,7 @@
 	<a class="logo" href="/">light<b>tube</b></a>
 	<div class="divider"></div>
 	<form action="/results">
-		<input type="text" placeholder="Search" name="search_query">
+		<input type="text" placeholder="Search" name="search_query" value="@(Model is SearchContext ctx ? ctx.Query : Context.Request.Cookies.TryGetValue("search_query", out string s) ? s : "")">
 		<input type="submit" value="Search">
 	</form>
 	<div class="divider"></div>
