@@ -63,7 +63,9 @@ namespace LightTube.Controllers
 			byte[] buffer = Encoding.UTF8.GetBytes(
 				RequestContext.BuildRequestContextJson(new Dictionary<string, object>
 				{
-					["videoId"] = v
+					["videoId"] = v,
+                    ["contentCheckOk"] = true,
+                    ["racyCheckOk"] = true
 				}, clientName: "IOS", clientVersion: "17.13.3"));
 			ByteArrayContent byteContent = new(buffer);
 			byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
