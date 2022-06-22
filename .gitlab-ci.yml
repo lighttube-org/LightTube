@@ -6,6 +6,9 @@ publish_image:
   services:
   - docker:dind
   stage: release
+  only:
+    refs:
+      - master
   script:
     - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
     - docker build -t kuylar/lighttube .
