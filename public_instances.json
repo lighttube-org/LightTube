@@ -1,6 +1,6 @@
 [
   {
-    "host": "https://lighttube.herokuapp.com",
+    "host": "https://tube.kuylar.dev",
     "api": true,
     "accounts": true
   }
