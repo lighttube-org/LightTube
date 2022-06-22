@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -61,7 +62,9 @@ namespace InnerTube
 
 			JObject player = await MakeRequest("player", new Dictionary<string, object>
 			{
-				["videoId"] = videoId
+				["videoId"] = videoId,
+				["contentCheckOk"] = true,
+				["racyCheckOk"] = true
 			}, language, region, iOS ? "IOS" : "ANDROID", iOS ? "5" : "3", "17.13.3", true);
 
 			switch (player["playabilityStatus"]?["status"]?.ToString())
