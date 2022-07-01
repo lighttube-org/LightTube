@@ -209,8 +209,15 @@ namespace InnerTube
 					sb.AppendLine(line);
 				if (line.StartsWith("http"))
 				{
-					Uri u = new(line);
-					sb.AppendLine($"{proxyUrl}/ytmanifest?path={HttpUtility.UrlEncode(u.PathAndQuery)}");
+					if (proxyUrl != null)
+					{
+						Uri u = new(line);
+						sb.AppendLine($"{proxyUrl}/ytmanifest?path={HttpUtility.UrlEncode(u.PathAndQuery)}");
+					}
+					else
+					{
+						sb.AppendLine(line);
+					}
 				}
 			}
 
