@@ -14,9 +14,19 @@
 
 ## Screenshots
 
-![Search Page](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/search.png?inline=false)
+### Desktop
 
-![Watch Page](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/watch.png?inline=false)
+| Page | Light | Dark |
+| :--- | :---: | :--: |
+| Search | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/light/search.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/dark/search.png?inline=false) |
+| Video | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/light/video.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/dark/video.png?inline=false) |
+
+### Mobile
+
+| Page | Light | Dark |
+| :--- | :---: | :--: |
+| Search | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/light/search.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/dark/search.png?inline=false) |
+| Video | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/light/video.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/dark/video.png?inline=false) |
 
 ---
 

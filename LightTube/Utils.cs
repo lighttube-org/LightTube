@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
@@ -34,8 +35,19 @@ namespace LightTube
 
 		public static string GetVersion()
 		{
-			return _version ??= FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
-				.FileVersion?[2..];
+			if (_version is null)
+			{
+				#if DEBUG
+				DateTime buildTime = DateTime.Today;
+				_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day}";
+				#else
+				_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
+					.FileVersion?[2..];
+				#endif
+				if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+					_version += " (dev)";
+			}
+			return _version;
 		}
 	}
 }
