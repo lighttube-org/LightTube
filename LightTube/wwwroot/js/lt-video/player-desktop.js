@@ -258,8 +258,11 @@
     updateMenu() {
         const makeButton = (label, action, icon) => {
             const b = document.createElement("div");
-            //todo: yes fix this
-            b.innerHTML = `<i class="bi bi-${icon}"></i>${label}`;
+            const i = document.createElement("i");
+            i.classList.add("bi");
+            i.classList.add("bi-" + icon);
+            b.appendChild(i);
+            b.innerHTML += label;
             b.onclick = e => this.menuButtonClick(e);
             b.setAttribute("data-action", action)
             b.classList.add("player-menu-item")
@@ -275,6 +278,28 @@
             return menu;
         }
 
+        const getQuality = () => {
+            switch (this.externalPlayerType) {
+                case "html5":
+                    for (const source of this.sources) {
+                        if (source.src === this.__videoElement.src) return `(${source.label})`;
+                    }
+                    break;
+                case "shaka":
+                    for (const track of this.__externalPlayer.getVariantTracks()) {
+                        if (track.active) return `(${track.height}p)`;
+                    }
+                    break;
+                case "hls.js":
+                    for (const level in this.__externalPlayer.levels) {
+                        if (level === this.__externalPlayer.currentLevel)
+                            return `(${this.__externalPlayer.levels[level].height}p)`;
+                    }
+                    break;
+            }
+            return "";
+        }
+
         if (this.menuElement) {
             this.menuElement.remove();
             this.menuElement = undefined;
@@ -284,7 +309,7 @@
         this.menuElement.appendChild(makeMenu("menu-main", [
             {
                 icon: "sliders",
-                label: "Quality",
+                label: `Quality ${getQuality()}`,
                 action: "menu res"
             },
             {
@@ -317,27 +342,20 @@
                 }
                 break;
             case "shaka":
-                resButtons.pop();
+                let abrEnabled = this.__externalPlayer.getConfiguration().abr.enabled;
                 let tracks = this.__externalPlayer.getVariantTracks();
-                for (const index in tracks) {
-                    if (tracks[index].audioId === 2)
-                        resButtons.unshift({
-                            icon: tracks[index].active ? "check2" : "",
-                            label: tracks[index].height + "p",
-                            action: "shakavariant " + index
-                        });
-                }
-                resButtons.unshift({
-                    icon: this.__externalPlayer.getConfiguration().abr.enabled ? "check2" : "",
+                resButtons.push({
+                    icon: abrEnabled ? "check2" : "",
                     label: "Auto",
                     action: "shakavariant -1"
                 });
-                resButtons.unshift(
-                    {
-                        icon: "arrow-left",
-                        label: "Back",
-                        action: "menu main"
+                for (const index in tracks) {
+                    resButtons.push({
+                        icon: tracks[index].active && !abrEnabled ? "check2" : "",
+                        label: tracks[index].height + "p",
+                        action: "shakavariant " + index
                     });
+                }
                 break;
             case "hls.js":
                 resButtons.pop();
@@ -373,6 +391,11 @@
 
         for (let index = 0; index < this.__videoElement.textTracks.length; index++) {
             if (this.__videoElement.textTracks[index].label.includes("Shaka Player")) continue;
+            subButtons.push({
+                icon: "",
+                label: "None",
+                action: "texttrack -1"
+            });
             subButtons.push({
                 icon: this.__videoElement.textTracks[index].mode === "showing" ? "check2" : "",
                 label: this.__videoElement.textTracks[index].label,
@@ -471,7 +494,8 @@
                     this.__videoElement.textTracks[index].mode = "hidden";
 
                 }
-                this.__videoElement.textTracks[i].mode = "showing";
+                if (i !== -1)
+                    this.__videoElement.textTracks[i].mode = "showing";
                 this.updateMenu();
                 break;
             case "videosrc":
