@@ -11,8 +11,6 @@ namespace LightTube.Database
 {
 	public static class DatabaseManager
 	{
-		public static readonly string ApiUaRegex = "LightTubeApiClient\\/([0-9.]*) ([\\S]+?)\\/([0-9.]*) \\(([\\s\\S]+?)\\)";
-
 		private static IMongoCollection<LTUser> _userCollection;
 		private static IMongoCollection<LTLogin> _tokenCollection;
 		private static IMongoCollection<LTChannel> _channelCacheCollection;

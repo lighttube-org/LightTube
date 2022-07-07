@@ -56,7 +56,7 @@ namespace InnerTube
 			if (PlayerCache.Any(x => x.Key == videoId && x.Value.ExpireTime > DateTimeOffset.Now))
 			{
 				CacheItem<YoutubePlayer> item = PlayerCache[videoId];
-				item.Item.ExpiresInSeconds = ((int)(item.ExpireTime - DateTimeOffset.Now).TotalSeconds).ToString();
+				item.Item.ExpiresInSeconds = ((int)(item.ExpireTime - DateTimeOffset.Now).TotalSeconds);
 				return item.Item;
 			}
 
@@ -130,14 +130,15 @@ namespace InnerTube
 								Url = x["baseUrl"].ToString()
 							}).ToArray(),
 						Storyboards = storyboardSpec.Urls.TryGetValue("L0", out string sb) ? new[] { sb } : Array.Empty<string>(),
-						ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToString(),
+						ExpiresInSeconds = player["streamingData"]?["expiresInSeconds"]?.ToObject<int>() ?? 0,
 						ErrorMessage = null
 					};
 					PlayerCache.Remove(videoId);
-					PlayerCache.Add(videoId,
-						new CacheItem<YoutubePlayer>(video,
-							TimeSpan.FromSeconds(int.Parse(video.ExpiresInSeconds ?? "21600"))
-								.Subtract(TimeSpan.FromHours(1))));
+					if (video.ExpiresInSeconds > 0)
+						PlayerCache.Add(videoId,
+							new CacheItem<YoutubePlayer>(video,
+								TimeSpan.FromSeconds(video.ExpiresInSeconds)
+									.Subtract(TimeSpan.FromHours(1))));
 					return video;
 				case "LOGIN_REQUIRED":
 					return new YoutubePlayer
@@ -161,7 +162,7 @@ namespace InnerTube
 						AdaptiveFormats = Array.Empty<Format>(),
 						Subtitles = Array.Empty<Subtitle>(),
 						Storyboards = Array.Empty<string>(),
-						ExpiresInSeconds = "0",
+						ExpiresInSeconds = 0,
 						ErrorMessage =
 							"This video is age-restricted. Please contact this instances authors to update their configuration"
 					};
@@ -187,7 +188,7 @@ namespace InnerTube
 						AdaptiveFormats = Array.Empty<Format>(),
 						Subtitles = Array.Empty<Subtitle>(),
 						Storyboards = Array.Empty<string>(),
-						ExpiresInSeconds = "0",
+						ExpiresInSeconds = 0,
 						ErrorMessage = player["playabilityStatus"]?["reason"]?.ToString() ?? "Something has gone *really* wrong"
 					};
 			}
@@ -370,7 +371,7 @@ namespace InnerTube
 				Banners = (channel?["header"]?["c4TabbedHeaderRenderer"]?["banner"]?["thumbnails"] ?? new JArray())
 					.Select(Utils.ParseThumbnails).ToArray(),
 				Description = channel?["metadata"]?["channelMetadataRenderer"]?["description"]?.ToString(),
-				Videos = ParseRenderers(mainArray ??
+				Contents = ParseRenderers(mainArray ??
 				                        channel?["onResponseReceivedActions"]?[0]?["appendContinuationItemsAction"]?
 					                        ["continuationItems"]?.ToObject<JArray>() ?? new JArray()),
 				Subscribers = channel?["header"]?["c4TabbedHeaderRenderer"]?["subscriberCountText"]?["simpleText"]

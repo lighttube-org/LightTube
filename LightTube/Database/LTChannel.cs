@@ -27,5 +27,12 @@ namespace LightTube.Database
 
 			return item;
 		}
+
+		public XmlDocument GetXmlDocument()
+		{
+			XmlDocument doc = new();
+			doc.AppendChild(GetXmlElement(doc));
+			return doc;
+		}
 	}
 }

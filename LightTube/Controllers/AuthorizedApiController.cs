@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using InnerTube;
@@ -41,54 +40,82 @@ namespace LightTube.Controllers
 			return File(ms, "application/xml");
 		}
 
-		private XmlNode BuildErrorXml(string message)
+		private IActionResult Error(string message, HttpStatusCode statusCode)
 		{
+			if (Request.Headers["Accept"].ToString().Contains("application/json"))
+			{
+				Response.StatusCode = (int)statusCode;
+				return Json(new Dictionary<string, string>
+				{
+					["error"] = message
+				});
+			}
+
 			XmlDocument doc = new();
 			XmlElement error = doc.CreateElement("Error");
 			error.InnerText = message;
 			doc.AppendChild(error);
-			return doc;
+			return Xml(doc, statusCode);
+		}
+
+		private string ValidateRequest()
+		{
+			if (!Request.Headers.TryGetValue("X-LightTube-Client-Name", out StringValues clientName) ||
+			    !Request.Headers.TryGetValue("X-LightTube-Client-Description", out StringValues clientDescription))
+			{
+				return
+					"Missing client identifiers. See: https://gitlab.com/kuylar/lighttube/-/wikis/Authorized-API/Requirements";
+			}
+
+			if (clientName.ToString().Length > 50)
+				return "X-LightTube-Client-Name cant be longer longer than 50 characters.";
+
+			if (clientDescription.ToString().Length > 255)
+				return "X-LightTube-Client-Description cant be longer longer than 255 characters.";
+			
+			if (clientName.Contains("|"))
+				return "Invalid character '|' in X-LightTube-Client-Name";
+			
+			if (clientDescription.Contains("|"))
+				return "Invalid character '|' in X-LightTube-Client-Description";
+
+			return $"APIAPP|{clientName}|{clientDescription}";
 		}
 
 		[HttpPost]
 		[Route("getToken")]
 		public async Task<IActionResult> GetToken()
 		{
-			if (!Request.Headers.TryGetValue("User-Agent", out StringValues userAgent))
-				return Xml(BuildErrorXml("Missing User-Agent header"), HttpStatusCode.BadRequest);
-
-			Match match = Regex.Match(userAgent.ToString(), DatabaseManager.ApiUaRegex);
-			if (!match.Success)
-				return Xml(BuildErrorXml("Bad User-Agent header. Please see 'Documentation/API requests'"), HttpStatusCode.BadRequest);
-			if (match.Groups[1].ToString() != "1.0")
-				return Xml(BuildErrorXml($"Unknown API version {match.Groups[1]}"), HttpStatusCode.BadRequest);
+			string apiInfo = ValidateRequest();
+			if (!apiInfo.StartsWith("APIAPP|")) return Error(apiInfo, HttpStatusCode.BadRequest);
 
 			if (!Request.Form.TryGetValue("user", out StringValues user))
-				return Xml(BuildErrorXml("Missing request value: 'user'"), HttpStatusCode.BadRequest);
+				return Error("Missing request value: 'user'", HttpStatusCode.BadRequest);
 			if (!Request.Form.TryGetValue("password", out StringValues password))
-				return Xml(BuildErrorXml("Missing request value: 'password'"), HttpStatusCode.BadRequest);
+				return Error("Missing request value: 'password'", HttpStatusCode.BadRequest);
 			if (!Request.Form.TryGetValue("scopes", out StringValues scopes))
-				return Xml(BuildErrorXml("Missing request value: 'scopes'"), HttpStatusCode.BadRequest);
+				return Error("Missing request value: 'scopes'", HttpStatusCode.BadRequest);
 
 			string[] newScopes = scopes.First().Split(",");
 			foreach (string s in newScopes)
 				if (!_scopes.Contains(s))
-					return Xml(BuildErrorXml($"Unknown scope '{s}'"), HttpStatusCode.BadRequest);
+					return Error($"Unknown scope '{s}'", HttpStatusCode.BadRequest);
 
 			try
 			{
 				LTLogin ltLogin =
-					await DatabaseManager.Logins.CreateToken(user, password, userAgent.ToString(),
+					await DatabaseManager.Logins.CreateToken(user, password, apiInfo,
 						scopes.First().Split(","));
-				return Xml(ltLogin.GetXmlElement(), HttpStatusCode.Created);
+				Response.StatusCode = (int)HttpStatusCode.Created;
+ return Request.Headers["Accept"].ToString().Contains("application/json") ? Json(ltLogin) : Xml(ltLogin.GetXmlElement(), HttpStatusCode.Created);
 			}
 			catch (UnauthorizedAccessException)
 			{
-				return Xml(BuildErrorXml("Invalid credentials"), HttpStatusCode.Unauthorized);
+				return Error("Invalid credentials", HttpStatusCode.Unauthorized);
 			}
 			catch (InvalidOperationException)
 			{
-				return Xml(BuildErrorXml("User has API access disabled"), HttpStatusCode.Forbidden);
+				return Error("User has API access disabled", HttpStatusCode.Forbidden);
 			}
 		}
 
@@ -96,14 +123,15 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> SubscriptionsFeed()
 		{
 			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.read"))
-				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+				return Error("Unauthorized", HttpStatusCode.Unauthorized);
 
 			SubscriptionFeed feed = new()
 			{
 				videos = await YoutubeRSS.GetMultipleFeeds(user.SubscribedChannels)
 			};
 
-			return Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
+			Response.StatusCode = (int)HttpStatusCode.OK;
+ return Request.Headers["Accept"].ToString().Contains("application/json") ? Json(feed) : Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
 		}
 
 		[HttpGet]
@@ -111,7 +139,7 @@ namespace LightTube.Controllers
 		public IActionResult SubscriptionsChannels()
 		{
 			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.read"))
-				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+				return Error("Unauthorized", HttpStatusCode.Unauthorized);
 
 			SubscriptionChannels feed = new()
 			{
@@ -119,7 +147,8 @@ namespace LightTube.Controllers
 			};
 			Array.Sort(feed.Channels, (p, q) => string.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
 
-			return Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
+			Response.StatusCode = (int)HttpStatusCode.OK;
+ return Request.Headers["Accept"].ToString().Contains("application/json") ? Json(feed.Channels) : Xml(feed.GetXmlDocument(), HttpStatusCode.OK);
 		}
 
 		[HttpPut]
@@ -127,7 +156,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Subscribe()
 		{
 			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.write"))
-				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+				return Error("Unauthorized", HttpStatusCode.Unauthorized);
 
 			Request.Form.TryGetValue("id", out StringValues ids);
 			string id = ids.ToString();
@@ -144,13 +173,11 @@ namespace LightTube.Controllers
 				
 				(LTChannel ltChannel, bool _) = await DatabaseManager.Logins.SubscribeToChannel(user, channel);
 
-				XmlDocument doc = new();
-				doc.AppendChild(ltChannel.GetXmlElement(doc));
-				return Xml(doc, HttpStatusCode.OK);
+				return Request.Headers["Accept"].ToString().Contains("application/json") ? Json(ltChannel) : Xml(ltChannel.GetXmlDocument(), HttpStatusCode.OK);
 			}
 			catch (Exception e)
 			{
-				return Xml(BuildErrorXml(e.Message), HttpStatusCode.InternalServerError);
+				return Error(e.Message, HttpStatusCode.InternalServerError);
 			}
 		}
 
@@ -159,7 +186,7 @@ namespace LightTube.Controllers
 		public async Task<IActionResult> Unsubscribe()
 		{
 			if (!HttpContext.TryGetUser(out LTUser user, "api.subscriptions.write"))
-				return Xml(BuildErrorXml("Unauthorized"), HttpStatusCode.Unauthorized);
+				return Error("Unauthorized", HttpStatusCode.Unauthorized);
 
 			Request.Form.TryGetValue("id", out StringValues ids);
 			string id = ids.ToString();
@@ -176,13 +203,11 @@ namespace LightTube.Controllers
 				
 				(LTChannel ltChannel, bool _) = await DatabaseManager.Logins.SubscribeToChannel(user, channel);
 
-				XmlDocument doc = new();
-				doc.AppendChild(ltChannel.GetXmlElement(doc));
-				return Xml(doc, HttpStatusCode.OK);
+				return Request.Headers["Accept"].ToString().Contains("application/json") ? Json(ltChannel) : Xml(ltChannel.GetXmlDocument(), HttpStatusCode.OK);
 			}
 			catch (Exception e)
 			{
-				return Xml(BuildErrorXml(e.Message), HttpStatusCode.InternalServerError);
+				return Error(e.Message, HttpStatusCode.InternalServerError);
 			}
 		}
 	}

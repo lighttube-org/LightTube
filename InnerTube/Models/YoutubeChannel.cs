@@ -10,7 +10,7 @@ namespace InnerTube.Models
 		public Thumbnail[] Avatars;
 		public Thumbnail[] Banners;
 		public string Description;
-		public DynamicItem[] Videos;
+		public DynamicItem[] Contents;
 		public string Subscribers;
 
 		public string GetHtmlDescription()
@@ -61,7 +61,7 @@ namespace InnerTube.Models
 			channel.AppendChild(metadata);
 
 			XmlElement contents = doc.CreateElement("Contents");
-			foreach (DynamicItem item in Videos) contents.AppendChild(item.GetXmlElement(doc));
+			foreach (DynamicItem item in Contents) contents.AppendChild(item.GetXmlElement(doc));
 			channel.AppendChild(contents);
 
 			doc.AppendChild(channel);

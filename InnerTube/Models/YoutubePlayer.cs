@@ -20,7 +20,7 @@ namespace InnerTube.Models
 		public string HlsManifestUrl { get; set; }
 		public Subtitle[] Subtitles { get; set; }
 		public string[] Storyboards { get; set; }
-		public string ExpiresInSeconds { get; set; }
+		public int ExpiresInSeconds { get; set; }
 		public string ErrorMessage { get; set; }
 
 		public string GetHtmlDescription()
@@ -43,7 +43,7 @@ namespace InnerTube.Models
 				player.SetAttribute("id", Id);
 				player.SetAttribute("duration", Duration.ToString());
 				player.SetAttribute("isLive", IsLive.ToString());
-				player.SetAttribute("expiresInSeconds", ExpiresInSeconds);
+				player.SetAttribute("expiresInSeconds", ExpiresInSeconds.ToString());
 
 				XmlElement title = doc.CreateElement("Title");
 				title.InnerText = Title;

@@ -15,11 +15,11 @@
 	DynamicItem[] contents;
 	try
 	{
-		contents = ((ItemSectionItem)((ItemSectionItem)Model.Channel.Videos[0]).Contents[0]).Contents;
+		contents = ((ItemSectionItem)((ItemSectionItem)Model.Channel.Contents[0]).Contents[0]).Contents;
 	}
 	catch
 	{
-		contents = Model.Channel.Videos;
+		contents = Model.Channel.Contents;
 	}
 }
 

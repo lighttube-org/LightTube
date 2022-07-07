@@ -7,6 +7,7 @@ using System.Xml;
 using Humanizer;
 using MongoDB.Bson.Serialization.Attributes;
 using MyCSharp.HttpUserAgentParser;
+using Newtonsoft.Json;
 
 namespace LightTube.Database
 {
@@ -16,10 +17,10 @@ namespace LightTube.Database
 		public string Identifier;
 		public string Email;
 		public string Token;
-		public string UserAgent;
+		[JsonIgnore] public string UserAgent;
 		public string[] Scopes;
-		public DateTimeOffset Created = DateTimeOffset.MinValue;
-		public DateTimeOffset LastSeen = DateTimeOffset.MinValue;
+		[JsonIgnore] public DateTimeOffset Created = DateTimeOffset.MinValue;
+		[JsonIgnore] public DateTimeOffset LastSeen = DateTimeOffset.MinValue;
 
 		public XmlDocument GetXmlElement()
 		{
@@ -37,7 +38,7 @@ namespace LightTube.Database
 			{
 				XmlElement scopeElement = doc.CreateElement("Scope");
 				scopeElement.InnerText = scope;
-				login.AppendChild(scopeElement);
+				scopes.AppendChild(scopeElement);
 			}
 			login.AppendChild(scopes);
 			
@@ -47,9 +48,8 @@ namespace LightTube.Database
 
 		public string GetTitle()
 		{
-			Match match = Regex.Match(UserAgent, DatabaseManager.ApiUaRegex);
-			if (match.Success)
-				return $"API App: {match.Groups[2]} {match.Groups[3]}";
+			if (UserAgent.StartsWith("APIAPP|"))
+				return $"API App: {UserAgent.Split("|")[1]}";
 
 			HttpUserAgentInformation client = HttpUserAgentParser.Parse(UserAgent);
 			StringBuilder sb = new($"{client.Name} {client.Version}");
@@ -64,11 +64,9 @@ namespace LightTube.Database
 			sb.AppendLine($"Created: {Created.Humanize(DateTimeOffset.Now)}");
 			sb.AppendLine($"Last seen: {LastSeen.Humanize(DateTimeOffset.Now)}");
 
-			Match match = Regex.Match(UserAgent, DatabaseManager.ApiUaRegex);
-			if (match.Success)
+			if (UserAgent.StartsWith("APIAPP|"))
 			{
-				sb.AppendLine($"API version: {HttpUtility.HtmlEncode(match.Groups[1])}");
-				sb.AppendLine($"App info: {HttpUtility.HtmlEncode(match.Groups[4])}");
+				sb.AppendLine($"App info: {HttpUtility.HtmlEncode(UserAgent.Split("|")[2])}");
 				sb.AppendLine("Allowed scopes:");
 				foreach (string scope in Scopes) sb.AppendLine($"- {scope}");
 			}
