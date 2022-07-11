@@ -50,6 +50,7 @@ namespace LightTube.Controllers
 			
 			if (player.IsLive)
 			{
+				player = await _youtube.GetPlayerAsync(v, HttpContext.GetLanguage(), HttpContext.GetRegion());
 				string manifest = await player.GetHlsManifest(useProxy ? $"https://{Request.Host}/proxy" : null);
 				return File(Encoding.UTF8.GetBytes(manifest), "application/vnd.apple.mpegurl");
 			}
