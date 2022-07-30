@@ -4,10 +4,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using InnerTube.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace InnerTube
@@ -445,6 +448,19 @@ namespace InnerTube
 								["actions"]?[0]?["selectCountryCommand"]?["gl"]?.ToString(),
 							x => x?["compactLinkRenderer"]?["title"]?["simpleText"]?.ToString())
 			};
+		}
+
+		public async Task<YoutubeCaption> GetCaptionAsync(string videoId, string languageCode)
+		{
+			YoutubePlayer player = await GetPlayerAsync(videoId);
+			Subtitle sub = player.Subtitles.FirstOrDefault(x => x.Language == languageCode);
+			if (sub is null)
+				throw new KeyNotFoundException(
+					$"Caption with language code {languageCode} not found in video {videoId}\nAvailable codes are: {string.Join(", ", player.Subtitles.Select(x => x.Language))}");
+
+			string url = sub.Url.Replace("timedtext?", "timedtext?fmt=json3&");
+			HttpResponseMessage response = await Client.GetAsync(url);
+			return JsonConvert.DeserializeObject<YoutubeCaption>(await response.Content.ReadAsStringAsync());
 		}
 
 		private DynamicItem[] ParseRenderers(JArray renderersArray)

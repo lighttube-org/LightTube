@@ -242,6 +242,25 @@ namespace LightTube.Controllers
 				"text/vtt");
 		}
 
+		[Route("caption/{videoId}/{language}/ass")]
+		public async Task<IActionResult> SSAProxy(string videoId, string language)
+		{
+			try
+			{
+				YoutubeCaption caption = await _youtube.GetCaptionAsync(videoId, language);
+				return File(new MemoryStream(Encoding.UTF8.GetBytes(caption.ConvertToSubStationAlpha())),
+					"text/vtt");
+			}
+			catch (KeyNotFoundException e)
+			{
+				return StatusCode(404, e.Message);
+			}
+			catch (Exception e)
+			{
+				return StatusCode(500, e.ToString());
+			}
+		}
+
 		[Route("image")]
 		[Obsolete("Use /proxy/thumbnail instead")]
 		public async Task ImageProxy(string url)
