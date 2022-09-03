@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightTube", "LightTube\LightTube.csproj", "{ED18222B-06FF-42AA-98D0-C932BBBE513A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnerTube", "InnerTube\InnerTube.csproj", "{0878BD56-A5B7-4D09-AF62-941FF2308746}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightTube", "LightTube\LightTube.csproj", "{279A1BE1-F31A-4BB4-9FE6-F47EDE4C8929}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ED18222B-06FF-42AA-98D0-C932BBBE513A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED18222B-06FF-42AA-98D0-C932BBBE513A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED18222B-06FF-42AA-98D0-C932BBBE513A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED18222B-06FF-42AA-98D0-C932BBBE513A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0878BD56-A5B7-4D09-AF62-941FF2308746}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0878BD56-A5B7-4D09-AF62-941FF2308746}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0878BD56-A5B7-4D09-AF62-941FF2308746}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0878BD56-A5B7-4D09-AF62-941FF2308746}.Release|Any CPU.Build.0 = Release|Any CPU
+		{279A1BE1-F31A-4BB4-9FE6-F47EDE4C8929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{279A1BE1-F31A-4BB4-9FE6-F47EDE4C8929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{279A1BE1-F31A-4BB4-9FE6-F47EDE4C8929}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{279A1BE1-F31A-4BB4-9FE6-F47EDE4C8929}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

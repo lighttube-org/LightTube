@@ -1,15 +1,11 @@
-﻿@model LightTube.Contexts.BaseContext
-@{
-	ViewBag.Metadata = new Dictionary<string, string>
-	{
-		["og:title"] = "LightTube",
-		["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}",
-		["og:description"] = "An alternative, privacy respecting front end for YouTube",
-	};
-	ViewData["Title"] = "Home Page";
-	ViewData["SelectedGuideItem"] = "home";
-}
-
-<div style="text-align: center">
-	<h1>@Configuration.Instance.Interface.MessageOfTheDay</h1>
-</div>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>LightTube</title>
+</head>
+<body style="display: flex;align-items: center;justify-content: center;">
+<h1 style="width: fit-content;">shhh...<br>let's not leak<br>our hard work</h1>
+</body>
+</html>
