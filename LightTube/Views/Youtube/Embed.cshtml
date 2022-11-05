@@ -1,0 +1,23 @@
+﻿@using LightTube.Contexts
+@model EmbedContext
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta property="theme-color" content="#AA0000"/>
+	<meta property="author" content="@Model.Video.Channel.Title"/>
+	<meta property="og:site_name" content="lighttube"/>
+	<meta property="og:type" content="website"/>
+	<meta property="og:title" content="@Model.Video.Title"/>
+	<meta property="og:url" content="@($"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}")"/>
+	<meta property="og:image" content="@($"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/thumbnail/{Model.Video.Id}/0")"/>
+	<meta property="og:description" content="@Model.Video.Description"/>
+	<meta property="twitter:card" content="@($"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/thumbnail/{Model.Video.Id}/-1")"/>
+	<title>@ViewData["Title"] - LightTube</title>
+</head>
+<body>
+@await Html.PartialAsync("Player", Model.Player)
+</body>
+</html>
