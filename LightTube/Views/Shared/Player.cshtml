@@ -1,0 +1,79 @@
+﻿@using InnerTube
+@using System.Text.Json
+@model PlayerContext
+
+@if (Model.Player is null)
+{
+	<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
+		<span>
+			@Model.ErrorMessage
+		</span>
+	</div>
+}
+else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
+{
+	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
+		@foreach (Format format in Model.Player.Formats)
+		{
+			@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">	
+		}
+
+		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
+		{
+			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.LanguageCode" label="@subtitle.Label" kind="subtitles">
+		}
+	</video>
+	<noscript style="z-index:999;color:white;position:relative;">This video requires JavaScript to play correctly</noscript>
+}
+else if (Model.Player.Formats.Any())
+{
+	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
+		@foreach (Format format in Model.Player.Formats)
+		{
+			@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">	
+		}
+
+		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
+		{
+			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.LanguageCode" label="@subtitle.Label" kind="subtitles">
+		}
+	</video>
+}
+else
+{
+	<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
+		<span>
+			No muxed formats were returned by YouTube
+		</span>
+	</div>
+}
+
+<script src="~/lib/videojs/video.min.js"></script>
+<script src="~/lib/videojs-hotkeys/videojs.hotkeys.min.js"></script>
+<script src="~/lib/videojs-endscreen/videojs-endscreen.js"></script>
+<script src="~/lib/videojs-contrib-quality-levels/videojs-contrib-quality-levels.min.js"></script>
+<script src="~/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.min.js"></script>
+<script src="~/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.min.js"></script>
+<script id="video-data">
+const videoId =  "@(Model.Player!.Details.Id)";
+const elementId =  "vjs-player";
+const endscreenData = @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
+                      {
+	                      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                      }));
+const playtype = "@(Model.UseHls ? "hls" : Model.UseDash ? "dash" : "html5")";
+endscreenData.clickHandler = item => {
+	switch (item.type) {
+		case 0:
+			window.location = "/watch?v=" + item.target;
+			break;
+		case 3:
+			window.location = "/channel/" + item.target;
+			break;
+		default:
+			alert("Unknown endscreen item type: " + item.type)
+			break;
+	}
+};
+</script>
+<script src="~/js/player.js"></script>

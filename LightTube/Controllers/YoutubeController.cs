@@ -16,7 +16,7 @@ public class YoutubeController : Controller
 	[Route("/embed/{v}")]
 	public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false)
 	{
-		InnerTubePlayer player = await _youtube.GetPlayerAsync(v, contentCheckOk, true, HttpContext.GetLanguage(),
+		InnerTubePlayer player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
 			HttpContext.GetRegion());
 		InnerTubeNextResponse video =
 			await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());

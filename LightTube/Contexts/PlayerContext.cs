@@ -5,25 +5,22 @@ namespace LightTube.Contexts;
 public class PlayerContext : BaseContext
 {
 	public InnerTubePlayer? Player;
-	public bool UseHls = true;
-	public bool UseDash = true;
+	public bool UseHls;
+	public bool UseDash;
 	public Thumbnail[] Thumbnails = Array.Empty<Thumbnail>();
 	public string? ErrorMessage = null;
 	public string PreferredItag = "18";
 	public bool UseEmbedUi = false;
-	public string? ClassName = "";
+	public string? ClassName;
 
 	public PlayerContext(InnerTubePlayer innerTubePlayer, string className, bool compatibility)
 	{
 		Player = innerTubePlayer;
 		ClassName = className;
-		UseHls = innerTubePlayer.HlsManifestUrl is not null;
-		UseDash = innerTubePlayer.DashManifestUrl is not null || innerTubePlayer.AdaptiveFormats.Any();
-		if (compatibility)
-		{
-			UseDash = false;
-			UseHls = false;
-		}
+		UseHls = innerTubePlayer.DashManifestUrl is not null && !compatibility; // Prefer HLS if the video is live
+																			// Live videos contain a DASH manifest URL
+		UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;  // Prefer DASH if we can provide Adaptive
+																			// Formats
 	}
 
 	public string? GetFirstItag() => Player?.Formats.First(x => x.Itag == PreferredItag && x.Itag != "17").Itag;

@@ -7,18 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="InnerTube" Version="1.0.0" />
+        <PackageReference Include="InnerTube" Version="1.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.8" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="wwwroot" />
     </ItemGroup>
 
 </Project>

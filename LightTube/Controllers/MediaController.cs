@@ -34,7 +34,7 @@ public class ProxyController : Controller
 	{
 		try
 		{
-			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
+			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
 			List<Format> formats = new();
 			formats.AddRange(player.Formats);
 			formats.AddRange(player.AdaptiveFormats);
@@ -150,7 +150,7 @@ public class ProxyController : Controller
 	{
 		try
 		{
-			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, true);
+			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
 
 			string manifest = Utils.GetDashManifest(player, useProxy ? $"https://{Request.Host}/proxy" : null);
 
