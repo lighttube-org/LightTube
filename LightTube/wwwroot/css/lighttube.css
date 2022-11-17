@@ -203,6 +203,7 @@ svg {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		width: 100vw;
 	}
 
 	.guide {
@@ -212,10 +213,12 @@ svg {
 		align-items: center;
 		justify-content: space-evenly;
 		border-top: 1px solid var(--border-color);
+		width: 100vw;
 	}
 
 	.app {
 		grid-area: app;
+		width: 100vw;
 	}
 }
 
@@ -268,6 +271,15 @@ body.no-guide .guide {
 	.guide-item__small {
 
 	}
+
+	.guide-item__active {
+		background-color: #f2f2f2;
+		font-weight: bold;
+	}
+
+	.dark-mode .guide-item__active {
+		background-color: #272727;
+	}
 }
 
 @media screen and (min-width: 700px) and (max-width: 1312px) {
@@ -298,6 +310,10 @@ body.no-guide .guide {
 	.guide-item__small {
 		display: flex;
 	}
+
+	.guide > hr {
+		display: none;
+	}
 }
 
 @media screen and (max-width: 700px) {
@@ -318,6 +334,10 @@ body.no-guide .guide {
 	.guide-item__small {
 		display: flex;
 	}
+
+	.guide > hr {
+		display: none;
+	}
 }
 /* Logo */
 
@@ -327,6 +347,7 @@ body.no-guide .guide {
 	color: var(--text-primary);
 	white-space: nowrap;
 	margin-left: 16px;
+	text-decoration: none;
 }
 
 .region {

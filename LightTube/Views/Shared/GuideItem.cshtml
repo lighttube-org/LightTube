@@ -1,0 +1,23 @@
+﻿@model GuideItem
+@{
+	string className = "guide-item";
+	string iconId = Model.IconId;
+
+	if (Model.VisibleOnMinifiedGuide)
+		className += " guide-item__small";
+	if (Context.Request.Path.Value! == Model.Path)
+	{
+		iconId += "-fill";
+		className += " guide-item__active";
+	}
+}
+<a class="@className" href="@Model.Path">
+	<div class="guide-item__icon">
+		<svg class="icon" width="20" height="20" fill="currentColor">
+			<use xlink:href="svg/bootstrap-icons.svg#@iconId"/>
+		</svg>
+	</div>
+	<div class="guide-item__label">
+		@Model.Title
+	</div>
+</a>

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using LightTube.Models;
 
@@ -15,7 +16,7 @@ public class HomeController : Controller
 
 	public IActionResult Index()
 	{
-		return View();
+		return View(new BaseContext());
 	}
 
 	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
