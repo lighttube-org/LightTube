@@ -6,11 +6,14 @@ public class WatchContext : BaseContext
 {
 	public PlayerContext Player;
 	public InnerTubeNextResponse Video;
+	public int Dislikes;
 
-	public WatchContext(InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse, bool compatibility, HttpContext context) : base()
+	public WatchContext(InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse,
+		bool compatibility, int dislikes, HttpContext context) : base()
 	{
 		Player = new PlayerContext(innerTubePlayer, "embed", compatibility);
 		Video = innerTubeNextResponse;
+		Dislikes = dislikes;
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);

@@ -25,6 +25,7 @@ builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 	CacheSize = int.Parse(Environment.GetEnvironmentVariable("LIGHTTUBE_CACHE_SIZE") ?? "50"),
 	CacheExpirationPollingInterval = default
 }));
+builder.Services.AddSingleton(new HttpClient());
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.

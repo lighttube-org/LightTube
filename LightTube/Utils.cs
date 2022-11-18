@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Web;
@@ -283,4 +284,13 @@ public static class Utils
 		mpdRoot.AppendChild(period);
 		return doc.OuterXml;
 	}
+	
+	public static string ToKMB(this int num) =>
+		num switch
+		{
+			> 999999999 or < -999999999 => num.ToString("0,,,.###B", CultureInfo.InvariantCulture),
+			> 999999 or < -999999 => num.ToString("0,,.##M", CultureInfo.InvariantCulture),
+			> 999 or < -999 => num.ToString("0,.#K", CultureInfo.InvariantCulture),
+			var _ => num.ToString(CultureInfo.InvariantCulture)
+		};
 }

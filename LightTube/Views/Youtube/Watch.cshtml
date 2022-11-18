@@ -25,7 +25,7 @@
 						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-down"/>
 					</svg>
 					<div class="interaction-button__text">
-						Dislike
+						@(Model.Dislikes == -1 ? "Dislike" : Model.Dislikes.ToKMB())
 					</div>
 				</div>
 			</div>

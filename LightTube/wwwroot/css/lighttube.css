@@ -125,6 +125,7 @@ svg {
 }
 
 .title {
+	text-decoration: none;
 	font-weight: bold;
 	color: var(--text-primary);
 }
