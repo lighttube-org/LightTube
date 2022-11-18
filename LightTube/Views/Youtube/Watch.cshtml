@@ -1,0 +1,151 @@
+﻿@using InnerTube.Renderers
+@model WatchContext
+
+<div class="watch-page">
+	<div class="player-container" style="color:white">
+		<partial name="Player" model="Model.Player"/>
+	</div>
+	<div class="info-container">
+		<div class="ml-2 title">
+			@Model.Video.Title
+		</div>
+		<div class="buttons">
+			<div class="interaction-buttons">
+				<div class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-up"/>
+					</svg>
+					<div class="interaction-button__text">
+						@Model.Video.LikeCount
+					</div>
+				</div>
+				<vr></vr>
+				<div class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-down"/>
+					</svg>
+					<div class="interaction-button__text">
+						Dislike
+					</div>
+				</div>
+			</div>
+			<div class="interaction-buttons">
+				<div class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#folder-plus"/>
+					</svg>
+					<div class="interaction-button__text">
+						Save
+					</div>
+				</div>
+			</div>
+			<div class="interaction-buttons">
+				<a class="interaction-button" href="/download/@Model.Video.Id">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#download"/>
+					</svg>
+					<div class="interaction-button__text">
+						Download
+					</div>
+				</a>
+			</div>
+			<div class="interaction-buttons">
+				<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#youtube"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+		<div class="video-channel-info">
+			<img class="avatar"
+			     src="@Model.Video.Channel.Avatar"
+			     alt="@Model.Video.Channel.Title">
+			<div class="video-channel-info__name">
+				<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
+				<span class="subs">@Model.Video.Channel.Subscribers</span>
+			</div>
+			@if (true)
+			{
+				<a class="btn-subscribe" href="/channel/@Model.Video.Channel.Id/subscribe" target="_blank">
+					<span class="text">Subscribe</span>
+				</a>
+			}
+			else
+			{
+				<a class="btn-subscribed" href="/channel/@Model.Video.Channel.Id/unsubscribe" target="_blank">
+					<span class="text">Subscribed</span>
+				</a>
+			}
+		</div>
+		<details class="description">
+			<summary>
+				@Model.Video.ViewCount • @Model.Video.DateText • Click to toggle description
+			</summary>
+			@foreach (string line in Model.Video.Description.Split("\n"))
+			{
+				@:@line<br>
+			}
+		</details>
+	</div>
+	<div class="comments-container">
+		@(Model.Video.CommentsContinuation ?? "Comments are disabled")
+	</div>
+	<div class="second-column">
+		@if (Model.Video.Playlist is not null)
+		{
+			<details class="playlist-view-container" open>
+				<summary class="playlist-view__header">
+					<div class="ml-1 title" title="@Model.Video.Playlist.Title">
+						@Model.Video.Playlist.Title
+					</div>
+					<div class="ml-1">@Model.Video.Playlist.Channel.Title</div>
+				</summary>
+				<div class="playlist-view__content renderer-container">
+					@foreach (PlaylistPanelVideoRenderer item in Model.Video.Playlist.Videos)
+					{
+						<div title="@item.Title">
+							<a href="/watch?v=@item.Id&list=@Model.Video.Playlist.PlaylistId">
+								@item.IndexText - @item.Title
+							</a>
+						</div>
+					}
+				</div>
+			</details>
+		}
+		<div class="recommendations-container renderer-container">
+			@foreach (IRenderer item in Model.Video.Recommended)
+			{
+				switch (item)
+				{
+					case CompactVideoRenderer cvr:
+						<div title="@cvr.Title">
+							<a href="/watch?v=@cvr.Id">
+								@cvr.Title
+							</a>
+						</div>
+						break;
+					default:
+						<div>
+							Unknown recommended item type: @item.GetType().Name
+						</div>
+						break;
+				}
+			}
+		</div>
+	</div>
+</div>
+<script>
+	const playerContainerElement = document.querySelector(".player-container");
+	const playlistContainerElement = document.querySelector(".playlist-view-container");
+	const updatePlaylistElementHeight = () => {
+		if (!playlistContainerElement.open)
+			playlistContainerElement.style.height = "94px";
+		else if (window.innerWidth > 1085)
+			playlistContainerElement.style.height = playerContainerElement.clientHeight + "px";
+		else
+			playlistContainerElement.style.height = "unset";
+		requestAnimationFrame(() => updatePlaylistElementHeight());
+	}
+	updatePlaylistElementHeight();
+</script>

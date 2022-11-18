@@ -10,6 +10,13 @@ public class BaseContext
 	public List<IHtmlContent> EndTags = new();
 	public bool GuideHidden = false;
 
+	public BaseContext()
+	{
+		AddMeta("og:site_name", "lighttube");
+		AddMeta("og:type", "website");
+		AddMeta("theme-color", "#AA0000");
+	}
+
 	public void AddScript(string src)
 	{
 		TagBuilder script = new("script");

@@ -1,4 +1,5 @@
-﻿@model BaseContext
+﻿@using Microsoft.AspNetCore.Html
+@model BaseContext
 
 <!DOCTYPE html>
 <!--html lang="en" class="dark-mode"-->
@@ -7,6 +8,10 @@
 	<meta charset="UTF-8">
 	<title>LightTube</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	@foreach (IHtmlContent item in Model.HeadTags)
+	{
+		@item
+	}
 	<link rel="stylesheet" href="css/lighttube.css">
 	<link rel="stylesheet" href="fonts/roboto/roboto.css">
 </head>
@@ -48,25 +53,35 @@
 			</label>
 			<div class="dropdown__menu" style="right:0">
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#person-circle"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#person-circle"/>
+					</svg>
 					Logged in as: {username}
 				</div>
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#box-arrow-right"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#box-arrow-right"/>
+					</svg>
 					Log Out
 				</div>
 				<hr>
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#moon"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#moon"/>
+					</svg>
 					Toggle Theme
 				</div>
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#gear"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#gear"/>
+					</svg>
 					Content Settings
 				</div>
 				<hr>
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#info-circle"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#info-circle"/>
+					</svg>
 					About
 				</div>
 			</div>
@@ -81,20 +96,28 @@
 		<div class="icon-button dropdown">
 			<input type="checkbox" id="loggedout-dropdown" autocomplete="off">
 			<label for="loggedout-dropdown">
-				<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#three-dots-vertical"/></svg>
+				<svg class="bi" width="20" height="20" fill="currentColor">
+					<use xlink:href="svg/bootstrap-icons.svg#three-dots-vertical"/>
+				</svg>
 			</label>
 			<div class="dropdown__menu" style="right:-100px">
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#moon"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#moon"/>
+					</svg>
 					Toggle Theme
 				</div>
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#gear"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#gear"/>
+					</svg>
 					Content Settings
 				</div>
 				<hr>
 				<div class="dropdown__item">
-					<svg class="bi" width="20" height="20" fill="currentColor"><use xlink:href="svg/bootstrap-icons.svg#info-circle"/></svg>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#info-circle"/>
+					</svg>
 					About
 				</div>
 			</div>
@@ -116,7 +139,11 @@
 	<partial name="GuideItem" model="@(new GuideItem("Library", "folder", "/feed/library", true))"/>
 </div>
 <div class="app">
-@RenderBody()
+	@RenderBody()
 </div>
+@foreach (IHtmlContent item in Model.EndTags)
+{
+	@item
+}
 </body>
 </html>
