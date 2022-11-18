@@ -40,4 +40,22 @@ public class WatchContext : BaseContext
 		AddScript("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.min.js");
 		AddScript("/js/player.js");
 	}
+
+	public WatchContext(Exception e, InnerTubeNextResponse innerTubeNextResponse, int dislikes, HttpContext context)
+	{
+		Player = new PlayerContext(e);
+		Video = innerTubeNextResponse;
+		Dislikes = dislikes;
+		GuideHidden = true;
+
+		AddMeta("description", Video.Description);
+		AddMeta("author", Video.Channel.Title);
+		AddMeta("og:title", Video.Title);
+		AddMeta("og:description", Video.Description);
+		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
+		AddMeta("og:image", $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{Video.Id}/-1");
+		AddMeta("twitter:card", $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{Video.Id}/-1");
+		AddMeta("twitter:player", $"https://{context.Request.Host}/embed/${Video.Id}");
+		AddMeta("twitter:player:stream", $"https://{context.Request.Host}/proxy/media/${Video.Id}/18");
+	}
 }

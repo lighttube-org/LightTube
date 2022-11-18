@@ -12,4 +12,10 @@ public class EmbedContext : BaseContext
 		Player = new PlayerContext(innerTubePlayer, "embed", compatibility);
 		Video = innerTubeNextResponse;
 	}
+
+	public EmbedContext(Exception e, InnerTubeNextResponse innerTubeNextResponse)
+	{
+		Player = new PlayerContext(e);
+		Video = innerTubeNextResponse;
+	}
 }
