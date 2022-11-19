@@ -86,15 +86,21 @@ else
 	                      }));
 	const playtype = "@(Model.UseHls ? "hls" : Model.UseDash ? "dash" : "html5")";
 	endscreenData.clickHandler = item => {
-		switch (item.type) {
-			case 0:
-				window.location = "/watch?v=" + item.target;
-				break;
-			case 3:
+		switch (item.style) {
+			case "VIDEO":
+        		window.location = "/watch?v=" + item.target;
+        		break;
+        	case "PLAYLIST":
+            	window.location = "/playlist?list=" + item.target;
+            	break;
+            case "CHANNEL":
 				window.location = "/channel/" + item.target;
 				break;
+            case "WEBSITE":
+				window.open(item.href, "_blank");
+				break;
 			default:
-				alert("Unknown endscreen item type: " + item.type)
+				alert("Unknown endscreen item type: " + item.style)
 				break;
 		}
 	};
