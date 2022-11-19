@@ -557,7 +557,7 @@ body.no-guide .guide {
 	.watch-page {
 		display: grid;
 		grid-template-columns: 1fr 400px;
-		grid-template-rows: auto max-content max-content;
+		grid-template-rows: auto auto max-content;
 		gap: 12px 24px;
 		grid-template-areas:
 			"player second-column"
@@ -752,6 +752,13 @@ body.no-guide .guide {
 .video-channel-info > .btn-subscribe, .video-channel-info > .btn-subscribed {
 	grid-area: btn-subscribe;
 	margin: 4px 8px;
+}
+
+.comments-container {
+	grid-area: comments;
+	flex-direction: column;
+	display: flex;
+	gap: 16px;
 }
 
 .interaction-buttons {

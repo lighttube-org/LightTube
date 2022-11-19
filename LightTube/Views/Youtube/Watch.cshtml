@@ -89,48 +89,40 @@
 		</details>
 	</div>
 	<div class="comments-container">
-		@(Model.Video.CommentsContinuation ?? "Comments are disabled")
+		@if (Model.Comments is not null)
+		{
+			@foreach (IRenderer renderer in Model.Comments.Contents)
+			{
+				<partial name="Renderer" model="renderer"/>
+			}
+		}
+		else
+		{
+			@:Comments are disabled
+		}
 	</div>
 	<div class="second-column">
 		@if (Model.Video.Playlist is not null)
 		{
 			<details class="playlist-view-container" open>
 				<summary class="playlist-view__header">
-					<div class="ml-1 title" title="@Model.Video.Playlist.Title">
+					<a href="/playlist?list=@Model.Video.Playlist.PlaylistId" class="ml-1 title" title="@Model.Video.Playlist.Title">
 						@Model.Video.Playlist.Title
-					</div>
-					<div class="ml-1">@Model.Video.Playlist.Channel.Title</div>
+					</a>
+					<div class="ml-1">@Model.Video.Playlist.Channel.Title • @(Model.Video.Playlist.CurrentIndex + 1) / @Model.Video.Playlist.TotalVideos</div>
 				</summary>
-				<div class="playlist-view__content renderer-container">
-					@foreach (PlaylistPanelVideoRenderer item in Model.Video.Playlist.Videos)
+				<div class="playlist-view__content">
+					@foreach (IRenderer renderer in Model.Video.Playlist.Videos)
 					{
-						<div title="@item.Title">
-							<a href="/watch?v=@item.Id&list=@Model.Video.Playlist.PlaylistId">
-								@item.IndexText - @item.Title
-							</a>
-						</div>
+						<partial name="Renderer" model="renderer"/>
 					}
 				</div>
 			</details>
 		}
-		<div class="recommendations-container renderer-container">
-			@foreach (IRenderer item in Model.Video.Recommended)
+		<div class="recommendations-container compact-renderer-list">
+			@foreach (IRenderer renderer in Model.Video.Recommended)
 			{
-				switch (item)
-				{
-					case CompactVideoRenderer cvr:
-						<div title="@cvr.Title">
-							<a href="/watch?v=@cvr.Id">
-								@cvr.Title
-							</a>
-						</div>
-						break;
-					default:
-						<div>
-							Unknown recommended item type: @item.GetType().Name
-						</div>
-						break;
-				}
+				<partial name="Renderer" model="renderer"/>
 			}
 		</div>
 	</div>

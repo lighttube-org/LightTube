@@ -6,13 +6,16 @@ public class WatchContext : BaseContext
 {
 	public PlayerContext Player;
 	public InnerTubeNextResponse Video;
+	public InnerTubeContinuationResponse? Comments;
 	public int Dislikes;
 
 	public WatchContext(InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse,
+		InnerTubeContinuationResponse? comments,
 		bool compatibility, int dislikes, HttpContext context) : base()
 	{
 		Player = new PlayerContext(innerTubePlayer, "embed", compatibility);
 		Video = innerTubeNextResponse;
+		Comments = comments;
 		Dislikes = dislikes;
 		GuideHidden = true;
 
@@ -41,10 +44,12 @@ public class WatchContext : BaseContext
 		AddScript("/js/player.js");
 	}
 
-	public WatchContext(Exception e, InnerTubeNextResponse innerTubeNextResponse, int dislikes, HttpContext context)
+	public WatchContext(Exception e, InnerTubeNextResponse innerTubeNextResponse,
+		InnerTubeContinuationResponse? comments, int dislikes, HttpContext context)
 	{
 		Player = new PlayerContext(e);
 		Video = innerTubeNextResponse;
+		Comments = comments;
 		Dislikes = dislikes;
 		GuideHidden = true;
 

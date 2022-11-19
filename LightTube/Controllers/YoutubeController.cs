@@ -57,6 +57,13 @@ public class YoutubeController : Controller
 		}
 		InnerTubeNextResponse video =
 			await _youtube.GetVideoAsync(v, list, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
+		InnerTubeContinuationResponse? comments = null;
+
+		if (video.CommentsContinuation is not null)
+			comments = await _youtube.GetVideoCommentsAsync(video.CommentsContinuation,
+				language: HttpContext.GetLanguage(),
+				region: HttpContext.GetRegion());
+
 		int dislikes;
 		try
 		{
@@ -71,7 +78,7 @@ public class YoutubeController : Controller
 			dislikes = -1;
 		}
 		if (player is null || e is not null)
-			return View(new WatchContext(e ?? new Exception("player is null"), video, dislikes, HttpContext));
-		return View(new WatchContext(player, video, compatibility, dislikes, HttpContext));
+			return View(new WatchContext(e ?? new Exception("player is null"), video, comments, dislikes, HttpContext));
+		return View(new WatchContext(player, video, comments, compatibility, dislikes, HttpContext));
 	}
 }

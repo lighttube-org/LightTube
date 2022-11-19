@@ -1,0 +1,167 @@
+﻿@using InnerTube.Renderers
+@using InnerTube
+@using Microsoft.Extensions.Primitives
+@model global::InnerTube.Renderers.IRenderer
+
+@switch (Model)
+{
+	case CompactVideoRenderer video:
+		<div class="renderer-compactvideorenderer">
+			<a class="thumbnail" href="/watch?v=@video.Id">
+				<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<div class="thumbnail__duration__container">
+					<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+				</div>
+			</a>
+			<div class="info">
+				<a class="ml-2 title" href="/watch?v=@video.Id" title="@video.Title">
+					@video.Title
+				</a>
+				<div class="info__more">
+					<div class="info__channel">
+						<a class="ml-1" href="/channel/@video.Channel.Id" title="@video.Channel.Title">
+							@video.Channel.Title
+						</a>
+						@foreach (Badge channelBadge in video.Channel.Badges)
+						{
+							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+								<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+							</svg>
+						}
+					</div>
+					<div>
+						@video.ViewCount • @video.Published
+					</div>
+					<div>
+						<!-- TODO: Someone forgot badges in InnerTube -->
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
+	case CompactPlaylistRenderer playlist:
+		<div class="renderer-compactplaylistrenderer">
+			<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="thumbnail">
+				<img src="@playlist.Thumbnails.Last().Url">
+				<div class="thumbnail__playlist__overlay">
+					<span>@playlist.VideoCountText.Split(" ")[0]</span>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#list"/>
+					</svg>
+				</div>
+			</a>
+			<div class="info">
+				<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="ml-2 title" title="@playlist.Title">
+					@playlist.Title
+				</a>
+				<div class="info__more">
+					<div class="info__channel">
+						<a href="/channel/@playlist.Channel.Id" title="@playlist.Channel.Title" class="ml-1">
+							@playlist.Channel.Title
+						</a>
+						@foreach (Badge channelBadge in playlist.Channel.Badges)
+						{
+							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+								<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+							</svg>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
+	case CompactRadioRenderer radio:
+		<div class="renderer-compactradiorenderer">
+			<div class="thumbnail">
+				<img src="@radio.Thumbnails.Last().Url" alt="@radio.Title">
+				<div class="thumbnail__radio__overlay">
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#broadcast"/>
+					</svg>
+				</div>
+			</div>
+			<div class="info">
+				<div class="ml-2 title" title="@radio.Title">
+					@radio.Title
+				</div>
+				<div class="info__more">
+					<div class="info__channel">
+						<a href="/channel/@radio.Channel.Id" title="@radio.Channel.Title" class="ml-1">
+							@radio.Channel.Title
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
+	case PlaylistPanelVideoRenderer video:
+		<div class="@(video.IsSelected ? "renderer-playlistpanelvideorenderer active" : "renderer-playlistpanelvideorenderer")">
+			<div class="playlistvideo__index">
+				@video.IndexText
+			</div>
+			<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.First() : "")&params=@video.PlaylistParams" class="playlistvideo__thumbnail">
+				<div class="playlistvideo__thumbnail">
+					<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+					<div class="playlistvideo__thumbnail__duration__container">
+						<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+					</div>
+				</div>
+			</a>
+			<div class="playlistvideo__info">
+				<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l2) ? l2.First() : "")&params=@video.PlaylistParams" class="title ml-2" title="@video.Title">
+					@video.Title
+				</a>
+				<a href="/channel/@video.Channel.Id" class="ml-1" title="@video.Channel.Title">
+					@video.Channel.Title
+				</a>
+			</div>
+		</div>
+		break;
+	case CommentThreadRenderer comment:
+		<div class="renderer-commentthreadrenderer">
+			<a class="comment__author-avatar" href="/channel/@comment.Owner.Id">
+				<img src="@comment.Owner.Avatar" alt="@comment.Owner.Title">
+			</a>
+			<div class="comment">
+				<div class="header ml-1">
+					@if (comment.Pinned)
+					{
+						<svg class="bi" width="12" height="12" fill="currentColor" title="Pinned">
+							<use xlink:href="svg/bootstrap-icons.svg#pin-angle-fill"/>
+						</svg>
+					}
+					<a href="/channel/@comment.Owner.Id" class="comment__author ml-1 title" title="@comment.Owner.Title">
+						@comment.Owner.Title
+					</a>
+					<span class="comment__posted ml-1">
+						@comment.PublishedTimeText
+					</span>
+				</div>
+				<div class="comment__content">
+					@Html.Raw(comment.Content.Replace("\n", "<br>"))
+				</div>
+				<div class="comment__buttons">
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
+					</svg>
+					@comment.LikeCount
+					@if (Context.Request.Query.TryGetValue("v", out StringValues v)){
+						<a href="/watch?v=@v&lc=@comment.Id">
+							Open on YouTube
+						</a>
+					}
+				</div>
+			</div>
+		</div>
+		break;
+	case UnknownRenderer:
+		<div class="renderer-null">
+			Unknown renderer type: @Model.Type
+		</div>
+		break;
+	default:
+		<div class="renderer-null">
+			Couldn't render: @Model.GetType().Name
+		</div>
+		break;
+}

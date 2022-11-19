@@ -284,7 +284,7 @@ public static class Utils
 		mpdRoot.AppendChild(period);
 		return doc.OuterXml;
 	}
-	
+
 	public static string ToKMB(this int num) =>
 		num switch
 		{
@@ -293,4 +293,10 @@ public static class Utils
 			> 999 or < -999 => num.ToString("0,.#K", CultureInfo.InvariantCulture),
 			var _ => num.ToString(CultureInfo.InvariantCulture)
 		};
+
+	public static string ToDurationString(this TimeSpan ts)
+	{
+		string str = ts.ToString();
+		return str.StartsWith("00:") ? str[3..] : str;
+	}
 }
