@@ -798,3 +798,11 @@ body.no-guide .guide {
 	color: var(--text-primary);
 	font-size: larger;
 }
+
+.search-container {
+	margin: auto;
+	max-width: 1096px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}

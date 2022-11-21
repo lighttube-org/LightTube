@@ -5,12 +5,217 @@
 
 @switch (Model)
 {
-	case CompactVideoRenderer video:
-		<div class="renderer-compactvideorenderer">
+	case VideoRenderer video:
+		<div class="renderer-videorenderer">
 			<a class="thumbnail" href="/watch?v=@video.Id">
 				<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
 				<div class="thumbnail__duration__container">
 					<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+				</div>
+			</a>
+			<div class="info">
+				<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
+					@video.Title
+				</a>
+				<div class="info__more">
+					<div>
+						@video.ViewCount • @video.Published
+					</div>
+					<div class="info__channel">
+						<img src="@video.Channel.Avatar!.ToString()" alt="@video.Channel.Title">
+						<a href="/channel/@video.Channel.Id" title="@video.Channel.Title" class="ml-1">
+							@video.Channel.Title
+						</a>
+						@foreach (Badge channelBadge in video.Channel.Badges)
+						{
+							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+								<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+							</svg>
+						}
+					</div>
+					<div>
+						@foreach (string line in video.Description.Split("\n"))
+						{
+							@:@line<br>
+						}
+					</div>
+					<div>
+						@foreach (Badge videoBadge in video.Badges)
+						{
+							<span class="badge" title="@videoBadge.Tooltip">
+								@videoBadge.Label
+							</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
+	case ChannelRenderer channel:
+		<div class="renderer-channelrenderer">
+			<a href="/channel/@channel.Id"  class="channel-avatar">
+				<img src="@channel.Avatars.Last().Url" alt="@channel.Title">
+			</a>
+			<div class="info">
+				<a href="/channel/@channel.Id" class="title ml-2" title="@channel.Title">
+					@channel.Title
+					<svg class="bi" width="12" height="12" fill="currentColor">
+
+						<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+					</svg>
+				</a>
+				<div class="info__more">
+					2.26M subscribers • 84 videos
+				</div>
+			</div>
+			<div class="subscribe-container">
+				@if (true)
+				{
+					<a class="btn-subscribe" href="/channel/@channel.Id/subscribe"><span class="text">Subscribe</span></a>
+				}
+				else
+				{
+					<a class="btn-subscribed" href="/channel/@channel.Id/unsubscribe"><span class="text">Subscribed</span></a>
+				}
+			</div>
+		</div>
+		break;
+	case PlaylistRenderer playlist:
+		<div class="renderer-playlistrenderer">
+			<a href="/watch?v=@playlist.Videos.First().Id&list=@playlist.Id" class="thumbnail">
+				<img src="@playlist.Thumbnails.First().Url" alt="@playlist.Title">
+				<div class="thumbnail__playlist__overlay">
+					<span>@playlist.VideoCount</span>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#list"/>
+					</svg>
+				</div>
+			</a>
+			<div class="info">
+				<a href="#" class="ml-2 title" title="@playlist.Title">
+					@playlist.Title
+				</a>
+				<div class="info__more">
+					<div class="info__channel">
+						<a href="/channel/@playlist.Channel.Id" title="@playlist.Channel.Title" class="ml-1">
+							@playlist.Channel.Title
+						</a>
+						<svg class="bi" width="12" height="12" fill="currentColor">
+							<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+						</svg>
+					</div>
+					<div>
+						@foreach (ChildVideoRenderer child in playlist.Videos)
+						{
+							<a href="/watch?v=@child.Id&list=@playlist.Id" class="renderer-childvideorenderer">@child.Title • @child.Duration</a>
+						}
+					</div>
+					<a href="/playlist?list=@playlist.Id" class="link-view-full-playlist">
+						View Full Playlist
+					</a>
+				</div>
+			</div>
+		</div>
+		break;
+	case RadioRenderer radio:
+		<div class="renderer-radiorenderer">
+			<a href="/watch?v=@radio.FirstVideoId&list=@radio.Id" class="thumbnail">
+				<img src="@radio.Thumbnails.Last().Url" title="@radio.Title">
+				<div class="thumbnail__radio__overlay">
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="svg/bootstrap-icons.svg#broadcast"/>
+					</svg>
+				</div>
+			</a>
+			<div class="info">
+				<a href="/watch?v=@radio.FirstVideoId&list=@radio.Id" class="ml-2 title" title="@radio.Title">
+					@radio.Title
+				</a>
+				<div class="info__channel">
+					<a href="/channel/@radio.Channel.Id" title="@radio.Channel.Title" class="ml-1">
+						@radio.Channel.Title
+					</a>
+				</div>
+			</div>
+		</div>
+		break;
+	case SearchPyvRenderer pyv:
+		/*
+		 uncomment to unleash chaos
+		@foreach (PromotedVideoRenderer video in pyv.Ads.Where(x => x.Type == "promotedVideoRenderer").Cast<PromotedVideoRenderer>())
+		{
+			<div class="renderer-videorenderer ad">
+				<a class="thumbnail" href="/watch?v=@video.Id">
+					<img src="@video.Thumbnails.First().Url" alt="@video.Title">
+					<div class="thumbnail__duration__container">
+						<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+					</div>
+				</a>
+				<div class="info">
+					<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
+						@video.Title
+					</a>
+					<div class="info__more">
+						<div>
+							@video.ViewCount
+						</div>
+						<div class="info__channel">
+							<a href="/channel/@video.Channel.Id" title="@video.Channel.Title" class="ml-1">
+								AD • @video.Channel.Title
+							</a>
+							@foreach (Badge channelBadge in video.Channel.Badges)
+							{
+								<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+									<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+								</svg>
+							}
+						</div>
+						<div>
+							@foreach (Badge videoBadge in video.Badges)
+							{
+								<span class="badge" title="@videoBadge.Tooltip">
+									@videoBadge.Label
+								</span>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		*/
+		break;
+	case ShelfRenderer shelf:
+		<details class="renderer-shelfrenderer">
+			<summary>
+				<div class="title ml-1">
+					@shelf.Title
+				</div>
+				@foreach (IRenderer renderer in shelf.Items.Take(shelf.CollapsedItemCount))
+				{
+					<partial name="Renderer" model="renderer"/>
+				}
+				<div class="shelf-expand-button">
+					+@(shelf.Items.Count() - shelf.CollapsedItemCount)) More
+				</div>
+			</summary>
+			@foreach (IRenderer renderer in shelf.Items.Skip(shelf.CollapsedItemCount))
+			{
+				<partial name="Renderer" model="renderer"/>
+			}
+		</details>
+		break;
+	case ItemSectionRenderer section:
+		@foreach (IRenderer renderer in section.Contents)
+		{
+			<partial name="Renderer" model="renderer"/>
+		}
+		break;
+	case CompactVideoRenderer video:
+		<div class="renderer-compactvideorenderer">
+			<a class="compact-thumbnail" href="/watch?v=@video.Id">
+				<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<div class="compact-thumbnail__duration__container">
+					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
 			</a>
 			<div class="info">
@@ -41,9 +246,9 @@
 		break;
 	case CompactPlaylistRenderer playlist:
 		<div class="renderer-compactplaylistrenderer">
-			<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="thumbnail">
+			<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="compact-thumbnail">
 				<img src="@playlist.Thumbnails.Last().Url">
-				<div class="thumbnail__playlist__overlay">
+				<div class="compact-thumbnail__playlist__overlay">
 					<span>@playlist.VideoCountText.Split(" ")[0]</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="svg/bootstrap-icons.svg#list"/>
@@ -72,9 +277,9 @@
 		break;
 	case CompactRadioRenderer radio:
 		<div class="renderer-compactradiorenderer">
-			<div class="thumbnail">
+			<div class="compact-thumbnail">
 				<img src="@radio.Thumbnails.Last().Url" alt="@radio.Title">
-				<div class="thumbnail__radio__overlay">
+				<div class="compact-thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="svg/bootstrap-icons.svg#broadcast"/>
 					</svg>
@@ -103,7 +308,7 @@
 				<div class="playlistvideo__thumbnail">
 					<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
 					<div class="playlistvideo__thumbnail__duration__container">
-						<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+						<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 					</div>
 				</div>
 			</a>

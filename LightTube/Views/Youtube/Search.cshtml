@@ -1,0 +1,9 @@
+﻿@using InnerTube.Renderers
+@model SearchContext
+
+<div class="search-container">
+	@foreach (IRenderer renderer in Model.Search.Results)
+	{
+		<partial name="Renderer" model="renderer"/>
+	}
+</div>

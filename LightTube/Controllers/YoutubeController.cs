@@ -81,4 +81,12 @@ public class YoutubeController : Controller
 			return View(new WatchContext(e ?? new Exception("player is null"), video, comments, dislikes, HttpContext));
 		return View(new WatchContext(player, video, comments, compatibility, dislikes, HttpContext));
 	}
+
+	[Route("/results")]
+	public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null)
+	{
+		InnerTubeSearchResults search =
+			await _youtube.SearchAsync(search_query, filter, HttpContext.GetLanguage(), HttpContext.GetRegion());
+		return View(new SearchContext(search_query, filter, search));
+	}
 }
