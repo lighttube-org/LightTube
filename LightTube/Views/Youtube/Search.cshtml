@@ -1,9 +1,68 @@
 ﻿@using InnerTube.Renderers
+@using InnerTube
 @model SearchContext
 
 <div class="search-container">
-	@foreach (IRenderer renderer in Model.Search.Results)
+	@if (Model.Search?.SearchOptions is not null)
+	{
+		<details>
+			<summary class="btn" style="width:min-content;">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="svg/bootstrap-icons.svg#sliders2"/>
+				</svg>
+				<div class="text">
+					@Model.Search.SearchOptions.Title
+				</div>
+			</summary>
+			<div class="search-filters">
+				@foreach (InnerTubeSearchResults.Options.Group group in Model.Search.SearchOptions.Groups)
+				{
+					<div class="search-filter">
+						<div class="search-filter__category">
+							@group.Title
+						</div>
+						<hr>
+						@foreach (InnerTubeSearchResults.Options.Group.Filter filter in group.Filters)
+						{
+							@if (filter.Params is null)
+							{
+								<a class="search-filter__item active">
+									@filter.Label
+								</a>
+							}
+							else
+							{
+								<a href="/results?search_query=@Model.Query&filter=@filter.Params" class="search-filter__item">
+									@filter.Label
+								</a>
+							}
+						}
+					</div>
+				}
+			</div>
+		</details>
+	}
+	@foreach (IRenderer renderer in Model.Results)
 	{
 		<partial name="Renderer" model="renderer"/>
+	}
+</div>
+<div class="next-page">
+	@if (Context.Request.Query.ContainsKey("continuation"))
+	{
+		<a href="/results?search_query=@Model.Query">First Page</a>
+	}
+	else
+	{
+		<span></span>
+	}
+	<span>•</span>
+	@if (Model.Continuation is not null)
+	{
+		<a href="/results?search_query=@Model.Query&continuation=@Model.Continuation">Next Page</a>
+	}
+	else
+	{
+		<span></span>
 	}
 </div>

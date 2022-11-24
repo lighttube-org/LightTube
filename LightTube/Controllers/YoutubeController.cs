@@ -85,8 +85,17 @@ public class YoutubeController : Controller
 	[Route("/results")]
 	public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null)
 	{
-		InnerTubeSearchResults search =
-			await _youtube.SearchAsync(search_query, filter, HttpContext.GetLanguage(), HttpContext.GetRegion());
-		return View(new SearchContext(search_query, filter, search));
+		if (continuation is null)
+		{
+			InnerTubeSearchResults search =
+				await _youtube.SearchAsync(search_query, filter, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			return View(new SearchContext(search_query, filter, search));
+		}
+		else
+		{
+			InnerTubeContinuationResponse search =
+				await _youtube.ContinueSearchAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			return View(new SearchContext(search_query, filter, search));
+		}
 	}
 }
