@@ -13,7 +13,7 @@
 			<div class="interaction-buttons">
 				<div class="interaction-button">
 					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-up"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up"/>
 					</svg>
 					<div class="interaction-button__text">
 						@Model.Video.LikeCount
@@ -22,7 +22,7 @@
 				<vr></vr>
 				<div class="interaction-button">
 					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-down"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-down"/>
 					</svg>
 					<div class="interaction-button__text">
 						@(Model.Dislikes == -1 ? "Dislike" : Model.Dislikes.ToKMB())
@@ -32,7 +32,7 @@
 			<div class="interaction-buttons">
 				<div class="interaction-button">
 					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#folder-plus"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
 					</svg>
 					<div class="interaction-button__text">
 						Save
@@ -42,7 +42,7 @@
 			<div class="interaction-buttons">
 				<a class="interaction-button" href="/download/@Model.Video.Id">
 					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#download"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
 					</svg>
 					<div class="interaction-button__text">
 						Download
@@ -52,7 +52,7 @@
 			<div class="interaction-buttons">
 				<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)">
 					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#youtube"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#youtube"/>
 					</svg>
 				</a>
 			</div>

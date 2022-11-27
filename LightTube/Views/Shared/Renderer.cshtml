@@ -29,7 +29,7 @@
 						@foreach (Badge channelBadge in video.Channel.Badges)
 						{
 							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
-								<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+								<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
 							</svg>
 						}
 					</div>
@@ -61,7 +61,7 @@
 					@channel.Title
 					<svg class="bi" width="12" height="12" fill="currentColor">
 
-						<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
 					</svg>
 				</a>
 				<div class="info__more">
@@ -87,7 +87,7 @@
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#list"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#list"/>
 					</svg>
 				</div>
 			</a>
@@ -101,7 +101,7 @@
 							@playlist.Channel.Title
 						</a>
 						<svg class="bi" width="12" height="12" fill="currentColor">
-							<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+							<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
 						</svg>
 					</div>
 					<div>
@@ -123,7 +123,7 @@
 				<img src="@radio.Thumbnails.Last().Url" title="@radio.Title">
 				<div class="thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#broadcast"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#broadcast"/>
 					</svg>
 				</div>
 			</a>
@@ -166,7 +166,7 @@
 							@foreach (Badge channelBadge in video.Channel.Badges)
 							{
 								<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
-									<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+									<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
 								</svg>
 							}
 						</div>
@@ -230,7 +230,7 @@
 						@foreach (Badge channelBadge in video.Channel.Badges)
 						{
 							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
-								<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+								<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
 							</svg>
 						}
 					</div>
@@ -251,7 +251,7 @@
 				<div class="compact-thumbnail__playlist__overlay">
 					<span>@playlist.VideoCountText.Split(" ")[0]</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#list"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#list"/>
 					</svg>
 				</div>
 			</a>
@@ -267,7 +267,7 @@
 						@foreach (Badge channelBadge in playlist.Channel.Badges)
 						{
 							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
-								<use xlink:href="svg/bootstrap-icons.svg#check-circle-fill"/>
+								<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
 							</svg>
 						}
 					</div>
@@ -281,7 +281,7 @@
 				<img src="@radio.Thumbnails.Last().Url" alt="@radio.Title">
 				<div class="compact-thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#broadcast"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#broadcast"/>
 					</svg>
 				</div>
 			</div>
@@ -332,7 +332,7 @@
 					@if (comment.Pinned)
 					{
 						<svg class="bi" width="12" height="12" fill="currentColor" title="Pinned">
-							<use xlink:href="svg/bootstrap-icons.svg#pin-angle-fill"/>
+							<use xlink:href="/svg/bootstrap-icons.svg#pin-angle-fill"/>
 						</svg>
 					}
 					<a href="/channel/@comment.Owner.Id" class="comment__author ml-1 title" title="@comment.Owner.Title">
@@ -347,7 +347,7 @@
 				</div>
 				<div class="comment__buttons">
 					<svg class="bi" width="20" height="20" fill="currentColor">
-						<use xlink:href="svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
+						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
 					</svg>
 					@comment.LikeCount
 					@if (Context.Request.Query.TryGetValue("v", out StringValues v)){
