@@ -1,0 +1,53 @@
+﻿@using InnerTube
+@using InnerTube.Renderers
+@model ChannelContext
+
+<div class="channel-container">
+	@if (Model.Channel?.Header != null)
+	{
+		<div class="channel-banner">
+			<img class="channel-banner__img" src="@Model.Channel.Header.Banner.Last().Url" alt="Channel Banner">
+		</div>
+		<div class="channel-info">
+			<img class="channel-info__avatar" src="@Model.Channel.Metadata.Avatar.Last().Url" alt="@Model.Channel.Metadata.Title">
+			<div class="channel-info__info">
+				<span class="channel-info__name ml-1 title">@Model.Channel.Metadata.Title</span>
+				<!--span class="channel-info__username">TODO</span-->
+				<span class="channel-info__subs">@Model.Channel.Header?.SubscriberCountText</span>
+			</div>
+			<div class="flex-divider"></div>
+			<div class="channel-info__buttons">
+				@if (true)
+				{
+					<a class="btn-subscribe" href="/channel/@Model.Channel.Metadata.Id/subscribe" target="_blank">
+						<span class="text">Subscribe</span>
+					</a>
+				}
+				else
+				{
+					<a class="btn-subscribed" href="/channel/@Model.Channel.Metadata.Id/unsubscribe" target="_blank">
+						<span class="text">Subscribed</span>
+					</a>
+				}
+			</div>
+		</div>
+	}
+	<div class="channel-tabs">
+		<div class="channel-tabs__container">
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Home, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Videos, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Shorts, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Live, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Playlists, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Community, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.Channels, Model.Id)"/>
+			<partial name="ChannelTabItem" model="@(ChannelTabs.About, Model.Id)"/>
+		</div>
+	</div>
+	<div class="channel-content">
+		@foreach (IRenderer renderer in Model.Content)
+		{
+			<partial name="Renderer" model="renderer"/>
+		}
+	</div>
+</div>

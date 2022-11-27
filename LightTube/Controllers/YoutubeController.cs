@@ -98,4 +98,25 @@ public class YoutubeController : Controller
 			return View(new SearchContext(search_query, filter, search));
 		}
 	}
+
+	[Route("/channel/{id}")]
+	public async Task<IActionResult> Channel(string id, string? continuation = null) =>
+		await Channel(id, ChannelTabs.Home, continuation);
+
+	[Route("/channel/{id}/{tab}")]
+	public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home, string? continuation = null)
+	{
+		if (continuation is null)
+		{
+			InnerTubeChannelResponse channel =
+				await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			return View(new ChannelContext(tab, channel, id));
+		}
+		else
+		{
+			InnerTubeContinuationResponse channel =
+				await _youtube.ContinueChannelAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			return View(new ChannelContext(tab, channel, id));
+		}
+	}
 }

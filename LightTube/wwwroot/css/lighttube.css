@@ -25,9 +25,9 @@ html:root {
 	/* Button colors */
 	--btn-hover-color-blue: #def1ff;
 
-	--chip-background: rgb(0,0,0,0.05);
-	--chip-background-hover: rgb(0,0,0,0.10);
-	--chip-background-active: rgb(0,0,0,0.15);
+	--chip-background: rgb(0, 0, 0, 0.05);
+	--chip-background-hover: rgb(0, 0, 0, 0.10);
+	--chip-background-active: rgb(0, 0, 0, 0.15);
 
 	--playlist-header-background: #fff;
 	--playlist-background: #f9f9f9;
@@ -118,7 +118,7 @@ svg {
 
 .vr, vr {
 	margin-left: 8px;
-	margin-right:8px;
+	margin-right: 8px;
 	height: 100%;
 	width: 0;
 	border: 1px solid var(--border-color);
@@ -340,6 +340,7 @@ body.no-guide .guide {
 		display: none;
 	}
 }
+
 /* Logo */
 
 .logo {
@@ -852,4 +853,94 @@ body.no-guide .guide {
 	padding: 0.75rem 2rem;
 	color: var(--text-primary);
 	text-decoration: none;
+}
+
+/* Channel Page */
+
+.channel-banner {
+	width: 100%;
+}
+
+.channel-banner__img {
+	width: 100%;
+}
+
+.channel-info {
+	max-width: 1200px;
+	margin: 16px auto 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 24px;
+}
+
+@media screen and (max-width: 700px) {
+	.channel-info {
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+}
+
+.channel-info__avatar {
+	width: 80px;
+	height: 80px;
+	border-radius: 40px;
+}
+
+.channel-info__info {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.channel-info__info > * {
+	font-size: 1rem;
+}
+
+.channel-info__name {
+	font-size: 1.5rem;
+	font-weight: 450;
+}
+
+.channel-tabs {
+	width: 100%;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.channel-tabs__container {
+	max-width: 1200px;
+	margin: auto;
+	font-size: 1rem;
+	text-transform: uppercase;
+	display: flex;
+}
+
+@media screen and (max-width: 1000px) {
+	.channel-tabs__container {
+		overflow-x: scroll;
+	}
+}
+
+.channel-tabs__item {
+	color: var(--text-secondary);
+	text-decoration: none;
+	font-weight: 500;
+	line-height: 48px;
+	height: 48px;
+	display: inline-block;
+	padding: 0 32px;
+}
+
+.channel-tabs__item:hover {
+	color: var(--text-primary);
+}
+
+.channel-tabs__item.active {
+	color: var(--text-primary);
+	border-bottom: 3px solid var(--text-primary);
+}
+
+.channel-content {
+	max-width: 1200px;
+	margin: auto;
 }
