@@ -9,6 +9,7 @@ public class ChannelContext : BaseContext
 	public InnerTubeChannelResponse? Channel;
 	public IEnumerable<IRenderer> Content;
 	public string Id;
+	public string? Continuation;
 
 	public ChannelContext(ChannelTabs tab, InnerTubeChannelResponse channel, string id)
 	{
@@ -16,6 +17,8 @@ public class ChannelContext : BaseContext
 		CurrentTab = tab;
 		Channel = channel;
 		Content = channel.Contents;
+		Continuation =
+			(channel.Contents.FirstOrDefault(x => x is ContinuationItemRenderer) as ContinuationItemRenderer)?.Token;
 	}
 
 	public ChannelContext(ChannelTabs tab, InnerTubeContinuationResponse continuation, string id)
@@ -23,5 +26,6 @@ public class ChannelContext : BaseContext
 		Id = id;
 		CurrentTab = tab;
 		Content = continuation.Contents;
+		Continuation = continuation.Continuation;
 	}
 }

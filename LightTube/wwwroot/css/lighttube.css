@@ -803,7 +803,7 @@ body.no-guide .guide {
 /* Search Page */
 
 .search-container {
-	margin: auto;
+	margin: 8px auto auto !important;
 	max-width: 1096px;
 	display: flex;
 	flex-direction: column;
@@ -943,4 +943,11 @@ body.no-guide .guide {
 .channel-content {
 	max-width: 1200px;
 	margin: auto;
+}
+
+.reel-grid {
+	display: flex;
+	flex-wrap: wrap;
+	row-gap: 16px;
+	column-gap: 4px;
 }

@@ -299,4 +299,14 @@ public static class Utils
 		string str = ts.ToString();
 		return str.StartsWith("00:") ? str[3..] : str;
 	}
+
+	public static string GetContinuationUrl(string currentPath, string contToken)
+	{
+		string[] parts = currentPath.Split("?");
+		NameValueCollection query = parts.Length > 1
+			? HttpUtility.ParseQueryString(parts[1])
+			: new NameValueCollection();
+		query.Set("continuation", contToken);
+		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
+	}
 }

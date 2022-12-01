@@ -1,5 +1,6 @@
 ﻿@using InnerTube
 @using InnerTube.Renderers
+@using Utils = LightTube.Utils
 @model ChannelContext
 
 <div class="channel-container">
@@ -44,10 +45,45 @@
 			<partial name="ChannelTabItem" model="@(ChannelTabs.About, Model.Id)"/>
 		</div>
 	</div>
-	<div class="channel-content">
-		@foreach (IRenderer renderer in Model.Content)
+	@switch (Model.CurrentTab)
+	{
+		case ChannelTabs.Videos or ChannelTabs.Live or ChannelTabs.Community:
 		{
-			<partial name="Renderer" model="renderer"/>
+			<div class="channel-content search-container">
+				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				{
+					<partial name="Renderer" model="@renderer"/>
+				}
+			</div>
+			break;
 		}
-	</div>
+		case ChannelTabs.Shorts:
+		{
+			<div class="channel-content reel-grid">
+				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				{
+					<partial name="Renderer" model="@renderer"/>
+				}
+			</div>
+			break;
+		}
+		default:
+		{
+			<div class="channel-content">
+				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				{
+					<partial name="Renderer" model="@renderer"/>
+				}
+			</div>
+			break;
+		}
+	}
 </div>
+@if (Model.Continuation is not null)
+{
+	<div class="next-page">
+		<span></span>
+		<span>•</span>
+		<a href="@Utils.GetContinuationUrl(Context.Request.Path.ToString(), Model.Continuation)">Next Page</a>
+	</div>
+}
