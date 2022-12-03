@@ -140,4 +140,7 @@ public class YoutubeController : Controller
 			return View(new PlaylistContext(playlist, continuationRes));
 		}
 	}
+
+	[Route("/shorts/{v}")]
+	public IActionResult Shorts(string v) => RedirectPermanent("/watch?v={v}");
 }
