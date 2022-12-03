@@ -656,6 +656,38 @@
 			}
 		</div>
 		break;
+	case PlaylistVideoRenderer video:
+		<div class="renderer-playlistvideorenderer">
+			<div class="playlist-item-index">
+				@video.Index
+			</div>
+			@{
+				Context.Request.Query.TryGetValue("list", out StringValues l);
+			}
+			<a href="/watch?v=@video.Id&list=@l" class="compact-thumbnail">
+				<img src="@video.Thumbnails.Last().Url" alt="@video.Title"/>
+				<div class="compact-thumbnail__duration__container">
+					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+				</div>
+			</a>
+			<div class="info">
+				<a href="/watch?v=@video.Id&list=@l" title="@video.Title" class="ml-1 title">@video.Title</a>
+				<div class="ml-2">
+					<a href="/channel/@video.Channel.Id" title="@video.Channel.Title">@video.Channel.Title</a>
+				</div>
+			</div>
+			<div class="flex-divider"></div>
+			<div class="icon-button-container">
+				@if (false) {
+					<a href="#" class="icon-button">
+						<svg class="icon" width="20" height="20" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#trash"/>
+						</svg>
+					</a>
+				}
+			</div>
+		</div>
+		break;
 	case UnknownRenderer:
 		<div class="renderer-null">
 			Unknown renderer type: @Model.Type

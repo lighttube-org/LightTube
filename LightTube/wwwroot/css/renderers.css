@@ -968,3 +968,24 @@
     height: 580px;
     flex-shrink: 0;
 }
+
+/* Playlist video item */
+
+.renderer-playlistvideorenderer {
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: row;
+    column-gap: 8px;
+}
+
+.playlist-item-index {
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.renderer-playlistvideorenderer .info a:not(.title) {
+    color: var(--text-secondary);
+    text-decoration: none;
+}

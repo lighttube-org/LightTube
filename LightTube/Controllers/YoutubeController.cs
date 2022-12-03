@@ -32,6 +32,7 @@ public class YoutubeController : Controller
 			player = null;
 			e = ex;
 		}
+
 		InnerTubeNextResponse video =
 			await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
 		if (player is null || e is not null)
@@ -55,6 +56,7 @@ public class YoutubeController : Controller
 			player = null;
 			e = ex;
 		}
+
 		InnerTubeNextResponse video =
 			await _youtube.GetVideoAsync(v, list, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
 		InnerTubeContinuationResponse? comments = null;
@@ -70,13 +72,15 @@ public class YoutubeController : Controller
 			HttpResponseMessage rydResponse =
 				await _client.GetAsync("https://returnyoutubedislikeapi.com/votes?videoId=" + v);
 			Dictionary<string, JsonElement> rydJson =
-				JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(await rydResponse.Content.ReadAsStringAsync())!;
+				JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
+					await rydResponse.Content.ReadAsStringAsync())!;
 			dislikes = rydJson["dislikes"].GetInt32();
 		}
 		catch
 		{
 			dislikes = -1;
 		}
+
 		if (player is null || e is not null)
 			return View(new WatchContext(e ?? new Exception("player is null"), video, comments, dislikes, HttpContext));
 		return View(new WatchContext(player, video, comments, compatibility, dislikes, HttpContext));
@@ -117,6 +121,23 @@ public class YoutubeController : Controller
 			InnerTubeContinuationResponse channel =
 				await _youtube.ContinueChannelAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
 			return View(new ChannelContext(tab, channel, id));
+		}
+	}
+
+	[Route("/playlist")]
+	public async Task<IActionResult> Playlist(string list, string? continuation = null)
+	{
+		InnerTubePlaylist playlist =
+			await _youtube.GetPlaylistAsync(list, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
+		if (continuation is null)
+		{
+			return View(new PlaylistContext(playlist));
+		}
+		else
+		{
+			InnerTubeContinuationResponse continuationRes =
+				await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			return View(new PlaylistContext(playlist, continuationRes));
 		}
 	}
 }

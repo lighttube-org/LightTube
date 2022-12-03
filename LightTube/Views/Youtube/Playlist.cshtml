@@ -1,0 +1,48 @@
+﻿@using InnerTube.Renderers
+@model PlaylistContext
+
+<div class="playlist-page">
+	<div class="playlist-page-info">
+		<div class="playlist-page-thumbnail">
+			<img src="@Model.Playlist.Sidebar.Thumbnails.Last().Url" alt="@Model.Playlist.Sidebar.Title">
+		</div>
+		<h1 class="ml-2 title" title="@Model.Playlist.Sidebar.Title">@Model.Playlist.Sidebar.Title</h1>
+		<a class="playlist-page-channel" href="/channel/@Model.Playlist.Sidebar.Channel.Id" title="@Model.Playlist.Sidebar.Channel.Title">@Model.Playlist.Sidebar.Channel.Title</a>
+		<div class="playlist-page-info-data">
+			@Model.Playlist.Sidebar.ViewCountText&nbsp;&nbsp;@Model.Playlist.Sidebar.LastUpdated
+		</div>
+		@if (false)
+		{
+			<div class="playlist-page-buttons">
+				<a href="#" class="icon-button" title="Edit">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#pencil"/>
+					</svg>
+				</a>
+				<a href="#" class="icon-button" title="Delete">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#trash"/>
+					</svg>
+				</a>
+			</div>
+		}
+	</div>
+	<div class="playlist-page-items">
+		@foreach (IRenderer renderer in Model.Items)
+		{
+			<partial name="Renderer" model="renderer"/>
+		}
+	</div>
+</div>
+<div class="next-page">
+	<span></span>
+	<span>•</span>
+	@if (Model.Continuation is not null)
+	{
+		<a href="@Utils.GetContinuationUrl(Context.Request.Path, Model.Continuation)">Next Page</a>
+	}
+	else
+	{
+		<span></span>
+	}
+</div>
