@@ -1,6 +1,8 @@
 ﻿using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Xml;
@@ -29,8 +31,8 @@ public static class Utils
 			DateTime buildTime = DateTime.Today;
 			_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day}";
 #else
-				_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
-					.FileVersion?[2..];
+			_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
+				.FileVersion?[2..];
 #endif
 			if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
 				_version += " (dev)";
