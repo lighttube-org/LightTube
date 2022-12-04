@@ -15,6 +15,15 @@
     text-decoration: none;
 }
 
+@media screen and (max-width: 700px) {
+    .compact-thumbnail {
+        min-width: initial;
+        min-height: initial;
+        max-width: 100%;
+        max-height: initial;
+    }
+}
+
 .compact-thumbnail > * {
     z-index: 1;
 }
@@ -256,6 +265,7 @@
     background-color: var(--chip-background);
     padding: 3px 4px;
     border-radius: 2px;
+    margin-right: 4px;
 }
 
 /* Unknown Renderer */
@@ -536,6 +546,7 @@
 .renderer-radiorenderer .info__channel > img {
     width: 28px;
     height: 28px;
+    border-radius: 14px;
 }
 
 .renderer-childvideorenderer {
