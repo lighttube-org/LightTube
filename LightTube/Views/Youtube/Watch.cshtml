@@ -82,10 +82,7 @@
 			<summary>
 				@Model.Video.ViewCount • @Model.Video.DateText • Click to toggle description
 			</summary>
-			@foreach (string line in Model.Video.Description.Split("\n"))
-			{
-				@:@line<br>
-			}
+			@Html.Raw(Model.Video.Description)
 		</details>
 	</div>
 	<div class="comments-container">

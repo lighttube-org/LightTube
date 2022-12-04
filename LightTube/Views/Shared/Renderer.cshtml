@@ -38,10 +38,7 @@
 						</div>
 					}
 					<div>
-						@foreach (string line in video.Description.Split("\n"))
-						{
-							@:@line<br>
-						}
+						@Html.Raw(video.Description)
 					</div>
 					<div>
 						@foreach (Badge videoBadge in video.Badges)
@@ -371,7 +368,7 @@
 					</span>
 				</div>
 				<div class="comment__content">
-					@Html.Raw(comment.Content.Replace("\n", "<br>"))
+					@Html.Raw(comment.Content)
 				</div>
 				<div class="comment__buttons">
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -393,10 +390,7 @@
 			<div class="channel-about-description">
 				<h2 class="ml-1 title">Description</h2>
 				<p>
-					@foreach (string line in about.Description.Split("\n"))
-					{
-						@:@line<br>
-					}
+					@Html.Raw(about.Description)
 				</p>
 			</div>
 			<div class="channel-about-stats">
@@ -569,7 +563,7 @@
 					@video.ViewCount • @video.Published
 				</div>
 				<div class="promotedvideo-description">
-					@Html.Raw(video.Description.Replace("\n", "<br>"))
+					@Html.Raw(video.Description)
 				</div>
 			</div>
 		</div>
