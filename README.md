@@ -18,15 +18,15 @@
 
 | Page | Light | Dark |
 | :--- | :---: | :--: |
-| Search | ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/desktop/light/search.png)| ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/desktop/dark/search.png) |
-| Video | ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/desktop/light/video.png)| ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/desktop/dark/video.png) |
+| Search | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/light/search.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/dark/search.png) |
+| Video | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/light/video.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/dark/video.png) |
 
 ### Mobile
 
 | Page | Light | Dark |
 | :--- | :---: | :--: |
-| Search | ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/mobile/light/search.png)| ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/mobile/dark/search.png) |
-| Video | ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/mobile/light/video.png)| ![image](https://github.com/kuylar/lighttube/raw/master/screenshots/mobile/dark/video.png) |
+| Search | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/light/search.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/dark/search.png) |
+| Video | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/light/video.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/dark/video.png) |
 
 ---
 
