@@ -1,0 +1,7 @@
+﻿/**
+ * videojs-vtt-thumbnails
+ * @version 0.0.13
+ * @copyright 2022 Chris Boustead <chris@forgemotion.com>
+ * @license MIT
+ */
+.video-js.vjs-vtt-thumbnails{display:block}.video-js .vjs-vtt-thumbnail-display{position:absolute;transition:opacity .2s;bottom:72px;pointer-events:none;box-shadow:0 0 7px rgba(0,0,0,.6)}

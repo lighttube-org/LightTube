@@ -12,7 +12,11 @@ const opts = {
 			enableModifiersForNumbers: false,
 			enableVolumeScroll: false,
 		},
-		endscreen: endscreenData
+		endscreen: endscreenData,
+		vttThumbnails: {
+			src: `/proxy/storyboard/${videoId}.vtt`,
+			showTimestamp: true
+		}
 	},
 	sources: []
 };

@@ -414,4 +414,49 @@ public class ProxyController : Controller
 			await Response.StartAsync();
 		}
 	}
+
+	[Route("storyboard/{videoId}.vtt")]
+	public async Task<IActionResult> VttThumbnailProxy(string videoId)
+	{
+		try
+		{
+			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
+			if (!player.Storyboard.Levels.Any())
+			{
+				Response.StatusCode = (int)HttpStatusCode.NotFound;
+				return File(new MemoryStream(Encoding.UTF8.GetBytes("No usable storyboard found.")), "text/plain");
+			}
+
+			string url = player.Storyboard.Levels[0].ToString();
+			TimeSpan duration = player.Details.Length;
+			StringBuilder manifest = new();
+			double timeBetween = duration.TotalMilliseconds / 100;
+
+			manifest.AppendLine("WEBVTT")
+				.AppendLine();
+
+			for (double ms = 0, i = 0; ms < duration.TotalMilliseconds; ms += timeBetween, i++)
+			{
+				TimeSpan start = TimeSpan.FromMilliseconds(ms);
+				TimeSpan end = TimeSpan.FromMilliseconds(ms + timeBetween);
+				manifest
+					.AppendLine($"{start:hh\\:mm\\:ss\\.fff} --> {end:hh\\:mm\\:ss\\.fff}")
+					.AppendLine($"{Request.Scheme}://{Request.Host}/proxy/storyboard/{videoId}#xywh={i % 10 * 48},{Math.Floor(i / 10) * 27},48,27")
+					.AppendLine();
+			}
+
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest.ToString())), "text/vtt");
+		}
+		catch (InnerTubeException e)
+		{
+			Response.StatusCode = (int)HttpStatusCode.BadGateway;
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(e.ToString())), "text/plain");
+		}
+		catch (Exception e)
+		{
+			if (!Response.HasStarted)
+				Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+			return File(new MemoryStream(Encoding.UTF8.GetBytes(e.ToString())), "text/plain");
+		}
+	}
 }

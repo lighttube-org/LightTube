@@ -31,13 +31,15 @@ public class WatchContext : BaseContext
 
 		AddStylesheet("/lib/videojs/video-js.min.css");
 		AddStylesheet("/lib/videojs-endscreen/videojs-endscreen.css");
-		AddStylesheet("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.css");
+		AddStylesheet("/lib/videojs-vtt-thumbnails/videojs-vtt-thumbnails.min.css");
 		AddStylesheet("/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.css");
+		AddStylesheet("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.css");
 		AddStylesheet("/css/vjs-skin.css");
 
 		AddScript("/lib/videojs/video.min.js");
 		AddScript("/lib/videojs-hotkeys/videojs.hotkeys.min.js");
 		AddScript("/lib/videojs-endscreen/videojs-endscreen.js");
+		AddScript("/lib/videojs-vtt-thumbnails/videojs-vtt-thumbnails.min.js");
 		AddScript("/lib/videojs-contrib-quality-levels/videojs-contrib-quality-levels.min.js");
 		AddScript("/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.min.js");
 		AddScript("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.min.js");
