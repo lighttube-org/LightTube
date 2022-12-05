@@ -9,11 +9,11 @@ public class WatchContext : BaseContext
 	public InnerTubeContinuationResponse? Comments;
 	public int Dislikes;
 
-	public WatchContext(InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse,
+	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes, HttpContext context) : base()
+		bool compatibility, int dislikes) : base(context)
 	{
-		Player = new PlayerContext(innerTubePlayer, "embed", compatibility);
+		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility);
 		Video = innerTubeNextResponse;
 		Comments = comments;
 		Dislikes = dislikes;
@@ -46,10 +46,10 @@ public class WatchContext : BaseContext
 		AddScript("/js/player.js");
 	}
 
-	public WatchContext(Exception e, InnerTubeNextResponse innerTubeNextResponse,
-		InnerTubeContinuationResponse? comments, int dislikes, HttpContext context)
+	public WatchContext(HttpContext context, Exception e, InnerTubeNextResponse innerTubeNextResponse,
+		InnerTubeContinuationResponse? comments, int dislikes) : base(context)
 	{
-		Player = new PlayerContext(e);
+		Player = new PlayerContext(context, e);
 		Video = innerTubeNextResponse;
 		Comments = comments;
 		Dislikes = dislikes;

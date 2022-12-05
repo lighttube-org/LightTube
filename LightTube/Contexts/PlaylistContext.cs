@@ -9,14 +9,14 @@ public class PlaylistContext : BaseContext
 	public IEnumerable<IRenderer> Items;
 	public string? Continuation;
 
-	public PlaylistContext(InnerTubePlaylist playlist)
+	public PlaylistContext(HttpContext context, InnerTubePlaylist playlist) : base(context)
 	{
 		Playlist = playlist;
 		Items = playlist.Videos;
 		Continuation = playlist.Continuation;
 	}
 
-	public PlaylistContext(InnerTubePlaylist playlist, InnerTubeContinuationResponse continuation)
+	public PlaylistContext(HttpContext context, InnerTubePlaylist playlist, InnerTubeContinuationResponse continuation) : base(context)
 	{
 		Playlist = playlist;
 		Items = continuation.Contents;

@@ -26,7 +26,7 @@
 	</a>
 	<div class="flex-divider hide-on-mobile"></div>
 	<form action="/results" class="search-bar hide-on-mobile">
-		<input class="search-bar__input" type="text" placeholder="Search" name="search_query" value="">
+		<input class="search-bar__input" type="text" placeholder="Search" name="search_query" value="@Model.GetSearchBoxInput()">
 		<button class="search-bar__submit" type="submit">
 			<svg class="icon" width="20" height="20" fill="currentColor">
 				<use xlink:href="/svg/bootstrap-icons.svg#search"/>

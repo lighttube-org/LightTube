@@ -11,7 +11,7 @@ public class ChannelContext : BaseContext
 	public string Id;
 	public string? Continuation;
 
-	public ChannelContext(ChannelTabs tab, InnerTubeChannelResponse channel, string id)
+	public ChannelContext(HttpContext context, ChannelTabs tab, InnerTubeChannelResponse channel, string id) : base(context)
 	{
 		Id = id;
 		CurrentTab = tab;
@@ -21,7 +21,7 @@ public class ChannelContext : BaseContext
 			(channel.Contents.FirstOrDefault(x => x is ContinuationItemRenderer) as ContinuationItemRenderer)?.Token;
 	}
 
-	public ChannelContext(ChannelTabs tab, InnerTubeContinuationResponse continuation, string id)
+	public ChannelContext(HttpContext context, ChannelTabs tab, InnerTubeContinuationResponse continuation, string id) : base(context)
 	{
 		Id = id;
 		CurrentTab = tab;

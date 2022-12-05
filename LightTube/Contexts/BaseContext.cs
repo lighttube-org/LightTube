@@ -9,9 +9,11 @@ public class BaseContext
 	public List<IHtmlContent> HeadTags = new();
 	public List<IHtmlContent> EndTags = new();
 	public bool GuideHidden = false;
+	public HttpContext Context;
 
-	public BaseContext()
+	public BaseContext(HttpContext context)
 	{
+		Context = context;
 		AddMeta("og:site_name", "lighttube");
 		AddMeta("og:type", "website");
 		AddMeta("theme-color", "#AA0000");
@@ -38,5 +40,11 @@ public class BaseContext
 		stylesheet.Attributes.Add("property", property);
 		stylesheet.Attributes.Add("content", content);
 		HeadTags.Add(stylesheet);
+	}
+
+	public string? GetSearchBoxInput()
+	{
+		if (this is SearchContext s) return s.Query;
+		return Context.Request.Cookies.TryGetValue("lastSearch", out string? q) ? q : null;
 	}
 }

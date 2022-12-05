@@ -16,7 +16,7 @@ public class HomeController : Controller
 
 	public IActionResult Index()
 	{
-		return View(new BaseContext());
+		return View(new BaseContext(HttpContext));
 	}
 
 	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

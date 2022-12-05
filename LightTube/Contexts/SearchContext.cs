@@ -11,7 +11,7 @@ public class SearchContext : BaseContext
 	public IEnumerable<IRenderer> Results;
 	public string? Continuation;
 
-	public SearchContext(string query, string? filter, InnerTubeSearchResults search)
+	public SearchContext(HttpContext context, string query, string? filter, InnerTubeSearchResults search) : base(context)
 	{
 		Query = query;
 		Filter = filter;
@@ -20,7 +20,7 @@ public class SearchContext : BaseContext
 		Continuation = Search.Continuation;
 	}
 
-	public SearchContext(string query, string? filter, InnerTubeContinuationResponse search)
+	public SearchContext(HttpContext context, string query, string? filter, InnerTubeContinuationResponse search) : base(context)
 	{
 		Query = query;
 		Filter = filter;

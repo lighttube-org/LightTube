@@ -14,7 +14,7 @@ public class PlayerContext : BaseContext
 	public bool UseEmbedUi = false;
 	public string? ClassName;
 
-	public PlayerContext(InnerTubePlayer innerTubePlayer, string className, bool compatibility)
+	public PlayerContext(HttpContext context, InnerTubePlayer innerTubePlayer, string className, bool compatibility) : base(context)
 	{
 		Player = innerTubePlayer;
 		ClassName = className;
@@ -24,7 +24,7 @@ public class PlayerContext : BaseContext
 																			// Formats
 	}
 
-	public PlayerContext(Exception e)
+	public PlayerContext(HttpContext context, Exception e) : base(context)
 	{
 		Exception = e;
 	}
