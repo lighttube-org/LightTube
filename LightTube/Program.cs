@@ -1,4 +1,5 @@
 using InnerTube;
+using LightTube;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -6,23 +7,12 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 
 // ReSharper disable NotResolvedInText
-InnerTubeAuthorization? auth = Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_TYPE")?.ToLower() switch
-{
-	"cookie" => InnerTubeAuthorization.SapisidAuthorization(
-		Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_SAPISID") ?? 
-		throw new ArgumentNullException("LIGHTTUBE_AUTH_SAPISID", "Authentication type set to 'cookie' but the 'LIGHTTUBE_AUTH_SAPISID' environment variable is not set."),
-		Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_PSID") ?? 
-		throw new ArgumentNullException("LIGHTTUBE_AUTH_PSID", "Authentication type set to 'cookie' but the 'LIGHTTUBE_AUTH_PSID' environment variable is not set.")),
-	"oauth2" => InnerTubeAuthorization.RefreshTokenAuthorization(
-		Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ?? 
-		throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN", "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set.")),
-	var _ => null
-};
+InnerTubeAuthorization? auth = Configuration.GetInnerTubeAuthorization();
 // ReSharper restore NotResolvedInText
 builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 {
 	Authorization = auth,
-	CacheSize = int.Parse(Environment.GetEnvironmentVariable("LIGHTTUBE_CACHE_SIZE") ?? "50"),
+	CacheSize = int.Parse(Configuration.GetVariable("LIGHTTUBE_CACHE_SIZE", "50")!),
 	CacheExpirationPollingInterval = default
 }));
 builder.Services.AddSingleton(new HttpClient());
