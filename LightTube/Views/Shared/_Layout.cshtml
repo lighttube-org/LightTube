@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Html
+@using System.Web
 @model BaseContext
 
 <!DOCTYPE html>
-<!--html lang="en" class="dark-mode"-->
-<html lang="en">
+<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
 <head>
 	<meta charset="UTF-8">
 	<title>LightTube</title>
@@ -66,12 +66,12 @@
 					Log Out
 				</div>
 				<hr>
-				<div class="dropdown__item">
+				<a href="/toggles/theme?url=@HttpUtility.UrlEncode(Context.Request.Path)" class="dropdown__item">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#moon"/>
 					</svg>
 					Toggle Theme
-				</div>
+				</a>
 				<div class="dropdown__item">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#gear"/>
@@ -102,12 +102,12 @@
 				</svg>
 			</label>
 			<div class="dropdown__menu" style="right:-100px">
-				<div class="dropdown__item">
+				<a href="/toggles/theme?url=@HttpUtility.UrlEncode(Context.Request.Path)" class="dropdown__item">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#moon"/>
 					</svg>
 					Toggle Theme
-				</div>
+				</a>
 				<div class="dropdown__item">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#gear"/>

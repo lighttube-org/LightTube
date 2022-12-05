@@ -47,4 +47,10 @@ public class BaseContext
 		if (this is SearchContext s) return s.Query;
 		return Context.Request.Cookies.TryGetValue("lastSearch", out string? q) ? q : null;
 	}
+
+	public bool IsDarkMode()
+	{
+		if (Context.Request.Cookies.TryGetValue("theme", out string? theme)) return theme == "dark";
+		return Configuration.GetVariable("LIGHTTUBE_DEFAULT_THEME", "light") == "dark";
+	}
 }

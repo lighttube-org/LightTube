@@ -454,6 +454,7 @@ body.no-guide .guide {
 	height: 40px;
 	column-gap: 16px;
 	color: var(--text-primary);
+	text-decoration: none;
 }
 
 .dropdown__item:hover {
