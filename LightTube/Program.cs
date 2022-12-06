@@ -1,14 +1,13 @@
 using InnerTube;
 using LightTube;
+using LightTube.Database;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 
-// ReSharper disable NotResolvedInText
 InnerTubeAuthorization? auth = Configuration.GetInnerTubeAuthorization();
-// ReSharper restore NotResolvedInText
 builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 {
 	Authorization = auth,
@@ -16,6 +15,9 @@ builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 	CacheExpirationPollingInterval = default
 }));
 builder.Services.AddSingleton(new HttpClient());
+
+Database.Init(Configuration.GetVariable("LIGHTTUBE_MONGODB_CONNSTR"));
+
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
