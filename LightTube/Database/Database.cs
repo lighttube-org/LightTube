@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using LightTube.Database.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -7,7 +8,9 @@ namespace LightTube.Database;
 
 public static class Database
 {
+	private static IMongoDatabase _database;
 	private static IMongoCollection<DatabaseUser> _userCollection;
+	private static IMongoCollection<DatabaseLogin> _tokensCollection;
 	private static IMongoCollection<DatabaseVideo> _videoCacheCollection;
 	private static IMongoCollection<DatabasePlaylist> _playlistCollection;
 	private static IMongoCollection<DatabaseChannel> _channelCacheCollection;
@@ -15,14 +18,15 @@ public static class Database
 	public static void Init(string connstr)
 	{
 		MongoClient client = new(connstr);
-		IMongoDatabase database = client.GetDatabase(Configuration.GetVariable("LIGHTTUBE_MONGODB_DATABASE", "lighttube"));
-		_userCollection = database.GetCollection<DatabaseUser>("users");
-		_videoCacheCollection = database.GetCollection<DatabaseVideo>("videoCache");
-		_playlistCollection = database.GetCollection<DatabasePlaylist>("playlists");
-		_channelCacheCollection = database.GetCollection<DatabaseChannel>("channelCache");
+		_database = client.GetDatabase(Configuration.GetVariable("LIGHTTUBE_MONGODB_DATABASE", "lighttube"));
+		_userCollection = _database.GetCollection<DatabaseUser>("users");
+		_tokensCollection = _database.GetCollection<DatabaseLogin>("tokens");
+		_videoCacheCollection = _database.GetCollection<DatabaseVideo>("videoCache");
+		_playlistCollection = _database.GetCollection<DatabasePlaylist>("playlists");
+		_channelCacheCollection = _database.GetCollection<DatabaseChannel>("channelCache");
 
 		RunMigrations();
-		ClearJunkData();
+		//ClearJunkData();
 	}
 
 	public static async void RunMigrations()
@@ -40,6 +44,23 @@ public static class Database
 				Console.WriteLine("Migrated user: " + (replaceAsync.UserID ?? "{!}" + replaceAsync.Email));
 			}
 		}
+
+		Console.WriteLine("Migrating tokens...");
+		IMongoCollection<BsonDocument> tokensCollection = _database.GetCollection<BsonDocument>("tokens");
+		IAsyncCursor<BsonDocument> unmigratedTokens = await tokensCollection.FindAsync(x => true);
+		while (await unmigratedTokens.MoveNextAsync())
+		{
+			foreach (BsonDocument token in unmigratedTokens.Current.Where(x => x.Contains("Identifier")))
+			{
+				token["_id"] = token["Identifier"];
+				token["UserID"] = token["Email"];
+				token.Remove("Identifier");
+				token.Remove("Email");
+				await tokensCollection.DeleteOneAsync(x => x["Token"] == token["Token"]);
+				await tokensCollection.InsertOneAsync(token);
+			}
+		} 
+		Console.WriteLine("Migrated tokens");
 	}
 
 	public static async void ClearJunkData()
@@ -51,6 +72,7 @@ public static class Database
 		int deletedChannels = 0;
 		int deletedVideos = 0;
 		int deletedPlaylists = 0;
+		int deletedTokens = 0;
 
 		IAsyncCursor<DatabaseUser> allUsers = await _userCollection.FindAsync(x => true);
 		while (await allUsers.MoveNextAsync())
@@ -104,6 +126,15 @@ public static class Database
 				if (sp.ElapsedMilliseconds % 5000 == 0)
 					Console.WriteLine($"Deleted {deletedVideos} videos from the cache, and still going on...");
 			}
+		}
+		Console.WriteLine($"Deleted {deletedVideos} videos from the cache");
+
+		IMongoQueryable<DatabaseLogin> tokens = _tokensCollection.AsQueryable();
+		foreach (DatabaseLogin login in tokens)
+		{
+			//todo: delete tokens older than x days
+			if (!users.Contains(login.UserID)) 
+				await _tokensCollection.DeleteOneAsync(x => x.Id == login.Id);
 		}
 		Console.WriteLine($"Deleted {deletedVideos} videos from the cache");
 		
