@@ -1,5 +1,6 @@
 using InnerTube;
 using LightTube;
+using LightTube.Chores;
 using LightTube.Database;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,8 @@ builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 }));
 builder.Services.AddSingleton(new HttpClient());
 
-Database.Init(Configuration.GetVariable("LIGHTTUBE_MONGODB_CONNSTR"));
+ChoreManager.RegisterChores();
+DatabaseManager.Init(Configuration.GetVariable("LIGHTTUBE_MONGODB_CONNSTR"));
 
 WebApplication app = builder.Build();
 
@@ -39,5 +41,4 @@ app.MapControllerRoute(
 	name: "default",
 	pattern: "{controller=Home}/{action=Index}/{id?}");
 
-//app.Run();
-await Task.Delay(-1);
+app.Run();
