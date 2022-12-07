@@ -12,7 +12,7 @@ public class Database
 	public static void Init(string connstr)
 	{
 		MongoClient client = new(connstr);
-		IMongoDatabase database = client.GetDatabase("lighttube");
+		IMongoDatabase database = client.GetDatabase(Configuration.GetVariable("LIGHTTUBE_MONGODB_DATABASE", "lighttube"));
 		_userCollection = database.GetCollection<DatabaseUser>("users");
 		_channelCacheCollection = database.GetCollection<DatabaseChannel>("channelCache");
 
