@@ -682,6 +682,11 @@
 			</div>
 		</div>
 		break;
+	case MessageRenderer message:
+		<div class="renderer-null messagerenderer-@message.Type">
+			@message.Message
+		</div>
+		break;
 	case UnknownRenderer:
 		<div class="renderer-null">
 			Unknown renderer type: @Model.Type
