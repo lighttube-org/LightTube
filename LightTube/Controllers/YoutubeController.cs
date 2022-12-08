@@ -104,6 +104,18 @@ public class YoutubeController : Controller
 		}
 	}
 
+	[Route("/c/{vanity}")]
+	public async Task<IActionResult> ChannelFromVanity(string vanity) {
+		string? id = await _youtube.GetChannelIdFromVanity(vanity);
+		return Redirect(id is null ? "/" : $"/channel/{id}");
+	}
+
+	[Route("/@{vanity}")]
+	public async Task<IActionResult> ChannelFromHandle(string vanity) {
+		string? id = await _youtube.GetChannelIdFromVanity("@" + vanity);
+		return Redirect(id is null ? "/" : $"/channel/{id}");
+	}
+
 	[Route("/channel/{id}")]
 	public async Task<IActionResult> Channel(string id, string? continuation = null) =>
 		await Channel(id, ChannelTabs.Home, continuation);
