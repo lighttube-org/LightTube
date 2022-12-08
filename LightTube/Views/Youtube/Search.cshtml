@@ -24,15 +24,15 @@
 						<hr>
 						@foreach (InnerTubeSearchResults.Options.Group.Filter filter in group.Filters)
 						{
-							@if (filter.Params is null)
+							@if (filter.Selected)
 							{
-								<a class="search-filter__item active">
+								<a href="/results?search_query=@Model.Query&filter=@filter.Params" class="search-filter__item active" title="@filter.Tooltip">
 									@filter.Label
 								</a>
 							}
 							else
 							{
-								<a href="/results?search_query=@Model.Query&filter=@filter.Params" class="search-filter__item">
+								<a href="/results?search_query=@Model.Query&filter=@filter.Params" class="search-filter__item" title="@filter.Tooltip">
 									@filter.Label
 								</a>
 							}
