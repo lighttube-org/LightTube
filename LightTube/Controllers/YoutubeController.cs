@@ -89,7 +89,8 @@ public class YoutubeController : Controller
 	[Route("/results")]
 	public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null)
 	{
-		Response.Cookies.Append("lastSearch", search_query);
+		if (!string.IsNullOrWhiteSpace(search_query))
+			Response.Cookies.Append("lastSearch", search_query);
 		if (continuation is null)
 		{
 			InnerTubeSearchResults search =
