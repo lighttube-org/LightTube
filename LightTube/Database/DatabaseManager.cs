@@ -12,6 +12,7 @@ public static class DatabaseManager
 	public static IMongoCollection<DatabaseVideo> VideoCacheCollection { get; private set; }
 	public static IMongoCollection<DatabasePlaylist> PlaylistCollection { get; private set; }
 	public static IMongoCollection<DatabaseChannel> ChannelCacheCollection { get; private set; }
+	public static UserManager Users { get; private set; }
 
 	public static void Init(string connstr)
 	{
@@ -22,6 +23,8 @@ public static class DatabaseManager
 		VideoCacheCollection = Database.GetCollection<DatabaseVideo>("videoCache");
 		PlaylistCollection = Database.GetCollection<DatabasePlaylist>("playlists");
 		ChannelCacheCollection = Database.GetCollection<DatabaseChannel>("channelCache");
+
+		Users = new UserManager(UserCollection, TokensCollection, PlaylistCollection);
 
 		ChoreManager.QueueChore("MigrateData");
 		ChoreManager.QueueChore("DatabaseCleanup");
