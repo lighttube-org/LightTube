@@ -35,14 +35,10 @@
 	}
 	<div class="channel-tabs">
 		<div class="channel-tabs__container">
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Home, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Videos, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Shorts, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Live, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Playlists, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Community, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.Channels, Model.Id)"/>
-			<partial name="ChannelTabItem" model="@(ChannelTabs.About, Model.Id)"/>
+			@foreach (ChannelTabs tab in Model.Tabs.Where(x => x != ChannelTabs.Search))
+			{
+				<partial name="ChannelTabItem" model="@(tab, Model.Id)"/>
+			}
 		</div>
 	</div>
 	@switch (Model.CurrentTab)
