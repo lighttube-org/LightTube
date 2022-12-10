@@ -7,6 +7,8 @@ using System.Text;
 using System.Web;
 using System.Xml;
 using InnerTube;
+using LightTube.Database;
+using LightTube.Database.Models;
 using Microsoft.Extensions.Primitives;
 
 namespace LightTube;
@@ -311,5 +313,13 @@ public static class Utils
 			: new NameValueCollection();
 		query.Set("continuation", contToken);
 		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
+	}
+
+	public static SubscriptionType GetSubscriptionType(this HttpContext context, string? channelId)
+	{
+		if (channelId is null) return SubscriptionType.NONE;
+		DatabaseUser? user = DatabaseManager.Users.GetUserFromToken(context.Request.Cookies["token"] ?? "").Result;
+		if (user is null) return SubscriptionType.NONE;
+		return user.Subscriptions.TryGetValue(channelId, out SubscriptionType type) ? type : SubscriptionType.NONE;
 	}
 }

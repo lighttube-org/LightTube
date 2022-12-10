@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using InnerTube;
 using LightTube.Contexts;
+using LightTube.Database;
+using LightTube.Database.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
@@ -106,13 +108,15 @@ public class YoutubeController : Controller
 	}
 
 	[Route("/c/{vanity}")]
-	public async Task<IActionResult> ChannelFromVanity(string vanity) {
+	public async Task<IActionResult> ChannelFromVanity(string vanity)
+	{
 		string? id = await _youtube.GetChannelIdFromVanity(vanity);
 		return Redirect(id is null ? "/" : $"/channel/{id}");
 	}
 
 	[Route("/@{vanity}")]
-	public async Task<IActionResult> ChannelFromHandle(string vanity) {
+	public async Task<IActionResult> ChannelFromHandle(string vanity)
+	{
 		string? id = await _youtube.GetChannelIdFromVanity("@" + vanity);
 		return Redirect(id is null ? "/" : $"/channel/{id}");
 	}
@@ -120,6 +124,28 @@ public class YoutubeController : Controller
 	[Route("/channel/{id}")]
 	public async Task<IActionResult> Channel(string id, string? continuation = null) =>
 		await Channel(id, ChannelTabs.Home, continuation);
+
+	[Route("/channel/{id}/subscription")]
+	[HttpGet]
+	public async Task<IActionResult> Subscription(string id)
+	{
+		InnerTubeChannelResponse channel =
+			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
+				HttpContext.GetRegion());
+		return View(new SubscriptionContext(HttpContext, channel));
+	}
+
+	[Route("/channel/{id}/subscription")]
+	[HttpPost]
+	public async Task<IActionResult> Subscription(string id, SubscriptionType type)
+	{
+		(string? _, SubscriptionType subscriptionType) =
+			await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, type);
+		InnerTubeChannelResponse channel =
+			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
+				HttpContext.GetRegion());
+		return View(new SubscriptionContext(HttpContext, channel, subscriptionType));
+	}
 
 	[Route("/channel/{id}/{tab}")]
 	public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home, string? continuation = null)

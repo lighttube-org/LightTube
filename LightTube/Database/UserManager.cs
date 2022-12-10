@@ -111,6 +111,8 @@ public class UserManager
 		else if (type != SubscriptionType.NONE) 
 			user.Subscriptions.Add(channelId, type);
 
+		await UserCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
+
 		return user.Subscriptions.ContainsKey(channelId)
 			? (channelId, user.Subscriptions[channelId])
 			: (channelId, SubscriptionType.NONE);

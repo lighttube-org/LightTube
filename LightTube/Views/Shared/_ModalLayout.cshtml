@@ -1,0 +1,48 @@
+﻿@model ModalContext
+
+<!DOCTYPE html>
+<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<head>
+	<meta charset="UTF-8">
+	<title>@Model.Title - LightTube</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/css/lighttube.css">
+	<link rel="stylesheet" href="/css/modal.css">
+	<link rel="stylesheet" href="/fonts/roboto/roboto.css">
+	<link rel="stylesheet" href="/css/renderers.css">
+</head>
+<body class="modal-container">
+<form class="modal-box" method="post">
+	<div class="modal-title">
+		@Model.Title
+	</div>
+	<div class="modal-content">
+		@RenderBody()
+	</div>
+	<div class="modal-buttons">
+		@foreach (ModalButton button in Model.Buttons)
+		{
+			switch (button.Target)
+			{
+				case "|":
+					<div class="flex-divider"></div>
+					break;
+				case "__submit":
+					<input type="submit" class="modal-button-@button.Type" value="@button.Label">
+					break;
+				case "__close":
+					<div class="modal-button-@button.Type" data-close>
+						@button.Label
+					</div>
+					break;
+				default:
+					<a class="modal-button-@button.Type" href="@button.Target">
+						@button.Label
+					</a>
+					break;
+			}
+		}
+	</div>
+</form>
+</body>
+</html>

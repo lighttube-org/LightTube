@@ -1,0 +1,138 @@
+﻿html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+@media screen and (min-width: 700px) {
+    .modal-box {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        width: 400px;
+        max-height: 75%;
+    }
+}
+
+@media screen and (max-width: 700px) {
+
+    .modal-box {
+        border-radius: 8px;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.modal-box {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    gap: 8px;
+}
+
+.modal-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+    flex-grow: 1;
+    padding: 0 16px;
+    max-width: calc(100% - 32px);
+}
+
+.avatar {
+    border-radius: 50%;
+    overflow: hidden;
+    width: 128px;
+    height: 128px;
+}
+
+label {
+    color: var(--text-primary);
+}
+
+.modal-content.center {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-content > p {
+    text-align: center;
+}
+
+.modal-title {
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    padding: 8px;
+    margin: 0;
+    font-weight: normal;
+}
+
+.modal-buttons {
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+}
+
+[class^="modal-button-"] {
+    font-weight: bold;
+    line-height: 36px;
+    font-size: 13px;
+    transition: background-color 100ms;
+    border-radius: 4px;
+}
+
+.modal-button-primary {
+    padding: 0 24px;
+    background-color: #1a73e8;
+    color: #fff;
+    border: none;
+}
+
+.modal-button-primary:hover {
+    background-color: #1b66c8;
+}
+
+.modal-button-primary:active {
+    background-color: #1c539c;
+}
+
+.modal-button-danger {
+    padding: 0 24px;
+    background-color: hsl(0, 82%, 51%);
+    color: #fff;
+    border: none;
+}
+
+.modal-button-danger:hover {
+    background-color: hsl(0, 76%, 45%);
+}
+
+.modal-button-danger:active {
+    background-color: hsl(0, 70%, 36%);
+}
+
+.modal-button-secondary {
+    padding: 0 8px;
+    text-decoration: none;
+    color: #1a73e8;
+}
+
+.modal-button-secondary:hover {
+    background-color: #f6fafe22;
+    color: #174ea6;
+}
+
+.modal-button-secondary:active {
+    background-color: #cadff9;
+}

@@ -70,18 +70,7 @@
 				</div>
 			</div>
 			<div class="subscribe-container">
-				@if (true)
-				{
-					<a class="btn-subscribe" href="/channel/@channel.Id/subscribe">
-						<span class="text">Subscribe</span>
-					</a>
-				}
-				else
-				{
-					<a class="btn-subscribed" href="/channel/@channel.Id/unsubscribe">
-						<span class="text">Subscribed</span>
-					</a>
-				}
+				<partial name="SubscribeButton" model="channel.Id"/>
 			</div>
 		</div>
 		break;
@@ -219,7 +208,7 @@
 						<partial name="Renderer" model="renderer"/>
 					}
 					<div class="shelf-expand-button">
-						+@(shelf.Items.Count() - shelf.CollapsedItemCount)) More
+						+@(shelf.Items.Count() - shelf.CollapsedItemCount) More
 					</div>
 				</summary>
 				@foreach (IRenderer renderer in shelf.Items.Skip(shelf.CollapsedItemCount))
@@ -525,20 +514,9 @@
         		<div>
         			@channel.SubscriberCountText
         		</div>
-        		<div>
-	                @if (true)
-					{
-						<a class="btn-subscribe" href="/channel/@channel.Id/subscribe">
-							<span class="text">Subscribe</span>
-						</a>
-					}
-					else
-					{
-						<a class="btn-subscribed" href="/channel/@channel.Id/unsubscribe">
-							<span class="text">Subscribed</span>
-						</a>
-					}
-				</div>
+	            <div>
+		            <partial name="SubscribeButton" model="channel.Id"/>
+	            </div>
         	</div>
         </div>
 		break;

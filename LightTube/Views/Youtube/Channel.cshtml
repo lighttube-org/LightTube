@@ -18,18 +18,7 @@
 			</div>
 			<div class="flex-divider"></div>
 			<div class="channel-info__buttons">
-				@if (true)
-				{
-					<a class="btn-subscribe" href="/channel/@Model.Channel.Metadata.Id/subscribe" target="_blank">
-						<span class="text">Subscribe</span>
-					</a>
-				}
-				else
-				{
-					<a class="btn-subscribed" href="/channel/@Model.Channel.Metadata.Id/unsubscribe" target="_blank">
-						<span class="text">Subscribed</span>
-					</a>
-				}
+				<partial name="SubscribeButton" model="Model.Id"/>
 			</div>
 		</div>
 	}

@@ -1,0 +1,36 @@
+﻿@using LightTube.Database.Models
+@model string
+@{
+	SubscriptionType type = Context.GetSubscriptionType(Model);
+}
+
+
+@switch (type)
+{
+	case SubscriptionType.NOTIFICATIONS_ON:
+		<a class="btn-subscribed" target="_blank" href="/channel/@Model/subscription">
+			<span class="text">Subscribed</span>
+		</a>
+		<a class="icon-button hide-on-desktop" target="_blank" href="/channel/@Model/subscription">
+			<svg class="bi" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#bell-fill"/>
+			</svg>
+		</a>
+		break;
+	case SubscriptionType.NOTIFICATIONS_OFF:
+		<a class="btn-subscribed" target="_blank" href="/channel/@Model/subscription">
+			<span class="text">Subscribed</span>
+		</a>
+		<a class="icon-button hide-on-desktop" target="_blank" href="/channel/@Model/subscription">
+			<svg class="bi" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#bell-slash-fill"/>
+			</svg>
+		</a>
+		break;
+	case SubscriptionType.NONE:
+	default:
+		<a class="btn-subscribe" target="_blank" href="/channel/@Model/subscription">
+			<span class="text">Subscribe</span>
+		</a>
+		break;
+}

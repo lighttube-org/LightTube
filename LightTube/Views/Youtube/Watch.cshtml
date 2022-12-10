@@ -65,18 +65,7 @@
 				<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
 				<span class="subs">@Model.Video.Channel.Subscribers</span>
 			</div>
-			@if (true)
-			{
-				<a class="btn-subscribe" href="/channel/@Model.Video.Channel.Id/subscribe" target="_blank">
-					<span class="text">Subscribe</span>
-				</a>
-			}
-			else
-			{
-				<a class="btn-subscribed" href="/channel/@Model.Video.Channel.Id/unsubscribe" target="_blank">
-					<span class="text">Subscribed</span>
-				</a>
-			}
+				<partial name="SubscribeButton" model="Model.Video.Channel.Id"/>
 		</div>
 		<details class="description">
 			<summary>
