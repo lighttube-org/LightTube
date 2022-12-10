@@ -1,0 +1,110 @@
+﻿@using System.Web
+@model BaseContext
+@{
+	List<DropdownItem> generalItems = new()
+	{
+		new DropdownItem("Toggle Theme", $"/toggles/theme?url={HttpUtility.UrlEncode(Context.Request.Path)}", "moon"),
+		new DropdownItem("Content Settings", "/settings/content", "gear"),
+		new DropdownItem("===", "", ""),
+		new DropdownItem("About", "/about", "info-circle")
+	};
+}
+
+@if (Model.User is not null)
+{
+	<div class="account-buttons">
+		<a class="icon-button hide-on-desktop" href="/results">
+			<svg class="bi" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#search"/>
+			</svg>
+		</a>
+		<a class="icon-button" href="/rss.xml">
+			<svg class="bi" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#rss"/>
+			</svg>
+		</a>
+		<div class="icon-button dropdown">
+			<input type="checkbox" id="loggedin-dropdown" autocomplete="off">
+			<label for="loggedin-dropdown">
+				<svg class="bi" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#person-circle"/>
+				</svg>
+			</label>
+			<div class="dropdown__menu" style="right:0">
+				<a href="/channel/@Model.User.LTChannelID" class="dropdown__item">
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#person-circle"/>
+					</svg>
+					Logged in as: @Model.User.UserID
+				</a>
+				<a href="/account/logout?redirectUrl=@HttpUtility.UrlEncode(Context.Request.Path)" class="dropdown__item">
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#box-arrow-right"/>
+					</svg>
+					Log Out
+				</a>
+				<hr>
+				@foreach (DropdownItem item in generalItems)
+				{
+					@if (item.Label == "===")
+					{
+						<hr>
+					}
+					else
+					{
+						<a href="@item.Target" class="dropdown__item">
+							<svg class="bi" width="20" height="20" fill="currentColor">
+								<use xlink:href="/svg/bootstrap-icons.svg#@item.Icon"/>
+							</svg>
+							@item.Label
+						</a>
+					}
+				}
+			</div>
+		</div>
+	</div>
+}
+else
+{
+	<div class="account-buttons">
+		<a class="icon-button hide-on-desktop" href="/results">
+			<svg class="bi" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#search"/>
+			</svg>
+		</a>
+		<div class="icon-button dropdown">
+			<input type="checkbox" id="loggedout-dropdown" autocomplete="off">
+			<label for="loggedout-dropdown">
+				<svg class="bi" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#three-dots-vertical"/>
+				</svg>
+			</label>
+			<div class="dropdown__menu" style="right:-100px">
+				@foreach (DropdownItem item in generalItems)
+				{
+					@if (item.Label == "===")
+					{
+						<hr>
+					}
+					else
+					{
+						<a href="@item.Target" class="dropdown__item">
+							<svg class="bi" width="20" height="20" fill="currentColor">
+								<use xlink:href="/svg/bootstrap-icons.svg#@item.Icon"/>
+							</svg>
+							@item.Label
+						</a>
+					}
+				}
+			</div>
+		</div>
+		<a href="/account/login" class="btn-outline btn-blue">
+			<svg class="icon" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#person-circle"/>
+			</svg>
+			<span class="text">
+				Sign in
+			</span>
+		</a>
+	</div>
+}

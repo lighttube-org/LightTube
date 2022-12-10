@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Html;
+﻿using LightTube.Database;
+using LightTube.Database.Models;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LightTube.Contexts;
@@ -10,10 +12,12 @@ public class BaseContext
 	public List<IHtmlContent> EndTags = new();
 	public bool GuideHidden = false;
 	public HttpContext Context;
+	public DatabaseUser? User;
 
 	public BaseContext(HttpContext context)
 	{
 		Context = context;
+		User = DatabaseManager.Users.GetUserFromToken(context.Request.Cookies["token"] ?? "").Result;
 		AddMeta("og:site_name", "lighttube");
 		AddMeta("og:type", "website");
 		AddMeta("theme-color", "#AA0000");

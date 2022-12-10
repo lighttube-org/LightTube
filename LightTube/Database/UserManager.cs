@@ -72,6 +72,11 @@ public class UserManager
 		await TokensCollection.ReplaceOneAsync(x => x.Token == token, login);
 	}
 
+	public async Task RemoveToken(string token)
+	{
+		await TokensCollection.FindOneAndDeleteAsync(t => t.Token == token);
+	}
+
 	public async Task RemoveToken(string sourceToken, string id)
 	{
 		DatabaseLogin login = (await TokensCollection.FindAsync(x => x.Token == sourceToken)).First();

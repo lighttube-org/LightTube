@@ -154,4 +154,12 @@ public class AccountController : Controller
 
 		return View(ac);
 	}
+
+	[Route("logout")]
+	public async Task<IActionResult> Logout(string? redirectUrl)
+	{
+		await DatabaseManager.Users.RemoveToken(Request.Headers["token"]);
+		Response.Cookies.Delete("token");
+		return Redirect(redirectUrl ?? "/");
+	}
 }

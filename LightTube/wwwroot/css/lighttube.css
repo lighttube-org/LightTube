@@ -443,7 +443,8 @@ body.no-guide .guide {
 	margin: 0;
 	width: 300px;
 	border-radius: 8px;
-	box-shadow: var(--chip-background-hover) 0 0 5px;
+	box-shadow: var(--border-color) 0 0 5px;
+	background-color: var(--context-menu-background)
 }
 
 .dropdown__item {
