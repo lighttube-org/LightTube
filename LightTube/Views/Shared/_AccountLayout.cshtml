@@ -1,0 +1,37 @@
+﻿@model AccountContext
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>LightTube</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/css/account.css"/>
+	<link rel="stylesheet" href="/fonts/roboto/roboto.css">
+</head>
+<body>
+<div class="signin-container">
+	<form class="signin-box" method="post">
+		@if (Model.Redirect is not null)
+		{
+			<input style="display:none" name="redirectUri" value="@Model.Redirect">
+		}
+		
+		<p class="signin-title">@ViewData["AccountModalTitle"]</p>
+		
+		@if (Model.Error is not null)
+		{
+			<p class="signin-error">@Model.Error</p>
+		}
+
+		@RenderBody()
+	</form>
+</div>
+
+<script>
+	const showPass = document.getElementById("showpass");
+	showPass.parentElement.style.display = "flex";
+
+	showPass.addEventListener("change", e => document.getElementById("password").setAttribute("type", e.target.checked ? "text" : "password"))
+</script>
+</body>
+</html>

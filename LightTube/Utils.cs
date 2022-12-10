@@ -14,6 +14,7 @@ namespace LightTube;
 public static class Utils
 {
 	private static string? _version;
+	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 	public static string GetRegion(this HttpContext context) =>
 		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) ? h.ToString() :
