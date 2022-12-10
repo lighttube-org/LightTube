@@ -1,0 +1,34 @@
+﻿@model AccountContext
+
+@{
+	Layout = "_AccountLayout";
+	ViewData["AccountModalTitle"] = "Delete your account";
+}
+
+<div class="signin-input-container">
+	<input class="text" name="userid" placeholder="UserID">
+</div>
+
+<div class="signin-input-container">
+	<input class="text" name="password" id="password" type="password" placeholder="Password">
+</div>
+
+<div class="signin-input-container">
+	<input class="text" name="passwordCheck" type="password" placeholder="Confirm Password">
+</div>
+
+<div class="signin-checkbox" style="display:none;">
+	<input id="showpass" type="checkbox">
+	<label for="showpass">Show password</label>
+</div>
+<br>
+
+<div class="signin-checkbox">
+	<input id="consent" name="consent" type="checkbox">
+	<label for="consent">I understand that by clicking Delete, all my playlists, subscribed channels etc. will be deleted from this LightTube instance (@Context.Request.Host)</label>
+</div>
+
+<div class="signin-buttons">
+	<a href="/account/" class="signin-button-secondary">Go back</a>
+	<input type="submit" class="signin-button-danger" value="Delete">
+</div>

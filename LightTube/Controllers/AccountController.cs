@@ -108,4 +108,50 @@ public class AccountController : Controller
 
 		return View(ac);
 	}
+
+	[Route("delete")]
+	[HttpGet]
+	public IActionResult Delete(string? redirectUrl) =>
+		View(new AccountContext
+		{
+			Redirect = redirectUrl
+		});
+
+	[Route("delete")]
+	[HttpPost]
+	public async Task<IActionResult> Delete(string? redirectUrl, string userId, string password, string passwordCheck, string? consent)
+	{
+		AccountContext ac = new()
+		{
+			Redirect = redirectUrl,
+			UserID = userId
+		};
+
+		if (userId is null || password is null || passwordCheck is null)
+			ac.Error = "Invalid request";
+		else
+		{
+			if (password != passwordCheck)
+				ac.Error = "Passwords don't match";
+
+			if (consent is null)
+				ac.Error = "Please check the checkbox to delete your account";
+		}
+
+		if (ac.Error == null)
+			try
+			{
+				await DatabaseManager.Users.DeleteUser(userId, password);
+
+				Response.Cookies.Delete("token");
+
+				return Redirect(redirectUrl ?? "/");
+			}
+			catch (Exception e)
+			{
+				ac.Error = e.Message;
+			}
+
+		return View(ac);
+	}
 }
