@@ -1,0 +1,26 @@
+﻿@model AccountContext
+
+@{
+	Layout = "_AccountLayout";
+	ViewData["AccountModalTitle"] = "Sign in";
+}
+
+<div class="signin-input-container">
+	<input class="text" name="userid" placeholder="UserID">
+</div>
+<div class="signin-input-container">
+	<input class="text" name="password" id="password" type="password" placeholder="Enter your password">
+</div>
+<div class="signin-checkbox" style="display:none;">
+	<input id="showpass" type="checkbox">
+	<label for="showpass">Show password</label>
+</div>
+<div class="signin-checkbox">
+	<input id="remember" name="remember" type="checkbox">
+	<label for="remember">Remember me</label>
+</div>
+
+<div class="signin-buttons">
+	<a href="/account/register" class="signin-button-secondary">Create account</a>
+	<input type="submit" class="signin-button-primary" value="Sign in">
+</div>

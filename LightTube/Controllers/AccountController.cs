@@ -10,13 +10,11 @@ public class AccountController : Controller
 {
 	[Route("register")]
 	[HttpGet]
-	public IActionResult Register(string? redirectUrl)
-	{
-		return View(new AccountContext
+	public IActionResult Register(string? redirectUrl) =>
+		View(new AccountContext
 		{
 			Redirect = redirectUrl
 		});
-	}
 
 	[Route("register")]
 	[HttpPost]
@@ -53,6 +51,49 @@ public class AccountController : Controller
 				DatabaseLogin login = await DatabaseManager.Users.CreateToken(userId, password, Request.Headers.UserAgent.First(),
 					new[] { "web" });
 				
+				Response.Cookies.Append("token", login.Token, new CookieOptions
+				{
+					Expires = remember is null ? null : DateTimeOffset.MaxValue
+				});
+
+				return Redirect(redirectUrl ?? "/");
+			}
+			catch (Exception e)
+			{
+				ac.Error = e.Message;
+			}
+
+		return View(ac);
+	}
+
+	[Route("login")]
+	[HttpGet]
+	public IActionResult Login(string? redirectUrl) =>
+		View(new AccountContext
+		{
+			Redirect = redirectUrl
+		});
+
+	[Route("login")]
+	[HttpPost]
+	public async Task<IActionResult> Login(string? redirectUrl, string userId, string password, string? remember)
+	{
+		AccountContext ac = new()
+		{
+			Redirect = redirectUrl,
+			UserID = userId
+		};
+
+		if (userId is null || password is null)
+			ac.Error = "Invalid request";
+
+		if (ac.Error == null)
+			try
+			{
+				DatabaseLogin login =
+					await DatabaseManager.Users.CreateToken(userId, password, Request.Headers.UserAgent,
+						new[] { "web" });
+
 				Response.Cookies.Append("token", login.Token, new CookieOptions
 				{
 					Expires = remember is null ? null : DateTimeOffset.MaxValue
