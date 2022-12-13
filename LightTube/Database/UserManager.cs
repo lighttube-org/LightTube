@@ -20,7 +20,7 @@ public class UserManager
 		PlaylistCollection = playlistCollection;
 	}
 
-	public async Task<DatabaseUser?> GetUserUsernamePassword(string userId, string password)
+	public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
 	{
 		IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
 		if (!await users.AnyAsync())

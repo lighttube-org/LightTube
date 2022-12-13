@@ -14,10 +14,10 @@ public class HomeController : Controller
 		_logger = logger;
 	}
 
-	public IActionResult Index()
-	{
-		return View(new BaseContext(HttpContext));
-	}
+	public IActionResult Index() => View(new BaseContext(HttpContext));
+
+	[Route("/rss")]
+	public IActionResult Rss() => View(new BaseContext(HttpContext));
 
 	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 	public IActionResult Error() => StatusCode(500);
