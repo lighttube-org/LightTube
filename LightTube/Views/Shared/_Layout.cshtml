@@ -41,6 +41,11 @@
 	<partial name="GuideItem" model="@(new GuideItem("Subscriptions", "rss", "/feed/subscriptions", true))"/>
 	<hr>
 	<partial name="GuideItem" model="@(new GuideItem("Library", "folder", "/feed/library", true))"/>
+	<div class="guide-links hide-on-mobile">
+		<a href="https://github.com/kuylar/lighttube">Source code</a>
+		<a href="https://github.com/kuylar/lighttube/master/LICENSE">License</a><br>
+		<span style="font-weight: normal">Running on LightTube v@(Utils.GetVersion())</span>
+	</div>
 </div>
 <div class="app">
 	@RenderBody()

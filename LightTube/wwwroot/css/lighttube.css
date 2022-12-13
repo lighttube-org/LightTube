@@ -1067,3 +1067,24 @@ body.no-guide .guide {
 *[class*=thumbnail] img {
 	background-color: var(--thumbnail-background)
 }
+
+/* Guide Links */
+
+.guide-links {
+	padding: 8px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+@media screen and (max-width: 1312px) {
+	.guide-links {
+		display: none;
+	}
+}
+
+.guide-links > * {
+	color: var(--text-secondary);
+	text-decoration: none;
+	font-weight: bold;
+}
