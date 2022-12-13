@@ -1049,3 +1049,15 @@ body.no-guide .guide {
 .subscription-dropdown:active {
 	background-color: var(--chip-background-active);
 }
+
+/* Mobile Search Bar */
+
+@media screen and (max-width: 700px) {
+	.top-bar.search > * {
+		display: none;
+	}
+
+	.top-bar.search > .search-bar {
+		display: flex !important;
+	}
+}

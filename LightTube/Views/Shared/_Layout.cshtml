@@ -17,7 +17,7 @@
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
 </head>
 <body class="@(Model.GuideHidden ? "app-container no-guide" : "app-container")">
-<div class="top-bar">
+<div class="@(Context.Request.Path.Value == "/results" ? "top-bar search" : "top-bar")">
 	<a class="logo" href="/">
 		Light<b>Tube</b>
 		<sup class="hide-on-mobile region" title="InnerTube Content Region">
