@@ -8,7 +8,7 @@
 </a>
 
 <div class="renderer-gridrenderer">
-	@foreach(FeedVideo video in Model.Videos.Take(50)) {
+	@foreach(FeedVideo video in Model.Videos) {
 		<div class="renderer-gridvideorenderer">
 			<a href="/watch?v=@video.Id"  class="grid-thumbnail">
 				<img src="@video.Thumbnail" alt="@video.Title">
