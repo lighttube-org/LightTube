@@ -1,4 +1,4 @@
-﻿@using InnerTube.Renderers
+@using InnerTube.Renderers
 @using InnerTube
 @using Microsoft.Extensions.Primitives
 @using Utils = LightTube.Utils
@@ -60,13 +60,15 @@
 			<div class="info">
 				<a href="/channel/@channel.Id" class="title ml-2" title="@channel.Title">
 					@channel.Title
-					<svg class="bi" width="12" height="12" fill="currentColor">
-
-						<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
-					</svg>
+					@foreach (Badge badge in channel.Badges)
+					{
+						<svg class="bi" width="12" height="12" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+						</svg>
+					}
 				</a>
 				<div class="info__more">
-					2.26M subscribers • 84 videos
+					@channel.SubscriberCountText • @channel.VideoCountText
 				</div>
 			</div>
 			<div class="subscribe-container">
