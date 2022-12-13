@@ -1,0 +1,31 @@
+@using Humanizer
+@model SubscriptionsContext
+
+<a href="/feed/channels" class="btn-outline btn-blue" style="width:fit-content;">
+	<span class="text">
+		Manage Subscriptions
+	</span>
+</a>
+
+<div class="renderer-gridrenderer">
+	@foreach(FeedVideo video in Model.Videos.Take(50)) {
+		<div class="renderer-gridvideorenderer">
+			<a href="/watch?v=@video.Id"  class="grid-thumbnail">
+				<img src="@video.Thumbnail" alt="@video.Title">
+			</a>
+			<div class="info">
+				<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
+					@video.Title
+				</a>
+				<div class="info__channel">
+					<a href="/channel/@video.ChannelId" title="@video.ChannelName" class="ml-1">
+						@video.ChannelName
+					</a>
+				</div>
+				<div>
+					@video.ViewCount • @video.PublishedDate.Humanize(DateTimeOffset.UtcNow)
+				</div>
+			</div>
+		</div>
+	}
+</div>

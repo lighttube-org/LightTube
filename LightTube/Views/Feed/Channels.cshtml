@@ -1,0 +1,47 @@
+@using LightTube.Database.Models
+@model ChannelsContext
+
+<form class="search-container" method="post">
+	<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Apply Changes">
+
+	@foreach (DatabaseChannel? channel in Model.Channels)
+	{
+		if (channel != null) {
+			<div class="renderer-channelrenderer">
+				<a href="/channel/@channel.ChannelId" class="channel-avatar">
+					<img src="@channel.IconUrl" alt="@channel.Name">
+				</a>
+				<div class="info">
+					<a href="/channel/@channel.ChannelId" class="title ml-2" title="@channel.Name">
+						@channel.Name
+					</a>
+					<div class="info__more">
+						@channel.Subscribers
+					</div>
+				</div>
+				<div class="subscribe-container">
+					<select name="@channel.ChannelId" class="subscription-dropdown">
+						@switch (Model.User!.Subscriptions.TryGetValue(channel.ChannelId, out SubscriptionType t) ? t : SubscriptionType.NONE)
+						{
+							case SubscriptionType.NONE:
+								<option value="0" selected>Unsubscribe</option>
+								<option value="1">Subscribe with notifications off</option>
+								<option value="2">Subscribe with notifications on</option>
+								break;
+							case SubscriptionType.NOTIFICATIONS_OFF:
+								<option value="0">Unsubscribe</option>
+								<option value="1" selected>Subscribe with notifications off</option>
+								<option value="2">Subscribe with notifications on</option>
+								break;
+							case SubscriptionType.NOTIFICATIONS_ON:
+								<option value="0">Unsubscribe</option>
+								<option value="1">Subscribe with notifications off</option>
+								<option value="2" selected>Subscribe with notifications on</option>
+								break;
+						}
+					</select>
+				</div>
+			</div>
+		}
+	}
+</form>

@@ -1033,3 +1033,19 @@ body.no-guide .guide {
 	flex-direction: row;
 	column-gap: 8px;
 }
+
+.subscription-dropdown {
+	padding: 8px;
+	background: var(--chip-background);
+	border: var(--border-color);
+	border-radius: 50px;
+	color: var(--text-primary);
+}
+
+.subscription-dropdown:hover {
+	background-color: var(--chip-background-hover);
+}
+
+.subscription-dropdown:active {
+	background-color: var(--chip-background-active);
+}

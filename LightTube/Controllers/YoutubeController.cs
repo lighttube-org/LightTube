@@ -144,7 +144,7 @@ public class YoutubeController : Controller
 		InnerTubeChannelResponse channel =
 			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
-		return View(new SubscriptionContext(HttpContext, channel, subscriptionType));
+		return Ok("You can now close this window.");
 	}
 
 	[Route("/channel/{id}/{tab}")]
