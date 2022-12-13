@@ -1061,3 +1061,9 @@ body.no-guide .guide {
 		display: flex !important;
 	}
 }
+
+/* Thumbnail Backgrounds */
+
+*[class*=thumbnail] img {
+	background-color: var(--thumbnail-background)
+}

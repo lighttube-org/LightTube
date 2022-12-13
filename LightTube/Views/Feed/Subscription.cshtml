@@ -11,7 +11,7 @@
 	@foreach(FeedVideo video in Model.Videos) {
 		<div class="renderer-gridvideorenderer">
 			<a href="/watch?v=@video.Id"  class="grid-thumbnail">
-				<img src="@video.Thumbnail" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnail" alt="@video.Title">
 			</a>
 			<div class="info">
 				<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">

@@ -7,10 +7,10 @@
 	@if (Model.Channel?.Header != null)
 	{
 		<div class="channel-banner">
-			<img class="channel-banner__img" src="@Model.Channel.Header.Banner.Last().Url" alt="Channel Banner">
+			<img loading="lazy" class="channel-banner__img" src="@Model.Channel.Header.Banner.Last().Url" alt="Channel Banner">
 		</div>
 		<div class="channel-info">
-			<img class="channel-info__avatar" src="@Model.Channel.Metadata.Avatar.Last().Url" alt="@Model.Channel.Metadata.Title">
+			<img loading="lazy" class="channel-info__avatar" src="@Model.Channel.Metadata.Avatar.Last().Url" alt="@Model.Channel.Metadata.Title">
 			<div class="channel-info__info">
 				<span class="channel-info__name ml-1 title">@Model.Channel.Metadata.Title</span>
 				<!--span class="channel-info__username">TODO</span-->

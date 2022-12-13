@@ -9,7 +9,7 @@
 	case VideoRenderer video:
 		<div class="renderer-videorenderer">
 			<a class="thumbnail" href="/watch?v=@video.Id">
-				<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
 				<div class="thumbnail__duration__container">
 					<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -25,7 +25,7 @@
 					@if (video.Channel.Avatar != null)
 					{
 						<div class="info__channel">
-							<img src="@video.Channel.Avatar.ToString()" alt="@video.Channel.Title">
+							<img loading="lazy" src="@video.Channel.Avatar.ToString()" alt="@video.Channel.Title">
 							<a href="/channel/@video.Channel.Id" title="@video.Channel.Title" class="ml-1">
 								@video.Channel.Title
 							</a>
@@ -55,7 +55,7 @@
 	case ChannelRenderer channel:
 		<div class="renderer-channelrenderer">
 			<a href="/channel/@channel.Id" class="channel-avatar">
-				<img src="@channel.Avatars.Last().Url" alt="@channel.Title">
+				<img loading="lazy" src="@channel.Avatars.Last().Url" alt="@channel.Title">
 			</a>
 			<div class="info">
 				<a href="/channel/@channel.Id" class="title ml-2" title="@channel.Title">
@@ -79,7 +79,7 @@
 	case PlaylistRenderer playlist:
 		<div class="renderer-playlistrenderer">
 			<a href="/watch?v=@playlist.Videos.First().Id&list=@playlist.Id" class="thumbnail">
-				<img src="@playlist.Thumbnails.First().Url" alt="@playlist.Title">
+				<img loading="lazy" src="@playlist.Thumbnails.First().Url" alt="@playlist.Title">
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -116,7 +116,7 @@
 	case RadioRenderer radio:
 		<div class="renderer-radiorenderer">
 			<a href="/watch?v=@radio.FirstVideoId&list=@radio.Id" class="thumbnail">
-				<img src="@radio.Thumbnails.Last().Url" title="@radio.Title">
+				<img loading="lazy" src="@radio.Thumbnails.Last().Url" title="@radio.Title">
 				<div class="thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#broadcast"/>
@@ -142,7 +142,7 @@
 		{
 			<div class="renderer-videorenderer ad">
 				<a class="thumbnail" href="/watch?v=@video.Id">
-					<img src="@video.Thumbnails.First().Url" alt="@video.Title">
+					<img loading="lazy" src="@video.Thumbnails.First().Url" alt="@video.Title">
 					<div class="thumbnail__duration__container">
 						<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
 					</div>
@@ -229,7 +229,7 @@
 	case CompactVideoRenderer video:
 		<div class="renderer-compactvideorenderer">
 			<a class="compact-thumbnail" href="/watch?v=@video.Id">
-				<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -263,7 +263,7 @@
 	case CompactPlaylistRenderer playlist:
 		<div class="renderer-compactplaylistrenderer">
 			<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="compact-thumbnail">
-				<img src="@playlist.Thumbnails.Last().Url">
+				<img loading="lazy" src="@playlist.Thumbnails.Last().Url">
 				<div class="compact-thumbnail__playlist__overlay">
 					<span>@playlist.VideoCountText.Split(" ")[0]</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -294,7 +294,7 @@
 	case CompactRadioRenderer radio:
 		<div class="renderer-compactradiorenderer">
 			<div class="compact-thumbnail">
-				<img src="@radio.Thumbnails.Last().Url" alt="@radio.Title">
+				<img loading="lazy" src="@radio.Thumbnails.Last().Url" alt="@radio.Title">
 				<div class="compact-thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#broadcast"/>
@@ -322,7 +322,7 @@
 			</div>
 			<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.First() : "")&params=@video.PlaylistParams" class="playlistvideo__thumbnail">
 				<div class="playlistvideo__thumbnail">
-					<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+					<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
 					<div class="playlistvideo__thumbnail__duration__container">
 						<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 					</div>
@@ -341,7 +341,7 @@
 	case CommentThreadRenderer comment:
 		<div class="renderer-commentthreadrenderer">
 			<a class="comment__author-avatar" href="/channel/@comment.Owner.Id">
-				<img src="@comment.Owner.Avatar" alt="@comment.Owner.Title">
+				<img loading="lazy" src="@comment.Owner.Avatar" alt="@comment.Owner.Title">
 			</a>
 			<div class="comment">
 				<div class="header ml-1">
@@ -412,7 +412,7 @@
 			<div class="recognition-shelf-items">
 				@foreach (Thumbnail avatar in recognition.Avatars.Take(7))
 				{
-					<img src="@avatar.Url" alt="User Avatar">
+					<img loading="lazy" src="@avatar.Url" alt="User Avatar">
 				}
 			</div>
 		</div>
@@ -438,7 +438,7 @@
 	case GridVideoRenderer video:
 		<div class="renderer-gridvideorenderer">
 			<a href="/watch?v=@video.Id"  class="grid-thumbnail">
-				<img src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -470,7 +470,7 @@
 	case GridPlaylistRenderer playlist:
 		<div class="renderer-gridplaylistrenderer">
 			<a href="/playlist?list=@playlist.Id" class="grid-thumbnail">
-				<img src="@playlist.Thumbnails.Last().Url" alt="@playlist.Title">
+				<img loading="lazy" src="@playlist.Thumbnails.Last().Url" alt="@playlist.Title">
 				<div class="grid-thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -507,7 +507,7 @@
 	case GridChannelRenderer channel:
 		<div class="renderer-gridchannelrenderer">
         	<a href="/channel/@channel.Id" class="grid-avatar">
-        		<img src="@channel.Avatars.Last().Url" alt="@channel.Title">
+        		<img loading="lazy" src="@channel.Avatars.Last().Url" alt="@channel.Title">
         	</a>
         	<div class="info">
         		<a href="/channel/@channel.Id" class="title ml-1" alt="@channel.Title">
@@ -575,7 +575,7 @@
 	case ReelItemRenderer reel:
 		<a href="/shorts/@reel.Id" class="renderer-reelitemrenderer">
 			<div class="reel-thumbnail">
-				<img src="@reel.Thumbnails.Last().Url" alt="@reel.Title">
+				<img loading="lazy" src="@reel.Thumbnails.Last().Url" alt="@reel.Title">
 			</div>
 			<div class="reel-info">
 				<div class="ml-2 title" title="@reel.Title">@reel.Title</div>
@@ -589,7 +589,7 @@
 	case BackstagePostRenderer post:
 		<div class="renderer-backstagepostthreadrenderer">
 			<div class="post-avatar">
-				<img src="@post.Author.Avatar" alt="@post.Author.Title">
+				<img loading="lazy" src="@post.Author.Avatar" alt="@post.Author.Title">
 			</div>
 			<div class="post-info">
 				<a href="/channel/@post.Author.Id" class="post-author">@post.Author.Title</a>
@@ -619,14 +619,14 @@
 		break;
 	case BackstageImageRenderer image:
 		<div class="renderer-backstageimagerenderer">
-           	<img src="@image.Images.Last().Url">
+           	<img loading="lazy" src="@image.Images.Last().Url">
 		</div>
 		break;
 	case PostMultiImageRenderer images:
 		<div class="renderer-postmultiimagerenderer">
 			@foreach (BackstageImageRenderer img in images.Images)
 			{
-				<img src="@img.Images.Last().Url">
+				<img loading="lazy" src="@img.Images.Last().Url">
 			}
 		</div>
 		break;
@@ -639,7 +639,7 @@
 				Context.Request.Query.TryGetValue("list", out StringValues l);
 			}
 			<a href="/watch?v=@video.Id&list=@l" class="compact-thumbnail">
-				<img src="@video.Thumbnails.Last().Url" alt="@video.Title"/>
+				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title"/>
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>

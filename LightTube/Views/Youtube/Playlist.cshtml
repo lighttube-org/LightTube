@@ -4,7 +4,7 @@
 <div class="playlist-page">
 	<div class="playlist-page-info">
 		<div class="playlist-page-thumbnail">
-			<img src="@Model.Playlist.Sidebar.Thumbnails.Last().Url" alt="@Model.Playlist.Sidebar.Title">
+			<img loading="lazy" src="@Model.Playlist.Sidebar.Thumbnails.Last().Url" alt="@Model.Playlist.Sidebar.Title">
 		</div>
 		<h1 class="ml-2 title" title="@Model.Playlist.Sidebar.Title">@Model.Playlist.Sidebar.Title</h1>
 		<a class="playlist-page-channel" href="/channel/@Model.Playlist.Sidebar.Channel.Id" title="@Model.Playlist.Sidebar.Channel.Title">@Model.Playlist.Sidebar.Channel.Title</a>
