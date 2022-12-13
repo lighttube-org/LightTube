@@ -26,7 +26,7 @@ public class BaseContext
 	public void AddScript(string src)
 	{
 		TagBuilder script = new("script");
-		script.Attributes.Add("src", src);
+		script.Attributes.Add("src", src + "?v=@Utils.GetVersion()");
 		EndTags.Add(script);
 	}
 
@@ -34,7 +34,7 @@ public class BaseContext
 	{
 		TagBuilder stylesheet = new("link");
 		stylesheet.Attributes.Add("rel", "stylesheet");
-		stylesheet.Attributes.Add("href", href);
+		stylesheet.Attributes.Add("href", href + "?v=@Utils.GetVersion()");
 		HeadTags.Add(stylesheet);
 	}
 

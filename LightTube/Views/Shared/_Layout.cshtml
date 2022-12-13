@@ -12,8 +12,8 @@
 	{
 		@item
 	}
-	<link rel="stylesheet" href="~/css/lighttube.css">
-	<link rel="stylesheet" href="~/css/renderers.css">
+	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
+	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
 </head>
 <body class="@(Model.GuideHidden ? "app-container no-guide" : "app-container")">
