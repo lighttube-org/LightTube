@@ -23,7 +23,7 @@
 					</a>
 				</div>
 				<div>
-					@video.ViewCount • @video.PublishedDate.Humanize(DateTimeOffset.UtcNow)
+					@video.ViewCount.ToString("N0") views • @video.PublishedDate.Humanize(DateTimeOffset.UtcNow)
 				</div>
 			</div>
 		</div>
