@@ -19,12 +19,18 @@ public static class Utils
 	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 	public static string GetRegion(this HttpContext context) =>
-		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) ? h.ToString() :
-		context.Request.Cookies.TryGetValue("gl", out string region) ? region : "US";
+		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) 
+			? h.ToString() 
+			: context.Request.Cookies.TryGetValue("gl", out string region)
+				? region 
+				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
 
 	public static string GetLanguage(this HttpContext context) =>
-		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) ? h.ToString() :
-		context.Request.Cookies.TryGetValue("hl", out string language) ? language : "en";
+		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) 
+			? h.ToString() 
+			: context.Request.Cookies.TryGetValue("hl", out string language)
+				? language
+				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
 
 	public static string GetVersion()
 	{
