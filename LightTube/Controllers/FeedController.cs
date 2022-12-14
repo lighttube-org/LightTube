@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Xml;
 using LightTube.Contexts;
@@ -121,8 +122,20 @@ public class FeedController : Controller
 	{
 		BaseContext c = new(HttpContext);
 		if (c.User is null) return Redirect("/account/login?redirectUrl=%2ffeed%2fchannels");
-		foreach ((string id, string type) in data.Where(x => x.Key.StartsWith("UC")))
-			await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, (SubscriptionType)int.Parse(type));
+		foreach ((string id, string type) in data)
+		{
+			if (int.TryParse(type, out int subTypeInt))
+			{
+				SubscriptionType newType = (SubscriptionType)subTypeInt;
+				if (c.User.Subscriptions.TryGetValue(id, out SubscriptionType oldType))
+					if (newType != oldType) 
+					{
+						await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, newType);
+					}
+				else
+					await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, newType);
+			}
+		}
 
 		ChannelsContext ctx = new(HttpContext);
         ctx.Channels = from v in ctx.User!.Subscriptions.Keys
