@@ -32,13 +32,11 @@ public static class Utils
 		{
 #if DEBUG
 			DateTime buildTime = DateTime.Today;
-			_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day}";
+			_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
 #else
 			_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
 				.FileVersion?[2..];
 #endif
-			if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-				_version += " (dev)";
 		}
 
 		return _version;
