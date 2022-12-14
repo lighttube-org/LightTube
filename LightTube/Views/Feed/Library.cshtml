@@ -1,0 +1,35 @@
+@using LightTube.Database.Models
+@model LibraryContext
+
+<div class="search-container">
+	<a href="/createPlaylist" class="btn-outline btn-blue" style="width:fit-content;">
+		<div class="text">
+			New Playlist
+		</div>
+	</a>
+
+	@foreach (DatabasePlaylist playlist in Model.Playlists)
+	{
+		<div class="renderer-playlistrenderer">
+			<a href="/watch?v=@playlist.VideoIds.First()&list=@playlist.Id" class="thumbnail">
+				<img loading="lazy" src="https://i.ytimg.com/vi/@playlist.VideoIds.First()/hqdefault.jpg" alt="@playlist.Name" style="object-fit:cover;">
+				<div class="thumbnail__playlist__overlay">
+					<span>@playlist.VideoIds.Count</span>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#list"/>
+					</svg>
+				</div>
+			</a>
+			<div class="info">
+				<a href="#" class="ml-2 title" title="@playlist.Name">
+					@playlist.Name
+				</a>
+				<div class="info__more">
+					<a href="/playlist?list=@playlist.Id" class="link-view-full-playlist">
+						View Full Playlist
+					</a>
+				</div>
+			</div>
+		</div>
+	}
+</div>

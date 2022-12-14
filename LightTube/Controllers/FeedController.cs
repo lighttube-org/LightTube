@@ -145,4 +145,13 @@ public class FeedController : Controller
 			select v;
 		return View(ctx);
 	}
+
+	[Route("library")]
+	[HttpGet]
+	public async Task<IActionResult> Library()
+	{
+		LibraryContext c = new(HttpContext);
+		if (c.User is null) return Redirect("/account/login?redirectUrl=%2ffeed%2flibrary");
+		return View(c);
+	}
 }

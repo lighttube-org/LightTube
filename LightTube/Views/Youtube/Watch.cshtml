@@ -89,17 +89,17 @@
 		}
 	</div>
 	<div class="second-column">
-		@if (Model.Video.Playlist is not null)
+		@if (Model.Playlist is not null)
 		{
 			<details class="playlist-view-container" open>
 				<summary class="playlist-view__header">
-					<a href="/playlist?list=@Model.Video.Playlist.PlaylistId" class="ml-1 title" title="@Model.Video.Playlist.Title">
-						@Model.Video.Playlist.Title
+					<a href="/playlist?list=@Model.Playlist.PlaylistId" class="ml-1 title" title="@Model.Playlist.Title">
+						@Model.Playlist.Title
 					</a>
-					<div class="ml-1">@Model.Video.Playlist.Channel.Title • @(Model.Video.Playlist.CurrentIndex + 1) / @Model.Video.Playlist.TotalVideos</div>
+					<div class="ml-1">@Model.Playlist.Channel.Title • @(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
 				</summary>
 				<div class="playlist-view__content">
-					@foreach (IRenderer renderer in Model.Video.Playlist.Videos)
+					@foreach (IRenderer renderer in Model.Playlist.Videos)
 					{
 						<partial name="Renderer" model="renderer"/>
 					}

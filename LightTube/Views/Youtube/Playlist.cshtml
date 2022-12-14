@@ -4,12 +4,12 @@
 <div class="playlist-page">
 	<div class="playlist-page-info">
 		<div class="playlist-page-thumbnail">
-			<img loading="lazy" src="@Model.Playlist.Sidebar.Thumbnails.Last().Url" alt="@Model.Playlist.Sidebar.Title">
+			<img loading="lazy" src="@Model.PlaylistThumbnail" alt="@Model.PlaylistTitle">
 		</div>
-		<h1 class="ml-2 title" title="@Model.Playlist.Sidebar.Title">@Model.Playlist.Sidebar.Title</h1>
-		<a class="playlist-page-channel" href="/channel/@Model.Playlist.Sidebar.Channel.Id" title="@Model.Playlist.Sidebar.Channel.Title">@Model.Playlist.Sidebar.Channel.Title</a>
+		<h1 class="ml-2 title" title="@Model.PlaylistTitle">@Model.PlaylistTitle</h1>
+		<a class="playlist-page-channel" href="/channel/@Model.AuthorId" title="@Model.AuthorName">@Model.AuthorName</a>
 		<div class="playlist-page-info-data">
-			@Model.Playlist.Sidebar.ViewCountText&nbsp;&nbsp;@Model.Playlist.Sidebar.LastUpdated
+			@Model.ViewCountText&nbsp;&nbsp;@Model.LastUpdatedText
 		</div>
 		@if (false)
 		{
