@@ -47,6 +47,12 @@ public class UserManager
 		return await userCursor.FirstOrDefaultAsync();
 	}
 
+	public async Task<DatabaseUser?> GetUserFromLTId(string id)
+	{
+		IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.LTChannelID == id);
+		return await userCursor.FirstOrDefaultAsync();
+	}
+
 	public async Task<DatabaseLogin> CreateToken(string userId, string password, string userAgent,
 		IEnumerable<string> scopes)
 	{

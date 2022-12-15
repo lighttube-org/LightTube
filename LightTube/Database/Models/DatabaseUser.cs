@@ -1,10 +1,15 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using InnerTube.Renderers;
+using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json.Linq;
 
 namespace LightTube.Database.Models;
 
 [BsonIgnoreExtraElements]
 public class DatabaseUser
 {
+	private const string INNERTUBE_GRID_RENDERER_TEMPLATE = "{\"items\": [%%CONTENTS%%]}";
+
+	private const string INNERTUBE_MESSAGE_RENDERER_TEMPLATE = "{\"messageRenderer\":{\"text\":{\"simpleText\":\"%%MESSAGE%%\"}}}";
 	private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 	public string UserID { get; set; }
 	public string PasswordHash { get; set; }
@@ -55,5 +60,18 @@ public class DatabaseUser
 		while (channelId.Length < 24) 
 			channelId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
 		return channelId;
+	}
+
+	public GridRenderer PlaylistRenderers()
+	{
+		IEnumerable<DatabasePlaylist> playlists =
+			DatabaseManager.Playlists.GetUserPlaylists(UserID, PlaylistVisibility.VISIBLE);
+		string playlistsJson = playlists.Any()
+			? string.Join(',', playlists.Select(x => x.GetInnerTubeGridPlaylistJson()))
+			: INNERTUBE_MESSAGE_RENDERER_TEMPLATE.Replace("%%MESSAGE%%", "This user doesn't have any public playlists.");
+
+		string json = INNERTUBE_GRID_RENDERER_TEMPLATE
+			.Replace("%%CONTENTS%%", playlistsJson);
+		return new GridRenderer(JObject.Parse(json));
 	}
 }

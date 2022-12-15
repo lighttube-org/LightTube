@@ -140,6 +140,7 @@ public class YoutubeController : Controller
 	[HttpGet]
 	public async Task<IActionResult> Subscription(string id)
 	{
+		if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
 		InnerTubeChannelResponse channel =
 			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
@@ -150,6 +151,7 @@ public class YoutubeController : Controller
 	[HttpPost]
 	public async Task<IActionResult> Subscription(string id, SubscriptionType type)
 	{
+		if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
 		(string? _, SubscriptionType subscriptionType) =
 			await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, type);
 		InnerTubeChannelResponse channel =
@@ -161,6 +163,12 @@ public class YoutubeController : Controller
 	[Route("/channel/{id}/{tab}")]
 	public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home, string? continuation = null)
 	{
+		if (id.StartsWith("LT"))
+		{
+			DatabaseUser? user = await DatabaseManager.Users.GetUserFromLTId(id);
+			return View(new ChannelContext(HttpContext, user, id));
+		}
+
 		if (continuation is null)
 		{
 			InnerTubeChannelResponse channel =
@@ -169,9 +177,11 @@ public class YoutubeController : Controller
 		}
 		else
 		{
-			InnerTubeContinuationResponse channel =
+			InnerTubeChannelResponse channel =
+				await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			InnerTubeContinuationResponse cont =
 				await _youtube.ContinueChannelAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return View(new ChannelContext(HttpContext, tab, channel, id));
+			return View(new ChannelContext(HttpContext, tab, channel, cont, id));
 		}
 	}
 

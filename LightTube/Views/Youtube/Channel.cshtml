@@ -4,24 +4,33 @@
 @model ChannelContext
 
 <div class="channel-container">
-	@if (Model.Channel?.Header != null)
+	@if (Model.BannerUrl != null)
 	{
 		<div class="channel-banner">
-			<img loading="lazy" class="channel-banner__img" src="@Model.Channel.Header.Banner.Last().Url" alt="Channel Banner">
-		</div>
-		<div class="channel-info">
-			<img loading="lazy" class="channel-info__avatar" src="@Model.Channel.Metadata.Avatar.Last().Url" alt="@Model.Channel.Metadata.Title">
-			<div class="channel-info__info">
-				<span class="channel-info__name ml-1 title">@Model.Channel.Metadata.Title</span>
-				<!--span class="channel-info__username">TODO</span-->
-				<span class="channel-info__subs">@Model.Channel.Header?.SubscriberCountText</span>
-			</div>
-			<div class="flex-divider"></div>
-			<div class="channel-info__buttons">
-				<partial name="SubscribeButton" model="Model.Id"/>
-			</div>
+			<img loading="lazy" class="channel-banner__img" src="@Model.BannerUrl" alt="Channel Banner">
 		</div>
 	}
+	<div class="channel-info">
+		<img loading="lazy" class="channel-info__avatar" src="@Model.AvatarUrl" alt="@Model.ChannelTitle">
+		<div class="channel-info__info">
+			<span class="channel-info__name ml-1 title">@Model.ChannelTitle</span>
+			<!--span class="channel-info__username">TODO</span-->
+			<span class="channel-info__subs">@Model.SubscriberCountText</span>
+		</div>
+		<div class="flex-divider"></div>
+			<div class="channel-info__buttons">
+				@if (!Model.LightTubeAccount)
+				{
+					<partial name="SubscribeButton" model="Model.Id"/>
+				}
+				else if (Model.Editable)
+				{
+					<a class="btn-subscribed" href="/settings/account">
+						<span class="text">Account Settings</span>
+					</a>
+				}
+			</div>
+	</div>
 	<div class="channel-tabs">
 		<div class="channel-tabs__container">
 			@foreach (ChannelTabs tab in Model.Tabs.Where(x => x != ChannelTabs.Search))
