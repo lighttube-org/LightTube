@@ -920,6 +920,10 @@ body.no-guide .guide {
 	font-weight: 450;
 }
 
+.channel-info__buttons {
+	display: flex;
+}
+
 .channel-tabs {
 	width: 100%;
 	border-bottom: 1px solid var(--border-color);
