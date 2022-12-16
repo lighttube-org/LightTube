@@ -35,6 +35,14 @@ public class ChannelContext : BaseContext
 		Continuation =
 			(channel.Contents.FirstOrDefault(x => x is ContinuationItemRenderer) as ContinuationItemRenderer)?.Token;
 		Tabs = channel.EnabledTabs;
+
+		AddMeta("description", channel.Metadata.Description);
+		AddMeta("author", channel.Metadata.Title);
+		AddMeta("og:title", channel.Metadata.Title);
+		AddMeta("og:description", channel.Metadata.Description);
+		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
+		AddMeta("og:image", channel.Header?.Avatars.Last().Url.ToString() ?? "");
+		AddMeta("twitter:card", channel.Header?.Avatars.Last().Url.ToString() ?? "");
 	}
 
 	public ChannelContext(HttpContext context, ChannelTabs tab, InnerTubeChannelResponse channel, InnerTubeContinuationResponse continuation, string id) : base(context)
@@ -50,6 +58,14 @@ public class ChannelContext : BaseContext
 		Content = continuation.Contents;
 		Continuation = continuation.Continuation;
 		Tabs = Enum.GetValues<ChannelTabs>();
+
+		AddMeta("description", channel.Metadata.Description);
+		AddMeta("author", channel.Metadata.Title);
+		AddMeta("og:title", channel.Metadata.Title);
+		AddMeta("og:description", channel.Metadata.Description);
+		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
+		AddMeta("og:image", channel.Header?.Avatars.Last().Url.ToString() ?? "");
+		AddMeta("twitter:card", channel.Header?.Avatars.Last().Url.ToString() ?? "");
 	}
 
 	public ChannelContext(HttpContext context, DatabaseUser? channel, string id) : base(context)

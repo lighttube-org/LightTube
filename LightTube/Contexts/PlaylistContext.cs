@@ -28,6 +28,14 @@ public class PlaylistContext : BaseContext
 		Editable = false;
 		Items = playlist.Videos;
 		Continuation = playlist.Continuation;
+
+		AddMeta("description", playlist.Sidebar.Description);
+		AddMeta("author", playlist.Sidebar.Title);
+		AddMeta("og:title", playlist.Sidebar.Title);
+		AddMeta("og:description", playlist.Sidebar.Description);
+		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
+		AddMeta("og:image", $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
+		AddMeta("twitter:card", $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
 	}
 
 	public PlaylistContext(HttpContext context, InnerTubePlaylist playlist, InnerTubeContinuationResponse continuation) : base(context)
@@ -41,6 +49,14 @@ public class PlaylistContext : BaseContext
 		Editable = false;
 		Items = continuation.Contents;
 		Continuation = continuation.Continuation;
+
+		AddMeta("description", playlist.Sidebar.Description);
+		AddMeta("author", playlist.Sidebar.Title);
+		AddMeta("og:title", playlist.Sidebar.Title);
+		AddMeta("og:description", playlist.Sidebar.Description);
+		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
+		AddMeta("og:image", $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
+		AddMeta("twitter:card", $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
 	}
 
 	public PlaylistContext(HttpContext context, DatabasePlaylist? playlist) : base(context)
