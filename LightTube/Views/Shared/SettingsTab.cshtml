@@ -1,0 +1,8 @@
+﻿@model SettingsTab
+@{
+	string className = "settings-tab";
+
+	if (Context.Request.Path.Value! == Model.Path)
+		className += " active";
+}
+<a href="@Model.Path" class="@className">@Model.Label</a>

@@ -1,0 +1,66 @@
+﻿@using Microsoft.AspNetCore.Html
+@model BaseContext
+
+@{
+	SettingsTab[] tabs = new SettingsTab[] {
+		new SettingsTab("Account", "/settings/account"),
+		new SettingsTab("Content", "/settings/content")
+	};
+}
+
+<!DOCTYPE html>
+<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<head>
+	<meta charset="UTF-8">
+	<title>LightTube</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	@foreach (IHtmlContent item in Model.HeadTags)
+	{
+		@item
+	}
+	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
+	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
+	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+</head>
+<body class="app-container no-guide">
+<div class="top-bar">
+	<a class="logo" href="/">
+		Light<b>Tube</b>
+		<sup class="hide-on-mobile region" title="InnerTube Content Region">
+			@Context.GetRegion()
+		</sup>
+	</a>
+	<div class="flex-divider hide-on-mobile"></div>
+	<form action="/results" class="search-bar hide-on-mobile">
+		<input class="search-bar__input" type="text" placeholder="Search" name="search_query" value="@Model.GetSearchBoxInput()">
+		<button class="search-bar__submit" type="submit">
+			<svg class="icon" width="20" height="20" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#search"/>
+			</svg>
+		</button>
+	</form>
+	<div class="flex-divider"></div>
+	<partial name="AccountDropdown" model="Model"/>
+</div>
+<div class="guide">
+</div>
+<div class="app">
+	<div class="settings-page">
+		<div class="settings-tabs">
+			<h1>Settings</h1>
+			@foreach (SettingsTab tab in tabs)
+			{
+				<partial name="SettingsTab" model="tab"/>
+			}
+		</div>
+		<form class="settings-form" method="post">
+			@RenderBody()
+		</form>
+	</div>
+</div>
+@foreach (IHtmlContent item in Model.EndTags)
+{
+	@item
+}
+</body>
+</html>
