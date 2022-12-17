@@ -638,22 +638,22 @@
 			@{
 				Context.Request.Query.TryGetValue("list", out StringValues l);
 			}
-			<a href="/watch?v=@video.Id&list=@l" class="compact-thumbnail">
+			<a href="/watch?v=@video.Id[..11]&list=@l" class="compact-thumbnail">
 				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title"/>
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
 			</a>
 			<div class="info">
-				<a href="/watch?v=@video.Id&list=@l" title="@video.Title" class="ml-1 title">@video.Title</a>
+				<a href="/watch?v=@video.Id[..11]&list=@l" title="@video.Title" class="ml-1 title">@video.Title</a>
 				<div class="ml-2">
 					<a href="/channel/@video.Channel.Id" title="@video.Channel.Title">@video.Channel.Title</a>
 				</div>
 			</div>
 			<div class="flex-divider"></div>
 			<div class="icon-button-container">
-				@if (false) {
-					<a href="#" class="icon-button">
+				@if (video.Id.Length > 11) {
+					<a href="/removeFromPlaylist?v=@video.Id&list=@l" class="icon-button" target="_blank">
 						<svg class="icon" width="20" height="20" fill="currentColor">
 							<use xlink:href="/svg/bootstrap-icons.svg#trash"/>
 						</svg>

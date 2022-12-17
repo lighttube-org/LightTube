@@ -4,6 +4,7 @@ public class ModalContext : BaseContext
 {
 	public string Title { get; set; }
 	public ModalButton[] Buttons { get; set; }
+	public bool AlignToStart { get; set; }
 
 	public ModalContext(HttpContext context) : base(context)
 	{

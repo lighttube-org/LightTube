@@ -1,3 +1,4 @@
+using InnerTube;
 using InnerTube.Renderers;
 using LightTube.Database.Models;
 using MongoDB.Driver;
@@ -28,7 +29,7 @@ public class PlaylistManager
 		return unfiltered.ToList().Where(x => x.Visibility >= minVisibility);
 	}
 
-	public IEnumerable<PlaylistVideoRenderer> GetPlaylistVideos(string id)
+	public IEnumerable<PlaylistVideoRenderer> GetPlaylistVideos(string id, bool editable)
 	{
 		DatabasePlaylist? pl = GetPlaylist(id);
 		if (pl == null) return Array.Empty<PlaylistVideoRenderer>();
@@ -40,7 +41,7 @@ public class PlaylistManager
 			string videoId = pl.VideoIds[i];
 			DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
 			string json = INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE
-				.Replace("%%ID%%", videoId)
+				.Replace("%%ID%%", editable ? videoId + "!": videoId)
 				.Replace("%%INDEX%%", (i + 1).ToString())
 				.Replace("%%TITLE%%", video?.Title ?? "Uncached video. Click to fix")
 				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
@@ -106,5 +107,131 @@ public class PlaylistManager
 		}
 
 		return string.Join(",", renderers);
+	}
+
+	public async Task<DatabasePlaylist> CreatePlaylist(string token, string title, string description, PlaylistVisibility visibility)
+	{
+		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+
+		if (u is null)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		DatabasePlaylist pl = new DatabasePlaylist()
+		{
+			Id = DatabasePlaylist.GenerateId(),
+			Name = title,
+			Description = description,
+			Visibility = visibility,
+			VideoIds = new(),
+			Author = u.UserID,
+			LastUpdated = DateTimeOffset.UtcNow
+		};
+
+		await PlaylistCollection.InsertOneAsync(pl);
+		return pl;
+	}
+
+	public async Task AddVideoToPlaylist(string token, string playlistId, InnerTubePlayer video)
+	{
+		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+		DatabasePlaylist? playlist = GetPlaylist(playlistId);
+
+		if (u is null)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		if (playlist is null)
+			throw new KeyNotFoundException("Playlist not found");
+
+		if (u.UserID != playlist.Author)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		if (!playlist.VideoIds.Contains(video.Details.Id))
+			playlist.VideoIds.Add(video.Details.Id);
+		playlist.LastUpdated = DateTimeOffset.UtcNow;
+
+		await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
+		await DatabaseManager.Cache.AddVideo(new DatabaseVideo()
+		{
+			Id = video.Details.Id,
+			Title = video.Details.Title,
+			Thumbnails = new Thumbnail[] {
+				new Thumbnail()
+				{
+					Url = new Uri($"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg")
+				}
+			},
+			Views = video.Details.ViewCount,
+			Channel = new()
+			{
+				Id = video.Details.Author.Id!,
+				Name = video.Details.Author.Title,
+				Avatars = new Thumbnail[] {
+				new Thumbnail()
+				{
+					Url = video.Details.Author.Avatar!
+				}
+			}
+			},
+			Duration = video.Details.Length.ToDurationString()
+		});
+	}
+
+	public async Task RemoveVideoFromPlaylist(string token, string playlistId, string videoId)
+	{
+		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+		DatabasePlaylist? playlist = GetPlaylist(playlistId);
+
+		if (u is null)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		if (playlist is null)
+			throw new KeyNotFoundException("Playlist not found");
+
+		if (u.UserID != playlist.Author)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		playlist.VideoIds.Remove(videoId);
+		playlist.LastUpdated = DateTimeOffset.UtcNow;
+
+		await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
+	}
+
+	public async Task EditPlaylist(string token, string id, string title, string description, PlaylistVisibility visibility)
+	{
+		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+		DatabasePlaylist? playlist = GetPlaylist(id);
+
+		if (u is null)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		if (playlist is null)
+			throw new KeyNotFoundException("Playlist not found");
+
+		if (u.UserID != playlist.Author)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		playlist.Name = title;
+		playlist.Description = description;
+		playlist.Visibility = visibility;
+		playlist.LastUpdated = DateTimeOffset.UtcNow;
+
+		await PlaylistCollection.ReplaceOneAsync(x => x.Id == id, playlist);
+	}
+
+	public async Task DeletePlaylist(string token, string id)
+	{
+		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+		DatabasePlaylist? playlist = GetPlaylist(id);
+
+		if (u is null)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		if (playlist is null)
+			throw new KeyNotFoundException("Playlist not found");
+
+		if (u.UserID != playlist.Author)
+			throw new UnauthorizedAccessException("Unauthorized");
+
+		await PlaylistCollection.DeleteOneAsync(x => x.Id == id);
 	}
 }

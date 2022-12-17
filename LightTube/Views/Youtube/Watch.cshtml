@@ -30,14 +30,14 @@
 				</div>
 			</div>
 			<div class="interaction-buttons">
-				<div class="interaction-button">
+				<a class="interaction-button" href="/addToPlaylist?v=@Model.Video.Id" target="_blank">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
 					</svg>
 					<div class="interaction-button__text">
 						Save
 					</div>
-				</div>
+				</a>
 			</div>
 			<div class="interaction-buttons">
 				<a class="interaction-button" href="/download/@Model.Video.Id">

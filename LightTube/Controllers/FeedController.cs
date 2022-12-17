@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Text;
+using System.Web;
 using System.Xml;
+using InnerTube;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
@@ -11,24 +13,33 @@ namespace LightTube.Controllers;
 [Route("/feed")]
 public class FeedController : Controller
 {
+	private InnerTube.InnerTube _youtube;
+
+	public FeedController(InnerTube.InnerTube youtube)
+	{
+		_youtube = youtube;
+	}
+
 	[Route("subscriptions")]
-    public async Task<IActionResult> Subscription()
-    {
+	public async Task<IActionResult> Subscription()
+	{
 		SubscriptionsContext ctx = new(HttpContext);
 		if (ctx.User is null) return Redirect("/account/login?redirectUrl=%2ffeed%2fsubscriptions");
-        ctx.Videos = await YoutubeRSS.GetMultipleFeeds(ctx.User.Subscriptions.Keys);
+		ctx.Videos = await YoutubeRSS.GetMultipleFeeds(ctx.User.Subscriptions.Keys);
 		return View(ctx);
-    }
+	}
 
 	[Route("rss.xml")]
-	public async Task<IActionResult> RssFeed() {
+	public async Task<IActionResult> RssFeed()
+	{
 		if (string.IsNullOrWhiteSpace(Request.Headers.Authorization))
 		{
 			Response.Headers.Add("WWW-Authenticate", "Basic realm=\"Access to the personalized RSS feed\"");
 			return Unauthorized();
 		}
 
-		try {
+		try
+		{
 			string type = Request.Headers.Authorization.First().Split(' ').First();
 			string secret = Request.Headers.Authorization.First().Split(' ').Last();
 			string secretDecoded = Encoding.UTF8.GetString(Convert.FromBase64String(secret));
@@ -77,21 +88,21 @@ public class FeedController : Controller
 				item.AppendChild(published);
 
 				XmlElement author = document.CreateElement("author");
-				
+
 				XmlElement name = document.CreateElement("name");
 				name.InnerText = video.ChannelName;
 				author.AppendChild(name);
-				
+
 				XmlElement uri = document.CreateElement("uri");
 				uri.InnerText = $"https://{Request.Host}/channel/{video.ChannelId}";
 				author.AppendChild(uri);
-				
+
 				item.AppendChild(author);
 				channel.AppendChild(item);
 			}
 
 			rss.AppendChild(channel);
-			
+
 			document.AppendChild(rss);
 			return File(Encoding.UTF8.GetBytes(document.OuterXml), "application/xml");
 		}
@@ -104,15 +115,15 @@ public class FeedController : Controller
 
 	[Route("channels")]
 	[HttpGet]
-	public IActionResult Channels() 
+	public IActionResult Channels()
 	{
 		ChannelsContext ctx = new(HttpContext);
 		if (ctx.User is null) return Redirect("/account/login?redirectUrl=%2ffeed%2fchannels");
-        ctx.Channels = from v in ctx.User.Subscriptions.Keys
-			.Select(DatabaseManager.Channels.GetChannel)
+		ctx.Channels = from v in ctx.User.Subscriptions.Keys
+			.Select(DatabaseManager.Cache.GetChannel)
 			.Where(x => x is not null)
-			orderby v.Name
-			select v;
+					   orderby v.Name
+					   select v;
 		return View(ctx);
 	}
 
@@ -128,21 +139,21 @@ public class FeedController : Controller
 			{
 				SubscriptionType newType = (SubscriptionType)subTypeInt;
 				if (c.User.Subscriptions.TryGetValue(id, out SubscriptionType oldType))
-					if (newType != oldType) 
+					if (newType != oldType)
 					{
 						await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, newType);
 					}
-				else
-					await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, newType);
+					else
+						await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, newType);
 			}
 		}
 
 		ChannelsContext ctx = new(HttpContext);
-        ctx.Channels = from v in ctx.User!.Subscriptions.Keys
-			.Select(DatabaseManager.Channels.GetChannel)
+		ctx.Channels = from v in ctx.User!.Subscriptions.Keys
+			.Select(DatabaseManager.Cache.GetChannel)
 			.Where(x => x is not null)
-			orderby v.Name
-			select v;
+					   orderby v.Name
+					   select v;
 		return View(ctx);
 	}
 
@@ -153,5 +164,197 @@ public class FeedController : Controller
 		LibraryContext c = new(HttpContext);
 		if (c.User is null) return Redirect("/account/login?redirectUrl=%2ffeed%2flibrary");
 		return View(c);
+	}
+
+	[Route("/newPlaylist")]
+	[HttpGet]
+	public IActionResult NewPlaylist(string? v)
+	{
+		ModalContext ctx = new ModalContext(HttpContext);
+		if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
+		ctx.Buttons = new[]
+		{
+			new ModalButton(v ?? "", "|", ""),
+			new ModalButton("Create Playlist", "__submit", "primary"),
+		};
+		ctx.Title = "Create new playlist";
+		ctx.AlignToStart = true;
+		return View(ctx);
+	}
+
+	[Route("/newPlaylist")]
+	[HttpPost]
+	public async Task<IActionResult> NewPlaylist(string title, string description, PlaylistVisibility visibility, string firstVideo)
+	{
+		try
+		{
+			DatabasePlaylist pl = await DatabaseManager.Playlists.CreatePlaylist(Request.Cookies["token"], title, description, visibility);
+			if (firstVideo != null)
+			{
+				InnerTubePlayer video = await _youtube.GetPlayerAsync(firstVideo);
+				await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], pl.Id, video);
+			}
+			return Ok("You can now close this window");
+		}
+		catch (Exception e)
+		{
+			return Ok(e.Message);
+		}
+	}
+
+	[Route("/editPlaylist")]
+	[HttpGet]
+	public IActionResult EditPlaylist(string id)
+	{
+		PlaylistVideoContext ctx = new PlaylistVideoContext(HttpContext);
+		if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
+
+		DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
+		if (playlist is null) return Redirect("/");
+
+		if (playlist.Author != ctx.User.UserID) return Redirect("/");
+
+		ctx.ItemId = playlist.Id;
+		ctx.ItemTitle = playlist.Name;
+		ctx.ItemSubtitle = playlist.Description;
+		ctx.ItemThumbnail = ((int)playlist.Visibility).ToString();
+
+		ctx.Buttons = new[]
+		{
+			new ModalButton("", "|", ""),
+			new ModalButton("Confirm", "__submit", "primary"),
+		};
+		ctx.Title = "Edit playlist";
+		ctx.AlignToStart = true;
+		return View(ctx);
+	}
+
+	[Route("/editPlaylist")]
+	[HttpPost]
+	public async Task<IActionResult> EditPlaylist(string id, string title, string description, PlaylistVisibility visibility)
+	{
+		try
+		{
+			await DatabaseManager.Playlists.EditPlaylist(Request.Cookies["token"], id, title, description, visibility);
+			return Ok("You can now close this window");
+		}
+		catch (Exception e)
+		{
+			return Ok(e.Message);
+		}
+	}
+
+	[Route("/deletePlaylist")]
+	[HttpGet]
+	public IActionResult DeletePlaylist(string id)
+	{
+		PlaylistVideoContext ctx = new PlaylistVideoContext(HttpContext);
+		if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
+
+		DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
+		if (playlist is null) return Redirect("/");
+
+		if (playlist.Author != ctx.User.UserID) return Redirect("/");
+
+		ctx.ItemId = playlist.Id;
+		ctx.ItemTitle = playlist.Name;
+		ctx.ItemSubtitle = playlist.VideoIds.Count + " videos";
+		ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{playlist.VideoIds.FirstOrDefault()}/hqdefault.jpg";
+
+		ctx.Buttons = new[]
+		{
+			new ModalButton("", "|", ""),
+			new ModalButton("Delete", "__submit", "primary"),
+		};
+		ctx.Title = "Delete playlist";
+		return View(ctx);
+	}
+
+	[Route("/deletePlaylist")]
+	[HttpPost]
+	public async Task<IActionResult> DeletePlaylist(string id, string title, string description, PlaylistVisibility visibility)
+	{
+		try
+		{
+			await DatabaseManager.Playlists.DeletePlaylist(Request.Cookies["token"], id);
+			return Ok("You can now close this window");
+		}
+		catch (Exception e)
+		{
+			return Ok(e.Message);
+		}
+	}
+
+	[HttpGet]
+	[Route("/addToPlaylist")]
+	public async Task<IActionResult> AddToPlaylist(string v)
+	{
+		InnerTubeNextResponse intr = await _youtube.GetVideoAsync(v);
+		PlaylistVideoContext pvc = new PlaylistVideoContext(HttpContext, intr);
+		if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
+		pvc.Playlists = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.PRIVATE);
+		pvc.Buttons = new[]
+		{
+			new ModalButton("", "|", ""),
+			new ModalButton("Add", "__submit", "primary"),
+		};
+		pvc.Title = "Add video to playlist";
+		return View(pvc);
+	}
+
+	[Route("/addToPlaylist")]
+	[HttpPost]
+	public async Task<IActionResult> AddToPlaylist(string playlist, string video)
+	{
+		try
+		{
+			if (playlist == "__NEW") return Redirect("/newPlaylist?v=" + video);
+
+			InnerTubePlayer v = await _youtube.GetPlayerAsync(video);
+			await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], playlist, v);
+			return Ok("You can now close this window");
+		}
+		catch (Exception e)
+		{
+			return Ok(e.Message);
+		}
+	}
+
+	[HttpGet]
+	[Route("/removeFromPlaylist")]
+	public async Task<IActionResult> RemoveFromPlaylist(string v, string list)
+	{
+		DatabaseVideo? video = DatabaseManager.Cache.GetVideo(v[..11]);
+
+		PlaylistVideoContext pvc = new PlaylistVideoContext(HttpContext, video, v);
+		if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
+
+		DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(list);
+		if (playlist is null) return Redirect("/");
+
+		if (playlist.Author != pvc.User.UserID) return Redirect("/");
+		
+		pvc.Buttons = new[]
+		{
+			new ModalButton(@playlist.Name, "|", @playlist.Id),
+			new ModalButton("Delete", "__submit", "primary"),
+		};
+		pvc.Title = "Add video to playlist";
+		return View(pvc);
+	}
+
+	[Route("/removeFromPlaylist")]
+	[HttpPost]
+	public async Task<IActionResult> RemoveFromPlaylist(string playlist, string video, string __RequestVerificationToken)
+	{
+		try
+		{
+			await DatabaseManager.Playlists.RemoveVideoFromPlaylist(Request.Cookies["token"], playlist, video);
+			return Ok("You can now close this window");
+		}
+		catch (Exception e)
+		{
+			return Ok(e.Message);
+		}
 	}
 }

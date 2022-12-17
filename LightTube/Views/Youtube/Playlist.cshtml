@@ -10,16 +10,18 @@
 		<a class="playlist-page-channel" href="/channel/@Model.AuthorId" title="@Model.AuthorName">@Model.AuthorName</a>
 		<div class="playlist-page-info-data">
 			@Model.ViewCountText&nbsp;&nbsp;@Model.LastUpdatedText
+			<br><br>
+			@Model.PlaylistDescription
 		</div>
-		@if (false)
+		@if (Model.Editable)
 		{
 			<div class="playlist-page-buttons">
-				<a href="#" class="icon-button" title="Edit">
+				<a href="/editPlaylist?id=@Model.Id" target="_blank" class="icon-button" title="Edit">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#pencil"/>
 					</svg>
 				</a>
-				<a href="#" class="icon-button" title="Delete">
+				<a href="/deletePlaylist?id=@Model.Id" target="_blank" class="icon-button" title="Delete">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#trash"/>
 					</svg>

@@ -1,0 +1,60 @@
+@model PlaylistVideoContext
+
+@{
+	Layout = "_ModalLayout";
+}
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Title
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<input type="text" name="title" value="@Model.ItemTitle">
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Description
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<input type="text" name="description" value="@Model.ItemSubtitle">
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Visibility
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="visibility">
+			@switch (Model.ItemThumbnail)
+			{
+				case "2":
+					<option value="2" selected>Public</option>
+					<option value="1">Unlisted</option>
+					<option value="0">Private</option>
+					break;
+				case "0":
+					<option value="2">Public</option>
+					<option value="1">Unlisted</option>
+					<option value="0" selected>Private</option>
+					break;
+				default:
+				case "1":
+					<option value="2">Public</option>
+					<option value="1" selected>Unlisted</option>
+					<option value="0">Private</option>
+					break;
+			}
+		</select>
+	</div>
+</div>
+
+<input style="display:none;" name="id" value="@Model.ItemId">

@@ -16,7 +16,7 @@
 	<div class="modal-title">
 		@Model.Title
 	</div>
-	<div class="modal-content">
+	<div class="modal-content" @(Model.AlignToStart ? Html.Raw("style=\"align-items:initial\"") : "")>
 		@RenderBody()
 	</div>
 	<div class="modal-buttons">

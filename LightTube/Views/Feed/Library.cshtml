@@ -2,7 +2,7 @@
 @model LibraryContext
 
 <div class="search-container">
-	<a href="/createPlaylist" class="btn-outline btn-blue" style="width:fit-content;">
+	<a href="/newPlaylist" class="btn-outline btn-blue" style="width:fit-content;">
 		<div class="text">
 			New Playlist
 		</div>
@@ -11,8 +11,8 @@
 	@foreach (DatabasePlaylist playlist in Model.Playlists)
 	{
 		<div class="renderer-playlistrenderer">
-			<a href="/watch?v=@playlist.VideoIds.First()&list=@playlist.Id" class="thumbnail">
-				<img loading="lazy" src="https://i.ytimg.com/vi/@playlist.VideoIds.First()/hqdefault.jpg" alt="@playlist.Name" style="object-fit:cover;">
+			<a href="/watch?v=@playlist.VideoIds.FirstOrDefault()&list=@playlist.Id" class="thumbnail">
+				<img loading="lazy" src="https://i.ytimg.com/vi/@playlist.VideoIds.FirstOrDefault()/hqdefault.jpg" alt="@playlist.Name" style="object-fit:cover;">
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoIds.Count</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">

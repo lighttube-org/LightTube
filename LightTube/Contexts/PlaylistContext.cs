@@ -7,8 +7,10 @@ namespace LightTube.Contexts;
 
 public class PlaylistContext : BaseContext
 {
+	public string Id;
 	public string PlaylistThumbnail;
 	public string PlaylistTitle;
+	public string PlaylistDescription;
 	public string AuthorName;
 	public string AuthorId;
 	public string ViewCountText;
@@ -19,8 +21,10 @@ public class PlaylistContext : BaseContext
 
 	public PlaylistContext(HttpContext context, InnerTubePlaylist playlist) : base(context)
 	{
+		Id = playlist.Id;
 		PlaylistThumbnail = playlist.Sidebar.Thumbnails.Last().Url.ToString();
 		PlaylistTitle = playlist.Sidebar.Title;
+		PlaylistDescription = playlist.Sidebar.Description;
 		AuthorName = playlist.Sidebar.Channel.Title;
 		AuthorId = playlist.Sidebar.Channel.Id!;
 		ViewCountText = playlist.Sidebar.ViewCountText;
@@ -40,8 +44,10 @@ public class PlaylistContext : BaseContext
 
 	public PlaylistContext(HttpContext context, InnerTubePlaylist playlist, InnerTubeContinuationResponse continuation) : base(context)
 	{
+		Id = playlist.Id;
 		PlaylistThumbnail = playlist.Sidebar.Thumbnails.Last().Url.ToString();
 		PlaylistTitle = playlist.Sidebar.Title;
+		PlaylistDescription = playlist.Sidebar.Description;
 		AuthorName = playlist.Sidebar.Channel.Title;
 		AuthorId = playlist.Sidebar.Channel.Id!;
 		ViewCountText = playlist.Sidebar.ViewCountText;
@@ -67,19 +73,22 @@ public class PlaylistContext : BaseContext
 		
 		if (visible && playlist != null)
 		{
+			Id = playlist.Id;
 			PlaylistThumbnail = $"https://i.ytimg.com/vi/{playlist.VideoIds.First()}/hqdefault.jpg";
 			PlaylistTitle = playlist.Name;
+			PlaylistDescription = playlist.Description;
 			AuthorName = playlist.Author;
 			AuthorId = DatabaseManager.Users.GetUserFromId(playlist.Author).Result?.LTChannelID ?? "";
 			ViewCountText = "LightTube playlist";
 			LastUpdatedText = $"Last updated on {playlist.LastUpdated:MMM d, yyyy}";
-			Items = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id);
 			Editable = User != null && User.UserID == playlist.Author;
+			Items = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Editable);
 		}
 		else
 		{
 			PlaylistThumbnail = $"https://i.ytimg.com/vi//hqdefault.jpg";
 			PlaylistTitle = "Playlist unavailable";
+			PlaylistDescription = "";
 			AuthorName = "";
 			AuthorId = "";
 			ViewCountText = "LightTube playlist";

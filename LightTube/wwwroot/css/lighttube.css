@@ -1041,7 +1041,7 @@ body.no-guide .guide {
 	column-gap: 8px;
 }
 
-.subscription-dropdown {
+select {
 	padding: 8px;
 	background: var(--chip-background);
 	border: var(--border-color);
@@ -1049,11 +1049,11 @@ body.no-guide .guide {
 	color: var(--text-primary);
 }
 
-.subscription-dropdown:hover {
+select:hover {
 	background-color: var(--chip-background-hover);
 }
 
-.subscription-dropdown:active {
+select:active {
 	background-color: var(--chip-background-active);
 }
 
@@ -1177,4 +1177,12 @@ body.no-guide .guide {
 .settings-option__info * {
 	text-align: start;
 	width: 100%;
+}
+
+input[type=text] {
+	background-color: var(--chip-background);
+	padding: 4px 8px;
+	border-radius: 32px;
+	border: 1px solid var(--chip-background-active);
+	color: var(--text-primary);
 }

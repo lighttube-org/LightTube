@@ -136,3 +136,29 @@ label {
 .modal-button-secondary:active {
     background-color: #cadff9;
 }
+
+.modal-item {
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+    gap: 8px;
+    background-color: var(--item-active-background);
+    width: 350px;
+    border-radius: 8px;
+ }
+
+.modal-item__thumbnail {
+    height: 70px;
+    width: 125px;
+    aspect-ratio: 16 / 9;
+    overflow: clip;
+    border-radius: 8px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.modal-item__thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

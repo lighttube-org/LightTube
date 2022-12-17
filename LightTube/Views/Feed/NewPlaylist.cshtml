@@ -1,0 +1,44 @@
+@model ModalContext
+
+@{
+	Layout = "_ModalLayout";
+}
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Title
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<input type="text" name="title">
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Description
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<input type="text" name="description">
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Visibility
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="visibility">
+			<option value="1">Unlisted</option>
+			<option value="2">Public</option>
+			<option value="0">Private</option>
+		</select>
+	</div>
+</div>
+
+<input style="display:none;" name="firstVideo" value="@Model.Buttons[0].Label">
