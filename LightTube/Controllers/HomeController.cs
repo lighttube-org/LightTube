@@ -20,5 +20,5 @@ public class HomeController : Controller
 	public IActionResult Rss() => View(new BaseContext(HttpContext));
 
 	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-	public IActionResult Error() => StatusCode(500);
+	public IActionResult Error() => View(new BaseContext(HttpContext));
 }

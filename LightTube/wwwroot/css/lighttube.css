@@ -1186,3 +1186,41 @@ input[type=text] {
 	border: 1px solid var(--chip-background-active);
 	color: var(--text-primary);
 }
+
+/* Error Page */
+
+.error-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+}
+
+.error-container > * {
+	text-align: center;
+}
+
+.error-container > ul {
+	text-align: start;
+}
+
+.error-container a {
+	color: var(--text-link);
+	text-decoration: none;
+}
+
+.error-container a:hover {
+	text-decoration: underline;
+}
+
+code {
+	max-width: calc(100% - 2rem);
+	overflow-x: auto;
+	padding: 4px;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	background-color: var(--thumbnail-background);
+	user-select: all;
+	color: var(--text-primary);
+}

@@ -16,6 +16,7 @@ namespace LightTube;
 public static class Utils
 {
 	private static string? _version;
+	private static string? _itVersion;
 	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 	public static string GetRegion(this HttpContext context) =>
@@ -46,6 +47,13 @@ public static class Utils
 		}
 
 		return _version;
+	}
+
+	public static string GetInnerTubeVersion()
+	{
+		_itVersion ??= typeof(InnerTube.InnerTube).Assembly.GetName().Version!.ToString();
+
+		return _itVersion;
 	}
 
 	public static string GetCodecFromMimeType(string mime)
