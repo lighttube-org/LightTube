@@ -2,6 +2,10 @@
 @using InnerTube
 @model SearchContext
 
+@{
+	Model.Title = Model.GetSearchBoxInput();
+}
+
 <div class="search-container">
 	@if (Model.Search?.SearchOptions is not null)
 	{

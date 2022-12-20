@@ -3,6 +3,10 @@
 @using Utils = LightTube.Utils
 @model ChannelContext
 
+@{
+	Model.Title = Model.ChannelTitle;
+}
+
 <div class="channel-container">
 	@if (Model.BannerUrl != null)
 	{

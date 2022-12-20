@@ -7,6 +7,7 @@ namespace LightTube.Contexts;
 
 public class BaseContext
 {
+	public string Title;
 	public bool IsMobile;
 	public List<IHtmlContent> HeadTags = new();
 	public List<IHtmlContent> EndTags = new();

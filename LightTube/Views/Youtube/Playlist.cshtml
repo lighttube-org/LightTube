@@ -1,6 +1,10 @@
 ﻿@using InnerTube.Renderers
 @model PlaylistContext
 
+@{
+	Model.Title = Model.PlaylistTitle;
+}
+
 <div class="playlist-page">
 	<div class="playlist-page-info">
 		<div class="playlist-page-thumbnail">

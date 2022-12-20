@@ -1,6 +1,10 @@
 ﻿@using InnerTube.Renderers
 @model WatchContext
 
+@{
+	Model.Title = Model.Video.Title;
+}
+
 <div class="watch-page">
 	<div class="player-container" style="color:white">
 		<partial name="Player" model="Model.Player"/>
