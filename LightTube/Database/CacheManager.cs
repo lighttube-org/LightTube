@@ -17,14 +17,22 @@ public class CacheManager
 		VideoCollection = videoCollection;
 	}
 
+	public async Task AddChannel(DatabaseChannel channel, bool updateOnly = false)
+	{
+		if (await ChannelCollection.CountDocumentsAsync(x => x.ChannelId == channel.ChannelId) > 0)
+			await ChannelCollection.ReplaceOneAsync(x => x.ChannelId == channel.ChannelId, channel);
+		else if (!updateOnly)
+			await ChannelCollection.InsertOneAsync(channel);
+	}
+
 	public DatabaseChannel? GetChannel(string id) =>
 		ChannelCollection.FindSync(x => x.ChannelId == id).FirstOrDefault();
 
-	public async Task AddVideo(DatabaseVideo video)
+	public async Task AddVideo(DatabaseVideo video, bool updateOnly = false)
 	{
 		if (await VideoCollection.CountDocumentsAsync(x => x.Id == video.Id) > 0)
 			await VideoCollection.ReplaceOneAsync(x => x.Id == video.Id, video);
-		else
+		else if (!updateOnly)
 			await VideoCollection.InsertOneAsync(video);
 	}
 

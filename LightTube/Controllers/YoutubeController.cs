@@ -84,6 +84,9 @@ public class YoutubeController : Controller
 			dislikes = -1;
 		}
 
+		if (player is not null)
+			await DatabaseManager.Cache.AddVideo(new DatabaseVideo(player), true);
+
 		if (localPlaylist && list != null)
 		{
 			DatabasePlaylist? pl = DatabaseManager.Playlists.GetPlaylist(list);
@@ -144,6 +147,7 @@ public class YoutubeController : Controller
 		InnerTubeChannelResponse channel =
 			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
+		await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
 		return View(new SubscriptionContext(HttpContext, channel));
 	}
 
@@ -157,6 +161,7 @@ public class YoutubeController : Controller
 		InnerTubeChannelResponse channel =
 			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
+		await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
 		return Ok("You can now close this window.");
 	}
 
@@ -173,6 +178,7 @@ public class YoutubeController : Controller
 		{
 			InnerTubeChannelResponse channel =
 				await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
 			return View(new ChannelContext(HttpContext, tab, channel, id));
 		}
 		else
