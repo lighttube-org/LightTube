@@ -3,13 +3,13 @@ using LightTube.Database.Models;
 
 namespace LightTube.Contexts;
 
-public class PlaylistVideoContext : ModalContext
+public class PlaylistVideoContext<T> : ModalContext
 {
 	public string ItemId;
 	public string ItemTitle;
 	public string ItemSubtitle;
 	public string ItemThumbnail;
-	public IEnumerable<DatabasePlaylist>? Playlists;
+	public T? Extra;
 
 	public PlaylistVideoContext(HttpContext context) : base(context)
 	{

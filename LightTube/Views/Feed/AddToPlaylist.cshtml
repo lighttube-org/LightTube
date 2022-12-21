@@ -1,5 +1,5 @@
 @using LightTube.Database.Models
-@model PlaylistVideoContext
+@model PlaylistVideoContext<IEnumerable<DatabasePlaylist>>
 
 @{
 	Layout = "_ModalLayout";
@@ -25,7 +25,7 @@
 
 <input style="display:none;" name="video" value="@Model.ItemId">
 <select name="playlist">
-	@foreach (DatabasePlaylist playlist in Model.Playlists!)
+	@foreach (DatabasePlaylist playlist in Model.Extra!)
 	{
 		<option value="@playlist.Id">@playlist.Name</option>
 	}

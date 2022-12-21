@@ -206,7 +206,7 @@ public class FeedController : Controller
 	[HttpGet]
 	public IActionResult EditPlaylist(string id)
 	{
-		PlaylistVideoContext ctx = new PlaylistVideoContext(HttpContext);
+		PlaylistVideoContext<IEnumerable<DatabasePlaylist>> ctx = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext);
 		if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
 
 		DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
@@ -248,7 +248,7 @@ public class FeedController : Controller
 	[HttpGet]
 	public IActionResult DeletePlaylist(string id)
 	{
-		PlaylistVideoContext ctx = new PlaylistVideoContext(HttpContext);
+		PlaylistVideoContext<IEnumerable<DatabasePlaylist>> ctx = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext);
 		if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
 
 		DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
@@ -290,9 +290,9 @@ public class FeedController : Controller
 	public async Task<IActionResult> AddToPlaylist(string v)
 	{
 		InnerTubeNextResponse intr = await _youtube.GetVideoAsync(v);
-		PlaylistVideoContext pvc = new PlaylistVideoContext(HttpContext, intr);
+		PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext, intr);
 		if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
-		pvc.Playlists = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.PRIVATE);
+		pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.PRIVATE);
 		pvc.Buttons = new[]
 		{
 			new ModalButton("", "|", ""),
@@ -326,7 +326,7 @@ public class FeedController : Controller
 	{
 		DatabaseVideo? video = DatabaseManager.Cache.GetVideo(v[..11]);
 
-		PlaylistVideoContext pvc = new PlaylistVideoContext(HttpContext, video, v);
+		PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext, video, v);
 		if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
 
 		DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(list);

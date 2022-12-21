@@ -1,4 +1,5 @@
-@model PlaylistVideoContext
+@using LightTube.Database.Models
+@model PlaylistVideoContext<IEnumerable<DatabasePlaylist>>
 
 @{
 	Layout = "_ModalLayout";
