@@ -334,4 +334,20 @@ public static class Utils
 		if (user is null) return SubscriptionType.NONE;
 		return user.Subscriptions.TryGetValue(channelId, out SubscriptionType type) ? type : SubscriptionType.NONE;
 	}
+
+	public static string GetExtension(this Format format)
+	{
+		if (format.MimeType.StartsWith("video"))
+			format.MimeType
+				.Split("/").Last()
+				.Split(";").First();
+		else {
+			if (format.MimeType.Contains("opus"))
+				return "opus";
+			if (format.MimeType.Contains("mp4a"))
+				return "mp3";
+		}
+
+		return "mp4";
+	}
 }

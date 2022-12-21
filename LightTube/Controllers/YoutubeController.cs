@@ -212,4 +212,38 @@ public class YoutubeController : Controller
 
 	[Route("/shorts/{v}")]
 	public IActionResult Shorts(string v) => RedirectPermanent("/watch?v={v}");
+
+	[Route("/download/{v}")]
+	public async Task<IActionResult> Download(string v)
+	{
+		InnerTubePlayer? player;
+		Exception? e;
+
+		try
+		{
+			player = await _youtube.GetPlayerAsync(v, true, false, HttpContext.GetLanguage(),
+				HttpContext.GetRegion());
+			e = null;
+		}
+		catch (Exception ex)
+		{
+			player = null;
+			e = ex;
+		}
+
+		if (player is null || e is not null)
+			return BadRequest(e?.Message ?? "player is null");
+		if (player.Details.IsLive)
+			return BadRequest("You cannot download live videos");
+		PlaylistVideoContext<InnerTubePlayer> ctx = new PlaylistVideoContext<InnerTubePlayer>(HttpContext);
+		ctx.ItemId = player.Details.Id;
+		ctx.ItemTitle = player.Details.Title;
+		ctx.ItemSubtitle = player.Details.Author.Title;
+		ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{player.Details.Id}/hqdefault.jpg";
+		ctx.Extra = player;
+		ctx.Title = "Download video";
+		ctx.AlignToStart = true;
+		ctx.Buttons = Array.Empty<ModalButton>();
+		return View(ctx);
+	}
 }

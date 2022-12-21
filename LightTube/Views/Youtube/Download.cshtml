@@ -1,0 +1,115 @@
+@using InnerTube
+@model PlaylistVideoContext<InnerTubePlayer>
+@{
+	Layout = "_ModalLayout";
+}
+
+<div class="modal-item">
+	<div class="modal-item__thumbnail">
+		<img src="@Model.ItemThumbnail" alt="@Model.ItemTitle">
+	</div>
+	<div class="modal-item__info">
+		<div class="ml-2 title" title="@Model.ItemTitle">
+			@Model.ItemTitle
+		</div>
+		<div class="ml-1" title="@Model.ItemSubtitle">
+			@Model.ItemSubtitle
+		</div>
+	</div>
+</div>
+
+<p>
+	Please select a format to download.
+</p>
+
+<table>
+	<tr>
+		<td>
+			<svg class="icon" width="14" height="14" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+			</svg>
+		</td>
+		<td>
+			Direct download
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<svg class="icon" width="14" height="14" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#cloud-download"/>
+			</svg>
+		</td>
+		<td>
+			Proxied download (not recommended)
+		</td>
+	</tr>
+</table>
+
+<br>
+
+@foreach (Format f in Model.Extra!.Formats)
+{
+	<div class="settings-option">
+		<div class="settings-option__info">
+			<div class="ml-1 title">
+				@f.QualityLabel
+			</div>
+			<div class="ml-2">
+				@f.Fps FPS, @(f.AudioSampleRate)Hz, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
+			</div>
+		</div>
+		<div class="settings-option__option">
+			<div class="interaction-buttons">
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="@f.Url" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+					</svg>
+				</a>
+				<vr></vr>
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="/proxy/media/@Model.Extra.Details.Id/@f.Itag" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#cloud-download"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</div>
+}
+
+@foreach (Format f in Model.Extra!.AdaptiveFormats)
+{
+	<div class="settings-option">
+		<div class="settings-option__info">
+			@if (f.MimeType.StartsWith("video")) {
+				<div class="ml-1 title">
+					Video Only - @f.QualityLabel
+				</div>
+				<div class="ml-2">
+						@f.Fps FPS, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
+				</div>
+			} else {
+				<div class="ml-1 title">
+					Audio only - @f.AudioQuality.Replace("AUDIO_QUALITY_", "")
+				</div>
+				<div class="ml-2">
+					@f.AudioChannels channels, @(f.AudioSampleRate)Hz (@(f.MimeType.Split(";")[0]))
+				</div>
+			}
+		</div>
+		<div class="settings-option__option">
+			<div class="interaction-buttons">
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="@f.Url" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+					</svg>
+				</a>
+				<vr></vr>
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="/proxy/media/@Model.Extra.Details.Id/@f.Itag" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#cloud-download"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</div>
+}
