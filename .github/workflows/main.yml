@@ -1,0 +1,26 @@
+name: publish-to-docker
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out code
+
+      - name: Set version
+        run: date +0.%Y.%m.%d >> $LIGHTTUBE_VERSION
+
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build & push Docker image
+        with:
+          image: kuylar/lighttube
+          tags: latest,${{ env.LIGHTTUBE_VERSION }}
+          registry: hub.docker.com
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
