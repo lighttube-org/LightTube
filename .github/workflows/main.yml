@@ -13,7 +13,10 @@ jobs:
         name: Check out code
 
       - name: Set version
-        run: date +0.%Y.%m.%d >> $LIGHTTUBE_VERSION
+        run: LIGHTTUBE_VERSION=$(date +0.%Y.%m.%d)
+
+      - name: Check version
+        run: echo Building version ${{ env.LIGHTTUBE_VERSION }}
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
