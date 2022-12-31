@@ -28,4 +28,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: inftord/lighttube:latest
+          tags: inftord/lighttube:latest,inftord/lighttube:${{ env.LIGHTTUBE_VERSION }}
