@@ -13,7 +13,7 @@ jobs:
         name: Check out code
 
       - name: Set version
-        run: echo LIGHTTUBE_VERSION=`date +0.%Y.%m.%d` >> $GITHUB_ENV
+        run: echo LIGHTTUBE_VERSION=`date %Y%m%d` >> $GITHUB_ENV
 
       - name: Check version
         run: echo Building version ${{ env.LIGHTTUBE_VERSION }}
