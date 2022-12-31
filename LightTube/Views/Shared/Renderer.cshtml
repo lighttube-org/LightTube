@@ -78,7 +78,7 @@
 		break;
 	case PlaylistRenderer playlist:
 		<div class="renderer-playlistrenderer">
-			<a href="/watch?v=@playlist.Videos.First().Id&list=@playlist.Id" class="thumbnail">
+			<a href="@(playlist.Videos.Any() ? $"/watch?v={playlist.Videos.First().Id}&list={playlist.Id}" : $"/playlist?list={playlist.Id}")" class="thumbnail">
 				<img loading="lazy" src="@playlist.Thumbnails.First().Url" alt="@playlist.Title">
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
