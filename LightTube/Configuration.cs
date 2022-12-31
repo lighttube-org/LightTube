@@ -1,87 +1,34 @@
-﻿using System;
-using System.IO;
-using YamlDotNet.Serialization;
+﻿using InnerTube;
 
-namespace LightTube
+namespace LightTube;
+
+public static class Configuration
 {
-	public class Configuration
+	private static Dictionary<string, string> _variables = new();
+
+	public static string? GetVariable(string var, string? def = null)
 	{
-		public static Configuration Instance { get; private set; }
-
-		public InterfaceConfig Interface = new();
-		public CredentialsConfig Credentials = new();
-		public DatabaseConfig Database = new();
-
-		public static void LoadConfiguration()
+		if (_variables.TryGetValue(var, out string? res)) return res;
+		string? v = Environment.GetEnvironmentVariable(var) ?? def;
+		if (v == null) return null;
+		_variables.Add(var, v);
+		return v;
+	}
+	
+	public static InnerTubeAuthorization? GetInnerTubeAuthorization() =>
+		GetVariable("LIGHTTUBE_AUTH_TYPE")?.ToLower() switch
 		{
-			string path = null;
-			string cwdConfigPath = Path.Join(Environment.CurrentDirectory, "lighttube.yml");
-			if (File.Exists(cwdConfigPath))
-			{
-				path = cwdConfigPath;
-			}
-			else if (OperatingSystem.IsLinux())
-			{
-				path = "/etc/lighttube.yml";
-			}
-			else if (OperatingSystem.IsWindows())
-			{
-				string appdataFolder = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-					"lighttube", "config.yml");
-				path = appdataFolder;
-			}
-			else
-			{
-				Console.WriteLine($"Unknown operating system {Environment.OSVersion}, using the current working dir for the configuration ({cwdConfigPath}).");
-			}
-
-			path ??= cwdConfigPath;
-			if (!File.Exists(path))
-			{
-				CreateConfigurationFile(path);
-			}
-			
-			Console.WriteLine($"Reading configuration from {path}");
-			Instance = new Deserializer().Deserialize<Configuration>(File.ReadAllText(path));
-
-			if (string.IsNullOrEmpty(Instance.Database.MongoConnectionString))
-			{
-				Console.WriteLine("MongoDB Connection String is not provided in the configuration file. Exiting...");
-				Environment.Exit(1);
-			}
-		}
-
-		private static void CreateConfigurationFile(string path)
-		{
-			Console.WriteLine($"Creating configuration file at {path}");
-			Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-			using FileStream stream = File.Create(path);
-			using TextWriter writer = new StreamWriter(stream);
-			writer.WriteLine("# see https://gitlab.com/kuylar/lighttube/-/blob/master/CONFIGURATION.md");
-			writer.WriteLine();
-			new Serializer().Serialize(writer, new Configuration());
-			writer.Close();
-			stream.Close();
-			Console.WriteLine("Created configuration file");
-		}
-	}
-
-	public class InterfaceConfig
-	{
-		public string MessageOfTheDay = "Search something to get started!";
-	}
-
-	public class CredentialsConfig
-	{
-		public bool UseCredentials = false;
-		public string Sapisid = null;
-		public string Psid = null;
-
-		public bool CanUseAuthorizedEndpoints() => UseCredentials && Sapisid != null && Psid != null;
-	}
-
-	public class DatabaseConfig
-	{
-		public string MongoConnectionString = null;
-	}
+			"cookie" => InnerTubeAuthorization.SapisidAuthorization(
+				GetVariable("LIGHTTUBE_AUTH_SAPISID") ??
+				throw new ArgumentNullException("LIGHTTUBE_AUTH_SAPISID",
+					"Authentication type set to 'cookie' but the 'LIGHTTUBE_AUTH_SAPISID' environment variable is not set."),
+				GetVariable("LIGHTTUBE_AUTH_PSID") ??
+				throw new ArgumentNullException("LIGHTTUBE_AUTH_PSID",
+					"Authentication type set to 'cookie' but the 'LIGHTTUBE_AUTH_PSID' environment variable is not set.")),
+			"oauth2" => InnerTubeAuthorization.RefreshTokenAuthorization(
+				GetVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ??
+				throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN",
+					"Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set.")),
+			var _ => null
+		};
 }

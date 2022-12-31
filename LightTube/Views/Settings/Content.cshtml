@@ -1,0 +1,62 @@
+@model ContentSettingsContext
+
+@{
+	Layout = "_SettingsLayout";
+	Model.Title = "Content settings";
+}
+
+<h1 class="title">Content Settings</h1>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-1 title">
+			Content Language
+		</div>
+		<div>
+			Only affects video title & descriptions
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="hl" class="subscription-dropdown">
+			@foreach ((string id, string label) in Model.Locals.Languages)
+			{
+				@if (id == Context.GetLanguage())
+				{
+					<option value="@id" selected>@label</option>
+				}
+				else
+				{
+					<option value="@id">@label</option>
+				}
+			}
+		</select>
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Content Region
+		</div>
+		<div>
+			Affects the recommended content
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="gl" class="subscription-dropdown">
+			@foreach ((string id, string label) in Model.Locals.Regions)
+			{
+				@if (id == Context.GetRegion())
+				{
+					<option value="@id" selected>@label</option>
+				}
+				else
+				{
+					<option value="@id">@label</option>
+				}
+			}
+		</select>
+	</div>
+</div>
+<br>
+<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Save Changes">

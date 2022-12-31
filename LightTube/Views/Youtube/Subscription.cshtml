@@ -1,0 +1,32 @@
+﻿@using LightTube.Database.Models
+@model SubscriptionContext
+
+@{
+	Layout = "_ModalLayout";
+}
+
+<img loading="lazy"
+	 class="avatar"
+     src="@Model.Channel.Header?.Avatars.Last().Url"
+     alt="@Model.Channel.Header?.Title">
+<h2 class="title ml-1">
+	@Model.Channel.Header?.Title
+</h2>
+<p>
+	Edit your subscription settings with this channel.
+</p>
+
+<div>
+	<input type="radio" id="st_0" name="type" value="0" @(Model.CurrentType == SubscriptionType.NONE ? "checked" : "")>
+	<label for="st_0">
+		Unsubscribe
+	</label><br>
+	<input type="radio" id="st_2" name="type" value="2" @(Model.CurrentType == SubscriptionType.NOTIFICATIONS_ON ? "checked" : "")>
+	<label for="st_2">
+		Subscribe and include in the RSS feed
+	</label><br>
+	<input type="radio" id="st_1" name="type" value="1" @(Model.CurrentType == SubscriptionType.NOTIFICATIONS_OFF ? "checked" : "")>
+	<label for="st_1">
+		Just subscribe (won't include videos from this channel in your RSS feed)
+	</label>
+</div>

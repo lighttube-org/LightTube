@@ -1,95 +1,115 @@
-﻿@using System.Web
 @using InnerTube
-@using InnerTube.Models
-@model LightTube.Contexts.PlayerContext
-
+@model PlaylistVideoContext<InnerTubePlayer>
 @{
-	ViewBag.Metadata = new Dictionary<string, string>();
-	ViewBag.Metadata["author"] = Model.Video.Channel.Name;
-	ViewBag.Metadata["og:title"] = Model.Player.Title;
-	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
-	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.FirstOrDefault()?.Url?.ToString())}";
-	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Player.Thumbnails.LastOrDefault()?.Url?.ToString())}";
-	ViewBag.Title = Model.Player.Title;
-	Layout = "_Layout";	
+	Layout = "_ModalLayout";
 }
 
-<div class="playlist-page">
-	<div class="playlist-info">
-		<div class="thumbnail" style="background-image: url('@Model.Player.Thumbnails.Last().Url')">
-			<a href="/watch?v=@Model.Player.Id">Watch</a>
-		</div>
-		<p class="title">@Model.Player.Title</p>
-		<span class="info">@Model.Video.Views • @Model.Video.UploadDate</span>
-		<div class="channel-info">
-			<a href="/channel/@Model.Player.Channel.Id" class="avatar">
-				<img src="@Model.Player.Channel.Avatars.LastOrDefault()?.Url">
-			</a>
-			<div class="name">
-				<a class="name" href="/channel/@Model.Player.Channel.Id">@Model.Player.Channel.Name</a>
-			</div>
-		</div>
+<div class="modal-item">
+	<div class="modal-item__thumbnail">
+		<img src="@Model.ItemThumbnail" alt="@Model.ItemTitle">
 	</div>
-	<div class="video-list download-list playlist-video-list">
-		<div class="format-list">
-			<h2>Muxed formats</h2>
-			<p>These downloads have both video and audio in them</p>
-			@foreach (Format format in Model.Player.Formats)
-			{
-				<div class="download-format">
-					<div>
-						@format.FormatNote
-					</div>
-					<a href="/proxy/download/@Model.Video.Id/@format.FormatId/@(HttpUtility.UrlEncode(Model.Video.Title)).@format.GetExtension()">
-						<i class="bi bi-download"></i>
-						Download through LightTube
-					</a>
-					<a href="@format.Url">
-						<i class="bi bi-cloud-download"></i>
-						Download through YouTube
-					</a>
-				</div>
-			}
+	<div class="modal-item__info">
+		<div class="ml-2 title" title="@Model.ItemTitle">
+			@Model.ItemTitle
 		</div>
-		<div class="format-list">
-			<h2>Audio only formats</h2>
-			<p>These downloads have only have audio in them</p>
-			@foreach (Format format in Model.Player.AdaptiveFormats.Where(x => x.VideoCodec == "none"))
-			{
-				<div class="download-format">
-					<div>
-						@format.FormatNote (Codec: @format.AudioCodec, Sample Rate: @format.AudioSampleRate)
-					</div>
-					<a href="/proxy/download/@Model.Video.Id/@format.FormatId/@(HttpUtility.UrlEncode(Model.Video.Title)).@format.GetExtension()">
-						<i class="bi bi-download"></i>
-						Download through LightTube
-					</a>
-					<a href="@format.Url">
-						<i class="bi bi-cloud-download"></i>
-						Download through YouTube
-					</a>
-				</div>
-			}
-		</div>
-		<div class="format-list">
-			<h2>Video only formats</h2>
-			<p>These downloads have only have video in them</p>
-			@foreach (Format format in Model.Player.AdaptiveFormats.Where(x => x.AudioCodec == "none"))
-			{
-				<div class="download-format">
-					<div>
-						@format.FormatNote (Codec: @format.VideoCodec)
-					</div>
-					<a href="/proxy/download/@Model.Video.Id/@format.FormatId/@(HttpUtility.UrlEncode(Model.Video.Title)).@format.GetExtension()">
-						<i class="bi bi-download"></i>
-						Download through LightTube
-					</a>
-					<a href="@format.Url">
-						<i class="bi bi-cloud-download"></i>
-						Download through YouTube
-					</a>
-				</div>
-			}
+		<div class="ml-1" title="@Model.ItemSubtitle">
+			@Model.ItemSubtitle
 		</div>
 	</div>
 </div>
+
+<p>
+	Please select a format to download.
+</p>
+
+<table>
+	<tr>
+		<td>
+			<svg class="icon" width="14" height="14" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+			</svg>
+		</td>
+		<td>
+			Direct download
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<svg class="icon" width="14" height="14" fill="currentColor">
+				<use xlink:href="/svg/bootstrap-icons.svg#cloud-download"/>
+			</svg>
+		</td>
+		<td>
+			Proxied download (not recommended)
+		</td>
+	</tr>
+</table>
+
+<br>
+
+@foreach (Format f in Model.Extra!.Formats)
+{
+	<div class="settings-option">
+		<div class="settings-option__info">
+			<div class="ml-1 title">
+				@f.QualityLabel
+			</div>
+			<div class="ml-2">
+				@f.Fps FPS, @(f.AudioSampleRate)Hz, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
+			</div>
+		</div>
+		<div class="settings-option__option">
+			<div class="interaction-buttons">
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="@f.Url" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+					</svg>
+				</a>
+				<vr></vr>
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="/proxy/media/@Model.Extra.Details.Id/@f.Itag" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#cloud-download"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</div>
+}
+
+@foreach (Format f in Model.Extra!.AdaptiveFormats)
+{
+	<div class="settings-option">
+		<div class="settings-option__info">
+			@if (f.MimeType.StartsWith("video")) {
+				<div class="ml-1 title">
+					Video Only - @f.QualityLabel
+				</div>
+				<div class="ml-2">
+						@f.Fps FPS, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
+				</div>
+			} else {
+				<div class="ml-1 title">
+					Audio only - @f.AudioQuality.Replace("AUDIO_QUALITY_", "")
+				</div>
+				<div class="ml-2">
+					@f.AudioChannels channels, @(f.AudioSampleRate)Hz (@(f.MimeType.Split(";")[0]))
+				</div>
+			}
+		</div>
+		<div class="settings-option__option">
+			<div class="interaction-buttons">
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="@f.Url" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+					</svg>
+				</a>
+				<vr></vr>
+				<a download="@(Model.Extra.Details.Title).@f.GetExtension()" href="/proxy/media/@Model.Extra.Details.Id/@f.Itag" class="interaction-button">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#cloud-download"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,58 @@
+.vjs-endscreen {
+	position: absolute;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	max-width: 100%;
+	max-height: 100%;
+	aspect-ratio: 16 / 9;
+	pointer-events: none;
+	display: none;
+}
+
+.vjs-endscreen-item-container {
+}
+
+.vjs-endscreen-item {
+	position: absolute;
+	border: 1px solid white;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	pointer-events: auto;
+	display: grid;
+
+	cursor: pointer;
+}
+
+.vjs-endscreen-item > * {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	top: 0;
+	left: 0;
+	grid-column: 1;
+	grid-row: 1;
+}
+
+.vjs-endscreen-item > img {
+	object-fit: cover;
+}
+
+.vjs-endscreen-item > div {
+	margin: 12px;
+	display: flex;
+	flex-direction: column;
+	row-gap: 4px;
+}
+
+.vjs-endscreen-item > div > * {
+	color: #ddd;
+	text-shadow: -1px -1px 0 #0003, 0 -1px 0 #0003, 1px -1px 0 #0003, 1px 0 0 #0003, 1px 1px 0 #0003, 0 1px 0 #0003, -1px 1px 0 #0003, -1px 0 0 #0003;
+}
+
+.vjs-endscreen-item > div > *:first-child {
+	color: #fff;
+}

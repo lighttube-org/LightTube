@@ -1,0 +1,108 @@
+﻿@using InnerTube
+@using System.Text.Json
+@using InnerTube.Exceptions
+@model PlayerContext
+
+@{
+	bool playable = true;
+}
+
+@if (Model.Player is null)
+{
+	playable = false;
+	@if (Model.Exception is not null)
+	{
+		@if (Model.Exception is PlayerException e)
+		{
+			@:[@e.Code] @e.Error
+			<br>
+			@e.Description
+		}
+		else
+		{
+			<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
+				<span>
+					@Model.Exception.Message
+				</span>
+			</div>
+		}
+	}
+	else
+	{
+		<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
+			<span>
+				Failed to load player
+			</span>
+		</div>
+	}
+}
+else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
+{
+	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
+		@foreach (Format format in Model.Player.Formats)
+		{
+			@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">	
+		}
+
+		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
+		{
+			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.LanguageCode" label="@subtitle.Label" kind="subtitles">
+		}
+	</video>
+	<noscript style="z-index:999;color:white;position:relative;">This video requires JavaScript to play correctly</noscript>
+}
+else if (Model.Player.Formats.Any())
+{
+	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
+		@foreach (Format format in Model.Player.Formats)
+		{
+			@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">	
+		}
+
+		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
+		{
+			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.LanguageCode" label="@subtitle.Label" kind="subtitles">
+		}
+	</video>
+}
+else
+{
+	playable = false;
+	<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
+		<span>
+			No muxed formats were returned by YouTube
+		</span>
+	</div>
+}
+
+@if (playable)
+{
+	<script id="video-data">
+	const videoId =  "@(Model.Player!.Details.Id)";
+	const elementId =  "vjs-player";
+	const endscreenData = @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
+	                      {
+		                      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+	                      }));
+	const playtype = "@(Model.UseHls ? "hls" : Model.UseDash ? "dash" : "html5")";
+	endscreenData.clickHandler = item => {
+		switch (item.style) {
+			case "VIDEO":
+        		window.location = "/watch?v=" + item.target;
+        		break;
+        	case "PLAYLIST":
+            	window.location = "/playlist?list=" + item.target;
+            	break;
+            case "CHANNEL":
+				window.location = "/channel/" + item.target;
+				break;
+            case "WEBSITE":
+				window.open(item.href, "_blank");
+				break;
+			default:
+				alert("Unknown endscreen item type: " + item.style)
+				break;
+		}
+	};
+	</script>
+}

@@ -1,0 +1,12 @@
+﻿@using InnerTube
+@model (ChannelTabs Tab, string Id)
+@{
+	string className = "channel-tabs__item";
+	string lastPathPart = Context.Request.Path.Value.Split("/").Last().Split("?").First();
+	
+	if (lastPathPart == Model.Tab.ToString().ToLower() || (lastPathPart == Model.Id && Model.Tab == ChannelTabs.Home))
+	{
+		className += " active";
+	}
+}
+<a href="/channel/@Model.Id/@Model.Tab.ToString().ToLower()" class="@className">@Model.Tab.ToString()</a>

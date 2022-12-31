@@ -1,53 +1,353 @@
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using System.Reflection;
+﻿using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
+using System.Net;
+using System.Reflection;
+using System.Text;
+using System.Web;
+using System.Xml;
+using InnerTube;
+using LightTube.Database;
+using LightTube.Database.Models;
+using Microsoft.Extensions.Primitives;
 
-namespace LightTube
+namespace LightTube;
+
+public static class Utils
 {
-	public static class Utils
+	private static string? _version;
+	private static string? _itVersion;
+	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+	public static string GetRegion(this HttpContext context) =>
+		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) 
+			? h.ToString() 
+			: context.Request.Cookies.TryGetValue("gl", out string region)
+				? region 
+				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
+
+	public static string GetLanguage(this HttpContext context) =>
+		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) 
+			? h.ToString() 
+			: context.Request.Cookies.TryGetValue("hl", out string language)
+				? language
+				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
+
+	public static string GetVersion()
 	{
-		private static string _version = null;
-
-		public static bool IsClientMobile(HttpRequest request)
+		if (_version is null)
 		{
-			request.Headers.TryGetValue("user-agent", out StringValues sv);
-			string userAgent = sv.First();
-			Regex b = new(
-				@"(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino",
-				RegexOptions.IgnoreCase | RegexOptions.Multiline);
-			Regex v = new(
-				@"1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-",
-				RegexOptions.IgnoreCase | RegexOptions.Multiline);
-			return b.IsMatch(userAgent) || v.IsMatch(userAgent[..4]);
+#if DEBUG
+			DateTime buildTime = DateTime.Today;
+			_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
+#else
+			_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
+				.FileVersion?[2..];
+#endif
 		}
 
-		public static string GetRegion(this HttpContext context) =>
-			context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) ? h.ToString() :
-			context.Request.Cookies.TryGetValue("gl", out string region) ? region : "US";
+		return _version;
+	}
 
-		public static string GetLanguage(this HttpContext context) =>
-			context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) ? h.ToString() :
-			context.Request.Cookies.TryGetValue("hl", out string language) ? language : "en";
+	public static string GetInnerTubeVersion()
+	{
+		_itVersion ??= typeof(InnerTube.InnerTube).Assembly.GetName().Version!.ToString();
 
-		public static string GetVersion()
+		return _itVersion;
+	}
+
+	public static string GetCodecFromMimeType(string mime)
+	{
+		try
 		{
-			if (_version is null)
+			return mime.Split("codecs=\"")[1].Replace("\"", "");
+		}
+		catch
+		{
+			return "";
+		}
+	}
+
+	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null)
+	{
+		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+			url = "https://" + url;
+
+		HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+		request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+		using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+		await using Stream stream = response.GetResponseStream();
+		using StreamReader reader = new(stream);
+		string manifest = await reader.ReadToEndAsync();
+		StringBuilder proxyManifest = new();
+
+		List<string> types = new();
+
+		if (proxyRoot is not null)
+			foreach (string s in manifest.Split("\n"))
 			{
-				#if DEBUG
-				DateTime buildTime = DateTime.Today;
-				_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day}";
-				#else
-				_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
-					.FileVersion?[2..];
-				#endif
-				if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-					_version += " (dev)";
+				string? manifestType = null;
+				string? manifestUrl = null;
+
+				if (s.StartsWith("https://www.youtube.com/api/timedtext"))
+				{
+					manifestUrl = s;
+					manifestType = "caption";
+				}
+				else if (s.Contains(".googlevideo.com/videoplayback"))
+				{
+					manifestType = "segment";
+					manifestUrl = s;
+				}
+				else if (s.StartsWith("http"))
+				{
+					manifestUrl = s;
+					manifestType = s[46..].Split("/")[0];
+				}
+				else if (s.StartsWith("#EXT-X-MEDIA:URI="))
+				{
+					manifestUrl = s[18..].Split('"')[0];
+					manifestType = s[64..].Split("/")[0];
+				}
+
+				string? proxiedUrl = null;
+
+				if (manifestUrl != null)
+				{
+					switch (manifestType)
+					{
+						case "hls_playlist":
+							// MPEG-TS playlist
+							proxiedUrl = "/hls/playlist/" +
+							             HttpUtility.UrlEncode(manifestUrl.Split(manifestType)[1]);
+							break;
+						case "hls_timedtext_playlist":
+							// subtitle playlist
+							proxiedUrl = "/hls/timedtext/" +
+							             HttpUtility.UrlEncode(manifestUrl.Split(manifestType)[1]);
+							break;
+						case "caption":
+							// subtitles
+							NameValueCollection qs = HttpUtility.ParseQueryString(manifestUrl.Split("?")[1]);
+							proxiedUrl = $"/caption/{qs.Get("v")}/{qs.Get("lang")}";
+							break;
+						case "segment":
+							// HLS segment
+							proxiedUrl = "/hls/segment/" +
+							             HttpUtility.UrlEncode(manifestUrl.Split("://")[1]);
+							break;
+					}
+				}
+
+				types.Add(manifestType);
+
+				proxyManifest.AppendLine(proxiedUrl is not null && manifestUrl is not null
+					//TODO: check if http or https
+					? s.Replace(manifestUrl, proxyRoot + proxiedUrl)
+					: s);
 			}
-			return _version;
+		else
+			proxyManifest.Append(manifest);
+
+
+		return proxyManifest.ToString();
+	}
+
+	public static string GetDashManifest(InnerTubePlayer player, string? proxyUrl)
+	{
+		XmlDocument doc = new();
+
+		XmlDeclaration xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+		doc.InsertBefore(xmlDeclaration, doc.DocumentElement);
+
+		XmlElement mpdRoot = doc.CreateElement("MPD");
+		mpdRoot.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		mpdRoot.SetAttribute("xmlns", "urn:mpeg:dash:schema:mpd:2011");
+		mpdRoot.SetAttribute("xsi:schemaLocation", "urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd");
+		mpdRoot.SetAttribute("profiles", "urn:mpeg:dash:profile:isoff-main:2011");
+		mpdRoot.SetAttribute("type", "static");
+		mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
+		StringBuilder duration = new("PT");
+		if (player.Details.Length.TotalHours > 0)
+			duration.Append($"{player.Details.Length.Hours}H");
+		if (player.Details.Length.Minutes > 0)
+			duration.Append($"{player.Details.Length.Minutes}M");
+		if (player.Details.Length.Seconds > 0)
+			duration.Append(player.Details.Length.Seconds);
+		mpdRoot.SetAttribute("mediaPresentationDuration", $"{duration}.{player.Details.Length.Milliseconds}S");
+		doc.AppendChild(mpdRoot);
+
+		XmlElement period = doc.CreateElement("Period");
+
+		period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
+		XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
+		List<Format> audios = player.AdaptiveFormats
+			.Where(x => x.AudioChannels.HasValue)
+			.ToList();
+
+		audioAdaptationSet.SetAttribute("mimeType",
+			HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+		audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+		audioAdaptationSet.SetAttribute("contentType", "audio");
+		foreach (Format format in audios)
+		{
+			XmlElement representation = doc.CreateElement("Representation");
+			representation.SetAttribute("id", format.Itag);
+			representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+			representation.SetAttribute("startWithSAP", "1");
+			representation.SetAttribute("bandwidth", format.Bitrate.ToString());
+
+			XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
+			audioChannelConfiguration.SetAttribute("schemeIdUri",
+				"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
+			audioChannelConfiguration.SetAttribute("value", "2");
+			representation.AppendChild(audioChannelConfiguration);
+
+			XmlElement baseUrl = doc.CreateElement("BaseURL");
+			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
+				? format.Url.ToString()
+				: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}";
+			representation.AppendChild(baseUrl);
+
+			if (format.IndexRange != null && format.InitRange != null)
+			{
+				XmlElement segmentBase = doc.CreateElement("SegmentBase");
+				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+				segmentBase.SetAttribute("indexRangeExact", "true");
+
+				XmlElement initialization = doc.CreateElement("Initialization");
+				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+
+				segmentBase.AppendChild(initialization);
+				representation.AppendChild(segmentBase);
+			}
+
+			audioAdaptationSet.AppendChild(representation);
 		}
+
+		period.AppendChild(audioAdaptationSet);
+
+		period.AppendChild(doc.CreateComment("Video Adaptation Set"));
+
+		List<Format> videos = player.AdaptiveFormats.Where(x => !x.AudioChannels.HasValue).ToList();
+
+		XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
+		videoAdaptationSet.SetAttribute("mimeType",
+			HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Query ?? "mime=video/mp4")
+				.Get("mime"));
+		videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+		videoAdaptationSet.SetAttribute("contentType", "video");
+
+		foreach (Format format in videos)
+		{
+			XmlElement representation = doc.CreateElement("Representation");
+			representation.SetAttribute("id", format.Itag);
+			representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+			representation.SetAttribute("startWithSAP", "1");
+			representation.SetAttribute("width", format.Width.ToString());
+			representation.SetAttribute("height", format.Height.ToString());
+			representation.SetAttribute("bandwidth", format.Bitrate.ToString());
+
+			XmlElement baseUrl = doc.CreateElement("BaseURL");
+			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
+				? format.Url.ToString()
+				: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}";
+			representation.AppendChild(baseUrl);
+
+			if (format.IndexRange != null && format.InitRange != null)
+			{
+				XmlElement segmentBase = doc.CreateElement("SegmentBase");
+				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+				segmentBase.SetAttribute("indexRangeExact", "true");
+
+				XmlElement initialization = doc.CreateElement("Initialization");
+				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+
+				segmentBase.AppendChild(initialization);
+				representation.AppendChild(segmentBase);
+			}
+
+			videoAdaptationSet.AppendChild(representation);
+		}
+
+		period.AppendChild(videoAdaptationSet);
+
+		period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
+		foreach (InnerTubePlayer.VideoCaption subtitle in player.Captions)
+		{
+			period.AppendChild(doc.CreateComment(subtitle.Label));
+			XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
+			adaptationSet.SetAttribute("mimeType", "text/vtt");
+			adaptationSet.SetAttribute("lang", subtitle.LanguageCode);
+
+			XmlElement representation = doc.CreateElement("Representation");
+			representation.SetAttribute("id", $"caption_{subtitle.LanguageCode.ToLower()}");
+			representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
+
+			XmlElement baseUrl = doc.CreateElement("BaseURL");
+			string url = subtitle.BaseUrl.ToString();
+			url = url.Replace("fmt=srv3", "fmt=vtt");
+			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
+				? url
+				: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.LanguageCode}";
+
+			representation.AppendChild(baseUrl);
+			adaptationSet.AppendChild(representation);
+			period.AppendChild(adaptationSet);
+		}
+
+		mpdRoot.AppendChild(period);
+		return doc.OuterXml;
+	}
+
+	public static string ToKMB(this int num) =>
+		num switch
+		{
+			> 999999999 or < -999999999 => num.ToString("0,,,.###B", CultureInfo.InvariantCulture),
+			> 999999 or < -999999 => num.ToString("0,,.##M", CultureInfo.InvariantCulture),
+			> 999 or < -999 => num.ToString("0,.#K", CultureInfo.InvariantCulture),
+			var _ => num.ToString(CultureInfo.InvariantCulture)
+		};
+
+	public static string ToDurationString(this TimeSpan ts)
+	{
+		string str = ts.ToString();
+		return str.StartsWith("00:") ? str[3..] : str;
+	}
+
+	public static string GetContinuationUrl(string currentPath, string contToken)
+	{
+		string[] parts = currentPath.Split("?");
+		NameValueCollection query = parts.Length > 1
+			? HttpUtility.ParseQueryString(parts[1])
+			: new NameValueCollection();
+		query.Set("continuation", contToken);
+		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
+	}
+
+	public static SubscriptionType GetSubscriptionType(this HttpContext context, string? channelId)
+	{
+		if (channelId is null) return SubscriptionType.NONE;
+		DatabaseUser? user = DatabaseManager.Users.GetUserFromToken(context.Request.Cookies["token"] ?? "").Result;
+		if (user is null) return SubscriptionType.NONE;
+		return user.Subscriptions.TryGetValue(channelId, out SubscriptionType type) ? type : SubscriptionType.NONE;
+	}
+
+	public static string GetExtension(this Format format)
+	{
+		if (format.MimeType.StartsWith("video"))
+			format.MimeType
+				.Split("/").Last()
+				.Split(";").First();
+		else {
+			if (format.MimeType.Contains("opus"))
+				return "opus";
+			if (format.MimeType.Contains("mp4a"))
+				return "mp3";
+		}
+
+		return "mp4";
 	}
 }

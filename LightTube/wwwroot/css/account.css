@@ -1,0 +1,128 @@
+﻿@media screen and (min-width: 700px) {
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .signin-box {
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+    }
+}
+
+.signin-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+* {
+    font-family: "Roboto", sans-serif;
+}
+
+.signin-box {
+    width: 400px;
+    padding: 25px;
+}
+
+.signin-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.signin-error {
+    padding: 4px 16px;
+    color: red;
+    font-weight: bold;
+}
+
+.signin-input-container {
+    margin: 8px;
+}
+
+input.text {
+    padding: 13px 15px;
+    width: calc(100% - 25px);
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    transition: all 100ms;
+}
+
+input.text:active {
+    padding: 12px 14px;
+    border: 2px solid #1a73c8;
+}
+
+input[type=checkbox] {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.signin-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.signin-buttons {
+    margin-top: 32px;
+    display: flex;
+    justify-content: space-between;
+}
+
+[class^="signin-button-"] {
+    font-weight: bold;
+    line-height: 36px;
+    font-size: 13px;
+    transition: background-color 100ms;
+    border-radius: 4px;
+}
+
+.signin-button-primary {
+    padding: 0 24px;
+    background-color: #1a73e8;
+    color: #fff;
+    border: none;
+}
+
+.signin-button-primary:hover {
+    background-color: #1b66c8;
+}
+
+.signin-button-primary:active {
+    background-color: #1c539c;
+}
+
+.signin-button-danger {
+    padding: 0 24px;
+    background-color: hsl(0, 82%, 51%);
+    color: #fff;
+    border: none;
+}
+
+.signin-button-danger:hover {
+    background-color: hsl(0, 76%, 45%);
+}
+
+.signin-button-danger:active {
+    background-color: hsl(0, 70%, 36%);
+}
+
+.signin-button-secondary {
+    padding: 0 8px;
+    text-decoration: none;
+    color: #1a73e8;
+}
+
+.signin-button-secondary:hover {
+    background-color: #f6fafe;
+    color: #174ea6;
+}
+
+.signin-button-secondary:active {
+    background-color: #cadff9;
+}

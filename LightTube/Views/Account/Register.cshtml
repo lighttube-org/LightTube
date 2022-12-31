@@ -1,42 +1,32 @@
-@model LightTube.Contexts.MessageContext
+﻿@model AccountContext
+
 @{
-	ViewData["Title"] = "Register";
-	Layout = "_Layout";
+	Layout = "_AccountLayout";
+	Model.HtmlTitle = "Create an account";
 }
 
-@if (!string.IsNullOrWhiteSpace(Model.Message))
-{
-	<div class="login-message">
-		@Model.Message
-	</div>
-}
+<div class="signin-input-container">
+	<input class="text" name="userid" placeholder="UserID" value="@Model.UserID">
+</div>
 
-<div class="login-container">
-	<div>
-		<div>
-			<form asp-action="Register" method="POST" class="login-form">
-            	<h1>Register</h1>
-            	<input name="userid" type="text" placeholder="UserID">
-            	<input name="password" type="password" placeholder="Password">
-            	<input type="submit" value="Register">
-            </form>
-		</div>
-	</div>
-	<div>
-		<div>
-			<h1>...or register with a local account</h1>
-			<h2>What is the difference?</h2>
-			<ul>
-				<li>Remote account data is saved in this lighttube instance, while local account data is stored in
-					your browser's cookies
-					<ul>
-						<li>This means that the author of this lighttube instance cannot see your account data</li>
-						<li>It also means that, if you clear your cookies a lot, your account data will also get
-							lost with the cookies</li>
-					</ul>
-				</li>
-			</ul>
-			<a href="/Account/RegisterLocal" class="login-button">Create local account</a>
-		</div>
-	</div>
+<div class="signin-input-container">
+	<input class="text" name="password" id="password" type="password" placeholder="Password">
+</div>
+
+<div class="signin-input-container">
+	<input class="text" name="passwordCheck" type="password" placeholder="Confirm Password">
+</div>
+
+<div class="signin-checkbox" style="display:none;">
+	<input id="showpass" type="checkbox">
+	<label for="showpass">Show password</label>
+</div>
+<div class="signin-checkbox">
+	<input id="remember" name="remember" type="checkbox">
+	<label for="remember">Remember me</label>
+</div>
+
+<div class="signin-buttons">
+	<a href="/account/login" class="signin-button-secondary">Sign in instead</a>
+	<input type="submit" class="signin-button-primary" value="Sign up">
 </div>

@@ -1,0 +1,27 @@
+@using LightTube.Database.Models
+@model PlaylistVideoContext<IEnumerable<DatabasePlaylist>>
+
+@{
+	Layout = "_ModalLayout";
+}
+
+<div class="modal-item">
+	<div class="modal-item__thumbnail">
+		<img src="@Model.ItemThumbnail" alt="@Model.ItemTitle">
+	</div>
+	<div class="modal-item__info">
+		<div class="ml-2 title" title="@Model.ItemTitle">
+			@Model.ItemTitle
+		</div>
+		<div class="ml-1" title="@Model.ItemSubtitle">
+			@Model.ItemSubtitle
+		</div>
+	</div>
+</div>
+
+<p>
+	Are you sure that you want to remove this video from playlist <b>"@Model.Buttons[0].Label"</b>
+</p>
+
+<input style="display:none;" name="video" value="@Model.ItemId">
+<input style="display:none;" name="playlist" value="@Model.Buttons[0].Type">

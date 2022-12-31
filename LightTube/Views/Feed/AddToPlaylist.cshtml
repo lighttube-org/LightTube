@@ -1,0 +1,33 @@
+@using LightTube.Database.Models
+@model PlaylistVideoContext<IEnumerable<DatabasePlaylist>>
+
+@{
+	Layout = "_ModalLayout";
+}
+
+<div class="modal-item">
+	<div class="modal-item__thumbnail">
+		<img src="@Model.ItemThumbnail" alt="@Model.ItemTitle">
+	</div>
+	<div class="modal-item__info">
+		<div class="ml-2 title" title="@Model.ItemTitle">
+			@Model.ItemTitle
+		</div>
+		<div class="ml-1" title="@Model.ItemSubtitle">
+			@Model.ItemSubtitle
+		</div>
+	</div>
+</div>
+
+<p>
+	Please select the playlist to add this video into.
+</p>
+
+<input style="display:none;" name="video" value="@Model.ItemId">
+<select name="playlist">
+	@foreach (DatabasePlaylist playlist in Model.Extra!)
+	{
+		<option value="@playlist.Id">@playlist.Name</option>
+	}
+	<option value="__NEW">Create New Playlist</option>
+</select>

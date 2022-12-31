@@ -1,26 +1,44 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using InnerTube;
+using LightTube;
+using LightTube.Chores;
+using LightTube.Database;
 
-namespace LightTube
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews().AddNewtonsoftJson();
+
+InnerTubeAuthorization? auth = Configuration.GetInnerTubeAuthorization();
+builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			Configuration.LoadConfiguration();
-			InnerTube.Utils.SetAuthorization(Configuration.Instance.Credentials.CanUseAuthorizedEndpoints(),
-				Configuration.Instance.Credentials.Sapisid, Configuration.Instance.Credentials.Psid);
-			CreateHostBuilder(args).Build().Run();
-		}
+	Authorization = auth,
+	CacheSize = int.Parse(Configuration.GetVariable("LIGHTTUBE_CACHE_SIZE", "50")!),
+	CacheExpirationPollingInterval = default
+}));
+builder.Services.AddSingleton(new HttpClient());
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
-	}
+ChoreManager.RegisterChores();
+DatabaseManager.Init(Configuration.GetVariable("LIGHTTUBE_MONGODB_CONNSTR"));
+
+WebApplication app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+	app.UseExceptionHandler("/Home/Error");
+	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+	app.UseHsts();
+	app.UseHttpsRedirection();
 }
+
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+	name: "default",
+	pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

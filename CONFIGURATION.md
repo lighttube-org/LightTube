@@ -25,3 +25,15 @@ This part configures how LightTube receives playback data from YouTube.
 [bool] `UseCredentials`: Set to true if you want to use the cookies listed below
 [string] `Sapisid`: The `SAPISID` cookie from your browser
 [string] `Psid`: The `__Secure-3PSID` cookie from your browser
+
+## `Database`
+
+Self explanatory, settings of the database LightTube connects to
+
+[string] `MongoConnectionString`: Connection string of the MongoDB database
+
+## `Cache`
+
+Limits to the memory cache
+
+[string] `PlayerCacheSize`: Amount of player data that the cache can hold

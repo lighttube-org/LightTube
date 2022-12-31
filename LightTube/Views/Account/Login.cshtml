@@ -1,29 +1,26 @@
-@model LightTube.Contexts.MessageContext
+﻿@model AccountContext
+
 @{
-	ViewData["Title"] = "Login";
-	Layout = "_Layout";
+	Layout = "_AccountLayout";
+	Model.HtmlTitle = "Sign in";
 }
 
-@if (!string.IsNullOrWhiteSpace(Model.Message))
-{
-	<div class="login-message">
-		@Model.Message
-	</div>
-}
+<div class="signin-input-container">
+	<input class="text" name="userid" placeholder="UserID">
+</div>
+<div class="signin-input-container">
+	<input class="text" name="password" id="password" type="password" placeholder="Enter your password">
+</div>
+<div class="signin-checkbox" style="display:none;">
+	<input id="showpass" type="checkbox">
+	<label for="showpass">Show password</label>
+</div>
+<div class="signin-checkbox">
+	<input id="remember" name="remember" type="checkbox">
+	<label for="remember">Remember me</label>
+</div>
 
-<div class="login-container">
-	<div>
-		<div>
-			<form asp-action="Login" method="POST" class="login-form">
-				<h1>Log in</h1>
-				<input name="userid" type="text" placeholder="UserID">
-				<input name="password" type="password" placeholder="Password">
-				<input type="submit" value="Login">
-			</form>
-		</div>
-	</div>
-	<div>
-		<h2>Don't have an account?</h2>
-		<a href="/Account/Register" class="login-button">Create an account</a>
-	</div>
+<div class="signin-buttons">
+	<a href="/account/register" class="signin-button-secondary">Create account</a>
+	<input type="submit" class="signin-button-primary" value="Sign in">
 </div>

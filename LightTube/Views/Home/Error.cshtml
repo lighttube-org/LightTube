@@ -1,0 +1,69 @@
+@using Microsoft.AspNetCore.Diagnostics
+@{
+	Layout = null;
+	IExceptionHandlerPathFeature error = Context.Features.Get<IExceptionHandlerPathFeature>()!;
+	Exception exception = 
+		error.Error.InnerException ?? 
+		error.Error ?? 
+		new Exception("Nothing went wrong..?");
+
+	bool innertubeError = exception.StackTrace?.Contains("InnerTube") ?? false;
+	bool errorReportable = true;
+	string message = "Something went wrong...";
+	string path = error.Path + Context.Request.QueryString;
+
+	if (exception.GetType().Namespace == "InnerTube.Exceptions")
+	{
+		errorReportable = false;
+		message = error.Error.Message;
+	}
+}
+
+<!DOCTYPE html>
+<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<head>
+	<meta charset="UTF-8">
+	<title>Error - LightTube</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
+	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
+	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+</head>
+<body class="error-container">
+<h1 class="title">Whoops!</h1>
+<h2 class="title">@message</h2>
+
+@if (errorReportable) {
+	@if (innertubeError) {
+		<p>This problem was caused while interacting with YouTube. If you want to report it, head over to <a href="https://github.com/kuylar/InnerTube/issues">InnerTube GitHub issues page</a> and look for/open an issue with the following:</p>
+	} else {
+		<p>If you want to report this error, head over to <a href="https://github.com/kuylar/LightTube/issues">LightTube GitHub issues page</a> and look for/open an issue with the following:</p>
+	}
+
+	<ul>
+		<li><b class="title">LightTube instance this error occured on</b> (@Context.Request.Host)</li>
+		<li><b class="title">LightTube & InnerTube versions</b> (@Utils.GetVersion() / @Utils.GetInnerTubeVersion())</li>
+		<li><b class="title">The full resource path</b> (@path)</li>
+		<li><b class="title">InnerTube language & region</b> (@Context.GetLanguage()_@Context.GetRegion())</li>
+		<li><b class="title">The following text (the whole thing):</b></li>
+	</ul>
+	<code>
+		@Html.Raw(string.Join("<br>",
+			(exception.ToString() ?? "Huh... There was supposed to be a stack trace here.")
+				.Split('\n')
+				.Where(x => !x.Contains("Microsoft.AspNetCore."))))
+	</code>
+}
+
+<p>
+	You can still try other alternatives to access this resource such as 
+	<b>
+		<a href="https://invidio.us@path">Invidious</a>
+	</b>,
+	or just 
+	<b>
+		<a href="https://youtube.com@path">YouTube</a>
+	</b>
+</p>
+</body>
+</html>

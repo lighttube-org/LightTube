@@ -1,50 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using LightTube.Contexts;
-using LightTube.Models;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
-using InnerTube;
-using InnerTube.Models;
-using ErrorContext = LightTube.Contexts.ErrorContext;
+using LightTube.Models;
 
-namespace LightTube.Controllers
+namespace LightTube.Controllers;
+
+public class HomeController : Controller
 {
-	public class HomeController : Controller
+	private readonly ILogger<HomeController> _logger;
+
+	public HomeController(ILogger<HomeController> logger)
 	{
-		private readonly ILogger<HomeController> _logger;
-		private readonly Youtube _youtube;
-
-		public HomeController(ILogger<HomeController> logger, Youtube youtube)
-		{
-			_logger = logger;
-			_youtube = youtube;
-		}
-
-		public IActionResult Index()
-		{
-			return View(new BaseContext
-			{
-				MobileLayout = Utils.IsClientMobile(Request)
-			});
-		}
-
-		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-		public IActionResult Error()
-		{
-			return View(new ErrorContext
-			{
-				Path = HttpContext.Features.Get<IExceptionHandlerPathFeature>().Path,
-				MobileLayout = Utils.IsClientMobile(Request)
-			});
-		}
+		_logger = logger;
 	}
+
+	public IActionResult Index() => View(new BaseContext(HttpContext));
+
+	[Route("/rss")]
+	public IActionResult Rss() => View(new BaseContext(HttpContext));
+
+	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+	public IActionResult Error() => View(new BaseContext(HttpContext));
 }

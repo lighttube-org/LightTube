@@ -1,80 +1,87 @@
-@using InnerTube.Models
-@using System.Web
-@model LightTube.Contexts.ChannelContext
+﻿@using InnerTube
+@using InnerTube.Renderers
+@using Utils = LightTube.Utils
+@model ChannelContext
 
 @{
-	ViewBag.Metadata = new Dictionary<string, string>();
-	ViewBag.Metadata["og:title"] = Model.Channel.Name;
-	ViewBag.Metadata["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}";
-	ViewBag.Metadata["og:image"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Channel.Avatars.FirstOrDefault()?.Url?.ToString())}";
-	ViewBag.Metadata["twitter:card"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/image?url={HttpUtility.UrlEncode(Model.Channel.Avatars.LastOrDefault()?.Url?.ToString())}";
-	ViewBag.Metadata["og:description"] = Model.Channel.Description;
-	ViewBag.Title = Model.Channel.Name;
-	Layout = "_Layout";
-
-	DynamicItem[] contents;
-	try
-	{
-		contents = ((ItemSectionItem)((ItemSectionItem)Model.Channel.Contents[0]).Contents[0]).Contents;
-	}
-	catch
-	{
-		contents = Model.Channel.Contents;
-	}
+	Model.Title = Model.ChannelTitle;
 }
 
-<div class="channel-page">
-	@if (Model.Channel.Banners.Length > 0)
+<div class="channel-container">
+	@if (Model.BannerUrl != null)
 	{
-		<img class="channel-banner" alt="Channel Banner" src="@Model.Channel.Banners.Last().Url">
+		<div class="channel-banner">
+			<img loading="lazy" class="channel-banner__img" src="@Model.BannerUrl" alt="Channel Banner">
+		</div>
 	}
-
-	<div class="channel-info-container">
-		<div class="channel-info">
-			<a href="/channel/@Model.Channel.Id" class="avatar">
-				<img src="@Model.Channel.Avatars.LastOrDefault()?.Url" alt="Channel Avatar">
-			</a>
-			<div class="name">
-				<a>@Model.Channel.Name</a>
-				<span>@Model.Channel.Subscribers</span>
+	<div class="channel-info">
+		<img loading="lazy" class="channel-info__avatar" src="@Model.AvatarUrl" alt="@Model.ChannelTitle">
+		<div class="channel-info__info">
+			<span class="channel-info__name ml-1 title">@Model.ChannelTitle</span>
+			<!--span class="channel-info__username">TODO</span-->
+			<span class="channel-info__subs">@Model.SubscriberCountText</span>
+		</div>
+		<div class="flex-divider"></div>
+			<div class="channel-info__buttons">
+				@if (!Model.LightTubeAccount)
+				{
+					<partial name="SubscribeButton" model="Model.Id"/>
+				}
+				else if (Model.Editable)
+				{
+					<a class="btn-subscribed" href="/settings/account">
+						<span class="text">Account Settings</span>
+					</a>
+				}
 			</div>
-			<button class="subscribe-button" data-cid="@Model.Channel.Id">Subscribe</button>
+	</div>
+	<div class="channel-tabs">
+		<div class="channel-tabs__container">
+			@foreach (ChannelTabs tab in Model.Tabs.Where(x => x != ChannelTabs.Search))
+			{
+				<partial name="ChannelTabItem" model="@(tab, Model.Id)"/>
+			}
 		</div>
 	</div>
-
-	<h3>About</h3>
-	<p>@Html.Raw(Model.Channel.GetHtmlDescription())</p>
-	<br><br>
-	<h3>Uploads</h3>
-	<div class="video-grid">
-		@foreach (VideoItem video in contents.Where(x => x is VideoItem).Cast<VideoItem>())
+	@switch (Model.CurrentTab)
+	{
+		case ChannelTabs.Videos or ChannelTabs.Live or ChannelTabs.Community:
 		{
-			<a href="/watch?v=@video.Id" class="video">
-				<div class="thumbnail" style="background-image: url('@video.Thumbnails.LastOrDefault()?.Url')"><span class="video-length">@video.Duration</span></div>
-				<div class="info">
-					<span class="title max-lines-2">@video.Title</span>
-					<div>
-						<div>
-							<span>@video.Views views</span>
-							<span>@video.UploadedAt</span>
-						</div>
-					</div>
-				</div>
-			</a>	
+			<div class="channel-content search-container">
+				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				{
+					<partial name="Renderer" model="@renderer"/>
+				}
+			</div>
+			break;
 		}
-	</div>
-
-	<div class="pagination-buttons">
-		@if (!string.IsNullOrWhiteSpace(Model.ContinuationToken))
+		case ChannelTabs.Shorts:
 		{
-			<a href="/channel?id=@Model.Id">First Page</a>
+			<div class="channel-content reel-grid">
+				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				{
+					<partial name="Renderer" model="@renderer"/>
+				}
+			</div>
+			break;
 		}
-		<div class="divider"></div>	
-		<span>•</span>
-		<div class="divider"></div>
-		@if (!string.IsNullOrWhiteSpace(contents.FirstOrDefault(x => x is ContinuationItem)?.Id))
+		default:
 		{
-			<a href="/channel/@Model.Id?continuation=@(contents.FirstOrDefault(x => x is ContinuationItem)?.Id)">Next Page</a>
+			<div class="channel-content">
+				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				{
+					<partial name="Renderer" model="@renderer"/>
+				}
+			</div>
+			break;
 		}
-	</div>
+	}
 </div>
+@if (Model.Continuation is not null)
+{
+	<div class="next-page">
+		<span></span>
+		<span>•</span>
+		<a href="@Utils.GetContinuationUrl(Context.Request.Path.ToString(), Model.Continuation)">Next Page</a>
+	</div>
+}

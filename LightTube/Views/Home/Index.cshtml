@@ -1,15 +1,3 @@
-﻿@model LightTube.Contexts.BaseContext
-@{
-	ViewBag.Metadata = new Dictionary<string, string>
-	{
-		["og:title"] = "LightTube",
-		["og:url"] = $"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}",
-		["og:description"] = "An alternative, privacy respecting front end for YouTube",
-	};
-	ViewData["Title"] = "Home Page";
-	ViewData["SelectedGuideItem"] = "home";
-}
-
-<div style="text-align: center">
-	<h1>@Configuration.Instance.Interface.MessageOfTheDay</h1>
+﻿<div style="display: flex;align-items: center;justify-content: center;width: 100%;height: 100%">
+	<h1 style="color: var(--text-primary)">@Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")</h1>
 </div>

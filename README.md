@@ -18,16 +18,16 @@
 
 | Page | Light | Dark |
 | :--- | :---: | :--: |
-| Search | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/light/search.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/dark/search.png?inline=false) |
-| Video | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/light/video.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/desktop/dark/video.png?inline=false) |
+| Search | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/light/search.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/dark/search.png) |
+| Video | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/light/video.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/desktop/dark/video.png) |
 
 ### Mobile
 
 | Page | Light | Dark |
 | :--- | :---: | :--: |
-| Search | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/light/search.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/dark/search.png?inline=false) |
-| Video | ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/light/video.png?inline=false)| ![image](https://gitlab.com/kuylar/lighttube/-/raw/master/screenshots/mobile/dark/video.png?inline=false) |
+| Search | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/light/search.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/dark/search.png) |
+| Video | ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/light/video.png)| ![image](https://github.com/kuylar/lighttube/raw/v2-rewrite/screenshots/mobile/dark/video.png) |
 
 ---
 
-[XML API Documentation](https://gitlab.com/kuylar/lighttube/-/wikis/XML-API) - [Used libraries](https://gitlab.com/kuylar/lighttube/-/blob/master/OTHERLIBS.md)  - [Public instances](https://gitlab.com/kuylar/lighttube/-/blob/master/INSTANCES.md) 
+[Documentation](https://github.com/kuylar/lighttube/wikis) - [Used libraries](https://github.com/kuylar/lighttube/blob/master/OTHERLIBS.md)  - [Public instances](https://github.com/kuylar/lighttube/blob/master/INSTANCES.md) 
