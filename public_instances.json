@@ -3,5 +3,10 @@
     "host": "https://tube.kuylar.dev",
     "api": true,
     "accounts": true
+  },
+  {
+    "host": "https://tube.alexorjev.dev",
+    "api": true,
+    "accounts": true
   }
 ]
