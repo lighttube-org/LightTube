@@ -14,6 +14,9 @@ public class SettingsController : Controller
 		_youtube = youtube;
 	}
 
+	[Route("/settings")]
+	public IActionResult Settings() => RedirectPermanent("/settings/content");
+
 	[Route("content")]
 	[HttpGet]
 	public async Task<IActionResult> Content() {
