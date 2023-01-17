@@ -68,7 +68,7 @@ public static class Utils
 		}
 	}
 
-	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null)
+	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null, bool skipCaptions = false)
 	{
 		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 			url = "https://" + url;
@@ -143,6 +143,7 @@ public static class Utils
 
 				types.Add(manifestType);
 
+				if (skipCaptions && manifestType == "caption") continue;
 				proxyManifest.AppendLine(proxiedUrl is not null && manifestUrl is not null
 					//TODO: check if http or https
 					? s.Replace(manifestUrl, proxyRoot + proxiedUrl)
@@ -155,7 +156,7 @@ public static class Utils
 		return proxyManifest.ToString();
 	}
 
-	public static string GetDashManifest(InnerTubePlayer player, string? proxyUrl)
+	public static string GetDashManifest(InnerTubePlayer player, string? proxyUrl = null, bool skipCaptions = false)
 	{
 		XmlDocument doc = new();
 
@@ -274,28 +275,31 @@ public static class Utils
 
 		period.AppendChild(videoAdaptationSet);
 
-		period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
-		foreach (InnerTubePlayer.VideoCaption subtitle in player.Captions)
+		if (!skipCaptions)
 		{
-			period.AppendChild(doc.CreateComment(subtitle.Label));
-			XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
-			adaptationSet.SetAttribute("mimeType", "text/vtt");
-			adaptationSet.SetAttribute("lang", subtitle.LanguageCode);
+			period.AppendChild(doc.CreateComment("Subtitle Adaptation Sets"));
+			foreach (InnerTubePlayer.VideoCaption subtitle in player.Captions)
+			{
+				period.AppendChild(doc.CreateComment(subtitle.Label));
+				XmlElement adaptationSet = doc.CreateElement("AdaptationSet");
+				adaptationSet.SetAttribute("mimeType", "text/vtt");
+				adaptationSet.SetAttribute("lang", subtitle.LanguageCode);
 
-			XmlElement representation = doc.CreateElement("Representation");
-			representation.SetAttribute("id", $"caption_{subtitle.LanguageCode.ToLower()}");
-			representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
+				XmlElement representation = doc.CreateElement("Representation");
+				representation.SetAttribute("id", $"caption_{subtitle.LanguageCode.ToLower()}");
+				representation.SetAttribute("bandwidth", "256"); // ...why do we need this for a plaintext file
 
-			XmlElement baseUrl = doc.CreateElement("BaseURL");
-			string url = subtitle.BaseUrl.ToString();
-			url = url.Replace("fmt=srv3", "fmt=vtt");
-			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-				? url
-				: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.LanguageCode}";
+				XmlElement baseUrl = doc.CreateElement("BaseURL");
+				string url = subtitle.BaseUrl.ToString();
+				url = url.Replace("fmt=srv3", "fmt=vtt");
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
+					? url
+					: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.LanguageCode}";
 
-			representation.AppendChild(baseUrl);
-			adaptationSet.AppendChild(representation);
-			period.AppendChild(adaptationSet);
+				representation.AppendChild(baseUrl);
+				adaptationSet.AppendChild(representation);
+				period.AppendChild(adaptationSet);
+			}
 		}
 
 		mpdRoot.AppendChild(period);

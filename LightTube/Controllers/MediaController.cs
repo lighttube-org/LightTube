@@ -114,7 +114,7 @@ public class ProxyController : Controller
 	}
 
 	[Route("media/{videoId}.m3u8")]
-	public async Task<IActionResult> HlsProxy(string videoId, string formatId, bool useProxy = true)
+	public async Task<IActionResult> HlsProxy(string videoId, string formatId, bool useProxy = true, bool skipCaptions = false)
 	{
 		try
 		{
@@ -130,7 +130,7 @@ public class ProxyController : Controller
 
 			string url = player.HlsManifestUrl;
 
-			string manifest = await Utils.GetProxiedHlsManifest(url, useProxy ? $"https://{Request.Host}/proxy" : null);
+			string manifest = await Utils.GetProxiedHlsManifest(url, useProxy ? $"https://{Request.Host}/proxy" : null, skipCaptions);
 
 			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest)),
 				"application/vnd.apple.mpegurl");
@@ -146,13 +146,13 @@ public class ProxyController : Controller
 	}
 
 	[Route("media/{videoId}.mpd")]
-	public async Task<IActionResult> DashProxy(string videoId, string formatId, bool useProxy = true)
+	public async Task<IActionResult> DashProxy(string videoId, string formatId, bool useProxy = true, bool skipCaptions = false)
 	{
 		try
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
 
-			string manifest = Utils.GetDashManifest(player, useProxy ? $"https://{Request.Host}/proxy" : null);
+			string manifest = Utils.GetDashManifest(player, useProxy ? $"https://{Request.Host}/proxy" : null, skipCaptions);
 
 			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest)),
 				"application/dash+xml");
