@@ -379,12 +379,10 @@ body.no-guide .guide {
 .search-bar__input {
 	width: 100%;
 	flex-grow: 1;
-	padding: 0 16px;
-	border: 1px solid var(--border-color);
-	border-bottom-left-radius: 20px;
-	border-top-left-radius: 20px;
-	background-color: var(--search-bar-background, #0000);
-	color: var(--text-primary);
+	padding: 0 16px !important;
+	border: 1px solid var(--border-color) !important;
+	border-radius: 20px 0 0 20px !important;
+	background-color: var(--search-bar-background, #0000) !important;
 }
 
 .search-bar__input::placeholder {
@@ -1126,11 +1124,11 @@ select:active {
 }
 
 .settings-tab:hover {
-  background-color: var(--button-hover-background);
+	background-color: var(--button-hover-background);
 }
 
 .settings-tab.active {
-  background-color: var(--button-active-background);
+	background-color: var(--button-active-background);
 }
 
 .settings-form {
@@ -1142,14 +1140,14 @@ select:active {
 	.settings-page {
 		flex-direction: column;
 	}
-	
+
 	.settings-tabs {
 		flex-direction: row;
 		flex-wrap: nowrap;
 		overflow-x: auto;
 		width: calc(100vw - 24px);
 	}
-	
+
 	.settings-tab {
 		flex-shrink: 0;
 	}
