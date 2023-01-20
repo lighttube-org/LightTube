@@ -39,4 +39,4 @@ jobs:
         with:
           push: true
           platforms: linux/arm64,linux/amd64
-          tags: inftord/lighttube:latest,inftord/lighttube:${{ env.LIGHTTUBE_VERSION }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/lighttube:latest,${{ secrets.DOCKER_USERNAME }}/lighttube:${{ env.LIGHTTUBE_VERSION }}
