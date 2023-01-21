@@ -39,9 +39,19 @@
 else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 {
 	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@foreach (Format format in Model.Player.Formats)
+		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
-			@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">	
+			@foreach (Format format in Model.Player.Formats)
+			{
+				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
+			}
+		}
+		else
+		{
+			@foreach (Format format in Model.Player.Formats)
+			{
+				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
+			}
 		}
 
 		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
@@ -54,9 +64,19 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 else if (Model.Player.Formats.Any())
 {
 	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@foreach (Format format in Model.Player.Formats)
+		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
-			@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">	
+			@foreach (Format format in Model.Player.Formats)
+			{
+				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
+			}
+		}
+		else
+		{
+			@foreach (Format format in Model.Player.Formats)
+			{
+				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
+			}
 		}
 
 		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
