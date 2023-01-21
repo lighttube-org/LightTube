@@ -32,6 +32,13 @@ public class ProxyController : Controller
 	[Route("media/{videoId}/{formatId}")]
 	public async Task Media(string videoId, string formatId)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		{
+			Response.StatusCode = (int)HttpStatusCode.NotFound;
+			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
+			await Response.StartAsync();
+		}
+
 		try
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
@@ -116,6 +123,9 @@ public class ProxyController : Controller
 	[Route("media/{videoId}.m3u8")]
 	public async Task<IActionResult> HlsProxy(string videoId, string formatId, bool useProxy = true, bool skipCaptions = false)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+			useProxy = false;
+
 		try
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, true);
@@ -148,6 +158,9 @@ public class ProxyController : Controller
 	[Route("media/{videoId}.mpd")]
 	public async Task<IActionResult> DashProxy(string videoId, string formatId, bool useProxy = true, bool skipCaptions = false)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+			useProxy = false;
+
 		try
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
@@ -170,6 +183,9 @@ public class ProxyController : Controller
 	[Route("hls/playlist/{path}")]
 	public async Task<IActionResult> HlsPlaylistProxy(string path, bool useProxy = true)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+			return NotFound("This instance has disabled media proxies.");
+		
 		try
 		{
 			string url = "https://manifest.googlevideo.com/api/manifest/hls_playlist" +
@@ -193,6 +209,9 @@ public class ProxyController : Controller
 	[Route("hls/timedtext/{path}")]
 	public async Task<IActionResult> HlsSubtitleProxy(string path, bool useProxy = true)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+			return NotFound("This instance has disabled media proxies.");
+		
 		try
 		{
 			string url = "https://manifest.googlevideo.com/api/manifest/hls_timedtext_playlist" +
@@ -216,6 +235,13 @@ public class ProxyController : Controller
 	[Route("hls/segment/{path}")]
 	public async Task HlsSegmentProxy(string path)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		{
+			Response.StatusCode = (int)HttpStatusCode.NotFound;
+			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
+			await Response.StartAsync();
+		}
+		
 		try
 		{
 			string url = "https://" +
@@ -325,7 +351,12 @@ public class ProxyController : Controller
 	[Route("thumbnail/{videoId}/{index:int}")]
 	public async Task ThumbnailProxy(string videoId, int index = 0)
 	{
-		InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		{
+			Response.StatusCode = (int)HttpStatusCode.NotFound;
+			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
+			await Response.StartAsync();
+		}
 
 		/*
 		if (index == -1) index = player.Thumbnails.Length - 1;
