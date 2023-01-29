@@ -24,13 +24,13 @@ const opts = {
 switch (playtype) {
 	case "dash":
 		opts.sources.push({
-			src: `/proxy/media/${videoId}.mpd`,
+			src: `/proxy/media/${videoId}.mpd?skipCaptions=true`,
 			type: "application/dash+xml"
 		});
 		break;
 	case "hls":
 		opts.sources.push({
-			src: `/proxy/media/${videoId}.m3u8`,
+			src: `/proxy/media/${videoId}.m3u8?skipCaptions=true`,
 			type: "application/x-mpegURL"
 		});
 		break;
@@ -46,7 +46,7 @@ const player = videojs(elementId, opts, function () {
 	this.controlBar.addChild('QualitySelector', {}, 14);
 	this.qualityLevels();
 	this.hlsQualitySelector();
-	
+
 	this.on("volumechange", _ => {
 		localStorage.setItem("ltvideo.volume", this.volume())
 	})

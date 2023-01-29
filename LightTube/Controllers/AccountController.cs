@@ -27,6 +27,9 @@ public class AccountController : Controller
 			UserID = userId
 		};
 
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "false") != "false")
+			return View(ac);
+
 		if (userId is null || password is null || passwordCheck is null)
 			ac.Error = "Invalid request";
 		else

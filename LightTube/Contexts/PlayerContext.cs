@@ -22,6 +22,11 @@ public class PlayerContext : BaseContext
 																			// Live videos contain a DASH manifest URL
 		UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;  // Prefer DASH if we can provide Adaptive
 																			// Formats
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		{
+			UseHls = false;
+			UseDash = false;
+		}
 	}
 
 	public PlayerContext(HttpContext context, Exception e) : base(context)
