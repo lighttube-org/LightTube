@@ -15,22 +15,27 @@ public class SettingsController : Controller
 	}
 
 	[Route("/settings")]
-	public IActionResult Settings() => RedirectPermanent("/settings/content");
+	public IActionResult Settings() => RedirectPermanent("/settings/appearance");
 
 	[Route("content")]
+	public async Task<IActionResult> Content() => RedirectPermanent("/settings/appearance");
+
+	[Route("appearance")]
 	[HttpGet]
-	public async Task<IActionResult> Content() {
+	public async Task<IActionResult> Appearance()
+	{
 		InnerTubeLocals locals = await _youtube.GetLocalsAsync();
-		ContentSettingsContext ctx = new ContentSettingsContext(HttpContext, locals);
+		AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.GetCustomThemeDefs());
 		return View(ctx);
 	}
 
-	[Route("content")]
+	[Route("appearance")]
 	[HttpPost]
-	public IActionResult Content(string hl, string gl) {
+	public IActionResult Appearance(string hl, string gl, string theme) {
 		Response.Cookies.Append("hl", hl);
 		Response.Cookies.Append("gl", gl);
-		return Redirect("/settings/content");
+		Response.Cookies.Append("theme", theme);
+		return Redirect("/settings/appearance");
 	}
 
 	[Route("account")]

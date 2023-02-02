@@ -1,6 +1,7 @@
 ﻿@using InnerTube
 @using System.Text.Json
 @using InnerTube.Exceptions
+@using Utils = LightTube.Utils
 @model PlayerContext
 
 @{
@@ -17,6 +18,11 @@
 			@:[@e.Code] @e.Error
 			<br>
 			@e.Description
+			
+			@if (e.Code == "CONTENT_CHECK_REQUIRED")
+			{
+				<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true">I understand and wish to proceed</a>
+			}
 		}
 		else
 		{

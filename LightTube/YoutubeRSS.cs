@@ -12,11 +12,17 @@ public static class YoutubeRSS
         HttpResponseMessage response =
             await _httpClient.GetAsync("https://www.youtube.com/feeds/videos.xml?channel_id=" + channelId);
         if (!response.IsSuccessStatusCode)
-            throw response.StatusCode switch
+            return new ChannelFeed
             {
-                HttpStatusCode.NotFound => new KeyNotFoundException($"Channel '{channelId}' does not exist"),
-                var _ => new Exception("Failed to fetch RSS feed for channel " + channelId)
+                Name = $"Failed to get channel videos: HTTP {(int)response.StatusCode}",
+                Id = channelId,
+                Videos = Array.Empty<FeedVideo>()
             };
+//            throw response.StatusCode switch
+//            {
+//                HttpStatusCode.NotFound => new KeyNotFoundException($"Channel '{channelId}' does not exist"),
+//                var _ => new Exception("Failed to fetch RSS feed for channel " + channelId)
+//            };
 
         ChannelFeed feed = new();
 

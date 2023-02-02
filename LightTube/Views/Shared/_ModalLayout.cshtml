@@ -1,7 +1,7 @@
 ﻿@model ModalContext
 
 <!DOCTYPE html>
-<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<html lang="en" class="@Model.GetThemeClass()">
 <head>
 	<meta charset="UTF-8">
 	<title>@Model.Title - LightTube</title>
@@ -10,6 +10,10 @@
 	<link rel="stylesheet" href="/css/modal.css">
 	<link rel="stylesheet" href="/fonts/roboto/roboto.css">
 	<link rel="stylesheet" href="/css/renderers.css">
+	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
+	{
+		<link rel="stylesheet" href="/css/custom.css">
+	}
 </head>
 <body class="modal-container">
 <form class="modal-box" method="post">

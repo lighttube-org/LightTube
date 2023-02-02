@@ -1,9 +1,53 @@
-@model ContentSettingsContext
+@model AppearanceSettingsContext
 
 @{
 	Layout = "_SettingsLayout";
-	Model.Title = "Content settings";
+	Model.Title = "Appearance settings";
 }
+
+<h1 class="title">Theme</h1>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Theme
+		</div>
+		<div>
+			Change how LightTube looks like!
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="theme" class="subscription-dropdown">
+			<option disabled>Built-in</option>
+			@foreach ((string className, string name) in Model.BuiltinThemes)
+			{
+				@if (Model.GetThemeClass() == $"theme-{className}")
+				{
+					<option value="@className" selected>@name</option>
+				}
+				else
+				{
+					<option value="@className">@name</option>
+				}
+			}
+			@if (Model.CustomThemes.Count > 0)
+			{
+				<option disabled>Custom</option>
+				@foreach ((string className, string name) in Model.CustomThemes)
+				{
+					@if (Model.GetThemeClass() == $"theme-{className}")
+					{
+						<option value="@className" selected>@name</option>
+					}
+					else
+					{
+						<option value="@className">@name</option>
+					}
+				}
+			}
+		</select>
+	</div>
+</div>
 
 <h1 class="title">Content Settings</h1>
 

@@ -1,10 +1,12 @@
-﻿using InnerTube;
+﻿using System.Text.RegularExpressions;
+using InnerTube;
 
 namespace LightTube;
 
 public static class Configuration
 {
 	private static Dictionary<string, string> _variables = new();
+	private static Dictionary<string, string> _customThemeDefs = null;
 
 	public static string? GetVariable(string var, string? def = null)
 	{
@@ -31,4 +33,30 @@ public static class Configuration
 					"Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set.")),
 			var _ => null
 		};
+
+	public static Dictionary<string, string> GetCustomThemeDefs()
+	{
+		if (_customThemeDefs == null)
+		{
+			Dictionary<string, string> dict = new();
+			string? fileName = GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
+
+			if (fileName != null)
+			{
+				using FileStream fs = File.OpenRead(fileName);
+				using StreamReader sr = new(fs);
+				string contents = sr.ReadToEnd();
+				fs.Close();
+				MatchCollection matches = Regex.Matches(contents, "@themedef \"(.+?)\" (\\S+)");
+				foreach (Match match in matches)
+				{
+					dict.Add(match.Groups[2].Value, match.Groups[1].Value);
+				}
+			}
+
+			_customThemeDefs = dict;
+		}
+
+		return _customThemeDefs;
+	}
 }
