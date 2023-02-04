@@ -105,10 +105,6 @@ svg {
 	color: var(--text-primary);
 }
 
-* {
-	flex-shrink: 0;
-}
-
 /* Utils */
 
 .flex-divider {

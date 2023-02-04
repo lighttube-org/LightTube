@@ -1,6 +1,7 @@
 ﻿/* General Stuff */
 
 .compact-thumbnail {
+    flex-shrink: 0;
     display: grid;
     border-radius: 8px;
     overflow: hidden;
@@ -431,6 +432,7 @@
 }
 
 .playlistvideo__thumbnail {
+    flex-shrink: 0;
     width: 100px;
     height: 56px;
 }
