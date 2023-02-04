@@ -32,9 +32,15 @@ public class SettingsController : Controller
 	[Route("appearance")]
 	[HttpPost]
 	public IActionResult Appearance(string hl, string gl, string theme) {
-		Response.Cookies.Append("hl", hl);
-		Response.Cookies.Append("gl", gl);
-		Response.Cookies.Append("theme", theme);
+		Response.Cookies.Append("hl", hl, new CookieOptions{
+			Expires = DateTimeOffset.MaxValue
+		});
+		Response.Cookies.Append("gl", gl, new CookieOptions{
+			Expires = DateTimeOffset.MaxValue
+		});
+		Response.Cookies.Append("theme", theme, new CookieOptions{
+			Expires = DateTimeOffset.MaxValue
+		});
 		return Redirect("/settings/appearance");
 	}
 
