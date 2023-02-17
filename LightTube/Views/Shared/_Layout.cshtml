@@ -3,7 +3,7 @@
 @model BaseContext
 
 <!DOCTYPE html>
-<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<html lang="en" class="@Model.GetThemeClass()">
 <head>
 	<meta charset="UTF-8">
 	<title>@(string.IsNullOrWhiteSpace(Model.Title) ? "LightTube" : $"{Model.Title} - LightTube")</title>
@@ -15,6 +15,10 @@
 	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
+	{
+		<link rel="stylesheet" href="/css/custom.css">
+	}
 </head>
 <body class="@(Model.GuideHidden ? "app-container no-guide" : "app-container")">
 <div class="@(Context.Request.Path.Value == "/results" ? "top-bar search" : "top-bar")">

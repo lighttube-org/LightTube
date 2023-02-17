@@ -2,14 +2,14 @@
 @model BaseContext
 
 @{
-	SettingsTab[] tabs = new SettingsTab[] {
-		new SettingsTab("Account", "/settings/account"),
-		new SettingsTab("Content", "/settings/content")
+	SettingsTab[] tabs = {
+		new("Account", "/settings/account"),
+		new("Appearance", "/settings/appearance")
 	};
 }
 
 <!DOCTYPE html>
-<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<html lang="en" class="@Model.GetThemeClass()">
 <head>
 	<meta charset="UTF-8">
 	<title>@Model.Title - LightTube</title>
@@ -21,6 +21,10 @@
 	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
+	{
+		<link rel="stylesheet" href="/css/custom.css">
+	}
 </head>
 <body class="app-container no-guide">
 <div class="top-bar">

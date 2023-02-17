@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Text;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
-using LightTube.Models;
 
 namespace LightTube.Controllers;
 
@@ -21,4 +20,21 @@ public class HomeController : Controller
 
 	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 	public IActionResult Error() => View(new BaseContext(HttpContext));
+
+	[Route("/css/custom.css")]
+	public IActionResult CustomCss()
+	{
+		string? fileName = Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
+
+		if (fileName != null)
+		{
+			using FileStream fs = System.IO.File.OpenRead(fileName);
+			using StreamReader sr = new(fs);
+			string contents = sr.ReadToEnd();
+			fs.Close();
+			return File(Encoding.UTF8.GetBytes(contents), "text/css");
+		}
+
+		return NotFound();
+	}
 }
