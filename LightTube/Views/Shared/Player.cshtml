@@ -15,14 +15,29 @@
 	{
 		@if (Model.Exception is PlayerException e)
 		{
-			@:[@e.Code] @e.Error
-			<br>
-			@e.Description
-			
-			@if (e.Code == "CONTENT_CHECK_REQUIRED")
-			{
-				<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true">I understand and wish to proceed</a>
-			}
+			<div class="player-error-container">
+				<div class="player-error-icon">
+					<svg class="icon" fill="currentColor" style="color: white;" width="128" height="128">
+						<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+					</svg>
+				</div>
+				<div class="player-error-info">
+					@if (e.Code == "LOGIN_REQUIRED")
+					{
+						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
+						<p class="ml-1">Please contact the instance administrator to include InnerTube login details</p>
+					}
+					else
+					{
+						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
+						<p class="ml-1">@e.Description</p>
+						@if (e.Code is "CONTENT_CHECK_REQUIRED" or "AGE_CHECK_REQUIRED")
+						{
+							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">I understand and wish to proceed</a>
+						}
+					}
+				</div>
+			</div>
 		}
 		else
 		{
