@@ -771,6 +771,9 @@ body.no-guide .guide {
 
 .info-container > .description > summary {
 	font-weight: bold;
+	margin: -16px;
+	padding: 16px;
+	cursor: pointer;
 }
 
 .info-container > .description > a {

@@ -16,7 +16,7 @@
     text-decoration: none;
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1085px) {
     .compact-thumbnail {
         min-width: initial;
         min-height: initial;
@@ -294,7 +294,7 @@
 
 /* Compact renderers generic */
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1085px) {
     .compact-renderer-list {
         width: 400px;
         display: flex;
@@ -308,7 +308,7 @@
     }
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1085px) {
     .compact-renderer-list {
         width: 100%;
         display: flex;
@@ -350,7 +350,7 @@
 }
 
 /* Compact Video Renderer, Compact Playlist Renderer, Compact Radio Renderer */
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 1085px) {
     .renderer-compactvideorenderer,
     .renderer-compactplaylistrenderer,
     .renderer-compactradiorenderer {
@@ -361,7 +361,7 @@
     }
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1085px) {
     .renderer-compactvideorenderer,
     .renderer-compactplaylistrenderer,
     .renderer-compactradiorenderer {
