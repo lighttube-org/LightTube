@@ -24,6 +24,7 @@ html:root {
 
 	/* Button colors */
 	--btn-hover-color-blue: #def1ff;
+	--btn-hover-color-white: #aaa;
 
 	--chip-background: rgb(0, 0, 0, 0.05);
 	--chip-background-hover: rgb(0, 0, 0, 0.10);
@@ -518,6 +519,7 @@ body.no-guide .guide {
 	-ms-user-select: none;
 	-webkit-user-select: none;
 	border-radius: 18px;
+	width: fit-content;
 }
 
 *[class^="btn"]:hover {
@@ -546,6 +548,17 @@ body.no-guide .guide {
 
 .btn-blue:hover {
 	background-color: var(--btn-hover-color-blue);
+}
+
+.btn-white, .btn-white > svg {
+	background-color: #fff;
+	color: #000;
+}
+
+.btn-white:hover {
+	background-color: var(--btn-hover-color-white);
+	border-color: var(--btn-hover-color-white);
+	color: #000;
 }
 
 .btn-outline {
@@ -634,6 +647,34 @@ body.no-guide .guide {
 .player {
 	width: 100%;
 	height: 100%;
+}
+
+.player-error-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 0 20%;
+	height: 100%;
+	gap: 32px;
+}
+
+@media screen and (max-width: 1085px) {
+	.player-error-container {
+		padding: 8px;
+	}
+	
+	.player-error-container svg {
+		width: 32px;
+		height: 32px;
+	}
+}
+
+.player-error-container *:not(a) {
+	color: white;
+}
+
+.player-error-container .title {
+	font-size: 1.3rem;
 }
 
 .playlist-view-container {
@@ -730,6 +771,9 @@ body.no-guide .guide {
 
 .info-container > .description > summary {
 	font-weight: bold;
+	margin: -16px;
+	padding: 16px;
+	cursor: pointer;
 }
 
 .info-container > .description > a {
