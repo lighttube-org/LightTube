@@ -126,3 +126,21 @@ input[type=checkbox] {
 .signin-button-secondary:active {
     background-color: #cadff9;
 }
+
+.scope-list {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.scope {
+    display: flex;
+    gap: 12px;
+    line-height: 24px;
+}
+
+.scope-icon {
+    width: 24px;
+    height: 24px;
+}
