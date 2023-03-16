@@ -400,4 +400,14 @@ public static class Utils
 
 		return descriptions;
 	}
+
+	public static string GenerateToken(int length)
+	{
+		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+*/()[]{}";
+		Random rng = new();
+		StringBuilder sb = new();
+		for (int i = 0; i < length; i++)
+			sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
+		return sb.ToString();
+	}
 }

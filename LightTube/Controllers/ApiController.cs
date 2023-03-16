@@ -1,7 +1,10 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
 using InnerTube;
+using LightTube.Database;
+using LightTube.Database.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace LightTube.Controllers
 {
@@ -16,6 +19,21 @@ namespace LightTube.Controllers
 		public ApiController(InnerTube.InnerTube youtube)
 		{
 			_youtube = youtube;
+		}
+
+		[Route("currentUser")]
+		public async Task<IActionResult> GetCurrentUser()
+		{
+			if (!Request.Headers.TryGetValue("authorization", out StringValues authHeaders))
+			{
+				return Unauthorized();
+			}
+
+			string authHeader = authHeaders.First();
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHeader(authHeader);
+
+			if (user is null) return Unauthorized();
+			return Json(user);
 		}
 		
 		private IActionResult Error(string message, HttpStatusCode statusCode)

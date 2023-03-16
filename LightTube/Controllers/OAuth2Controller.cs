@@ -1,46 +1,30 @@
 using System.Web;
+using LightTube.ApiModels;
 using LightTube.Contexts;
+using LightTube.Database;
+using LightTube.Database.Models;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace LightTube.Controllers;
 
 [Route("/oauth2")]
 public class OAuth2Controller : Controller
 {
-	private HttpClient _client = new();
-
 	[Route("authorize")]
+	[HttpGet]
 	public async Task<IActionResult> Authorize(
 		[FromQuery(Name = "response_type")] string responseType,
 		[FromQuery(Name = "client_id")] string clientId,
 		[FromQuery(Name = "redirect_uri")] string redirectUri,
-		[FromQuery(Name = "scope")] string scope,
+		[FromQuery(Name = "scope")] string? scope,
 		[FromQuery(Name = "state")] string? state = null)
 	{
-		bool valid = true;
-		List<string> statuses = new()
-		{
-			$"Response Type: {responseType}",
-			$"Client ID: {clientId}",
-			$"Redirect URI: {redirectUri}",
-			$"Scopes: {scope}",
-			$"State: {state}",
-			"========================"
-		};
-
 		if (string.IsNullOrEmpty(responseType))
-		{
-			valid = false;
-			return View(new OAuthContext("Response type invalid!"));
-		}
+			return View(new OAuthContext("response_type cannot be empty"));
 
 		if (responseType != "code")
-		{
-			valid = false;
-			return View(new OAuthContext("response_type must be `code`!"));
-		}
+			return View(new OAuthContext("response_type must be `code`"));
 
 		// ...client ids
 		// yeah idk how to do that
@@ -49,45 +33,92 @@ public class OAuth2Controller : Controller
 		// thats not centralized
 
 		if (string.IsNullOrEmpty(clientId))
-		{
-			valid = false;
 			return View(new OAuthContext("client_id cannot be empty"));
-		}
 
 		Uri? redirectUrl = null;
 		if (string.IsNullOrEmpty(redirectUri))
-		{
-			valid = false;
 			return View(new OAuthContext("redirect_uri is not valid"));
-		}
-		else
-		{
-			redirectUrl = new(redirectUri);
-		}
+		redirectUrl = new(redirectUri);
 
 		if (scope == null)
-		{
-			valid = false;
-			return View(new OAuthContext($"scope cannot be empty"));
-		}
-		else
-		{
-			string[] invalidScopes = Utils.FindInvalidScopes(scope.Split(" "));
-			if (invalidScopes.Length > 0)
-			{
-				valid = false;
-				return View(new OAuthContext($"Invalid scope(s): {string.Join(", ", invalidScopes)}"));
-			}
-		}
-		
+			return View(new OAuthContext("scope cannot be empty"));
 
-		statuses.Add(valid ? "Request valid" : "INVALID REQUEST");
-		if (valid && redirectUrl != null)
-			statuses.Add($"Return URL: {redirectUrl}{(redirectUrl.Query.Length > 0 ? "&" : "?")}code=CODE{(state is not null ? $"&state={state}" : "")}");
-		//return Ok(string.Join("\n", statuses));
+		string[] invalidScopes = Utils.FindInvalidScopes(scope.Split(" "));
+		if (invalidScopes.Length > 0)
+			return View(new OAuthContext($"Invalid scope(s): {string.Join(", ", invalidScopes)}"));
+
 
 		OAuthContext ctx = new(HttpContext, clientId, scope.Split(" "));
-		if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.GetEncodedPathAndQuery()));
+		if (ctx.User is null)
+			return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.GetEncodedPathAndQuery()));
 		return View(ctx);
+	}
+
+	[Route("authorize")]
+	[HttpPost]
+	public async Task<IActionResult> GetAuthTokenAndRedirect(
+		[FromQuery(Name = "response_type")] string responseType,
+		[FromQuery(Name = "client_id")] string clientId,
+		[FromQuery(Name = "redirect_uri")] string redirectUri,
+		[FromQuery(Name = "scope")] string scope,
+		[FromQuery(Name = "state")] string? state = null)
+	{
+		if (string.IsNullOrEmpty(responseType))
+			throw new Exception("Response type invalid!");
+
+		if (responseType != "code")
+			throw new Exception("response_type must be `code`!");
+
+		// ...client ids
+		// yeah idk how to do that
+		// so theyre just the name of the app ig?
+		// i dont know how to handle this on something
+		// thats not centralized
+
+		if (string.IsNullOrEmpty(clientId))
+			throw new Exception("client_id cannot be empty");
+
+		Uri? redirectUrl = null;
+		if (string.IsNullOrEmpty(redirectUri))
+			throw new Exception("redirect_uri is not valid");
+
+		redirectUrl = new(redirectUri);
+
+		if (scope == null)
+			throw new Exception("scope cannot be empty");
+
+		string[] invalidScopes = Utils.FindInvalidScopes(scope.Split(" "));
+		if (invalidScopes.Length > 0)
+			throw new Exception($"Invalid scope(s): {string.Join(", ", invalidScopes)}");
+
+		BaseContext ctx = new(HttpContext);
+		if (ctx.User is null)
+			throw new Exception("User not logged in");
+
+		if (redirectUrl == null)
+			throw new Exception("redirect_uri is not valid");
+		string returnUrl =
+			$"{redirectUrl}{(redirectUrl.Query.Length > 0 ? "&" : "?")}code=%%%CODE%%%{(state is not null ? $"&state={state}" : "")}";
+		string code =
+			await DatabaseManager.Oauth2.CreateOauthToken(Request.Cookies["token"]!, clientId, scope.Split(" "));
+
+
+		return Redirect(returnUrl.Replace("%%%CODE%%%", code));
+	}
+
+	[Route("token")]
+	[HttpPost]
+	public async Task<IActionResult> GrantTokenAsync(
+		[FromForm(Name = "grant_type")] string grantType,
+		[FromForm(Name = "code")] string code,
+		[FromForm(Name = "redirect_uri")] string redirectUri,
+		[FromForm(Name = "client_id")] string clientId,
+		[FromForm(Name = "client_secret")] string clientSecret)
+	{
+		if (grantType is not ("code" or "authorization_code"))
+			return Unauthorized();
+		DatabaseOauthToken? token = await DatabaseManager.Oauth2.RefreshToken(code, clientId);
+		if (token is null) return Unauthorized();
+		return Json(new Oauth2CodeGrantResponse(token));
 	}
 }

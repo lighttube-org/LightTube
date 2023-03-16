@@ -67,7 +67,7 @@ public class UserManager
 		{
 			Id = Guid.NewGuid().ToString(),
 			UserID = userId,
-			Token = GenerateToken(256),
+			Token = Utils.GenerateToken(256),
 			UserAgent = userAgent,
 			Scopes = scopes.ToArray(),
 			Created = DateTimeOffset.Now,
@@ -154,15 +154,5 @@ public class UserManager
 
 		DatabaseUser user = DatabaseUser.CreateUser(userId, password);
 		await UserCollection.InsertOneAsync(user);
-	}
-
-	private string GenerateToken(int length)
-	{
-		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+*/()[]{}";
-		Random rng = new();
-		StringBuilder sb = new();
-		for (int i = 0; i < length; i++)
-			sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
-		return sb.ToString();
 	}
 }
