@@ -6,7 +6,6 @@ namespace LightTube.Database.Models;
 public class DatabaseOauthToken
 {
 	public string UserId;
-	public string? OauthGrantCode;
 	public string? ClientId;
 	public string RefreshToken;
 	public string CurrentAuthToken;

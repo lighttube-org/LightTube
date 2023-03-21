@@ -15,18 +15,17 @@ public class Oauth2Manager
 	public async Task<string> CreateOauthToken(string loginToken, string clientId, string[] scopes)
 	{
 		DatabaseUser user = (await DatabaseManager.Users.GetUserFromToken(loginToken))!;
-		string grantCode = Utils.GenerateToken(32);
+		string refreshToken = Utils.GenerateToken(512);
 		await OauthTokensCollection.InsertOneAsync(new DatabaseOauthToken
 		{
 			UserId = user.UserID,
-			OauthGrantCode = grantCode,
 			ClientId = clientId,
-			RefreshToken = Utils.GenerateToken(512),
+			RefreshToken = refreshToken,
 			CurrentAuthToken = null,
 			CurrentTokenExpirationDate = DateTimeOffset.UnixEpoch,
 			Scopes = scopes
 		});
-		return grantCode;
+		return refreshToken;
 	}
 
 	public async Task<DatabaseOauthToken?> RefreshToken(string refreshToken, string clientId)
@@ -35,13 +34,12 @@ public class Oauth2Manager
 		// returns null sometimes :sob:
 		DatabaseOauthToken? token =
 			(await OauthTokensCollection
-				.FindAsync(x => (x.OauthGrantCode == refreshToken /* && x.ClientId == clientId*/) || x.RefreshToken == refreshToken))
+				.FindAsync(x => x.RefreshToken == refreshToken))
 			.FirstOrDefault();
 		if (token is null) return null;
 		token.CurrentAuthToken = Utils.GenerateToken(256);
 		token.CurrentTokenExpirationDate = DateTimeOffset.Now.AddHours(1);
-		token.OauthGrantCode = null;
-		await OauthTokensCollection.FindOneAndReplaceAsync(x => x.OauthGrantCode == refreshToken, token);
+		await OauthTokensCollection.FindOneAndReplaceAsync(x => x.RefreshToken == refreshToken, token);
 		return token;
 	}
 
@@ -49,7 +47,7 @@ public class Oauth2Manager
 	{
 		string[] parts = authHeader.Split(" ");
 		string type = parts[0].ToLower();
-		string token = parts[1].ToLower();
+		string token = parts[1];
 
 		IAsyncCursor<DatabaseOauthToken> cursor = await OauthTokensCollection.FindAsync(x => x.CurrentAuthToken == token);
 		DatabaseOauthToken login = cursor.FirstOrDefault();

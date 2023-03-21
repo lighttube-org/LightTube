@@ -403,7 +403,7 @@ public static class Utils
 
 	public static string GenerateToken(int length)
 	{
-		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+*/()[]{}";
+		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 		Random rng = new();
 		StringBuilder sb = new();
 		for (int i = 0; i < length; i++)
