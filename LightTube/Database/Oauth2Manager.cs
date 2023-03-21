@@ -1,4 +1,5 @@
 using LightTube.Database.Models;
+using Microsoft.Extensions.Primitives;
 using MongoDB.Driver;
 
 namespace LightTube.Database;
@@ -49,12 +50,42 @@ public class Oauth2Manager
 		string type = parts[0].ToLower();
 		string token = parts[1];
 
-		IAsyncCursor<DatabaseOauthToken> cursor = await OauthTokensCollection.FindAsync(x => x.CurrentAuthToken == token);
+		if (type != "bearer") return null;
+
+		IAsyncCursor<DatabaseOauthToken> cursor =
+			await OauthTokensCollection.FindAsync(x => x.CurrentAuthToken == token);
 		DatabaseOauthToken login = cursor.FirstOrDefault();
 
 		if (login is null)
 			return null;
 
 		return await DatabaseManager.Users.GetUserFromId(login.UserId);
+	}
+
+	public async Task<DatabaseOauthToken?> GetLoginFromHttpContext(HttpContext context)
+	{
+		if (!context.Request.Headers.TryGetValue("authorization", out StringValues authHeaders))
+			return null;
+
+		string[] parts = authHeaders.First().Split(" ");
+		string type = parts[0].ToLower();
+		string token = parts[1];
+
+		if (type != "bearer") return null;
+
+		IAsyncCursor<DatabaseOauthToken> cursor =
+			await OauthTokensCollection.FindAsync(x => x.CurrentAuthToken == token);
+		DatabaseOauthToken login = cursor.FirstOrDefault();
+
+		return login;
+	}
+
+	public async Task<DatabaseUser?> GetUserFromHttpRequest(HttpRequest request)
+	{
+		if (!request.Headers.TryGetValue("authorization", out StringValues authHeaders))
+			return null;
+
+		string authHeader = authHeaders.First();
+		return await DatabaseManager.Oauth2.GetUserFromHeader(authHeader);
 	}
 }
