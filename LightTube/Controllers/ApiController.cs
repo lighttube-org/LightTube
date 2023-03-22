@@ -157,21 +157,28 @@ namespace LightTube.Controllers
 		}
 
 		[Route("playlist")]
-		public async Task<IActionResult> Playlist(string id, string? continuation = null)
+		public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, string? continuation = null)
 		{
 			Regex regex = new(PLAYLIST_ID_REGEX);
 			if (!regex.IsMatch(id) || id.Length != 34)
-				return Error($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
+				return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
 
 
 			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
 			{
-				return Error($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
+				return Error<ApiPlaylist>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
 			}
 
-			InnerTubePlaylist playlist =
-				await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return Json(playlist);
+			try
+			{
+				InnerTubePlaylist playlist =
+					await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
+				return new ApiResponse<ApiPlaylist>(new ApiPlaylist(playlist), null);
+			}
+			catch (Exception e)
+			{
+				return Error<ApiPlaylist>(e.Message, 500, HttpStatusCode.InternalServerError);
+			}
 		}
 
 		[Route("channel")]
