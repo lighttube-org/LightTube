@@ -88,12 +88,12 @@ namespace LightTube.Controllers
 			{
 				InnerTubeNextResponse video = await _youtube.GetVideoAsync(v, playlistId, playlistIndex, playlistParams,
 					HttpContext.GetLanguage(), HttpContext.GetRegion());
-				
+
 				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 				userData?.AddInfoForChannel(video.Channel.Id);
 				userData?.CalculateWithRenderers(video.Recommended);
-				
+
 				return new ApiResponse<InnerTubeNextResponse>(video, userData);
 			}
 			catch (Exception e)
@@ -137,13 +137,23 @@ namespace LightTube.Controllers
 		}
 
 		[Route("searchSuggestions")]
-		public async Task<IActionResult> SearchSuggestions(string query)
+		public async Task<ApiResponse<InnerTubeSearchAutocomplete>> SearchSuggestions(string query)
 		{
 			if (string.IsNullOrWhiteSpace(query))
-				return Error($"Missing query (query parameter `query`)", 400, HttpStatusCode.BadRequest);
-
-			return Json(await _youtube.GetSearchAutocompleteAsync(query, HttpContext.GetLanguage(),
-				HttpContext.GetRegion()));
+				return Error<InnerTubeSearchAutocomplete>("Missing query (query parameter `query`)", 400,
+					HttpStatusCode.BadRequest);
+			try
+			{
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				return new ApiResponse<InnerTubeSearchAutocomplete>(await _youtube.GetSearchAutocompleteAsync(query,
+					HttpContext.GetLanguage(),
+					HttpContext.GetRegion()), userData);
+			}
+			catch (Exception e)
+			{
+				return Error<InnerTubeSearchAutocomplete>(e.Message, 500, HttpStatusCode.InternalServerError);
+			}
 		}
 
 		[Route("playlist")]
