@@ -182,22 +182,45 @@ namespace LightTube.Controllers
 		}
 
 		[Route("channel")]
-		public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home,
+		public async Task<ApiResponse<ApiChannel>> Channel(string id, ChannelTabs tab = ChannelTabs.Home,
 			string? searchQuery = null, string? continuation = null)
 		{
 			Regex regex = new(CHANNEL_ID_REGEX);
 			if (!regex.IsMatch(id) || id.Length != 24)
-				return Error("Invalid channel ID: " + id, 400, HttpStatusCode.BadRequest);
+				return Error<ApiChannel>("Invalid channel ID: " + id, 400, HttpStatusCode.BadRequest);
 
 			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
 			{
-				return Error($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
+				return Error<ApiChannel>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
 			}
 
-			return continuation is null
-				? Json(await _youtube.GetChannelAsync(id, tab, searchQuery, HttpContext.GetLanguage(),
-					HttpContext.GetRegion()))
-				: Json(await _youtube.ContinueChannelAsync(id));
+			try
+			{
+				ApiChannel response;
+				if (continuation is null)
+				{
+					InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id, tab, searchQuery,
+						HttpContext.GetLanguage(),
+						HttpContext.GetRegion());
+					response = new ApiChannel(channel);
+				}
+				else
+				{
+					InnerTubeContinuationResponse channel = await _youtube.ContinueChannelAsync(continuation);
+					response = new ApiChannel(channel);
+				}
+
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.AddInfoForChannel(response.Id);
+				userData?.CalculateWithRenderers(response.Contents);
+
+				return new ApiResponse<ApiChannel>(response, userData);
+			}
+			catch (Exception e)
+			{
+				return Error<ApiChannel>(e.Message, 500, HttpStatusCode.InternalServerError);
+			}
 		}
 
 		[Route("locals")]
