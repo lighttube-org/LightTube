@@ -29,9 +29,30 @@ public class ApiUserData
 		switch (renderer)
 		{
 			case ChannelRenderer channel:
-				if (User.Subscriptions.ContainsKey(channel.Id))
-					Channels.Add(channel.Id, new ApiSubscriptionInfo(User.Subscriptions[channel.Id]));
+				AddInfoForChannel(channel.Id);
+				break;
+			case VideoRenderer video:
+				AddInfoForChannel(video.Channel.Id);
+				break;
+			case CompactVideoRenderer video:
+				AddInfoForChannel(video.Channel.Id);
+				break;
+			case GridVideoRenderer video:
+				AddInfoForChannel(video.Channel.Id);
+				break;
+			case PlaylistVideoRenderer video:
+				AddInfoForChannel(video.Channel.Id);
+				break;
+			case PlaylistPanelVideoRenderer video:
+				AddInfoForChannel(video.Channel.Id);
 				break;
 		}
+	}
+
+	public void AddInfoForChannel(string? channelId)
+	{
+		if (channelId == null) return;
+		if (User.Subscriptions.ContainsKey(channelId))
+			Channels.Add(channelId, new ApiSubscriptionInfo(User.Subscriptions[channelId]));
 	}
 }

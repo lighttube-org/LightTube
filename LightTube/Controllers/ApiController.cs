@@ -40,10 +40,12 @@ namespace LightTube.Controllers
 		}
 
 		[Route("player")]
-		public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? v, bool contentCheckOk = true, bool includeHls = false)
+		public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? v, bool contentCheckOk = true,
+			bool includeHls = false)
 		{
 			if (v is null)
-				return Error<InnerTubePlayer>("Missing YouTube ID (query parameter `v`)", 400, HttpStatusCode.BadRequest);
+				return Error<InnerTubePlayer>("Missing YouTube ID (query parameter `v`)", 400,
+					HttpStatusCode.BadRequest);
 
 			Regex regex = new(VIDEO_ID_REGEX);
 			if (!regex.IsMatch(v) || v.Length != 11)
@@ -54,7 +56,7 @@ namespace LightTube.Controllers
 				InnerTubePlayer player =
 					await _youtube.GetPlayerAsync(v, contentCheckOk, includeHls, HttpContext.GetLanguage(),
 						HttpContext.GetRegion());
-			
+
 				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 				userData?.AddInfoForChannel(player.Details.Author.Id);
@@ -68,23 +70,41 @@ namespace LightTube.Controllers
 		}
 
 		[Route("video")]
-		public async Task<IActionResult> GetVideoInfo(string? v, string? playlistId = null, int? playlistIndex = null,
+		public async Task<ApiResponse<InnerTubeNextResponse>> GetVideoInfo(
+			string? v,
+			string? playlistId = null,
+			int? playlistIndex = null,
 			string? playlistParams = null)
 		{
 			if (v is null)
-				return Error("Missing video ID (query parameter `v`)", 400, HttpStatusCode.BadRequest);
+				return Error<InnerTubeNextResponse>("Missing video ID (query parameter `v`)", 400,
+					HttpStatusCode.BadRequest);
 
 			Regex regex = new(VIDEO_ID_REGEX);
 			if (!regex.IsMatch(v) || v.Length != 11)
-				return Error($"Invalid video ID: {v}", 400, HttpStatusCode.BadRequest);
+				return Error<InnerTubeNextResponse>($"Invalid video ID: {v}", 400, HttpStatusCode.BadRequest);
 
-			InnerTubeNextResponse video = await _youtube.GetVideoAsync(v, playlistId, playlistIndex, playlistParams,
-				HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return Json(video);
+			try
+			{
+				InnerTubeNextResponse video = await _youtube.GetVideoAsync(v, playlistId, playlistIndex, playlistParams,
+					HttpContext.GetLanguage(), HttpContext.GetRegion());
+				
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.AddInfoForChannel(video.Channel.Id);
+				userData?.CalculateWithRenderers(video.Recommended);
+				
+				return new ApiResponse<InnerTubeNextResponse>(video, userData);
+			}
+			catch (Exception e)
+			{
+				return Error<InnerTubeNextResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
+			}
 		}
 
 		[Route("search")]
-		public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null, string? @params = null)
+		public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null,
+			string? @params = null)
 		{
 			if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
 			{
@@ -108,7 +128,7 @@ namespace LightTube.Controllers
 					HttpContext.GetRegion());
 				result = new ApiSearchResults(results);
 			}
-			
+
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			userData?.CalculateWithRenderers(result.SearchResults);
