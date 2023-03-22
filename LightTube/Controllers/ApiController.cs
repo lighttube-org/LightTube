@@ -108,7 +108,7 @@ namespace LightTube.Controllers
 		{
 			if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
 			{
-				return Error(
+				return Error<ApiSearchResults>(
 					"Missing query (query parameter `query`) or continuation key (query parameter `continuation`)",
 					400, HttpStatusCode.BadRequest);
 			}
