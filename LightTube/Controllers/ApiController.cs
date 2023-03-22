@@ -32,33 +32,38 @@ namespace LightTube.Controllers
 			return Json(user);
 		}
 
-		private ApiResponse<object> Error(string message, int code, HttpStatusCode statusCode)
+		private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
 		{
 			Response.StatusCode = (int)statusCode;
-			return new ApiResponse<object>(statusCode == HttpStatusCode.BadRequest ? "BAD_REQUEST" : "ERROR",
+			return new ApiResponse<T>(statusCode == HttpStatusCode.BadRequest ? "BAD_REQUEST" : "ERROR",
 				message, code);
 		}
 
 		[Route("player")]
-		public async Task<IActionResult> GetPlayerInfo(string? v, bool contentCheckOk = true, bool includeHls = false)
+		public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? v, bool contentCheckOk = true, bool includeHls = false)
 		{
 			if (v is null)
-				return Error("Missing YouTube ID (query parameter `v`)", 400, HttpStatusCode.BadRequest);
+				return Error<InnerTubePlayer>("Missing YouTube ID (query parameter `v`)", 400, HttpStatusCode.BadRequest);
 
 			Regex regex = new(VIDEO_ID_REGEX);
 			if (!regex.IsMatch(v) || v.Length != 11)
-				return Error($"Invalid video ID: {v}", 400, HttpStatusCode.BadRequest);
+				return Error<InnerTubePlayer>($"Invalid video ID: {v}", 400, HttpStatusCode.BadRequest);
 
 			try
 			{
 				InnerTubePlayer player =
 					await _youtube.GetPlayerAsync(v, contentCheckOk, includeHls, HttpContext.GetLanguage(),
 						HttpContext.GetRegion());
-				return Json(player);
+			
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.AddInfoForChannel(player.Details.Author.Id);
+
+				return new ApiResponse<InnerTubePlayer>(player, userData);
 			}
 			catch (Exception e)
 			{
-				return Error(e.Message, 500, HttpStatusCode.InternalServerError);
+				return Error<InnerTubePlayer>(e.Message, 500, HttpStatusCode.InternalServerError);
 			}
 		}
 
