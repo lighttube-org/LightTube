@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
 using InnerTube;
+using LightTube.ApiModels;
 using LightTube.Attributes;
 using LightTube.Database;
 using LightTube.Database.Models;
@@ -31,14 +32,11 @@ namespace LightTube.Controllers
 			return Json(user);
 		}
 
-		private IActionResult Error(string message, int code, HttpStatusCode statusCode)
+		private ApiResponse<object> Error(string message, int code, HttpStatusCode statusCode)
 		{
 			Response.StatusCode = (int)statusCode;
-			return Json(new Dictionary<string, object>
-			{
-				["errorMessage"] = message,
-				["errorCode"] = code
-			});
+			return new ApiResponse<object>(statusCode == HttpStatusCode.BadRequest ? "BAD_REQUEST" : "ERROR",
+				message, code);
 		}
 
 		[Route("player")]
@@ -81,7 +79,7 @@ namespace LightTube.Controllers
 		}
 
 		[Route("search")]
-		public async Task<IActionResult> Search(string query, string? continuation = null, string? @params = null)
+		public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null, string? @params = null)
 		{
 			if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
 			{
@@ -90,10 +88,27 @@ namespace LightTube.Controllers
 					400, HttpStatusCode.BadRequest);
 			}
 
-			return continuation is null
-				? Json(await _youtube.SearchAsync(query, @params, HttpContext.GetLanguage(), HttpContext.GetRegion()))
-				: Json(await _youtube.ContinueSearchAsync(continuation, HttpContext.GetLanguage(),
-					HttpContext.GetRegion()));
+
+			ApiSearchResults result;
+			if (continuation is null)
+			{
+				InnerTubeSearchResults results = await _youtube.SearchAsync(query, @params, HttpContext.GetLanguage(),
+					HttpContext.GetRegion());
+				result = new ApiSearchResults(results);
+			}
+			else
+			{
+				InnerTubeContinuationResponse results = await _youtube.ContinueSearchAsync(continuation,
+					HttpContext.GetLanguage(),
+					HttpContext.GetRegion());
+				result = new ApiSearchResults(results);
+			}
+			
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			userData?.CalculateWithRenderers(result.SearchResults);
+
+			return new ApiResponse<ApiSearchResults>(result, userData);
 		}
 
 		[Route("searchSuggestions")]

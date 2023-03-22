@@ -16,7 +16,7 @@ public class DatabaseUser
 	private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 	public string UserID { get; set; }
 	[JsonIgnore] public string PasswordHash { get; set; }
-	public Dictionary<string, SubscriptionType> Subscriptions { get; set; }
+	[JsonIgnore] public Dictionary<string, SubscriptionType> Subscriptions { get; set; }
 	public string LTChannelID { get; set; }
 
 	[JsonIgnore] [BsonIgnoreIfNull] [Obsolete("Use Subscriptions dictionary instead")]
