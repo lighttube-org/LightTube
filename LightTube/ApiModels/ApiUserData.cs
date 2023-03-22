@@ -74,7 +74,7 @@ public class ApiUserData
 	public void AddInfoForChannel(string? channelId)
 	{
 		if (channelId == null) return;
-		if (User.Subscriptions.ContainsKey(channelId))
+		if (User.Subscriptions.ContainsKey(channelId) && !Channels.ContainsKey(channelId))
 			Channels.Add(channelId, new ApiSubscriptionInfo(User.Subscriptions[channelId]));
 	}
 }
