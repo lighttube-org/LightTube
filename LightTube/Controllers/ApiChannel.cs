@@ -1,5 +1,6 @@
 using InnerTube;
 using InnerTube.Renderers;
+using LightTube.Database.Models;
 
 namespace LightTube.Controllers;
 
@@ -61,5 +62,23 @@ public class ApiChannel
 		EnabledTabs = Array.Empty<string>();
 		Contents = channel.Contents;
 		Continuation = channel.Continuation;
+	}
+
+	public ApiChannel(DatabaseUser channel)
+	{
+		Id = channel.LTChannelID;
+		Title = channel.UserID;
+		Avatars = Array.Empty<Thumbnail>();
+		Banner = Array.Empty<Thumbnail>();
+		Badges = Array.Empty<Badge>();
+		PrimaryLinks = Array.Empty<ChannelLink>();
+		SecondaryLinks = Array.Empty<ChannelLink>();
+		SubscriberCountText = "LightTube account";
+		EnabledTabs = new[]
+		{
+			ChannelTabs.Playlists.ToString()
+		};
+		Contents = new[] { channel.PlaylistRenderers() };
+		Continuation = null;
 	}
 }

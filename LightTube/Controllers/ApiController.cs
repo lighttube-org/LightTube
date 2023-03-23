@@ -197,7 +197,13 @@ namespace LightTube.Controllers
 			try
 			{
 				ApiChannel response;
-				if (continuation is null)
+				if (id.StartsWith("LT"))
+				{
+					DatabaseUser? localUser = await DatabaseManager.Users.GetUserFromLTId(id);
+					if (localUser is null)
+						throw new Exception("This user does not exist.");
+					response = new ApiChannel(localUser);
+				} else if (continuation is null)
 				{
 					InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id, tab, searchQuery,
 						HttpContext.GetLanguage(),
