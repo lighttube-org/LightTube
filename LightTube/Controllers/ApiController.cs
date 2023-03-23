@@ -159,21 +159,62 @@ namespace LightTube.Controllers
 		[Route("playlist")]
 		public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, string? continuation = null)
 		{
-			Regex regex = new(PLAYLIST_ID_REGEX);
-			if (!regex.IsMatch(id) || id.Length != 34)
-				return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
+			if (id.StartsWith("LT-PL"))
+			{
+				if (id.Length != 24)
+					return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
+			}
+			else
+			{
+				Regex regex = new(PLAYLIST_ID_REGEX);
+				if (!regex.IsMatch(id) || id.Length != 34)
+					return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
+			}
 
 
 			if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
-			{
 				return Error<ApiPlaylist>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
-			}
 
 			try
 			{
-				InnerTubePlaylist playlist =
-					await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
-				return new ApiResponse<ApiPlaylist>(new ApiPlaylist(playlist), null);
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiPlaylist result;
+				if (id.StartsWith("LT-PL"))
+				{
+					DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
+
+					if (playlist is null)
+						return Error<ApiPlaylist>("The playlist does not exist.", 500,
+							HttpStatusCode.InternalServerError);
+
+					if (playlist.Visibility == PlaylistVisibility.PRIVATE)
+					{
+						if (user == null)
+							return Error<ApiPlaylist>("The playlist does not exist.", 500,
+								HttpStatusCode.InternalServerError);
+
+						if (playlist.Author != user.UserID)
+							return Error<ApiPlaylist>("The playlist does not exist.", 500,
+								HttpStatusCode.InternalServerError);
+					}
+
+					result = new ApiPlaylist(playlist);
+				}
+				else if (continuation is null)
+				{
+					InnerTubePlaylist playlist =
+						await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
+					result = new ApiPlaylist(playlist);
+				}
+				else
+				{
+					InnerTubeContinuationResponse playlist =
+						await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(),
+							HttpContext.GetRegion());
+					result = new ApiPlaylist(playlist);
+				}
+
+				return new ApiResponse<ApiPlaylist>(result, null);
 			}
 			catch (Exception e)
 			{
@@ -203,7 +244,8 @@ namespace LightTube.Controllers
 					if (localUser is null)
 						throw new Exception("This user does not exist.");
 					response = new ApiChannel(localUser);
-				} else if (continuation is null)
+				}
+				else if (continuation is null)
 				{
 					InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id, tab, searchQuery,
 						HttpContext.GetLanguage(),
