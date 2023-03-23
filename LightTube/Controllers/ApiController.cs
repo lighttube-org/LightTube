@@ -157,14 +157,14 @@ namespace LightTube.Controllers
 		}
 
 		[Route("playlist")]
-		public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, string? continuation = null)
+		public async Task<ApiResponse<ApiPlaylist>> Playlist(string? id, string? continuation = null)
 		{
-			if (id.StartsWith("LT-PL"))
+			if (id?.StartsWith("LT-PL") ?? false)
 			{
 				if (id.Length != 24)
 					return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
 			}
-			else
+			else if (id != null)
 			{
 				Regex regex = new(PLAYLIST_ID_REGEX);
 				if (!regex.IsMatch(id) || id.Length != 34)
@@ -179,7 +179,7 @@ namespace LightTube.Controllers
 			{
 				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 				ApiPlaylist result;
-				if (id.StartsWith("LT-PL"))
+				if (id?.StartsWith("LT-PL") ?? false)
 				{
 					DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
 
@@ -214,7 +214,10 @@ namespace LightTube.Controllers
 					result = new ApiPlaylist(playlist);
 				}
 
-				return new ApiResponse<ApiPlaylist>(result, null);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.AddInfoForChannel(result.Channel.Id);
+				userData?.CalculateWithRenderers(result.Videos);
+				return new ApiResponse<ApiPlaylist>(result, userData);
 			}
 			catch (Exception e)
 			{
