@@ -274,6 +274,29 @@ public class ApiController : Controller
 		}
 	}
 
+	[Route("comments")]
+	public async Task<ApiResponse<InnerTubeContinuationResponse>> Comments(string continuation)
+	{
+		if (string.IsNullOrWhiteSpace(continuation))
+			return Error<InnerTubeContinuationResponse>($"Invalid continuation", 400, HttpStatusCode.BadRequest);
+
+		try
+		{
+			InnerTubeContinuationResponse comments =
+				await _youtube.GetVideoCommentsAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			userData?.CalculateWithRenderers(comments.Contents);
+
+			return new ApiResponse<InnerTubeContinuationResponse>(comments, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<InnerTubeContinuationResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
 	[Route("locals")]
 	public async Task<IActionResult> Locals()
 	{
