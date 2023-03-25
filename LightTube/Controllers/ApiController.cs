@@ -43,21 +43,21 @@ public class ApiController : Controller
 
 	[Route("player")]
 	[ApiDisableable]
-	public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? v, bool contentCheckOk = true,
+	public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? id, bool contentCheckOk = true,
 		bool includeHls = false)
 	{
-		if (v is null)
-			return Error<InnerTubePlayer>("Missing YouTube ID (query parameter `v`)", 400,
+		if (id is null)
+			return Error<InnerTubePlayer>("Missing video ID (query parameter `id`)", 400,
 				HttpStatusCode.BadRequest);
 
 		Regex regex = new(VIDEO_ID_REGEX);
-		if (!regex.IsMatch(v) || v.Length != 11)
-			return Error<InnerTubePlayer>($"Invalid video ID: {v}", 400, HttpStatusCode.BadRequest);
+		if (!regex.IsMatch(id) || id.Length != 11)
+			return Error<InnerTubePlayer>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
 
 		try
 		{
 			InnerTubePlayer player =
-				await _youtube.GetPlayerAsync(v, contentCheckOk, includeHls, HttpContext.GetLanguage(),
+				await _youtube.GetPlayerAsync(id, contentCheckOk, includeHls, HttpContext.GetLanguage(),
 					HttpContext.GetRegion());
 
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
@@ -75,22 +75,22 @@ public class ApiController : Controller
 	[Route("video")]
 	[ApiDisableable]
 	public async Task<ApiResponse<InnerTubeNextResponse>> GetVideoInfo(
-		string? v,
+		string? id,
 		string? playlistId = null,
 		int? playlistIndex = null,
 		string? playlistParams = null)
 	{
-		if (v is null)
-			return Error<InnerTubeNextResponse>("Missing video ID (query parameter `v`)", 400,
+		if (id is null)
+			return Error<InnerTubeNextResponse>("Missing video ID (query parameter `id`)", 400,
 				HttpStatusCode.BadRequest);
 
 		Regex regex = new(VIDEO_ID_REGEX);
-		if (!regex.IsMatch(v) || v.Length != 11)
-			return Error<InnerTubeNextResponse>($"Invalid video ID: {v}", 400, HttpStatusCode.BadRequest);
+		if (!regex.IsMatch(id) || id.Length != 11)
+			return Error<InnerTubeNextResponse>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
 
 		try
 		{
-			InnerTubeNextResponse video = await _youtube.GetVideoAsync(v, playlistId, playlistIndex, playlistParams,
+			InnerTubeNextResponse video = await _youtube.GetVideoAsync(id, playlistId, playlistIndex, playlistParams,
 				HttpContext.GetLanguage(), HttpContext.GetRegion());
 
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
