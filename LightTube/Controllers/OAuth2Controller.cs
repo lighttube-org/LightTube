@@ -1,5 +1,6 @@
 using System.Web;
 using LightTube.ApiModels;
+using LightTube.Attributes;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
@@ -20,6 +21,8 @@ public class OAuth2Controller : Controller
 		[FromQuery(Name = "scope")] string? scope,
 		[FromQuery(Name = "state")] string? state = null)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
+			return View(new OAuthContext("This instance does not allow OAuth2"));
 		if (string.IsNullOrEmpty(responseType))
 			return View(new OAuthContext("response_type cannot be empty"));
 
@@ -63,6 +66,9 @@ public class OAuth2Controller : Controller
 		[FromQuery(Name = "scope")] string scope,
 		[FromQuery(Name = "state")] string? state = null)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
+			throw new Exception("Instance doesn't allow OAuth");
+
 		if (string.IsNullOrEmpty(responseType))
 			throw new Exception("Response type invalid!");
 
@@ -115,6 +121,8 @@ public class OAuth2Controller : Controller
 		[FromForm(Name = "client_id")] string clientId,
 		[FromForm(Name = "client_secret")] string clientSecret)
 	{
+		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
+			return Unauthorized();
 		if (grantType is not ("code" or "authorization_code"))
 			return Unauthorized();
 		DatabaseOauthToken? token = await DatabaseManager.Oauth2.RefreshToken(code, clientId);
