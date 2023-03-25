@@ -2,7 +2,7 @@ using InnerTube;
 using InnerTube.Renderers;
 using LightTube.Database.Models;
 
-namespace LightTube.Controllers;
+namespace LightTube.ApiModels;
 
 public class ApiChannel
 {
