@@ -22,6 +22,18 @@ public class ApiController : Controller
 		_youtube = youtube;
 	}
 
+	[Route("info")]
+	public LightTubeInstanceInfo GetInstanceInfo() =>
+		new()
+		{
+			Type = "lighttube",
+			Version = Utils.GetVersion(),
+			Motd = Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")!,
+			AllowsApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_API", "")?.ToLower() != "true",
+			AllowsNewUsers = Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "")?.ToLower() != "true",
+			AllowsOauthApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true"
+		};
+
 	[Route("currentUser")]
 	[ApiAuthorization]
 	[ApiDisableable]
