@@ -24,6 +24,7 @@ public class ApiController : Controller
 
 	[Route("currentUser")]
 	[ApiAuthorization]
+	[ApiDisableable]
 	public async Task<IActionResult> GetCurrentUser()
 	{
 		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
@@ -40,6 +41,7 @@ public class ApiController : Controller
 	}
 
 	[Route("player")]
+	[ApiDisableable]
 	public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? v, bool contentCheckOk = true,
 		bool includeHls = false)
 	{
@@ -70,6 +72,7 @@ public class ApiController : Controller
 	}
 
 	[Route("video")]
+	[ApiDisableable]
 	public async Task<ApiResponse<InnerTubeNextResponse>> GetVideoInfo(
 		string? v,
 		string? playlistId = null,
@@ -103,6 +106,7 @@ public class ApiController : Controller
 	}
 
 	[Route("search")]
+	[ApiDisableable]
 	public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null,
 		string? @params = null)
 	{
@@ -137,6 +141,7 @@ public class ApiController : Controller
 	}
 
 	[Route("searchSuggestions")]
+	[ApiDisableable]
 	public async Task<ApiResponse<InnerTubeSearchAutocomplete>> SearchSuggestions(string query)
 	{
 		if (string.IsNullOrWhiteSpace(query))
@@ -157,6 +162,7 @@ public class ApiController : Controller
 	}
 
 	[Route("playlist")]
+	[ApiDisableable]
 	public async Task<ApiResponse<ApiPlaylist>> Playlist(string? id, string? continuation = null)
 	{
 		if (id?.StartsWith("LT-PL") ?? false)
@@ -226,6 +232,7 @@ public class ApiController : Controller
 	}
 
 	[Route("channel")]
+	[ApiDisableable]
 	public async Task<ApiResponse<ApiChannel>> Channel(string id, ChannelTabs tab = ChannelTabs.Home,
 		string? searchQuery = null, string? continuation = null)
 	{
@@ -275,6 +282,7 @@ public class ApiController : Controller
 	}
 
 	[Route("comments")]
+	[ApiDisableable]
 	public async Task<ApiResponse<InnerTubeContinuationResponse>> Comments(string continuation)
 	{
 		if (string.IsNullOrWhiteSpace(continuation))
@@ -298,6 +306,7 @@ public class ApiController : Controller
 	}
 
 	[Route("locals")]
+	[ApiDisableable]
 	public async Task<IActionResult> Locals()
 	{
 		InnerTubeLocals locals = await _youtube.GetLocalsAsync();
