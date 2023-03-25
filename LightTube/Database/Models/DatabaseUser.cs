@@ -65,10 +65,10 @@ public class DatabaseUser
 		return channelId;
 	}
 
-	public GridRenderer PlaylistRenderers()
+	public GridRenderer PlaylistRenderers(PlaylistVisibility minVisibility = PlaylistVisibility.VISIBLE)
 	{
 		IEnumerable<DatabasePlaylist> playlists =
-			DatabaseManager.Playlists.GetUserPlaylists(UserID, PlaylistVisibility.VISIBLE);
+			DatabaseManager.Playlists.GetUserPlaylists(UserID, minVisibility);
 		string playlistsJson = playlists.Any()
 			? string.Join(',', playlists.Select(x => x.GetInnerTubeGridPlaylistJson()))
 			: INNERTUBE_MESSAGE_RENDERER_TEMPLATE.Replace("%%MESSAGE%%",

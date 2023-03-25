@@ -34,17 +34,6 @@ public class ApiController : Controller
 			AllowsOauthApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true"
 		};
 
-	[Route("currentUser")]
-	[ApiAuthorization]
-	[ApiDisableable]
-	public async Task<IActionResult> GetCurrentUser()
-	{
-		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-		if (user is null) return Unauthorized();
-
-		return Json(user);
-	}
-
 	private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
 	{
 		Response.StatusCode = (int)statusCode;
