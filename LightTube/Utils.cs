@@ -24,9 +24,7 @@ public static class Utils
 		"playlists.read",
 		"playlists.write",
 		"subscriptions.read",
-		"subscriptions.write",
-		"logins.read",
-		"logins.delete"
+		"subscriptions.write"
 	};
 
 	public static string GetRegion(this HttpContext context) =>
