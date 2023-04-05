@@ -67,7 +67,8 @@ public class OauthApiController : Controller
 		if (user is null) return Error<DatabasePlaylist>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
 		if (string.IsNullOrWhiteSpace(request.Title))
-			return Error<DatabasePlaylist>("Playlist title cannot be null, empty or whitespace", 400, HttpStatusCode.BadRequest);
+			return Error<DatabasePlaylist>("Playlist title cannot be null, empty or whitespace", 400,
+				HttpStatusCode.BadRequest);
 
 		try
 		{
@@ -96,6 +97,53 @@ public class OauthApiController : Controller
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			await DatabaseManager.Playlists.DeletePlaylist(Request.Headers["Authorization"].ToString(), id);
 			return new ApiResponse<string>($"Deleted playlist '{id}'", userData);
+		}
+		catch (Exception e)
+		{
+			return Error<string>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
+	[Route("playlists/{playlistId}/{videoId}")]
+	[HttpPut]
+	[ApiAuthorization("playlists.write")]
+	public async Task<ApiResponse<ModifyPlaylistContentResponse>> PutVideoIntoPlaylist(string playlistId, string videoId)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null) return Error<ModifyPlaylistContentResponse>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		try
+		{
+			InnerTubePlayer video = await _youtube.GetPlayerAsync(videoId);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			await DatabaseManager.Playlists.AddVideoToPlaylist(
+				Request.Headers["Authorization"].ToString(),
+				playlistId,
+				video);
+			return new ApiResponse<ModifyPlaylistContentResponse>(new ModifyPlaylistContentResponse(video), userData);
+		}
+		catch (Exception e)
+		{
+			return Error<ModifyPlaylistContentResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
+	[Route("playlists/{playlistId}/{videoId}")]
+	[HttpDelete]
+	[ApiAuthorization("playlists.write")]
+	public async Task<ApiResponse<string>> DeleteVideoFromPlaylist(string playlistId, string videoId)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null) return Error<string>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		try
+		{
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			await DatabaseManager.Playlists.RemoveVideoFromPlaylist(
+				Request.Headers["Authorization"].ToString(),
+				playlistId,
+				videoId);
+			return new ApiResponse<string>($"Removed '{videoId}' from playlist '{playlistId}'", userData);
 		}
 		catch (Exception e)
 		{
