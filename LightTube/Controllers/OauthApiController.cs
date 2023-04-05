@@ -58,6 +58,51 @@ public class OauthApiController : Controller
 			userData);
 	}
 
+	[Route("playlists")]
+	[HttpPut]
+	[ApiAuthorization("playlists.write")]
+	public async Task<ApiResponse<DatabasePlaylist>> CreatePlaylist([FromBody] CreatePlaylistRequest request)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null) return Error<DatabasePlaylist>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		if (string.IsNullOrWhiteSpace(request.Title))
+			return Error<DatabasePlaylist>("Playlist title cannot be null, empty or whitespace", 400, HttpStatusCode.BadRequest);
+
+		try
+		{
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			DatabasePlaylist playlist = await DatabaseManager.Playlists.CreatePlaylist(
+				Request.Headers["Authorization"].ToString(), request.Title,
+				request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
+			return new ApiResponse<DatabasePlaylist>(playlist, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<DatabasePlaylist>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
+	[Route("playlists/{id}")]
+	[HttpDelete]
+	[ApiAuthorization("playlists.write")]
+	public async Task<ApiResponse<string>> DeletePlaylist(string id)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null) return Error<string>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		try
+		{
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			await DatabaseManager.Playlists.DeletePlaylist(Request.Headers["Authorization"].ToString(), id);
+			return new ApiResponse<string>($"Deleted playlist '{id}'", userData);
+		}
+		catch (Exception e)
+		{
+			return Error<string>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
 	#endregion
 
 	#region subscriptions.*

@@ -29,7 +29,7 @@ public static class DatabaseManager
 		ChannelCacheCollection = Database.GetCollection<DatabaseChannel>("channelCache");
 		Oauth2TokensCollection = Database.GetCollection<DatabaseOauthToken>("oauth2Tokens");
 
-		Users = new UserManager(UserCollection, TokensCollection, PlaylistCollection);
+		Users = new UserManager(UserCollection, TokensCollection, PlaylistCollection, Oauth2TokensCollection);
 		Cache = new CacheManager(ChannelCacheCollection, VideoCacheCollection);
 		Oauth2 = new Oauth2Manager(Oauth2TokensCollection);
 		Playlists = new PlaylistManager(PlaylistCollection, VideoCacheCollection);
