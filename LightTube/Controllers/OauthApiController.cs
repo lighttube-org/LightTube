@@ -1,4 +1,5 @@
 using System.Net;
+using InnerTube;
 using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
@@ -94,5 +95,66 @@ public class OauthApiController : Controller
 
 		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 		return new ApiResponse<FeedVideo[]>(feed, userData);
+	}
+
+	[Route("subscriptions")]
+	[HttpPut]
+	[ApiAuthorization("subscriptions.write")]
+	public async Task<ApiResponse<UpdateSubscriptionResponse>> UpdateSubscription(
+		[FromBody] UpdateSubscriptionRequest req)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null)
+			return Error<UpdateSubscriptionResponse>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+
+		try
+		{
+			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
+			if (user.Subscriptions.ContainsKey(req.ChannelId))
+			{
+				if (!req.Subscribed)
+					user.Subscriptions.Remove(req.ChannelId);
+				else
+					user.Subscriptions[req.ChannelId] =
+						req.EnableNotifications
+							? SubscriptionType.NOTIFICATIONS_ON
+							: SubscriptionType.NOTIFICATIONS_OFF;
+			}
+			else if (req.Subscribed)
+				user.Subscriptions.Add(req.ChannelId, req.EnableNotifications
+					? SubscriptionType.NOTIFICATIONS_ON
+					: SubscriptionType.NOTIFICATIONS_OFF);
+
+			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, user), userData);
+		}
+		catch (Exception e)
+		{
+			return Error<UpdateSubscriptionResponse>(e.StackTrace!, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
+	[Route("subscriptions/{id}")]
+	[HttpDelete]
+	[ApiAuthorization("subscriptions.write")]
+	public async Task<ApiResponse<UpdateSubscriptionResponse>> Unsubscribe(string id)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null)
+			return Error<UpdateSubscriptionResponse>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+
+		try
+		{
+			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id);
+			if (user.Subscriptions.ContainsKey(id)) user.Subscriptions.Remove(id);
+			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, user), userData);
+		}
+		catch (Exception e)
+		{
+			return Error<UpdateSubscriptionResponse>(e.StackTrace!, 500, HttpStatusCode.InternalServerError);
+		}
 	}
 }
