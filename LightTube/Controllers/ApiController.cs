@@ -207,19 +207,20 @@ public class ApiController : Controller
 
 				result = new ApiPlaylist(playlist);
 			}
-			else if (continuation is null)
+			else if (id is not null && continuation is null)
 			{
 				InnerTubePlaylist playlist =
 					await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
 				result = new ApiPlaylist(playlist);
 			}
-			else
+			else if (continuation is not null)
 			{
 				InnerTubeContinuationResponse playlist =
 					await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(),
 						HttpContext.GetRegion());
 				result = new ApiPlaylist(playlist);
-			}
+			} else 
+				return Error<ApiPlaylist>($"Invalid request: missing both `id` and `continuation`", 400, HttpStatusCode.BadRequest);
 
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			userData?.AddInfoForChannel(result.Channel.Id);
