@@ -10,4 +10,5 @@ public class LightTubeInstanceInfo
 	[JsonProperty("allowsApi")] public bool AllowsApi { get; set; }
 	[JsonProperty("allowsNewUsers")] public bool AllowsNewUsers { get; set; }
 	[JsonProperty("allowsOauthApi")] public bool AllowsOauthApi { get; set; }
+	[JsonProperty("allowsThirdPartyProxyUsage")] public bool AllowsThirdPartyProxyUsage { get; set; }
 }

@@ -31,7 +31,8 @@ public class ApiController : Controller
 			Motd = Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")!,
 			AllowsApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_API", "")?.ToLower() != "true",
 			AllowsNewUsers = Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "")?.ToLower() != "true",
-			AllowsOauthApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true"
+			AllowsOauthApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true",
+			AllowsThirdPartyProxyUsage = Configuration.GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true"
 		};
 
 	private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
