@@ -43,6 +43,8 @@ public class OauthApiController : Controller
 		return Json(user);
 	}
 
+	#region playlists.*
+
 	[Route("playlists")]
 	[HttpGet]
 	[ApiAuthorization("playlists.read")]
@@ -51,13 +53,14 @@ public class OauthApiController : Controller
 		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 		if (user is null) return Error<IEnumerable<IRenderer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
-		IEnumerable<DatabasePlaylist> playlists =
-			DatabaseManager.Playlists.GetUserPlaylists(user.UserID, PlaylistVisibility.PRIVATE);
-
 		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 		return new ApiResponse<IEnumerable<IRenderer>>(user.PlaylistRenderers(PlaylistVisibility.PRIVATE).Items,
 			userData);
 	}
+
+	#endregion
+
+	#region subscriptions.*
 
 	[Route("subscriptions")]
 	[HttpGet]
@@ -157,4 +160,6 @@ public class OauthApiController : Controller
 			return Error<UpdateSubscriptionResponse>(e.StackTrace!, 500, HttpStatusCode.InternalServerError);
 		}
 	}
+
+	#endregion
 }
