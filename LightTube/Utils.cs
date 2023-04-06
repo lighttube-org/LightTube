@@ -19,16 +19,24 @@ public static class Utils
 	private static string? _itVersion;
 	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
+	public static string[] OauthScopes =
+	{
+		"playlists.read",
+		"playlists.write",
+		"subscriptions.read",
+		"subscriptions.write"
+	};
+
 	public static string GetRegion(this HttpContext context) =>
-		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) 
-			? h.ToString() 
+		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)
+			? h.ToString()
 			: context.Request.Cookies.TryGetValue("gl", out string region)
-				? region 
+				? region
 				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
 
 	public static string GetLanguage(this HttpContext context) =>
-		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) 
-			? h.ToString() 
+		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
+			? h.ToString()
 			: context.Request.Cookies.TryGetValue("hl", out string language)
 				? language
 				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
@@ -68,7 +76,8 @@ public static class Utils
 		}
 	}
 
-	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null, bool skipCaptions = false)
+	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null,
+		bool skipCaptions = false)
 	{
 		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 			url = "https://" + url;
@@ -345,7 +354,8 @@ public static class Utils
 			format.MimeType
 				.Split("/").Last()
 				.Split(";").First();
-		else {
+		else
+		{
 			if (format.MimeType.Contains("opus"))
 				return "opus";
 			if (format.MimeType.Contains("mp4a"))
@@ -353,5 +363,49 @@ public static class Utils
 		}
 
 		return "mp4";
+	}
+
+	public static string[] FindInvalidScopes(string[] scopes) =>
+		scopes.Where(x => !OauthScopes.Contains(x)).ToArray();
+
+	public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes)
+	{
+		List<string> descriptions = new();
+
+		// dangerous ones are at the top
+		if (modelScopes.Contains("logins.read"))
+			descriptions.Add("!See your other logins");
+		if (modelScopes.Contains("logins.delete"))
+			descriptions.Add("!Log out from another place");
+
+		descriptions.Add("Access YouTube data");
+
+		if (modelScopes.Contains("playlists.read") && modelScopes.Contains("playlists.write"))
+			descriptions.Add("Access and modify your playlists");
+		else if (modelScopes.Contains("playlists.read"))
+			descriptions.Add("Access your playlists");
+		else if (modelScopes.Contains("playlists.write"))
+			descriptions.Add("Modify your playlists");
+
+		if (modelScopes.Contains("subscriptions.read"))
+		{
+			descriptions.Add("Get a list of your subscribed channels");
+			descriptions.Add("Get your subscription feed");
+		}
+
+		if (modelScopes.Contains("subscriptions.write")) 
+			descriptions.Add("Subscribe & unsubscribe from channels");
+
+		return descriptions;
+	}
+
+	public static string GenerateToken(int length)
+	{
+		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+		Random rng = new();
+		StringBuilder sb = new();
+		for (int i = 0; i < length; i++)
+			sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
+		return sb.ToString();
 	}
 }

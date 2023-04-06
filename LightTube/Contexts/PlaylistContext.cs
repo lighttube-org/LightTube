@@ -74,7 +74,7 @@ public class PlaylistContext : BaseContext
 		if (visible && playlist != null)
 		{
 			Id = playlist.Id;
-			PlaylistThumbnail = $"https://i.ytimg.com/vi/{playlist.VideoIds.First()}/hqdefault.jpg";
+			PlaylistThumbnail = $"https://i.ytimg.com/vi/{playlist.VideoIds.FirstOrDefault()}/hqdefault.jpg";
 			PlaylistTitle = playlist.Name;
 			PlaylistDescription = playlist.Description;
 			AuthorName = playlist.Author;

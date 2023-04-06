@@ -33,7 +33,7 @@ public class DatabasePlaylist
 		.Replace("%%ID%%", Id)
 		.Replace("%%TITLE%%", Name)
 		.Replace("%%VIDEOCOUNT%%", VideoIds.Count.ToString())
-		.Replace("%%THUMBNAIL%%", $"https://i.ytimg.com/vi/{VideoIds.First()}/hqdefault.jpg");
+		.Replace("%%THUMBNAIL%%", $"https://i.ytimg.com/vi/{VideoIds.FirstOrDefault()}/hqdefault.jpg");
 
 	public static string GenerateId()
 	{

@@ -1,5 +1,6 @@
 ﻿using InnerTube.Renderers;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace LightTube.Database.Models;
@@ -9,17 +10,19 @@ public class DatabaseUser
 {
 	private const string INNERTUBE_GRID_RENDERER_TEMPLATE = "{\"items\": [%%CONTENTS%%]}";
 
-	private const string INNERTUBE_MESSAGE_RENDERER_TEMPLATE = "{\"messageRenderer\":{\"text\":{\"simpleText\":\"%%MESSAGE%%\"}}}";
+	private const string INNERTUBE_MESSAGE_RENDERER_TEMPLATE =
+		"{\"messageRenderer\":{\"text\":{\"simpleText\":\"%%MESSAGE%%\"}}}";
+
 	private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 	public string UserID { get; set; }
-	public string PasswordHash { get; set; }
-	public Dictionary<string, SubscriptionType> Subscriptions { get; set; }
+	[JsonIgnore] public string PasswordHash { get; set; }
+	[JsonIgnore] public Dictionary<string, SubscriptionType> Subscriptions { get; set; }
 	public string LTChannelID { get; set; }
 
-	[BsonIgnoreIfNull] [Obsolete("Use Subscriptions dictionary instead")]
+	[JsonIgnore] [BsonIgnoreIfNull] [Obsolete("Use Subscriptions dictionary instead")]
 	public string[]? SubscribedChannels;
 
-	[BsonIgnoreIfNull] [Obsolete("Use UserID instead")]
+	[JsonIgnore] [BsonIgnoreIfNull] [Obsolete("Use UserID instead")]
 	public string? Email;
 
 	public static DatabaseUser CreateUser(string userId, string password) =>
@@ -57,18 +60,19 @@ public class DatabaseUser
 	{
 		Random rng = new(userId.GetHashCode());
 		string channelId = "LT_UC";
-		while (channelId.Length < 24) 
+		while (channelId.Length < 24)
 			channelId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
 		return channelId;
 	}
 
-	public GridRenderer PlaylistRenderers()
+	public GridRenderer PlaylistRenderers(PlaylistVisibility minVisibility = PlaylistVisibility.VISIBLE)
 	{
 		IEnumerable<DatabasePlaylist> playlists =
-			DatabaseManager.Playlists.GetUserPlaylists(UserID, PlaylistVisibility.VISIBLE);
+			DatabaseManager.Playlists.GetUserPlaylists(UserID, minVisibility);
 		string playlistsJson = playlists.Any()
 			? string.Join(',', playlists.Select(x => x.GetInnerTubeGridPlaylistJson()))
-			: INNERTUBE_MESSAGE_RENDERER_TEMPLATE.Replace("%%MESSAGE%%", "This user doesn't have any public playlists.");
+			: INNERTUBE_MESSAGE_RENDERER_TEMPLATE.Replace("%%MESSAGE%%",
+				"This user doesn't have any public playlists.");
 
 		string json = INNERTUBE_GRID_RENDERER_TEMPLATE
 			.Replace("%%CONTENTS%%", playlistsJson);
