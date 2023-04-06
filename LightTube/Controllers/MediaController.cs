@@ -30,7 +30,7 @@ public class ProxyController : Controller
 	}
 
 	[Route("media/{videoId}/{formatId}")]
-	public async Task Media(string videoId, string formatId)
+	public async Task Media(string videoId, string formatId, string? audioTrackId)
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
@@ -54,7 +54,10 @@ public class ProxyController : Controller
 				return;
 			}
 
-			string url = formats.First(x => x.Itag == formatId).Url.ToString();
+			Format format = !string.IsNullOrWhiteSpace(audioTrackId)
+				? formats.First(x => x.AudioTrack?.Id == audioTrackId)
+				: formats.OrderBy(x => !x.AudioTrack?.AudioIsDefault).First(x => x.Itag == formatId);
+			string url = format.Url.ToString();
 
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;
@@ -65,8 +68,8 @@ public class ProxyController : Controller
 
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
-				foreach (string value in values)
-					request.Headers.Add(header, value);
+			foreach (string value in values)
+				request.Headers.Add(header, value);
 
 			HttpWebResponse response;
 
@@ -121,7 +124,8 @@ public class ProxyController : Controller
 	}
 
 	[Route("media/{videoId}.m3u8")]
-	public async Task<IActionResult> HlsProxy(string videoId, string formatId, bool useProxy = true, bool skipCaptions = false)
+	public async Task<IActionResult> HlsProxy(string videoId, string formatId, bool useProxy = true,
+		bool skipCaptions = false)
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 			useProxy = false;
@@ -140,7 +144,8 @@ public class ProxyController : Controller
 
 			string url = player.HlsManifestUrl;
 
-			string manifest = await Utils.GetProxiedHlsManifest(url, useProxy ? $"https://{Request.Host}/proxy" : null, skipCaptions);
+			string manifest = await Utils.GetProxiedHlsManifest(url, useProxy ? $"https://{Request.Host}/proxy" : null,
+				skipCaptions);
 
 			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest)),
 				"application/vnd.apple.mpegurl");
@@ -156,7 +161,8 @@ public class ProxyController : Controller
 	}
 
 	[Route("media/{videoId}.mpd")]
-	public async Task<IActionResult> DashProxy(string videoId, string formatId, bool useProxy = true, bool skipCaptions = false)
+	public async Task<IActionResult> DashProxy(string videoId, string formatId, bool useProxy = true,
+		bool skipCaptions = false)
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 			useProxy = false;
@@ -165,7 +171,8 @@ public class ProxyController : Controller
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
 
-			string manifest = Utils.GetDashManifest(player, useProxy ? $"https://{Request.Host}/proxy" : null, skipCaptions);
+			string manifest =
+				Utils.GetDashManifest(player, useProxy ? $"https://{Request.Host}/proxy" : null, skipCaptions);
 
 			return File(new MemoryStream(Encoding.UTF8.GetBytes(manifest)),
 				"application/dash+xml");
@@ -185,7 +192,7 @@ public class ProxyController : Controller
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 			return NotFound("This instance has disabled media proxies.");
-		
+
 		try
 		{
 			string url = "https://manifest.googlevideo.com/api/manifest/hls_playlist" +
@@ -211,7 +218,7 @@ public class ProxyController : Controller
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 			return NotFound("This instance has disabled media proxies.");
-		
+
 		try
 		{
 			string url = "https://manifest.googlevideo.com/api/manifest/hls_timedtext_playlist" +
@@ -241,7 +248,7 @@ public class ProxyController : Controller
 			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
 			await Response.StartAsync();
 		}
-		
+
 		try
 		{
 			string url = "https://" +
@@ -263,18 +270,18 @@ public class ProxyController : Controller
 			HttpRequestMessage hrm = new(method, url);
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
-				foreach (string value in values)
-					hrm.Headers.Add(header, value);
+			foreach (string value in values)
+				hrm.Headers.Add(header, value);
 
 			HttpResponseMessage response = await client.SendAsync(hrm);
 			Response.StatusCode = (int)response.StatusCode;
 
 			foreach ((string? key, IEnumerable<string>? headers) in response.Headers)
-				foreach (string header in headers)
-				{
-					if (!Response.Headers.ContainsKey(key))
-						Response.Headers.Add(key, header);
-				}
+			foreach (string header in headers)
+			{
+				if (!Response.Headers.ContainsKey(key))
+					Response.Headers.Add(key, header);
+			}
 
 			await Response.StartAsync();
 
@@ -327,8 +334,8 @@ public class ProxyController : Controller
 
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
-				foreach (string value in values)
-					request.Headers.Add(header, value);
+			foreach (string value in values)
+				request.Headers.Add(header, value);
 
 			using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
@@ -379,8 +386,8 @@ public class ProxyController : Controller
 
 		foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 			         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
-			foreach (string value in values)
-				request.Headers.Add(header, value);
+		foreach (string value in values)
+			request.Headers.Add(header, value);
 
 		using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
@@ -415,9 +422,9 @@ public class ProxyController : Controller
 			HttpRequestMessage hrm = new(HttpMethod.Get, url);
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
-				foreach (string value in values)
-					if (!hrm.Headers.Contains(header))
-						hrm.Headers.Add(header, value);
+			foreach (string value in values)
+				if (!hrm.Headers.Contains(header))
+					hrm.Headers.Add(header, value);
 
 			HttpResponseMessage response = await client.SendAsync(hrm);
 
@@ -472,7 +479,8 @@ public class ProxyController : Controller
 				TimeSpan end = TimeSpan.FromMilliseconds(ms + timeBetween);
 				manifest
 					.AppendLine($"{start:hh\\:mm\\:ss\\.fff} --> {end:hh\\:mm\\:ss\\.fff}")
-					.AppendLine($"{Request.Scheme}://{Request.Host}/proxy/storyboard/{videoId}#xywh={i % 10 * 48},{Math.Floor(i / 10) * 27},48,27")
+					.AppendLine(
+						$"{Request.Scheme}://{Request.Host}/proxy/storyboard/{videoId}#xywh={i % 10 * 48},{Math.Floor(i / 10) * 27},48,27")
 					.AppendLine();
 			}
 

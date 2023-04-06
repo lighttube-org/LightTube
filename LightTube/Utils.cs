@@ -191,53 +191,67 @@ public static class Utils
 
 		XmlElement period = doc.CreateElement("Period");
 
-		period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
-		XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
+		period.AppendChild(doc.CreateComment("Audio Adaptation Sets"));
 		List<Format> audios = player.AdaptiveFormats
 			.Where(x => x.AudioChannels.HasValue)
 			.ToList();
-
-		audioAdaptationSet.SetAttribute("mimeType",
-			HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
-		audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
-		audioAdaptationSet.SetAttribute("contentType", "audio");
-		foreach (Format format in audios)
+		IEnumerable<IGrouping<string?, Format>> grouped = audios.GroupBy(x => x.AudioTrack?.Id);
+		foreach (IGrouping<string?, Format> formatGroup in grouped.OrderBy(x => x.First().AudioTrack?.AudioIsDefault))
 		{
-			XmlElement representation = doc.CreateElement("Representation");
-			representation.SetAttribute("id", format.Itag);
-			representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
-			representation.SetAttribute("startWithSAP", "1");
-			representation.SetAttribute("bandwidth", format.Bitrate.ToString());
+			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 
-			XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
-			audioChannelConfiguration.SetAttribute("schemeIdUri",
-				"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
-			audioChannelConfiguration.SetAttribute("value", "2");
-			representation.AppendChild(audioChannelConfiguration);
+			audioAdaptationSet.SetAttribute("mimeType",
+				HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+			audioAdaptationSet.SetAttribute("contentType", "audio");
+			audioAdaptationSet.SetAttribute("lang", formatGroup.Key);
 
-			XmlElement baseUrl = doc.CreateElement("BaseURL");
-			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-				? format.Url.ToString()
-				: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}";
-			representation.AppendChild(baseUrl);
-
-			if (format.IndexRange != null && format.InitRange != null)
+			if (formatGroup.First().AudioTrack != null)
 			{
-				XmlElement segmentBase = doc.CreateElement("SegmentBase");
-				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
-				segmentBase.SetAttribute("indexRangeExact", "true");
-
-				XmlElement initialization = doc.CreateElement("Initialization");
-				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
-
-				segmentBase.AppendChild(initialization);
-				representation.AppendChild(segmentBase);
+				XmlElement label = doc.CreateElement("Label");
+				label.InnerText = formatGroup.First().AudioTrack?.DisplayName;
+				audioAdaptationSet.AppendChild(label);
 			}
 
-			audioAdaptationSet.AppendChild(representation);
-		}
+			foreach (Format format in formatGroup)
+			{
+				XmlElement representation = doc.CreateElement("Representation");
+				representation.SetAttribute("id", format.Itag);
+				representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+				representation.SetAttribute("startWithSAP", "1");
+				representation.SetAttribute("bandwidth", format.Bitrate.ToString());
 
-		period.AppendChild(audioAdaptationSet);
+				XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
+				audioChannelConfiguration.SetAttribute("schemeIdUri",
+					"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
+				audioChannelConfiguration.SetAttribute("value", format.AudioChannels?.ToString());
+				representation.AppendChild(audioChannelConfiguration);
+
+				XmlElement baseUrl = doc.CreateElement("BaseURL");
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
+					? format.Url.ToString()
+					: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}?audioTrackId={format.AudioTrack?.Id}";
+				representation.AppendChild(baseUrl);
+
+				if (format.IndexRange != null && format.InitRange != null)
+				{
+					XmlElement segmentBase = doc.CreateElement("SegmentBase");
+					// sometimes wrong?? idk
+					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+					segmentBase.SetAttribute("indexRangeExact", "true");
+
+					XmlElement initialization = doc.CreateElement("Initialization");
+					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+
+					segmentBase.AppendChild(initialization);
+					representation.AppendChild(segmentBase);
+				}
+
+				audioAdaptationSet.AppendChild(representation);
+			}
+
+			period.AppendChild(audioAdaptationSet);
+		}
 
 		period.AppendChild(doc.CreateComment("Video Adaptation Set"));
 
