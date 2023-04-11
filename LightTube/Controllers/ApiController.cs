@@ -32,7 +32,8 @@ public class ApiController : Controller
 			AllowsApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_API", "")?.ToLower() != "true",
 			AllowsNewUsers = Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "")?.ToLower() != "true",
 			AllowsOauthApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true",
-			AllowsThirdPartyProxyUsage = Configuration.GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true"
+			AllowsThirdPartyProxyUsage =
+				Configuration.GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true"
 		};
 
 	private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
@@ -220,8 +221,10 @@ public class ApiController : Controller
 					await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(),
 						HttpContext.GetRegion());
 				result = new ApiPlaylist(playlist);
-			} else 
-				return Error<ApiPlaylist>($"Invalid request: missing both `id` and `continuation`", 400, HttpStatusCode.BadRequest);
+			}
+			else
+				return Error<ApiPlaylist>($"Invalid request: missing both `id` and `continuation`", 400,
+					HttpStatusCode.BadRequest);
 
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			userData?.AddInfoForChannel(result.Channel.Id);
@@ -239,14 +242,9 @@ public class ApiController : Controller
 	public async Task<ApiResponse<ApiChannel>> Channel(string id, ChannelTabs tab = ChannelTabs.Home,
 		string? searchQuery = null, string? continuation = null)
 	{
-		Regex regex = new(CHANNEL_ID_REGEX);
-		if (!regex.IsMatch(id) || id.Length != 24)
-			return Error<ApiChannel>("Invalid channel ID: " + id, 400, HttpStatusCode.BadRequest);
-
 		if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
-		{
-			return Error<ApiChannel>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
-		}
+			return Error<ApiChannel>($"Invalid request: missing both `id` and `continuation`", 400,
+				HttpStatusCode.BadRequest);
 
 		try
 		{
@@ -260,6 +258,9 @@ public class ApiController : Controller
 			}
 			else if (continuation is null)
 			{
+				if (!id.StartsWith("UC"))
+					id = await _youtube.GetChannelIdFromVanity(id) ?? id;
+
 				InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id, tab, searchQuery,
 					HttpContext.GetLanguage(),
 					HttpContext.GetRegion());
