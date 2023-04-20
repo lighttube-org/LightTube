@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report an error that you just encountered
+description: Report something that doesn't seem to work correct
 title: '[Bug]'
 labels:
   - bug
