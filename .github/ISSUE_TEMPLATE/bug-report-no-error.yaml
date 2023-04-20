@@ -1,5 +1,5 @@
-name: Error Report
-description: Report an error that you just encountered
+name: Bug Report
+description: Report something that doesn't seem to work correct
 title: '[Bug]'
 labels:
   - bug
@@ -11,9 +11,6 @@ body:
       placeholder: Shorts tab on channels don't work
     validations:
       required: true
-  - type: markdown
-    attributes:
-      value: '# There are some fields in the error page. Fill those values here'
   - type: input
     attributes:
       label: Instance URL
@@ -21,7 +18,7 @@ body:
       placeholder: https://tube.kuylar.dev
   - type: input
     attributes:
-      label: LightTube & InnerTube versions
+      label: LightTube version
       placeholder: 2023.01.21 / 1.0.9.0
     validations:
       required: true
@@ -29,18 +26,6 @@ body:
     attributes:
       label: Resource path
       placeholder: https://tube.kuylar.dev/watch?v=dQw4w9WgXcQ
-    validations:
-      required: true
-  - type: input
-    attributes:
-      label: Language & region
-      placeholder: en_US
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: Stack trace
-      description: The following text (the whole thing)
     validations:
       required: true
   - type: markdown
