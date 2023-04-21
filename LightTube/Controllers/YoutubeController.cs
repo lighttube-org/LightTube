@@ -217,7 +217,7 @@ public class YoutubeController : Controller
 	}
 
 	[Route("/shorts/{v}")]
-	public IActionResult Shorts(string v) => RedirectPermanent("/watch?v={v}");
+	public IActionResult Shorts(string v) => RedirectPermanent($"/watch?v={v}");
 
 	[Route("/download/{v}")]
 	public async Task<IActionResult> Download(string v)

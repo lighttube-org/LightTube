@@ -9,15 +9,18 @@ public class UserManager
 {
 	public IMongoCollection<DatabaseUser> UserCollection { get; }
 	public IMongoCollection<DatabaseLogin> TokensCollection { get; }
+	public IMongoCollection<DatabaseOauthToken> Oauth2TokensCollection { get; }
 	public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; }
 
 	public UserManager(IMongoCollection<DatabaseUser> userCollection,
 		IMongoCollection<DatabaseLogin> tokensCollection,
-		IMongoCollection<DatabasePlaylist> playlistCollection)
+		IMongoCollection<DatabasePlaylist> playlistCollection,
+		IMongoCollection<DatabaseOauthToken> oauth2TokensCollection)
 	{
 		UserCollection = userCollection;
 		TokensCollection = tokensCollection;
 		PlaylistCollection = playlistCollection;
+		Oauth2TokensCollection = oauth2TokensCollection;
 	}
 
 	public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
@@ -33,12 +36,25 @@ public class UserManager
 
 	public async Task<DatabaseUser?> GetUserFromToken(string token)
 	{
-		IAsyncCursor<DatabaseLogin> loginCursor = await TokensCollection.FindAsync(x => x.Token == token);
-		DatabaseLogin login = await loginCursor.FirstOrDefaultAsync();
-		if (login is null) return null;
+		if (token.StartsWith("Bearer "))
+		{
+			token = token.Split(" ")[1];
+			IAsyncCursor<DatabaseOauthToken> loginCursor = await Oauth2TokensCollection.FindAsync(x => x.CurrentAuthToken == token);
+			DatabaseOauthToken login = await loginCursor.FirstOrDefaultAsync();
+			if (login is null) return null;
 
-		IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == login.UserID);
-		return await userCursor.FirstOrDefaultAsync();
+			IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == login.UserId);
+			return await userCursor.FirstOrDefaultAsync();
+		}
+		else
+		{
+			IAsyncCursor<DatabaseLogin> loginCursor = await TokensCollection.FindAsync(x => x.Token == token);
+			DatabaseLogin login = await loginCursor.FirstOrDefaultAsync();
+			if (login is null) return null;
+
+			IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == login.UserID);
+			return await userCursor.FirstOrDefaultAsync();
+		}
 	}
 
 	public async Task<DatabaseUser?> GetUserFromId(string id)
@@ -67,7 +83,7 @@ public class UserManager
 		{
 			Id = Guid.NewGuid().ToString(),
 			UserID = userId,
-			Token = GenerateToken(256),
+			Token = Utils.GenerateToken(256),
 			UserAgent = userAgent,
 			Scopes = scopes.ToArray(),
 			Created = DateTimeOffset.Now,
@@ -120,7 +136,7 @@ public class UserManager
 				user.Subscriptions.Remove(channelId);
 			else
 				user.Subscriptions[channelId] = type;
-		else if (type != SubscriptionType.NONE) 
+		else if (type != SubscriptionType.NONE)
 			user.Subscriptions.Add(channelId, type);
 
 		await UserCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
@@ -129,7 +145,7 @@ public class UserManager
 			? (channelId, user.Subscriptions[channelId])
 			: (channelId, SubscriptionType.NONE);
 	}
-	
+
 	public async Task DeleteUser(string userId, string password)
 	{
 		IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
@@ -154,15 +170,5 @@ public class UserManager
 
 		DatabaseUser user = DatabaseUser.CreateUser(userId, password);
 		await UserCollection.InsertOneAsync(user);
-	}
-
-	private string GenerateToken(int length)
-	{
-		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+*/()[]{}";
-		Random rng = new();
-		StringBuilder sb = new();
-		for (int i = 0; i < length; i++)
-			sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
-		return sb.ToString();
 	}
 }

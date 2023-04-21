@@ -19,16 +19,24 @@ public static class Utils
 	private static string? _itVersion;
 	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
+	public static string[] OauthScopes =
+	{
+		"playlists.read",
+		"playlists.write",
+		"subscriptions.read",
+		"subscriptions.write"
+	};
+
 	public static string GetRegion(this HttpContext context) =>
-		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h) 
-			? h.ToString() 
+		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)
+			? h.ToString()
 			: context.Request.Cookies.TryGetValue("gl", out string region)
-				? region 
+				? region
 				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
 
 	public static string GetLanguage(this HttpContext context) =>
-		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h) 
-			? h.ToString() 
+		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
+			? h.ToString()
 			: context.Request.Cookies.TryGetValue("hl", out string language)
 				? language
 				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
@@ -68,7 +76,8 @@ public static class Utils
 		}
 	}
 
-	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null, bool skipCaptions = false)
+	public static async Task<string> GetProxiedHlsManifest(string url, string? proxyRoot = null,
+		bool skipCaptions = false)
 	{
 		if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 			url = "https://" + url;
@@ -182,53 +191,67 @@ public static class Utils
 
 		XmlElement period = doc.CreateElement("Period");
 
-		period.AppendChild(doc.CreateComment("Audio Adaptation Set"));
-		XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
+		period.AppendChild(doc.CreateComment("Audio Adaptation Sets"));
 		List<Format> audios = player.AdaptiveFormats
 			.Where(x => x.AudioChannels.HasValue)
 			.ToList();
-
-		audioAdaptationSet.SetAttribute("mimeType",
-			HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
-		audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
-		audioAdaptationSet.SetAttribute("contentType", "audio");
-		foreach (Format format in audios)
+		IEnumerable<IGrouping<string?, Format>> grouped = audios.GroupBy(x => x.AudioTrack?.Id);
+		foreach (IGrouping<string?, Format> formatGroup in grouped.OrderBy(x => x.First().AudioTrack?.AudioIsDefault))
 		{
-			XmlElement representation = doc.CreateElement("Representation");
-			representation.SetAttribute("id", format.Itag);
-			representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
-			representation.SetAttribute("startWithSAP", "1");
-			representation.SetAttribute("bandwidth", format.Bitrate.ToString());
+			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 
-			XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
-			audioChannelConfiguration.SetAttribute("schemeIdUri",
-				"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
-			audioChannelConfiguration.SetAttribute("value", "2");
-			representation.AppendChild(audioChannelConfiguration);
+			audioAdaptationSet.SetAttribute("mimeType",
+				HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
+			audioAdaptationSet.SetAttribute("contentType", "audio");
+			audioAdaptationSet.SetAttribute("lang", formatGroup.Key);
 
-			XmlElement baseUrl = doc.CreateElement("BaseURL");
-			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-				? format.Url.ToString()
-				: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}";
-			representation.AppendChild(baseUrl);
-
-			if (format.IndexRange != null && format.InitRange != null)
+			if (formatGroup.First().AudioTrack != null)
 			{
-				XmlElement segmentBase = doc.CreateElement("SegmentBase");
-				segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
-				segmentBase.SetAttribute("indexRangeExact", "true");
-
-				XmlElement initialization = doc.CreateElement("Initialization");
-				initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
-
-				segmentBase.AppendChild(initialization);
-				representation.AppendChild(segmentBase);
+				XmlElement label = doc.CreateElement("Label");
+				label.InnerText = formatGroup.First().AudioTrack?.DisplayName;
+				audioAdaptationSet.AppendChild(label);
 			}
 
-			audioAdaptationSet.AppendChild(representation);
-		}
+			foreach (Format format in formatGroup)
+			{
+				XmlElement representation = doc.CreateElement("Representation");
+				representation.SetAttribute("id", format.Itag);
+				representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+				representation.SetAttribute("startWithSAP", "1");
+				representation.SetAttribute("bandwidth", format.Bitrate.ToString());
 
-		period.AppendChild(audioAdaptationSet);
+				XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
+				audioChannelConfiguration.SetAttribute("schemeIdUri",
+					"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
+				audioChannelConfiguration.SetAttribute("value", format.AudioChannels?.ToString());
+				representation.AppendChild(audioChannelConfiguration);
+
+				XmlElement baseUrl = doc.CreateElement("BaseURL");
+				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
+					? format.Url.ToString()
+					: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}?audioTrackId={format.AudioTrack?.Id}";
+				representation.AppendChild(baseUrl);
+
+				if (format.IndexRange != null && format.InitRange != null)
+				{
+					XmlElement segmentBase = doc.CreateElement("SegmentBase");
+					// sometimes wrong?? idk
+					segmentBase.SetAttribute("indexRange", $"{format.IndexRange.Start}-{format.IndexRange.End}");
+					segmentBase.SetAttribute("indexRangeExact", "true");
+
+					XmlElement initialization = doc.CreateElement("Initialization");
+					initialization.SetAttribute("range", $"{format.InitRange.Start}-{format.InitRange.End}");
+
+					segmentBase.AppendChild(initialization);
+					representation.AppendChild(segmentBase);
+				}
+
+				audioAdaptationSet.AppendChild(representation);
+			}
+
+			period.AppendChild(audioAdaptationSet);
+		}
 
 		period.AppendChild(doc.CreateComment("Video Adaptation Set"));
 
@@ -345,7 +368,8 @@ public static class Utils
 			format.MimeType
 				.Split("/").Last()
 				.Split(";").First();
-		else {
+		else
+		{
 			if (format.MimeType.Contains("opus"))
 				return "opus";
 			if (format.MimeType.Contains("mp4a"))
@@ -353,5 +377,49 @@ public static class Utils
 		}
 
 		return "mp4";
+	}
+
+	public static string[] FindInvalidScopes(string[] scopes) =>
+		scopes.Where(x => !OauthScopes.Contains(x)).ToArray();
+
+	public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes)
+	{
+		List<string> descriptions = new();
+
+		// dangerous ones are at the top
+		if (modelScopes.Contains("logins.read"))
+			descriptions.Add("!See your other logins");
+		if (modelScopes.Contains("logins.delete"))
+			descriptions.Add("!Log out from another place");
+
+		descriptions.Add("Access YouTube data");
+
+		if (modelScopes.Contains("playlists.read") && modelScopes.Contains("playlists.write"))
+			descriptions.Add("Access and modify your playlists");
+		else if (modelScopes.Contains("playlists.read"))
+			descriptions.Add("Access your playlists");
+		else if (modelScopes.Contains("playlists.write"))
+			descriptions.Add("Modify your playlists");
+
+		if (modelScopes.Contains("subscriptions.read"))
+		{
+			descriptions.Add("Get a list of your subscribed channels");
+			descriptions.Add("Get your subscription feed");
+		}
+
+		if (modelScopes.Contains("subscriptions.write")) 
+			descriptions.Add("Subscribe & unsubscribe from channels");
+
+		return descriptions;
+	}
+
+	public static string GenerateToken(int length)
+	{
+		string tokenAlphabet = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+		Random rng = new();
+		StringBuilder sb = new();
+		for (int i = 0; i < length; i++)
+			sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
+		return sb.ToString();
 	}
 }
