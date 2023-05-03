@@ -1,53 +1,12 @@
-const opts = {
-	liveui: true,
-	playbackRates: [
-		0.25, 0.50, 0.75, 1.00,
-		1.25, 1.50, 1.75, 2.00
-	],
-	preloadTextTracks: false,
-	plugins: {
-		hotkeys: {
-			volumeStep: 0.1,
-			seekStep: 5,
-			enableModifiersForNumbers: false,
-			enableVolumeScroll: false,
-		},
-		endscreen: endscreenData,
-		vttThumbnails: {
-			src: `/proxy/storyboard/${videoId}.vtt`,
-			showTimestamp: true
-		}
-	},
-	sources: []
+videoInfo.buttons = {
+	play: '<svg><use href="/svg/bootstrap-icons.svg#play-fill"/></svg>',
+	pause: '<svg><use href="/svg/bootstrap-icons.svg#pause-fill"/></svg>',
+	volumeMute: '<svg><use href="/svg/bootstrap-icons.svg#volume-mute-fill"/></svg>',
+	volumeLow: '<svg><use href="/svg/bootstrap-icons.svg#volume-off-fill"/></svg>',
+	volumeMedium: '<svg><use href="/svg/bootstrap-icons.svg#volume-down-fill"/></svg>',
+	volumeHigh: '<svg><use href="/svg/bootstrap-icons.svg#volume-up-fill"/></svg>',
+	settings: '<svg><use href="/svg/bootstrap-icons.svg#gear-fill"/></svg>',
+	fullscreen: '<svg><use href="/svg/bootstrap-icons.svg#fullscreen"/></svg>',
+	minimize: '<svg><use href="/svg/bootstrap-icons.svg#fullscreen-exit"/></svg>'
 };
-
-switch (playtype) {
-	case "dash":
-		opts.sources.push({
-			src: `/proxy/media/${videoId}.mpd?skipCaptions=true`,
-			type: "application/dash+xml"
-		});
-		break;
-	case "hls":
-		opts.sources.push({
-			src: `/proxy/media/${videoId}.m3u8?skipCaptions=true`,
-			type: "application/x-mpegURL"
-		});
-		break;
-	case "html5":
-		opts.sources = undefined;
-		break;
-}
-
-const player = videojs(elementId, opts, function () {
-	const v = localStorage.getItem("ltvideo.volume");
-	if (v != null)
-		this.volume(localStorage.getItem("ltvideo.volume"))
-	this.controlBar.addChild('QualitySelector', {}, 14);
-	this.qualityLevels();
-	this.hlsQualitySelector();
-
-	this.on("volumechange", _ => {
-		localStorage.setItem("ltvideo.volume", this.volume())
-	})
-});
+const player = new Player("video", videoInfo);

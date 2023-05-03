@@ -119,13 +119,21 @@ else
 @if (playable)
 {
 	<script id="video-data">
-	const videoId =  "@(Model.Player!.Details.Id)";
-	const elementId =  "vjs-player";
-	const endscreenData = @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
-	                      {
-		                      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-	                      }));
-	const playtype = "@(Model.UseHls ? "hls" : Model.UseDash ? "dash" : "html5")";
+	const videoInfo = {
+		author: {
+            icon: "@(Model.Player!.Details.Author.Avatar)",
+            title: "@(Model.Player!.Details.Author.Title)",
+			href: "/channel/@Model.Player!.Details.Author.Id"
+		},
+		id: "@(Model.Player!.Details.Id)",
+		title: "@(Model.Player!.Details.Title)",
+		endscreenData: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen)),
+		@if (Model.UseHls)
+		{
+			@:hlsManifest: "/proxy/media/@(Model.Player!.Details.Id).m3u8",
+		}
+	}
+	/*
 	endscreenData.clickHandler = item => {
 		switch (item.style) {
 			case "VIDEO":
@@ -145,5 +153,6 @@ else
 				break;
 		}
 	};
+	*/
 	</script>
 }
