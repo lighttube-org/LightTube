@@ -16,13 +16,4 @@
         <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\lib\silvermine-videojs-quality-selector\silvermine-videojs-quality-selector.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\silvermine-videojs-quality-selector\silvermine-videojs-quality-selector.min.js" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\videojs-contrib-quality-levels\videojs-contrib-quality-levels.js" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\videojs-contrib-quality-levels\videojs-contrib-quality-levels.min.js" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\videojs-hls-quality-selector\videojs-hls-quality-selector.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\videojs-hls-quality-selector\videojs-hls-quality-selector.min.js" />
-    </ItemGroup>
-
 </Project>
