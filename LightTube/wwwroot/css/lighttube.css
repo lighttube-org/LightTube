@@ -645,7 +645,7 @@ body.no-guide .guide {
 	height: var(--video-player-height-max);
 }
 
-.ltp-root {
+.player {
 	width: 100%;
 	height: 100%;
 }
@@ -1272,20 +1272,4 @@ code {
 	background-color: var(--thumbnail-background);
 	user-select: all;
 	color: var(--text-primary);
-}
-
-.ltp-root svg {
-	color: #fff;
-}
-
-.ltp-controls-button > svg, .ltp-controls-volume-icon > svg {
-	stroke: currentColor !important;
-	stroke-width: 0 !important;
-	stroke-linecap: round !important;
-	stroke-linejoin: round !important;
-	fill: currentColor !important;
-}
-
-.ltp-root select {
-	all: revert;
 }
