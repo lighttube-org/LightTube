@@ -149,7 +149,7 @@ svg {
 
 .app {
 	overflow-y: scroll;
-	overflow-x: scroll;
+	overflow-x: hidden;
 }
 
 @media screen and (min-width: 700px) {
@@ -386,6 +386,7 @@ body.no-guide .guide {
 	border: 1px solid var(--border-color) !important;
 	border-radius: 20px 0 0 20px !important;
 	background-color: var(--search-bar-background, #0000) !important;
+	outline: none;
 }
 
 .search-bar__input::placeholder {
