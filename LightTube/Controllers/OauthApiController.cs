@@ -35,12 +35,13 @@ public class OauthApiController : Controller
 
 	[Route("currentUser")]
 	[ApiAuthorization]
-	public async Task<IActionResult> GetCurrentUser()
+	public async Task<ApiResponse<DatabaseUser>> GetCurrentUser()
 	{
 		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-		if (user is null) return Unauthorized();
+		if (user is null) return Error<DatabaseUser>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
-		return Json(user);
+		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+		return new ApiResponse<DatabaseUser>(user, userData);
 	}
 
 	#region playlists.*
@@ -107,7 +108,8 @@ public class OauthApiController : Controller
 	[Route("playlists/{playlistId}/{videoId}")]
 	[HttpPut]
 	[ApiAuthorization("playlists.write")]
-	public async Task<ApiResponse<ModifyPlaylistContentResponse>> PutVideoIntoPlaylist(string playlistId, string videoId)
+	public async Task<ApiResponse<ModifyPlaylistContentResponse>> PutVideoIntoPlaylist(string playlistId,
+		string videoId)
 	{
 		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 		if (user is null) return Error<ModifyPlaylistContentResponse>("Unauthorized", 401, HttpStatusCode.Unauthorized);
