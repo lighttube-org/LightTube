@@ -3,6 +3,8 @@
 
 @{
 	Model.Title = Model.Video.Title;
+	string desc = Model.Video.Description;
+	desc = desc.Replace("youtube.com", Context.Request.Host.ToString());
 }
 
 <div class="watch-page">
@@ -76,7 +78,7 @@
 			<summary>
 				@Model.Video.ViewCount • @Model.Video.DateText • Click to toggle description
 			</summary>
-			@Html.Raw(Model.Video.Description)
+			@Html.Raw(desc)
 		</details>
 	</div>
 	<div class="comments-container">
