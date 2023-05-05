@@ -123,7 +123,7 @@ public class OAuth2Controller : Controller
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
 			return Unauthorized();
-		if (grantType is not ("code" or "authorization_code"))
+		if (grantType is not ("code" or "authorization_code" or "refresh_token"))
 			return Unauthorized();
 		DatabaseOauthToken? token = await DatabaseManager.Oauth2.RefreshToken(code, clientId);
 		if (token is null) return Unauthorized();
