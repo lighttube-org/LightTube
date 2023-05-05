@@ -7,7 +7,6 @@ using InnerTube.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Serilog;
-using System;
 
 namespace LightTube.Controllers;
 
@@ -22,8 +21,6 @@ public class ProxyController : Controller
 		"host",
 		"cookie",
 		"cookies",
-		"origin",
-		"referer",
 		"if-none-match"
 	};
 
@@ -67,19 +64,13 @@ public class ProxyController : Controller
 
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			request.Method = "POST";
-
-			byte[] data = Convert.FromBase64String("eAA=");
-			request.ContentLength = data.Length;
-			await using (Stream reqStr = request.GetRequestStream())
-				await reqStr.WriteAsync(data);
+			request.Method = Request.Method;
 
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
 				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
 			foreach (string value in values)
 				request.Headers.Add(header, value);
-			request.Headers.Add("Origin", "https://youtube.com");
-			request.Headers.Add("Referer", "https://youtube.com/");
+
 			HttpWebResponse response;
 
 			try
