@@ -92,8 +92,8 @@ public class UserManager
 			Token = Utils.GenerateToken(256),
 			UserAgent = userAgent,
 			Scopes = scopes.ToArray(),
-			Created = DateTimeOffset.Now,
-			LastSeen = DateTimeOffset.Now
+			Created = DateTimeOffset.UtcNow,
+			LastSeen = DateTimeOffset.UtcNow
 		};
 		await TokensCollection.InsertOneAsync(login);
 		return login;
