@@ -43,6 +43,7 @@ public class DatabaseCleanupChore : IChore
 					await DatabaseManager.PlaylistCollection.DeleteOneAsync(x => x.Id == playlist.Id);
 					continue;
 				}
+
 				foreach (string videoId in playlist.VideoIds)
 					if (!videos.Contains(videoId))
 						videos.Add(videoId);
@@ -57,6 +58,7 @@ public class DatabaseCleanupChore : IChore
 				deletedChannels++;
 			}
 		}
+
 		updateStatus($"Deleted {deletedChannels} channels from the cache");
 
 		IMongoQueryable<DatabaseVideo> cachedVideos = DatabaseManager.VideoCacheCollection.AsQueryable();
@@ -68,16 +70,29 @@ public class DatabaseCleanupChore : IChore
 				deletedVideos++;
 			}
 		}
+
 		updateStatus($"Deleted {deletedVideos} videos from the cache");
 
 		IMongoQueryable<DatabaseLogin> tokens = DatabaseManager.TokensCollection.AsQueryable();
 		foreach (DatabaseLogin login in tokens)
 		{
-			//todo: delete tokens older than x days
-			if (!users.Contains(login.UserID)) 
+			if (!users.Contains(login.UserID))
+			{
 				await DatabaseManager.TokensCollection.DeleteOneAsync(x => x.Id == login.Id);
+				deletedTokens++;
+			}
+			// 10 days difference between creation & last seen
+			else if (login.LastSeen.Subtract(login.Created).CompareTo(TimeSpan.FromDays(10)) == 1)
+			{
+				// if token is older than 30 days
+				if (login.LastSeen >= DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(30))) continue;
+				await DatabaseManager.TokensCollection.DeleteOneAsync(x => x.Id == login.Id);
+				deletedTokens++;
+			}
 		}
+
 		updateStatus($"Deleted {deletedVideos} videos from the cache");
-		return $"deleted\n- {deletedChannels} channels\n- {deletedPlaylists} playlists\n- {deletedVideos} videos\n- {deletedTokens} tokens";
+		return
+			$"deleted\n- {deletedChannels} channels\n- {deletedPlaylists} playlists\n- {deletedVideos} videos\n- {deletedTokens} tokens";
 	}
 }
