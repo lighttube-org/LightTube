@@ -117,15 +117,16 @@ public class OAuth2Controller : Controller
 	public async Task<IActionResult> GrantTokenAsync(
 		[FromForm(Name = "grant_type")] string grantType,
 		[FromForm(Name = "code")] string code,
+		[FromForm(Name = "refresh_token")] string refreshToken,
 		[FromForm(Name = "redirect_uri")] string redirectUri,
 		[FromForm(Name = "client_id")] string clientId,
 		[FromForm(Name = "client_secret")] string clientSecret)
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
 			return Unauthorized();
-		if (grantType is not ("code" or "authorization_code"))
+		if (grantType is not ("code" or "authorization_code" or "refresh_token"))
 			return Unauthorized();
-		DatabaseOauthToken? token = await DatabaseManager.Oauth2.RefreshToken(code, clientId);
+		DatabaseOauthToken? token = await DatabaseManager.Oauth2.RefreshToken(refreshToken ?? code, clientId);
 		if (token is null) return Unauthorized();
 		return Json(new Oauth2CodeGrantResponse(token));
 	}

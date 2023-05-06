@@ -39,7 +39,8 @@ public class UserManager
 		if (token.StartsWith("Bearer "))
 		{
 			token = token.Split(" ")[1];
-			IAsyncCursor<DatabaseOauthToken> loginCursor = await Oauth2TokensCollection.FindAsync(x => x.CurrentAuthToken == token);
+			IAsyncCursor<DatabaseOauthToken> loginCursor =
+				await Oauth2TokensCollection.FindAsync(x => x.CurrentAuthToken == token);
 			DatabaseOauthToken login = await loginCursor.FirstOrDefaultAsync();
 			if (login is null) return null;
 
@@ -50,7 +51,12 @@ public class UserManager
 		{
 			IAsyncCursor<DatabaseLogin> loginCursor = await TokensCollection.FindAsync(x => x.Token == token);
 			DatabaseLogin login = await loginCursor.FirstOrDefaultAsync();
+
 			if (login is null) return null;
+
+			await TokensCollection.FindOneAndUpdateAsync(
+				Builders<DatabaseLogin>.Filter.Eq(x => x.Id, login.Id),
+				Builders<DatabaseLogin>.Update.Set(x => x.LastSeen, DateTimeOffset.UtcNow));
 
 			IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == login.UserID);
 			return await userCursor.FirstOrDefaultAsync();
@@ -86,8 +92,8 @@ public class UserManager
 			Token = Utils.GenerateToken(256),
 			UserAgent = userAgent,
 			Scopes = scopes.ToArray(),
-			Created = DateTimeOffset.Now,
-			LastSeen = DateTimeOffset.Now
+			Created = DateTimeOffset.UtcNow,
+			LastSeen = DateTimeOffset.UtcNow
 		};
 		await TokensCollection.InsertOneAsync(login);
 		return login;
