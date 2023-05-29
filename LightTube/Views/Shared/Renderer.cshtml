@@ -530,8 +530,7 @@
 					// im sorry
 					InnerTubePlayer player = Context.RequestServices.GetService<InnerTube>()
 												!.GetPlayerAsync(video.Id).Result;
-					PlayerContext playerContext = new(Context, player, "channel-promoted-video", true); 
-					// compatibility = true because i cant be bothered to import videojs etc in /channel
+					PlayerContext playerContext = new(Context, player, "channel-promoted-video", false);
 				}
 				<partial name="Player" model="@playerContext"/>
 			</div>
