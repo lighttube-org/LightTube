@@ -21,7 +21,14 @@ public class ProxyController : Controller
 		"host",
 		"cookie",
 		"cookies",
-		"if-none-match"
+		"accept-encoding",
+		"if-none-match",
+		"access-control-allow-origin",
+		"access-control-allow-credentials",
+		"timing-allow-origin",
+		"access-control-expose-headers",
+		"vary",
+		"cross-origin-resource-policy"
 	};
 
 	public ProxyController(InnerTube.InnerTube youtube)
@@ -89,10 +96,8 @@ public class ProxyController : Controller
 			}
 
 			foreach (string header in response.Headers.AllKeys)
-				if (Response.Headers.ContainsKey(header))
+				if (!_blockedHeaders.Contains(header))
 					Response.Headers[header] = response.Headers.Get(header);
-				else
-					Response.Headers.Add(header, response.Headers.Get(header));
 			Response.Headers.Add("Content-Disposition",
 				$"attachment; filename=\"{Regex.Replace(player.Details.Title, @"[^\u0000-\u007F]+", "_")}\"");
 			Response.StatusCode = (int)response.StatusCode;
@@ -254,46 +259,40 @@ public class ProxyController : Controller
 			string url = "https://" +
 			             path.Replace("%2f", "/", StringComparison.OrdinalIgnoreCase);
 
-			HttpClient client = new();
-			HttpMethod method = Request.Method switch
-			{
-				"GET" => HttpMethod.Get,
-				"PUT" => HttpMethod.Put,
-				"POST" => HttpMethod.Post,
-				"DELETE" => HttpMethod.Delete,
-				"HEAD" => HttpMethod.Head,
-				"OPTIONS" => HttpMethod.Options,
-				"TRACE" => HttpMethod.Trace,
-				"PATCH" => HttpMethod.Patch,
-				var _ => HttpMethod.Get
-			};
-			HttpRequestMessage hrm = new(method, url);
-			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
-			foreach (string value in values)
-				hrm.Headers.Add(header, value);
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+			request.Method = Request.Method;
 
-			HttpResponseMessage response = await client.SendAsync(hrm);
-			Response.StatusCode = (int)response.StatusCode;
-
-			foreach ((string? key, IEnumerable<string>? headers) in response.Headers)
-			foreach (string header in headers)
-			{
-				if (!Response.Headers.ContainsKey(key))
-					Response.Headers.Add(key, header);
-			}
-
-			await Response.StartAsync();
+			HttpWebResponse response;
 
 			try
 			{
-				await response.Content.CopyToAsync(Response.Body, null, HttpContext.RequestAborted);
+				response = (HttpWebResponse)request.GetResponse();
 			}
-			catch (TaskCanceledException e)
+			catch (WebException e)
 			{
-				Console.WriteLine(e.ToString());
+				response = (HttpWebResponse)e.Response;
+			}
+
+			if (response == null)
+			{
+				await Response.StartAsync();
+				return;
+			}
+
+			Response.StatusCode = (int)response.StatusCode;
+
+			await using Stream stream = response.GetResponseStream();
+			try
+			{
+				await stream.CopyToAsync(Response.Body, HttpContext.RequestAborted);
+			}
+			catch (Exception)
+			{
 				// an exception is thrown if the client suddenly stops streaming
 			}
+
+			await Response.StartAsync();
 		}
 		catch (Exception e)
 		{
@@ -429,10 +428,7 @@ public class ProxyController : Controller
 			HttpResponseMessage response = await client.SendAsync(hrm);
 
 			foreach ((string? header, IEnumerable<string>? values) in response.Headers)
-				if (Response.Headers.ContainsKey(header))
-					Response.Headers[header] = values.First();
-				else
-					Response.Headers.Add(header, values.First());
+				Response.Headers[header] = values.First();
 			Response.StatusCode = (int)response.StatusCode;
 
 			await response.Content.CopyToAsync(Response.Body);
