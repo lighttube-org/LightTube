@@ -9,7 +9,7 @@ public class EmbedContext : BaseContext
 
 	public EmbedContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse, bool compatibility) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility);
+		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility, context.Request.Query["q"]);
 		Video = innerTubeNextResponse;
 	}
 

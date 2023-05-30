@@ -62,14 +62,14 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
 		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
-			@foreach (Format format in Model.Player.Formats)
+			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
 				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
 			}
 		}
 		else
 		{
-			@foreach (Format format in Model.Player.Formats)
+			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
 				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
 			}
@@ -87,14 +87,14 @@ else if (Model.Player.Formats.Any())
 	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
 		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
-			@foreach (Format format in Model.Player.Formats)
+			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
 				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
 			}
 		}
 		else
 		{
-			@foreach (Format format in Model.Player.Formats)
+			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
 				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
 			}

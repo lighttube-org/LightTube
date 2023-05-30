@@ -16,7 +16,7 @@ public class WatchContext : BaseContext
 		InnerTubeContinuationResponse? comments,
 		bool compatibility, int dislikes) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility);
+		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility, context.Request.Query["q"]);
 		Video = innerTubeNextResponse;
 		Playlist = Video.Playlist;
 		Comments = comments;
@@ -75,7 +75,7 @@ public class WatchContext : BaseContext
 		InnerTubeContinuationResponse? comments,
 		bool compatibility, int dislikes) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility);
+		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility, context.Request.Query["q"]);
 		Video = innerTubeNextResponse;
 		Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubePlayer.Details.Id);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.PRIVATE)

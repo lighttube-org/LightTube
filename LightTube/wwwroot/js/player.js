@@ -1,3 +1,9 @@
+try {
+	document.querySelector(".player-container").style.marginBottom = "0";
+} catch (_) {
+	
+}
+
 const opts = {
 	liveui: true,
 	playbackRates: [

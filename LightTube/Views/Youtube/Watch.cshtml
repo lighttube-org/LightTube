@@ -1,4 +1,6 @@
 ﻿@using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using InnerTube
 @model WatchContext
 
 @{
@@ -8,8 +10,23 @@
 }
 
 <div class="watch-page">
-	<div class="player-container" style="color:white">
+	<div class="player-container" style="color:white;margin-bottom:2rem">
 		<partial name="Player" model="Model.Player"/>
+		<noscript>
+			<div class="noscript-quality-switcher">
+				Current video resolution:
+				<b>
+					@Model.Player.GetPreferredFormat()?.QualityLabel
+				</b>
+				Switch to
+				@foreach (Format f in Model.Player.Player?.Formats?.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
+				{
+					<b>
+						<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
+					</b>
+				}
+			</div>
+		</noscript>
 	</div>
 	<div class="info-container">
 		<div class="ml-2 title">
@@ -65,14 +82,14 @@
 		</div>
 		<div class="video-channel-info">
 			<img loading="lazy"
-				 class="avatar"
+			     class="avatar"
 			     src="@Model.Video.Channel.Avatar"
 			     alt="@Model.Video.Channel.Title">
 			<div class="video-channel-info__name">
 				<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
 				<span class="subs">@Model.Video.Channel.Subscribers</span>
 			</div>
-				<partial name="SubscribeButton" model="Model.Video.Channel.Id"/>
+			<partial name="SubscribeButton" model="Model.Video.Channel.Id"/>
 		</div>
 		<details class="description">
 			<summary>
