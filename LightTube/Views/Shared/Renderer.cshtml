@@ -530,7 +530,7 @@
 					// im sorry
 					InnerTubePlayer player = Context.RequestServices.GetService<InnerTube>()
 												!.GetPlayerAsync(video.Id).Result;
-					PlayerContext playerContext = new(Context, player, "channel-promoted-video", false);
+					PlayerContext playerContext = new(Context, player, "channel-promoted-video", false, "18");
 				}
 				<partial name="Player" model="@playerContext"/>
 			</div>

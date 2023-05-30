@@ -22,6 +22,8 @@ html:root {
 	--channel-info-background: #fff;
 	--channel-contents-background: #f9f9f9;
 
+	--nojs-color-switcher: #f5d562;
+
 	/* Button colors */
 	--btn-hover-color-blue: #def1ff;
 	--btn-hover-color-white: #aaa;
@@ -69,6 +71,8 @@ html.theme-dark:root {
 	--thumbnail-background: #252525;
 
 	--search-bar-background: #ffffff03;
+
+	--nojs-color-switcher: #f5d562;
 
 	/* Button colors */
 	--btn-hover-color-blue: #263850;
@@ -663,7 +667,7 @@ body.no-guide .guide {
 	.player-error-container {
 		padding: 8px;
 	}
-	
+
 	.player-error-container svg {
 		width: 32px;
 		height: 32px;
@@ -676,6 +680,17 @@ body.no-guide .guide {
 
 .player-error-container .title {
 	font-size: 1.3rem;
+}
+
+.noscript-quality-switcher {
+	background-color: var(--nojs-color-switcher, #f5d562);
+	color: var(--text-primary, #000);
+	padding: 8px;
+	font-size: 1.1rem;
+	z-index: 20;
+	position: relative;
+	top: 0;
+	bottom: 2rem;
 }
 
 .playlist-view-container {
