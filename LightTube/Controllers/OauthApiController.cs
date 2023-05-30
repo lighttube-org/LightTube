@@ -160,18 +160,22 @@ public class OauthApiController : Controller
 	[Route("subscriptions")]
 	[HttpGet]
 	[ApiAuthorization("subscriptions.read")]
-	public async Task<ApiResponse<Dictionary<string, ApiSubscriptionInfo>>> GetSubscriptions()
+	public async Task<ApiResponse<Dictionary<string, DatabaseChannel>>> GetSubscriptions()
 	{
 		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 		if (user is null)
-			return Error<Dictionary<string, ApiSubscriptionInfo>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+			return Error<Dictionary<string, DatabaseChannel>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
 		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-		return new ApiResponse<Dictionary<string, ApiSubscriptionInfo>>(
-			user.Subscriptions.ToDictionary(
-				x => x.Key,
-				x => new ApiSubscriptionInfo(x.Value))
-			, userData);
+		Dictionary<string, DatabaseChannel> channels = new();
+		foreach (string channelId in user.Subscriptions.Keys)
+		{
+			DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(channelId);
+			if (channel is null) continue;
+			userData?.AddInfoForChannel(channelId);
+			channels.Add(channelId, channel);
+		}
+		return new ApiResponse<Dictionary<string, DatabaseChannel>>(channels, userData);
 	}
 
 	[Route("feed")]
