@@ -513,16 +513,16 @@
         display: none;
     }
 
+    .renderer-videorenderer .info > *,
+    .renderer-playlistrenderer .info > *,
+    .renderer-radiorenderer .info > * {
+        padding: 0 8px;
+    }
+
     .renderer-videorenderer .info__more > *:first-child,
     .renderer-playlistrenderer .info__more > *:first-child,
     .renderer-radiorenderer .info__more > *:first-child {
         display: block;
-    }
-
-    .info__channel > img,
-    .info__channel > img,
-    .info__channel > img {
-        display: none;
     }
 
     .thumbnail {

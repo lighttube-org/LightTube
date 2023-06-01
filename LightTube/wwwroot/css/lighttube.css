@@ -892,6 +892,14 @@ body.no-guide .guide {
 	gap: 16px;
 }
 
+@media screen and (max-width: 700px) {
+	.filters-button {
+		width: calc(100% - 32px) !important;
+		margin: 0 16px;
+		padding: 0;
+	}
+}
+
 .search-filters {
 	display: flex;
 	flex-direction: row;
@@ -1212,6 +1220,7 @@ select:active {
 		flex-wrap: nowrap;
 		overflow-x: auto;
 		width: calc(100vw - 24px);
+		justify-content: center;
 	}
 
 	.settings-tab {
@@ -1220,6 +1229,14 @@ select:active {
 
 	.settings-tabs h1 {
 		display: none;
+	}
+	
+	.settings-form h1 {
+		padding-left: 8px;
+	}
+	
+	.settings-form *[class^=btn] {
+		margin: auto;
 	}
 }
 
