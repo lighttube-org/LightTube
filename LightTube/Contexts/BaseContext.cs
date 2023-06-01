@@ -63,5 +63,5 @@ public class BaseContext
 	public string GetThemeClass() =>
 		Context.Request.Cookies.TryGetValue("theme", out string? theme)
 			? $"theme-{theme}"
-			: $"theme-{Configuration.GetVariable("LIGHTTUBE_DEFAULT_THEME", "light")}";
+			: $"theme-{Configuration.GetVariable("LIGHTTUBE_DEFAULT_THEME", "auto")}";
 }

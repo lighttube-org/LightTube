@@ -8,8 +8,9 @@ public class AppearanceSettingsContext : BaseContext
 	public Dictionary<string, string> CustomThemes;
 	public Dictionary<string, string> BuiltinThemes = new()
 	{
+		["auto"] = "System Default",
 		["light"] = "Light",
-		["dark"] = "Dark"
+		["dark"] = "Dark",
 	};
 
 	public AppearanceSettingsContext(HttpContext context, InnerTubeLocals locals, Dictionary<string, string> customThemes) : base(context)
