@@ -1,4 +1,4 @@
-html:root {
+html:root, html.theme-light:root {
 	--text-primary: #000;
 	--text-secondary: #606060;
 	--text-link: #3ea6ff;
@@ -11,7 +11,7 @@ html:root {
 	--button-active-background: #e5e5e5;
 
 	--item-hover-background: #f2f2f2;
-	--item-active-background: #d9d9d9;;
+	--item-active-background: #d9d9d9;
 
 	--app-background: #f9f9f9;
 
@@ -62,7 +62,7 @@ html.theme-dark:root {
 	--button-active-background: #3d3d3d;
 
 	--item-hover-background: #0000;
-	--item-active-background: #3d3d3d;;
+	--item-active-background: #3d3d3d;
 
 	--app-background: #0f0f0f;
 
@@ -92,6 +92,106 @@ html.theme-dark:root {
 	/* Playlist gradient */
 	--playlist-gradient-start: #3338;
 	--playlist-gradient-end: #0000;
+}
+
+@media (prefers-color-scheme: light) {
+	html.theme-auto {
+		--text-primary: #000;
+		--text-secondary: #606060;
+		--text-link: #3ea6ff;
+
+		--top-bar-background: #FFF;
+		--guide-background: #FFF;
+		--border-color: #e5e5e5;
+
+		--button-hover-background: #0000;
+		--button-active-background: #e5e5e5;
+
+		--item-hover-background: #f2f2f2;
+		--item-active-background: #d9d9d9;
+
+		--app-background: #f9f9f9;
+
+		--context-menu-background: #f2f2f2;
+
+		--thumbnail-background: #CCC;
+
+		--channel-info-background: #fff;
+		--channel-contents-background: #f9f9f9;
+
+		--nojs-color-switcher: #f5d562;
+
+		/* Button colors */
+		--btn-hover-color-blue: #def1ff;
+		--btn-hover-color-white: #aaa;
+
+		--chip-background: rgb(0, 0, 0, 0.05);
+		--chip-background-hover: rgb(0, 0, 0, 0.10);
+		--chip-background-active: rgb(0, 0, 0, 0.15);
+
+		--subscribe-button: #c00;
+		--subscribe-button-hover: #c00;
+		--subscribe-button-subscribed: rgb(0, 0, 0, 0.05);
+		--subscribe-button-subscribed-hover: rgb(0, 0, 0, 0.1);
+
+		--playlist-header-background: #fff;
+		--playlist-background: #f9f9f9;
+
+		/* Global variables */
+		--video-player-height-max: 720px;
+		--video-player-width-max: 1280px;
+
+		/* Playlist gradient */
+		--playlist-gradient-start: #ccc8;
+		--playlist-gradient-end: #fff0;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	html.theme-auto {
+		--text-primary: #fff;
+		--text-secondary: #aaaaaa;
+		--text-link: #3ea6ff;
+
+		--top-bar-background: #0f0f0f;
+		--guide-background: #0f0f0f;
+		--border-color: #272727;
+
+		--button-hover-background: #272727;
+		--button-active-background: #3d3d3d;
+
+		--item-hover-background: #0000;
+		--item-active-background: #3d3d3d;
+
+		--app-background: #0f0f0f;
+
+		--context-menu-background: #282828;
+
+		--thumbnail-background: #252525;
+
+		--search-bar-background: #ffffff03;
+
+		--nojs-color-switcher: #f5d562;
+
+		/* Button colors */
+		--btn-hover-color-blue: #263850;
+
+		--chip-background: #272727;
+		--chip-background-hover: #3f3f3f;
+		--chip-background-active: #535353;
+
+		--subscribe-button: #c00;
+		--subscribe-button-hover: #c00;
+		--subscribe-button-subscribed: #272727;
+		--subscribe-button-subscribed-hover: #3f3f3f;
+
+		--playlist-header-background: #202020;
+		--playlist-background: #181818;
+
+		/* Playlist gradient */
+		--playlist-gradient-start: #3338;
+		--playlist-gradient-end: #0000;
+	}
 }
 
 html, body {
@@ -892,6 +992,14 @@ body.no-guide .guide {
 	gap: 16px;
 }
 
+@media screen and (max-width: 700px) {
+	.filters-button {
+		width: calc(100% - 32px) !important;
+		margin: 0 16px;
+		padding: 0;
+	}
+}
+
 .search-filters {
 	display: flex;
 	flex-direction: row;
@@ -1212,6 +1320,7 @@ select:active {
 		flex-wrap: nowrap;
 		overflow-x: auto;
 		width: calc(100vw - 24px);
+		justify-content: center;
 	}
 
 	.settings-tab {
@@ -1220,6 +1329,14 @@ select:active {
 
 	.settings-tabs h1 {
 		display: none;
+	}
+
+	.settings-form h1 {
+		padding-left: 8px;
+	}
+
+	.settings-form *[class^=btn] {
+		margin: auto;
 	}
 }
 
