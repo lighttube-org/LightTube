@@ -40,7 +40,7 @@ public class PlayerContext : BaseContext
 
 	public Format? GetPreferredFormat() =>
 		Player?.Formats.FirstOrDefault(x => x.Itag == PreferredItag && x.Itag != "17") ??
-		Player?.Formats.First(x => x.Itag != "17");
+		Player?.Formats.FirstOrDefault(x => x.Itag != "17");
 
 	public string GetClass() => ClassName is not null ? $" {ClassName}" : "";
 
