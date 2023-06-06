@@ -68,7 +68,15 @@ public class ApiPlaylist
 			Subscribers = null,
 			Badges = Array.Empty<Badge>()
 		};
-		Thumbnails = Array.Empty<Thumbnail>();
+		Thumbnails = new []
+		{
+			new Thumbnail
+			{
+				Width = null,
+				Height = null,
+				Url = new Uri($"https://i.ytimg.com/vi/{playlist.VideoIds.FirstOrDefault()}/hqdefault.jpg")
+			}
+		};
 		LastUpdated = $"Last updated on {playlist.LastUpdated:MMM d, yyyy}";
 		VideoCountText = playlist.VideoIds.Count switch
 		{
