@@ -12,21 +12,24 @@
 <div class="watch-page">
 	<div class="player-container" style="color:white;margin-bottom:2rem">
 		<partial name="Player" model="Model.Player"/>
-		<noscript>
-			<div class="noscript-quality-switcher">
-				Current video resolution:
-				<b>
-					@Model.Player.GetPreferredFormat()?.QualityLabel
-				</b>
-				Switch to
-				@foreach (Format f in Model.Player.Player?.Formats?.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
-				{
+		@if (!Model.Player.Player?.Details.IsLive ?? true)
+		{
+			<noscript>
+				<div class="noscript-quality-switcher">
+					Current video resolution:
 					<b>
-						<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
+						@Model.Player.GetPreferredFormat()?.QualityLabel
 					</b>
-				}
-			</div>
-		</noscript>
+					Switch to
+					@foreach (Format f in Model.Player.Player?.Formats?.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
+					{
+						<b>
+							<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
+						</b>
+					}
+				</div>
+			</noscript>
+		}
 	</div>
 	<div class="info-container">
 		<div class="ml-2 title">
