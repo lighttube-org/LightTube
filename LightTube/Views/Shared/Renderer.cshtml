@@ -666,6 +666,95 @@
 			@message.Message
 		</div>
 		break;
+	case MovieRenderer movie:
+		<div class="renderer-videorenderer">
+            <a class="thumbnail" href="/watch?v=@movie.Id">
+            	<img loading="lazy" src="@movie.Thumbnails.Last().Url" alt="@movie.Title">
+            	<div class="thumbnail__duration__container">
+            		<span class="thumbnail__duration">@movie.Duration.ToDurationString()</span>
+            	</div>
+            </a>
+            <div class="info">
+            	<a href="/watch?v=@movie.Id" class="ml-2 title" title="@movie.Title">
+            		@movie.Title
+            	</a>
+            	<div class="info__more">
+            		@if (movie.Channel.Title != null)
+            		{
+            			<div class="info__channel">
+           					@movie.Channel.Title
+            				@foreach (Badge channelBadge in movie.Channel.Badges)
+            				{
+            					<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+            						<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+            					</svg>
+            				}
+            			</div>
+            		}
+            		<div>
+            			@foreach (string s in movie.TopMetadataItems)
+			            {
+				            <div>@s</div>
+			            }
+            		</div>
+            		<div>
+            			@foreach (Badge videoBadge in movie.Badges)
+            			{
+            				<span class="badge" title="@videoBadge.Tooltip">
+            					@videoBadge.Label
+            				</span>
+            			}
+            		</div>
+		            <div>
+			            @Html.Raw(movie.DescriptionSnippet)
+		            </div>
+		            <div>
+			            @foreach (string s in movie.BottomMetadataItems)
+			            {
+				            <div>@s</div>
+			            }
+		            </div>
+            	</div>
+            </div>
+        </div>
+		break;
+	case CompactMovieRenderer movie:
+		<div class="renderer-compactvideorenderer">
+			<a class="compact-thumbnail" href="/watch?v=@movie.Id">
+				<img loading="lazy" src="@movie.Thumbnails.Last().Url" alt="@movie.Title">
+				<div class="compact-thumbnail__duration__container">
+					<span class="compact-thumbnail__duration">@movie.Duration.ToDurationString()</span>
+				</div>
+			</a>
+			<div class="info">
+				<a class="ml-2 title" href="/watch?v=@movie.Id" title="@movie.Title">
+					@movie.Title
+				</a>
+				<div class="info__more">
+					<div class="info__channel">
+						<a class="ml-1" href="/channel/@movie.Channel.Id" title="@movie.Channel.Title">
+							@movie.Channel.Title
+						</a>
+						@foreach (Badge channelBadge in movie.Channel.Badges)
+						{
+							<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+								<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+							</svg>
+						}
+					</div>
+					<div>
+			            @foreach (string s in movie.TopMetadataItems)
+			            {
+				            <div>@s</div>
+			            }
+					</div>
+					<div>
+						<br><span class="badge">Movie</span><span class="badge">Unavailable</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
 	case UnknownRenderer:
 		<div class="renderer-null">
 			Unknown renderer type: @Model.Type
