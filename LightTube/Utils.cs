@@ -407,7 +407,7 @@ public static class Utils
 			descriptions.Add("Get your subscription feed");
 		}
 
-		if (modelScopes.Contains("subscriptions.write")) 
+		if (modelScopes.Contains("subscriptions.write"))
 			descriptions.Add("Subscribe & unsubscribe from channels");
 
 		return descriptions;
@@ -421,5 +421,41 @@ public static class Utils
 		for (int i = 0; i < length; i++)
 			sb.Append(tokenAlphabet[rng.Next(0, tokenAlphabet.Length)]);
 		return sb.ToString();
+	}
+
+	public static SearchParams GetSearchParams(this HttpRequest request)
+	{
+		SearchParams searchParams = new()
+		{
+			Filters = new SearchFilters(),
+			QueryFlags = new QueryFlags()
+		};
+
+		if (request.Query.TryGetValue("uploadDate", out StringValues uploadDateValues) && int.TryParse(uploadDateValues, out int uploadDate))
+			searchParams.Filters.UploadedIn = (SearchFilters.Types.UploadDate)uploadDate;
+
+		if (request.Query.TryGetValue("type", out StringValues typeValues) && int.TryParse(typeValues, out int type))
+			searchParams.Filters.Type = (SearchFilters.Types.ItemType)type;
+
+		if (request.Query.TryGetValue("duration", out StringValues durationValues) && int.TryParse(durationValues, out int duration))
+			searchParams.Filters.Duration = (SearchFilters.Types.VideoDuration)duration;
+
+		if (request.Query.TryGetValue("sortField", out StringValues sortFieldValues) && int.TryParse(sortFieldValues, out int sortField))
+			searchParams.SortBy = (SearchParams.Types.SortField)sortField;
+
+		if (request.Query.TryGetValue("live", out StringValues _)) searchParams.Filters.Live = true;
+		if (request.Query.TryGetValue("_4k", out StringValues _)) searchParams.Filters.Resolution4K = true;
+		if (request.Query.TryGetValue("hd", out StringValues _)) searchParams.Filters.Hd = true;
+		if (request.Query.TryGetValue("subs", out StringValues _)) searchParams.Filters.Subtitles = true;
+		if (request.Query.TryGetValue("cc", out StringValues _)) searchParams.Filters.CreativeCommons = true;
+		if (request.Query.TryGetValue("vr360", out StringValues _)) searchParams.Filters.Vr360 = true;
+		if (request.Query.TryGetValue("vr180", out StringValues _)) searchParams.Filters.Vr180 = true;
+		if (request.Query.TryGetValue("_3d", out StringValues _)) searchParams.Filters.Resolution3D = true;
+		if (request.Query.TryGetValue("hdr", out StringValues _)) searchParams.Filters.Hdr = true;
+		if (request.Query.TryGetValue("location", out StringValues _)) searchParams.Filters.Location = true;
+		if (request.Query.TryGetValue("purchased", out StringValues _)) searchParams.Filters.Purchased = true;
+		if (request.Query.TryGetValue("exact", out StringValues _)) searchParams.QueryFlags.ExactSearch = true;
+
+		return searchParams;
 	}
 }

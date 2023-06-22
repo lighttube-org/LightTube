@@ -155,18 +155,18 @@ public class PlaylistManager
 			Id = video.Details.Id,
 			Title = video.Details.Title,
 			Thumbnails = new Thumbnail[] {
-				new Thumbnail()
+				new()
 				{
 					Url = new Uri($"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg")
 				}
 			},
-			Views = video.Details.ViewCount,
+			Views = 0,
 			Channel = new()
 			{
 				Id = video.Details.Author.Id!,
 				Name = video.Details.Author.Title,
 				Avatars = new Thumbnail[] {
-				new Thumbnail()
+				new()
 				{
 					Url = video.Details.Author.Avatar!
 				}
