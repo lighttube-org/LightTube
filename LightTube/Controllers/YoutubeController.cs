@@ -61,7 +61,8 @@ public class YoutubeController : Controller
 		}
 
 		InnerTubeNextResponse video =
-			await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
+			await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetLanguage(),
+				region: HttpContext.GetRegion());
 		InnerTubeContinuationResponse? comments = null;
 
 		if (video.CommentsContinuation is not null)
@@ -91,13 +92,15 @@ public class YoutubeController : Controller
 		{
 			DatabasePlaylist? pl = DatabaseManager.Playlists.GetPlaylist(list);
 			if (player is null || e is not null)
-				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments, dislikes));
+				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments,
+					dislikes));
 			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes));
 		}
 		else
 		{
 			if (player is null || e is not null)
-				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments, dislikes));
+				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments,
+					dislikes));
 			return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes));
 		}
 	}
@@ -109,15 +112,18 @@ public class YoutubeController : Controller
 			Response.Cookies.Append("lastSearch", search_query);
 		if (continuation is null)
 		{
+			SearchParams searchParams = Request.GetSearchParams();
+
 			InnerTubeSearchResults search =
-				await _youtube.SearchAsync(search_query, filter, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return View(new SearchContext(HttpContext, search_query, filter, search));
+				await _youtube.SearchAsync(search_query, searchParams, HttpContext.GetLanguage(),
+					HttpContext.GetRegion());
+			return View(new SearchContext(HttpContext, search_query, searchParams, search));
 		}
 		else
 		{
 			InnerTubeContinuationResponse search =
 				await _youtube.ContinueSearchAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return View(new SearchContext(HttpContext, search_query, filter, search));
+			return View(new SearchContext(HttpContext, search_query, null, search));
 		}
 	}
 
@@ -210,7 +216,8 @@ public class YoutubeController : Controller
 			else
 			{
 				InnerTubeContinuationResponse continuationRes =
-					await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+					await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(),
+						HttpContext.GetRegion());
 				return View(new PlaylistContext(HttpContext, playlist, continuationRes));
 			}
 		}

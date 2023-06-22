@@ -1,55 +1,370 @@
 ﻿@using InnerTube.Renderers
-@using InnerTube
 @model SearchContext
 
 @{
-	Model.Title = Model.GetSearchBoxInput();
+	Model.Title = Model.GetSearchBoxInput()!;
 }
 
 <div class="search-container">
-	@if (Model.Search?.SearchOptions is not null)
-	{
-		<details>
-			<summary class="btn filters-button" style="width:min-content;">
-				<svg class="icon" width="20" height="20" fill="currentColor">
-					<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
-				</svg>
-				<div class="text">
-					@Model.Search.SearchOptions.Title
-				</div>
-			</summary>
-			<div class="search-filters">
-				@foreach (InnerTubeSearchResults.Options.Group group in Model.Search.SearchOptions.Groups)
-				{
-					<div class="search-filter">
-						<div class="search-filter__category">
-							@group.Title
-						</div>
-						<hr>
-						@foreach (InnerTubeSearchResults.Options.Group.Filter filter in group.Filters)
-						{
-							@if (filter.Selected)
-							{
-								<a href="/results?search_query=@Model.Query&filter=@filter.Params" class="search-filter__item active" title="@filter.Tooltip">
-									@filter.Label
-								</a>
-							}
-							else
-							{
-								<a href="/results?search_query=@Model.Query&filter=@filter.Params" class="search-filter__item" title="@filter.Tooltip">
-									@filter.Label
-								</a>
-							}
-						}
-					</div>
-				}
-			</div>
-		</details>
-	}
-	@foreach (IRenderer renderer in Model.Results)
-	{
-		<partial name="Renderer" model="renderer"/>
-	}
+@if (Model.Filter != null)
+{
+	<details>
+	<summary class="btn filters-button" style="width:min-content;">
+		<svg class="icon" width="20" height="20" fill="currentColor">
+			<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
+		</svg>
+		<div class="text">
+			Filters
+		</div>
+	</summary>
+	<form class="search-filters__form">
+	<input style="display:none" value="@Model.GetSearchBoxInput()" name="search_query"/>
+	<div class="search-filters">
+	<div class="search-filter">
+		<div class="search-filter__category">
+			Upload Date
+		</div>
+		<hr>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasUploadedIn)
+			{
+				<input type="radio" name="uploadDate" value="null">
+			}
+			else
+			{
+				<input type="radio" name="uploadDate" value="null" checked>
+			}
+			Clear
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.LastHour)
+			{
+				<input type="radio" name="uploadDate" value="1" checked>
+			}
+			else
+			{
+				<input type="radio" name="uploadDate" value="1">
+			}
+			Last Hour
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.Today)
+			{
+				<input type="radio" name="uploadDate" value="2" checked>
+			}
+			else
+			{
+				<input type="radio" name="uploadDate" value="2">
+			}
+			Today
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisWeek)
+			{
+				<input type="radio" name="uploadDate" value="3" checked>
+			}
+			else
+			{
+				<input type="radio" name="uploadDate" value="3">
+			}
+			This week
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisMonth)
+			{
+				<input type="radio" name="uploadDate" value="4" checked>
+			}
+			else
+			{
+				<input type="radio" name="uploadDate" value="4">
+			}
+			This month
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisYear)
+			{
+				<input type="radio" name="uploadDate" value="5" checked>
+			}
+			else
+			{
+				<input type="radio" name="uploadDate" value="5">
+			}
+			This year
+		</label>
+	</div>
+
+	<div class="search-filter">
+		<div class="search-filter__category">
+			Type
+		</div>
+		<hr>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasType)
+			{
+				<input type="radio" name="type" value="null">
+			}
+			else
+			{
+				<input type="radio" name="type" value="null" checked>
+			}
+			Clear
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Video)
+			{
+				<input type="radio" name="type" value="1" checked>
+			}
+			else
+			{
+				<input type="radio" name="type" value="1">
+			}
+			Video
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Channel)
+			{
+				<input type="radio" name="type" value="2" checked>
+			}
+			else
+			{
+				<input type="radio" name="type" value="2">
+			}
+			Channel
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Playlist)
+			{
+				<input type="radio" name="type" value="3" checked>
+			}
+			else
+			{
+				<input type="radio" name="type" value="3">
+			}
+			Playlist
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Movie)
+			{
+				<input type="radio" name="type" value="4" checked>
+			}
+			else
+			{
+				<input type="radio" name="type" value="4">
+			}
+			Movie
+		</label>
+	</div>
+
+	<div class="search-filter">
+		<div class="search-filter__category">
+			Duration
+		</div>
+		<hr>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasDuration)
+			{
+				<input type="radio" name="duration" value="null">
+			}
+			else
+			{
+				<input type="radio" name="duration" value="null" checked>
+			}
+			Clear
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Short)
+			{
+				<input type="radio" name="duration" value="1" checked>
+			}
+			else
+			{
+				<input type="radio" name="duration" value="1">
+			}
+			Under 4 minutes
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Medium)
+			{
+				<input type="radio" name="duration" value="3" checked>
+			}
+			else
+			{
+				<input type="radio" name="duration" value="3">
+			}
+			4 - 20 minutes
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Long)
+			{
+				<input type="radio" name="duration" value="2" checked>
+			}
+			else
+			{
+				<input type="radio" name="duration" value="2">
+			}
+			Over 20 minutes
+		</label>
+	</div>
+
+	<div class="search-filter">
+		<div class="search-filter__category">
+			Features
+		</div>
+		<hr>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasLive) {
+				<input type="checkbox" name="live" checked>
+			} else {
+				<input type="checkbox" name="live">
+			}
+			Live
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasResolution4K) {
+				<input type="checkbox" name="4k" checked>
+			} else {
+				<input type="checkbox" name="4k">
+			}
+			4K
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasHd) {
+				<input type="checkbox" name="hd" checked>
+			} else {
+				<input type="checkbox" name="hd">
+			}
+			HD
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasSubtitles) {
+				<input type="checkbox" name="subs" checked>
+			} else {
+				<input type="checkbox" name="subs">
+			}
+			Subtitles/CC
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasCreativeCommons) {
+				<input type="checkbox" name="cc" checked>
+			} else {
+				<input type="checkbox" name="cc">
+			}
+			Creative Commons
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasVr360) {
+				<input type="checkbox" name="vr360" checked>
+			} else {
+				<input type="checkbox" name="vr360">
+			}
+			360°
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasVr180) {
+				<input type="checkbox" name="vr180" checked>
+			} else {
+				<input type="checkbox" name="vr180">
+			}
+			VR180
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasResolution3D) {
+				<input type="checkbox" name="3d" checked>
+			} else {
+				<input type="checkbox" name="3d">
+			}
+			3D
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasHdr) {
+				<input type="checkbox" name="hdr" checked>
+			} else {
+				<input type="checkbox" name="hdr">
+			}
+			HDR
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasLocation) {
+				<input type="checkbox" name="location" checked>
+			} else {
+				<input type="checkbox" name="location">
+			}
+			Location
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.Filters.HasPurchased) {
+				<input type="checkbox" name="purchased" checked>
+			} else {
+				<input type="checkbox" name="purchased">
+			}
+			Purchased
+		</label>
+	</div>
+
+	<div class="search-filter">
+		<div class="search-filter__category">
+			Sort By
+		</div>
+		<hr>
+		<label class="search-filter__item">
+			@if (Model.Filter.SortBy == SearchParams.Types.SortField.Relevance)
+			{
+				<input type="radio" name="sortField" value="0" checked>
+			}
+			else
+			{
+				<input type="radio" name="sortField" value="0">
+			}
+			Relevance
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.UploadDate)
+			{
+				<input type="radio" name="sortField" value="2" checked>
+			}
+			else
+			{
+				<input type="radio" name="sortField" value="2">
+			}
+			Upload date
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.ViewCount)
+			{
+				<input type="radio" name="sortField" value="3" checked>
+			}
+			else
+			{
+				<input type="radio" name="sortField" value="3">
+			}
+			View count
+		</label>
+		<label class="search-filter__item">
+			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.Rating)
+			{
+				<input type="radio" name="sortField" value="1" checked>
+			}
+			else
+			{
+				<input type="radio" name="sortField" value="1">
+			}
+			Rating
+		</label>
+	</div>
+	</div>
+
+	<button type="submit" class="btn filters-button">
+		<div class="text">
+			Apply Filters
+		</div>
+	</button>
+	</form>
+	</details>
+}
+@foreach (IRenderer renderer in Model.Results)
+{
+	<partial name="Renderer" model="renderer"/>
+}
 </div>
 <div class="next-page">
 	@if (Context.Request.Query.ContainsKey("continuation"))

@@ -24,13 +24,13 @@ public class DatabaseVideo
 		Id = player.Details.Id;
 		Title = player.Details.Title;
 		Thumbnails = new Thumbnail[] {
-			new Thumbnail()
+			new()
 			{
 				Url = new Uri($"https://i.ytimg.com/vi/{player.Details.Id}/hqdefault.jpg")
 			}
 		};
 		UploadedAt = "";
-		Views = player.Details.ViewCount;
+		Views = 0;
 		Channel = new()
 		{
 			Id = player.Details.Author.Id!,

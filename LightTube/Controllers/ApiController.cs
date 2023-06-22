@@ -110,8 +110,7 @@ public class ApiController : Controller
 
 	[Route("search")]
 	[ApiDisableable]
-	public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null,
-		string? @params = null)
+	public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null)
 	{
 		if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
 		{
@@ -124,9 +123,10 @@ public class ApiController : Controller
 		ApiSearchResults result;
 		if (continuation is null)
 		{
-			InnerTubeSearchResults results = await _youtube.SearchAsync(query, @params, HttpContext.GetLanguage(),
+			SearchParams searchParams = Request.GetSearchParams();
+			InnerTubeSearchResults results = await _youtube.SearchAsync(query, searchParams, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
-			result = new ApiSearchResults(results);
+			result = new ApiSearchResults(results, searchParams);
 		}
 		else
 		{

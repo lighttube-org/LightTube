@@ -6,12 +6,12 @@ namespace LightTube.Contexts;
 public class SearchContext : BaseContext
 {
 	public string Query;
-	public string? Filter;
+	public SearchParams? Filter;
 	public InnerTubeSearchResults? Search;
 	public IEnumerable<IRenderer> Results;
 	public string? Continuation;
 
-	public SearchContext(HttpContext context, string query, string? filter, InnerTubeSearchResults search) : base(context)
+	public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeSearchResults search) : base(context)
 	{
 		Query = query;
 		Filter = filter;
@@ -20,7 +20,7 @@ public class SearchContext : BaseContext
 		Continuation = Search.Continuation;
 	}
 
-	public SearchContext(HttpContext context, string query, string? filter, InnerTubeContinuationResponse search) : base(context)
+	public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeContinuationResponse search) : base(context)
 	{
 		Query = query;
 		Filter = filter;
