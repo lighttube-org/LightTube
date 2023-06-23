@@ -804,6 +804,19 @@ body.no-guide .guide {
     gap: 24px;
 }
 
+.recommendations-container summary {
+    font-size: large;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+}
+
+.recommended-videos {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+}
+
 .playlist-view-container {
     background-color: var(--playlist-background);
     border: 1px solid var(--border-color);
@@ -938,10 +951,91 @@ body.no-guide .guide {
 }
 
 .comments-container {
+    display: flex;
     grid-area: comments;
     flex-direction: column;
-    display: flex;
     gap: 16px;
+}
+
+.comments-container summary {
+    color: var(--text-primary, #fff);
+    padding: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: large;
+}
+
+input#comments-toggle {
+    display: none;
+    position: absolute;
+}
+
+.comments-container__flex {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.comments-header {
+    display: none;
+}
+
+.comments-container summary svg {
+    cursor: pointer;
+}
+
+.comments-container summary .flex-divider {
+    cursor: auto;
+    height: 2rem;
+}
+
+@media screen and (max-width: 1084px) {
+    .comments-container {
+        display: none;
+    }
+    input#comments-toggle:checked ~ .comments-container {
+        display: block;
+    }
+
+    .comments-container {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 60%;
+        background-color: var(--app-background, #fff);
+        z-index: 3;
+        border-top: 3px solid var(--border-color);
+        box-shadow: black 0 0 50px;
+        padding: 16px;
+    }
+
+    .comments-header, .comments-container summary {
+        display: flex;
+        font-size: large;
+        font-weight: bold;
+        color: var(--text-primary, #fff);
+        margin: -16px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 3px solid var(--border-color);
+    }
+
+    .comments-container details[open] .only-when-open,
+    .comments-container details .only-when-closed {
+        display: block;
+    }
+
+    .comments-container details[open] .only-when-closed,
+    .comments-container details .only-when-open {
+        display: none;
+    }
+
+
+    .comments-container__flex {
+        margin-top: 24px;
+    }
 }
 
 .interaction-buttons {

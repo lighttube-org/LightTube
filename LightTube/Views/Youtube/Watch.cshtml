@@ -10,6 +10,7 @@
 }
 
 <div class="watch-page">
+	<input type="checkbox" id="comments-toggle">
 	<div class="player-container" style="color:white;margin-bottom:2rem">
 		<partial name="Player" model="Model.Player"/>
 		@if (!Model.Player.Player?.Details.IsLive ?? true)
@@ -21,7 +22,7 @@
 						@Model.Player.GetPreferredFormat()?.QualityLabel
 					</b>
 					Switch to
-					@foreach (Format f in Model.Player.Player?.Formats?.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
+					@foreach (Format f in Model.Player.Player?.Formats.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
 					{
 						<b>
 							<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
@@ -54,6 +55,16 @@
 						@(Model.Dislikes == -1 ? "Dislike" : Model.Dislikes.ToKMB())
 					</div>
 				</div>
+			</div>
+			<div class="interaction-buttons hide-on-desktop">
+				<label class="interaction-button" for="comments-toggle">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
+					</svg>
+					<div class="interaction-button__text">
+						Comments
+					</div>
+				</label>
 			</div>
 			<div class="interaction-buttons">
 				<a class="interaction-button" href="/addToPlaylist?v=@Model.Video.Id" target="_blank">
@@ -102,17 +113,34 @@
 		</details>
 	</div>
 	<div class="comments-container">
-		@if (Model.Comments is not null)
-		{
-			@foreach (IRenderer renderer in Model.Comments.Contents)
-			{
-				<partial name="Renderer" model="renderer"/>
-			}
-		}
-		else
-		{
-			@:Comments are disabled
-		}
+		<details>
+			<summary>
+				<svg class="icon hide-on-desktop" width="32" height="32" fill="currentColor">
+					<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
+					<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
+				</svg>
+				123 comments
+				<div class="flex-divider hide-on-desktop"></div>
+				<label for="comments-toggle" class="hide-on-desktop">
+					<svg class="icon" width="32" height="32" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#x"></use>
+					</svg>
+				</label>
+			</summary>
+			<div class="comments-container__flex">
+				@if (Model.Comments is not null)
+				{
+					@foreach (IRenderer renderer in Model.Comments.Contents)
+					{
+						<partial name="Renderer" model="renderer"/>
+					}
+				}
+				else
+				{
+					@:Comments are disabled
+				}
+			</div>
+		</details>
 	</div>
 	<div class="second-column">
 		@if (Model.Playlist is not null)
@@ -133,10 +161,17 @@
 			</details>
 		}
 		<div class="recommendations-container compact-renderer-list">
-			@foreach (IRenderer renderer in Model.Video.Recommended)
-			{
-				<partial name="Renderer" model="renderer"/>
-			}
+			<details @(Context.GetDefaultRecommendationsVisibility() ? "open" : "")>
+				<summary>
+					Recommended
+				</summary>
+				<div class="recommended-videos">
+					@foreach (IRenderer renderer in Model.Video.Recommended.Where(x => x is not ContinuationItemRenderer))
+					{
+						<partial name="Renderer" model="renderer"/>
+					}
+				</div>
+			</details>
 		</div>
 	</div>
 </div>

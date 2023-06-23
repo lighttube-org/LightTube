@@ -14,7 +14,3 @@ body:
     attributes:
       label: Describe the solution you'd like
       description: If you have a solution in mind, please describe it.
-  - type: textarea
-    attributes:
-      label: Describe alternatives you've considered
-      description: Have you considered any alternative solutions or workarounds?

@@ -6,26 +6,9 @@ labels:
 body:
   - type: textarea
     attributes:
-      label: Describe what happened
-      description: Describe how you managed to get the error as detailed as you can
+      label: Describe the bug
+      description: Describe what exactly is going wrong
       placeholder: Shorts tab on channels don't work
-    validations:
-      required: true
-  - type: input
-    attributes:
-      label: Instance URL
-      description: The instance this error occured at
-      placeholder: https://tube.kuylar.dev
-  - type: input
-    attributes:
-      label: LightTube version
-      placeholder: 2023.01.21 / 1.0.9.0
-    validations:
-      required: true
-  - type: input
-    attributes:
-      label: Resource path
-      placeholder: https://tube.kuylar.dev/watch?v=dQw4w9WgXcQ
     validations:
       required: true
   - type: markdown
