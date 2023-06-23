@@ -31,14 +31,22 @@ public class SettingsController : Controller
 
 	[Route("appearance")]
 	[HttpPost]
-	public IActionResult Appearance(string hl, string gl, string theme) {
-		Response.Cookies.Append("hl", hl, new CookieOptions{
+	public IActionResult Appearance(string hl, string gl, string theme, string recommendations)
+	{
+		Response.Cookies.Append("hl", hl, new CookieOptions
+		{
 			Expires = DateTimeOffset.MaxValue
 		});
-		Response.Cookies.Append("gl", gl, new CookieOptions{
+		Response.Cookies.Append("gl", gl, new CookieOptions
+		{
 			Expires = DateTimeOffset.MaxValue
 		});
-		Response.Cookies.Append("theme", theme, new CookieOptions{
+		Response.Cookies.Append("theme", theme, new CookieOptions
+		{
+			Expires = DateTimeOffset.MaxValue
+		});
+		Response.Cookies.Append("recommendations", recommendations == "on" ? "visible" : "collapsed", new CookieOptions
+		{
 			Expires = DateTimeOffset.MaxValue
 		});
 		return Redirect("/settings/appearance");

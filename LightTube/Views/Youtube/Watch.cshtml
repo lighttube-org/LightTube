@@ -161,10 +161,17 @@
 			</details>
 		}
 		<div class="recommendations-container compact-renderer-list">
-			@foreach (IRenderer renderer in Model.Video.Recommended)
-			{
-				<partial name="Renderer" model="renderer"/>
-			}
+			<details @(Context.GetDefaultRecommendationsVisibility() ? "open" : "")>
+				<summary>
+					Recommended
+				</summary>
+				<div class="recommended-videos">
+					@foreach (IRenderer renderer in Model.Video.Recommended.Where(x => x is not ContinuationItemRenderer))
+					{
+						<partial name="Renderer" model="renderer"/>
+					}
+				</div>
+			</details>
 		</div>
 	</div>
 </div>

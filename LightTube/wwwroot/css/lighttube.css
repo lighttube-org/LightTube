@@ -804,6 +804,19 @@ body.no-guide .guide {
     gap: 24px;
 }
 
+.recommendations-container summary {
+    font-size: large;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+}
+
+.recommended-videos {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+}
+
 .playlist-view-container {
     background-color: var(--playlist-background);
     border: 1px solid var(--border-color);

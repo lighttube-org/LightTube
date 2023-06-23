@@ -41,6 +41,11 @@ public static class Utils
 				? language
 				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
 
+	public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
+		context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
+			? recommendations == "visible"
+			: true;
+
 	public static string GetVersion()
 	{
 		if (_version is null)
@@ -431,16 +436,19 @@ public static class Utils
 			QueryFlags = new QueryFlags()
 		};
 
-		if (request.Query.TryGetValue("uploadDate", out StringValues uploadDateValues) && int.TryParse(uploadDateValues, out int uploadDate))
+		if (request.Query.TryGetValue("uploadDate", out StringValues uploadDateValues) &&
+		    int.TryParse(uploadDateValues, out int uploadDate))
 			searchParams.Filters.UploadedIn = (SearchFilters.Types.UploadDate)uploadDate;
 
 		if (request.Query.TryGetValue("type", out StringValues typeValues) && int.TryParse(typeValues, out int type))
 			searchParams.Filters.Type = (SearchFilters.Types.ItemType)type;
 
-		if (request.Query.TryGetValue("duration", out StringValues durationValues) && int.TryParse(durationValues, out int duration))
+		if (request.Query.TryGetValue("duration", out StringValues durationValues) &&
+		    int.TryParse(durationValues, out int duration))
 			searchParams.Filters.Duration = (SearchFilters.Types.VideoDuration)duration;
 
-		if (request.Query.TryGetValue("sortField", out StringValues sortFieldValues) && int.TryParse(sortFieldValues, out int sortField))
+		if (request.Query.TryGetValue("sortField", out StringValues sortFieldValues) &&
+		    int.TryParse(sortFieldValues, out int sortField))
 			searchParams.SortBy = (SearchParams.Types.SortField)sortField;
 
 		if (request.Query.TryGetValue("live", out StringValues _)) searchParams.Filters.Live = true;

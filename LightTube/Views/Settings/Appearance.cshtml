@@ -102,5 +102,26 @@
 		</select>
 	</div>
 </div>
+
+<label class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Show Recommended Videos By Default
+		</div>
+		<div>
+			If unchecked, recommendations will be collapsed by default
+		</div>
+	</div>
+	<div class="settings-option__option">
+		@if (Context.GetDefaultRecommendationsVisibility())
+		{
+			<input type="checkbox" name="recommendations" checked>
+		}
+		else
+		{
+			<input type="checkbox" name="recommendations">
+		}
+	</div>
+</label>
 <br>
 <input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Save Changes">
