@@ -1,6 +1,6 @@
 name: Error Report
 description: Report an error that you just encountered
-title: '[Bug]'
+title: '[Error]'
 labels:
   - bug
 body:
