@@ -154,7 +154,12 @@ public class YoutubeController : Controller
 			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
 		await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
-		return View(new SubscriptionContext(HttpContext, channel));
+		SubscriptionContext ctx = new(HttpContext, channel);
+		if (ctx.User is null)
+		{
+			return Redirect($"/account/login?redirectUrl=%2Fchannel%2F{id}%2Fsubscription");
+		}
+		return View(ctx);
 	}
 
 	[Route("/channel/{id}/subscription")]
