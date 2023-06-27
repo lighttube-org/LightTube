@@ -181,43 +181,60 @@
 		*/
 		break;
 	case ShelfRenderer shelf:
-		@if (shelf.Direction == ShelfDirection.Horizontal)
+		@switch (shelf.Direction)
 		{
-			<div class="renderer-shelfrenderer__horizontal">
-				<a href="@shelf.Destination" class="ml-1 title">
-					@shelf.Title
-				</a>
-				<div class="shelf-description">
-					@shelf.Subtitle
-				</div>
-				<div class="shelf-contents-horizontal">
-					@foreach (IRenderer renderer in shelf.Items)
-					{
-						<partial name="Renderer" model="renderer"/>
-					}
-				</div>
-			</div>
-		}
-		else
-		{
-			<details class="renderer-shelfrenderer">
-				<summary>
-					<div class="title ml-1">
+			case ShelfDirection.Horizontal:
+				<div class="renderer-shelfrenderer__horizontal">
+					<a href="@shelf.Destination" class="ml-1 title">
 						@shelf.Title
+					</a>
+					<div class="shelf-description">
+						@shelf.Subtitle
 					</div>
-					@foreach (IRenderer renderer in shelf.Items.Take(shelf.CollapsedItemCount))
+					<div class="shelf-contents-horizontal">
+						@foreach (IRenderer renderer in shelf.Items)
+						{
+							<partial name="Renderer" model="renderer"/>
+						}
+					</div>
+				</div>
+				break;
+			case ShelfDirection.Grid:
+				<div class="renderer-shelfrenderer__horizontal">
+					<a href="@shelf.Destination" class="ml-1 title">
+						@shelf.Title
+					</a>
+					<div class="shelf-description">
+						@shelf.Subtitle
+					</div>
+					<div class="shelf-contents-grid">
+						@foreach (IRenderer renderer in shelf.Items)
+						{
+							<partial name="Renderer" model="renderer"/>
+						}
+					</div>
+				</div>
+				break;
+			default:
+				<details class="renderer-shelfrenderer">
+					<summary>
+						<div class="title ml-1">
+							@shelf.Title
+						</div>
+						@foreach (IRenderer renderer in shelf.Items.Take(shelf.CollapsedItemCount))
+						{
+							<partial name="Renderer" model="renderer"/>
+						}
+						<div class="shelf-expand-button">
+							+@(shelf.Items.Count() - shelf.CollapsedItemCount) More
+						</div>
+					</summary>
+					@foreach (IRenderer renderer in shelf.Items.Skip(shelf.CollapsedItemCount))
 					{
 						<partial name="Renderer" model="renderer"/>
 					}
-					<div class="shelf-expand-button">
-						+@(shelf.Items.Count() - shelf.CollapsedItemCount) More
-					</div>
-				</summary>
-				@foreach (IRenderer renderer in shelf.Items.Skip(shelf.CollapsedItemCount))
-				{
-					<partial name="Renderer" model="renderer"/>
-				}
-			</details>
+				</details>
+				break;
 		}
 		break;
 	case ItemSectionRenderer section:
@@ -753,6 +770,21 @@
 					</div>
 				</div>
 			</div>
+		</div>
+		break;
+	case VerticalProductCardRenderer product:
+		<div class="renderer-verticalproductcardrenderer">
+			<div class="product-image">
+				<img src="@product.Thumbnails.Last().Url" alt="@product.Title"/>
+			</div>
+			<div class="ml-2 product-title title">
+				@product.Title
+			</div>
+			<div class="product-price">
+				<span class="product-price__value">@product.Price</span>
+				<span class="product-price__extra">@product.AdditionalFeesText</span>
+			</div>
+			<a class="product-link" href="@product.Url">From @product.Merchant</a>
 		</div>
 		break;
 	case UnknownRenderer:
