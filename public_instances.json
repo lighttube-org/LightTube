@@ -13,5 +13,10 @@
     "host": "https://tube.inftord.tech",
     "api": true,
     "accounts": true
+  },
+  {
+    "host": "https://lighttube.wardpearce.com",
+    "api": true,
+    "accounts": true
   }
 ]
