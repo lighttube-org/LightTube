@@ -13,5 +13,10 @@
     "host": "https://tube.inftord.tech",
     "api": true,
     "accounts": true
+  },
+  {
+    "host": "https://tube.instellate.xyz",
+    "api": true,
+    "accounts": true
   }
 ]
