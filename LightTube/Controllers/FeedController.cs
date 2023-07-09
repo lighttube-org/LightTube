@@ -40,8 +40,8 @@ public class FeedController : Controller
 
 		try
 		{
-			string type = Request.Headers.Authorization.First().Split(' ').First();
-			string secret = Request.Headers.Authorization.First().Split(' ').Last();
+			string type = Request.Headers.Authorization[0].Split(' ')[0];
+			string secret = Request.Headers.Authorization[0].Split(' ')[Request.Headers.Authorization.Count-1];
 			string secretDecoded = Encoding.UTF8.GetString(Convert.FromBase64String(secret));
 			string username = secretDecoded.Split(':')[0];
 			string password = secretDecoded.Split(':')[1];

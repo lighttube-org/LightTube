@@ -14,9 +14,9 @@ namespace LightTube.Controllers;
 public class ProxyController : Controller
 {
 	private readonly InnerTube.InnerTube _youtube;
-	private readonly HttpClient client = new HttpClient();
+	private readonly HttpClient client = new();
 
-	private string[] _blockedHeaders =
+	private readonly string[] _blockedHeaders =
 	{
 		"host",
 		"cookie",
@@ -52,7 +52,7 @@ public class ProxyController : Controller
 			List<Format> formats = new();
 			formats.AddRange(player.Formats);
 			formats.AddRange(player.AdaptiveFormats);
-			if (formats.All(x => x.Itag != formatId))
+			if (formats.TrueForAll(x => x.Itag != formatId))
 			{
 				Response.StatusCode = (int)HttpStatusCode.NotFound;
 				await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(
@@ -74,7 +74,7 @@ public class ProxyController : Controller
 			request.Method = Request.Method;
 
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
+				         !header.Key.StartsWith(':') && !_blockedHeaders.Contains(header.Key.ToLower())))
 			foreach (string value in values)
 				request.Headers.Add(header, value);
 
@@ -332,7 +332,7 @@ public class ProxyController : Controller
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
+				         !header.Key.StartsWith(':') && !_blockedHeaders.Contains(header.Key.ToLower())))
 			foreach (string value in values)
 				request.Headers.Add(header, value);
 
@@ -384,7 +384,7 @@ public class ProxyController : Controller
 		request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
 		foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-			         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
+			         !header.Key.StartsWith(':') && !_blockedHeaders.Contains(header.Key.ToLower())))
 		foreach (string value in values)
 			request.Headers.Add(header, value);
 
@@ -420,7 +420,7 @@ public class ProxyController : Controller
 
 			HttpRequestMessage hrm = new(HttpMethod.Get, url);
 			foreach ((string header, StringValues values) in HttpContext.Request.Headers.Where(header =>
-				         !header.Key.StartsWith(":") && !_blockedHeaders.Contains(header.Key.ToLower())))
+				         !header.Key.StartsWith(':') && !_blockedHeaders.Contains(header.Key.ToLower())))
 			foreach (string value in values)
 				if (!hrm.Headers.Contains(header))
 					hrm.Headers.Add(header, value);

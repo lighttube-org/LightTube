@@ -26,6 +26,6 @@ public class UpdateSubscriptionResponse
 		}
 
 		ChannelName = channel.Metadata.Title;
-		ChannelAvatar = channel.Metadata.Avatar.Last().Url.ToString();
+		ChannelAvatar = channel.Metadata.Avatar[^1].Url.ToString();
 	}
 }
