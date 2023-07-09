@@ -206,7 +206,7 @@ public static class Utils
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 
 			audioAdaptationSet.SetAttribute("mimeType",
-				HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+				HttpUtility.ParseQueryString(audios[0].Url.Query).Get("mime"));
 			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			audioAdaptationSet.SetAttribute("contentType", "audio");
 			audioAdaptationSet.SetAttribute("lang", formatGroup.Key);

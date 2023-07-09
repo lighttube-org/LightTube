@@ -67,7 +67,7 @@ public class Oauth2Manager
 		if (!context.Request.Headers.TryGetValue("authorization", out StringValues authHeaders))
 			return null;
 
-		string[] parts = authHeaders.First().Split(" ");
+		string[] parts = authHeaders[0].Split(" ");
 		string type = parts[0].ToLower();
 		string token = parts[1];
 
@@ -85,7 +85,7 @@ public class Oauth2Manager
 		if (!request.Headers.TryGetValue("authorization", out StringValues authHeaders))
 			return null;
 
-		string authHeader = authHeaders.First();
+		string authHeader = authHeaders[0];
 		return await DatabaseManager.Oauth2.GetUserFromHeader(authHeader);
 	}
 }

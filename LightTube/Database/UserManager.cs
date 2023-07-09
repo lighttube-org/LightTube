@@ -147,8 +147,8 @@ public class UserManager
 
 		await UserCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
 
-		return user.Subscriptions.ContainsKey(channelId)
-			? (channelId, user.Subscriptions[channelId])
+		return user.Subscriptions.TryGetValue(channelId, out var subscription)
+			? (channelId, subscription)
 			: (channelId, SubscriptionType.NONE);
 	}
 
