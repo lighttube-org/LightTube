@@ -2,7 +2,7 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM= --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["LightTube/LightTube.csproj", "LightTube/"]
 RUN dotnet restore "LightTube/LightTube.csproj"
