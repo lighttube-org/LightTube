@@ -1,17 +1,19 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+ARG TARGETPLATFORM
+
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["LightTube/LightTube.csproj", "LightTube/"]
 RUN dotnet restore "LightTube/LightTube.csproj"
 COPY . .
 WORKDIR "/src/LightTube"
-RUN dotnet build "LightTube.csproj" -c Release -o /app/build /p:Version=`date +0.%Y.%m.%d`
+RUN dotnet build "LightTube.csproj" -c Release -o /app/build /p:Version=`date +0.%Y.%m.%d` -a $BUILDARCH
 
 FROM build AS publish
-RUN dotnet publish "LightTube.csproj" -c Release -o /app/publish /p:Version=`date +0.%Y.%m.%d`
+RUN dotnet publish "LightTube.csproj" -c Release -o /app/publish /p:Version=`date +0.%Y.%m.%d` -a $TARGETARCH
 
 FROM base AS final
 WORKDIR /app
