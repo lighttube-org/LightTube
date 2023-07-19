@@ -1,4 +1,5 @@
 ﻿@using InnerTube.Renderers
+@using Microsoft.AspNetCore.Http.Extensions
 @model PlaylistContext
 
 @{
@@ -45,7 +46,7 @@
 	<span>•</span>
 	@if (Model.Continuation is not null)
 	{
-		<a href="@Utils.GetContinuationUrl(Context.Request.Path, Model.Continuation)">Next Page</a>
+		<a href="@Utils.GetSkipUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation.Value)">Next Page</a>
 	}
 	else
 	{

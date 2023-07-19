@@ -359,6 +359,16 @@ public static class Utils
 		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
 	}
 
+	public static string GetSkipUrl(string currentPath, int skipAmount)
+	{
+		string[] parts = currentPath.Split("?");
+		NameValueCollection query = parts.Length > 1
+			? HttpUtility.ParseQueryString(parts[1])
+			: new NameValueCollection();
+		query.Set("skip", skipAmount.ToString());
+		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
+	}
+
 	public static SubscriptionType GetSubscriptionType(this HttpContext context, string? channelId)
 	{
 		if (channelId is null) return SubscriptionType.NONE;

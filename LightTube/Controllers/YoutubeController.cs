@@ -203,7 +203,7 @@ public class YoutubeController : Controller
 	}
 
 	[Route("/playlist")]
-	public async Task<IActionResult> Playlist(string list, string? continuation = null)
+	public async Task<IActionResult> Playlist(string list, int? skip = null)
 	{
 		if (list.StartsWith("LT-PL"))
 		{
@@ -214,14 +214,14 @@ public class YoutubeController : Controller
 		{
 			InnerTubePlaylist playlist =
 				await _youtube.GetPlaylistAsync(list, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			if (continuation is null)
+			if (skip is null)
 			{
 				return View(new PlaylistContext(HttpContext, playlist));
 			}
 			else
 			{
 				InnerTubeContinuationResponse continuationRes =
-					await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(),
+					await _youtube.ContinuePlaylistAsync(list, skip.Value, HttpContext.GetLanguage(),
 						HttpContext.GetRegion());
 				return View(new PlaylistContext(HttpContext, playlist, continuationRes));
 			}

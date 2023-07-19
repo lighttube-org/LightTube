@@ -166,14 +166,14 @@ public class ApiController : Controller
 
 	[Route("playlist")]
 	[ApiDisableable]
-	public async Task<ApiResponse<ApiPlaylist>> Playlist(string? id, string? continuation = null)
+	public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, int? skip)
 	{
-		if (id?.StartsWith("LT-PL") ?? false)
+		if (id.StartsWith("LT-PL"))
 		{
 			if (id.Length != 24)
 				return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
 		}
-		else if (id != null)
+		else
 		{
 			Regex regex = new(PLAYLIST_ID_REGEX);
 			if (!regex.IsMatch(id) || id.Length != 34)
@@ -181,14 +181,14 @@ public class ApiController : Controller
 		}
 
 
-		if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
+		if (string.IsNullOrWhiteSpace(id) && skip is null)
 			return Error<ApiPlaylist>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
 
 		try
 		{
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 			ApiPlaylist result;
-			if (id?.StartsWith("LT-PL") ?? false)
+			if (id.StartsWith("LT-PL"))
 			{
 				DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
 
@@ -209,22 +209,19 @@ public class ApiController : Controller
 
 				result = new ApiPlaylist(playlist);
 			}
-			else if (id is not null && continuation is null)
+			else if (skip is null)
 			{
 				InnerTubePlaylist playlist =
 					await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
 				result = new ApiPlaylist(playlist);
 			}
-			else if (continuation is not null)
+			else
 			{
 				InnerTubeContinuationResponse playlist =
-					await _youtube.ContinuePlaylistAsync(continuation, HttpContext.GetLanguage(),
+					await _youtube.ContinuePlaylistAsync(id, skip.Value, HttpContext.GetLanguage(),
 						HttpContext.GetRegion());
 				result = new ApiPlaylist(playlist);
 			}
-			else
-				return Error<ApiPlaylist>($"Invalid request: missing both `id` and `continuation`", 400,
-					HttpStatusCode.BadRequest);
 
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			userData?.AddInfoForChannel(result.Channel.Id);
