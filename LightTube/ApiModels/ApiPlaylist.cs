@@ -17,7 +17,7 @@ public class ApiPlaylist
 	public string LastUpdated { get; }
 	public string VideoCountText { get; }
 	public string ViewCountText { get; }
-	public string? Continuation { get; }
+	public PlaylistContinuationInfo? Continuation { get; }
 	public IEnumerable<PlaylistVideoRenderer> Videos { get; }
 
 	public ApiPlaylist(InnerTubePlaylist playlist)
@@ -48,7 +48,7 @@ public class ApiPlaylist
 		LastUpdated = "";
 		VideoCountText = "";
 		ViewCountText = "";
-		Continuation = playlist.Continuation;
+		Continuation = playlist.Continuation is not null ? InnerTube.Utils.UnpackPlaylistContinuation(playlist.Continuation) : null;
 		Videos = playlist.Contents.Cast<PlaylistVideoRenderer>();
 	}
 

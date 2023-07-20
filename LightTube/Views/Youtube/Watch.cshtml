@@ -56,16 +56,19 @@
 					</div>
 				</div>
 			</div>
-			<div class="interaction-buttons hide-on-desktop">
-				<label class="interaction-button" for="comments-toggle">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
-					</svg>
-					<div class="interaction-button__text">
-						Comments
-					</div>
-				</label>
-			</div>
+			@if (Model.Comments is not null)
+			{
+				<div class="interaction-buttons hide-on-desktop">
+					<label class="interaction-button" for="comments-toggle">
+						<svg class="icon" width="20" height="20" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
+						</svg>
+						<div class="interaction-button__text">
+							Comments
+						</div>
+					</label>
+				</div>
+			}
 			<div class="interaction-buttons">
 				<a class="interaction-button" href="/addToPlaylist?v=@Model.Video.Id" target="_blank">
 					<svg class="icon" width="20" height="20" fill="currentColor">
@@ -113,34 +116,34 @@
 		</details>
 	</div>
 	<div class="comments-container">
-		<details>
-			<summary>
-				<svg class="icon hide-on-desktop" width="32" height="32" fill="currentColor">
-					<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
-					<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
-				</svg>
-				@Model.Video.CommentCount comments
-				<div class="flex-divider hide-on-desktop"></div>
-				<label for="comments-toggle" class="hide-on-desktop">
-					<svg class="icon" width="32" height="32" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#x"></use>
+		@if (Model.Comments is not null)
+		{
+			<details>
+				<summary>
+					<svg class="icon hide-on-desktop" width="32" height="32" fill="currentColor">
+						<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
+						<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
 					</svg>
-				</label>
-			</summary>
-			<div class="comments-container__flex">
-				@if (Model.Comments is not null)
-				{
+					@Model.Video.CommentCount comments
+					<div class="flex-divider hide-on-desktop"></div>
+					<label for="comments-toggle" class="hide-on-desktop">
+						<svg class="icon" width="32" height="32" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#x"></use>
+						</svg>
+					</label>
+				</summary>
+				<div class="comments-container__flex">
 					@foreach (IRenderer renderer in Model.Comments.Contents)
 					{
 						<partial name="Renderer" model="renderer"/>
 					}
-				}
-				else
-				{
-					@:Comments are disabled
-				}
-			</div>
-		</details>
+				</div>
+			</details>
+		}
+		else
+		{
+			@:Comments are disabled
+		}
 	</div>
 	<div class="second-column">
 		@if (Model.Playlist is not null)

@@ -20,10 +20,10 @@ public class DatabasePlaylist
 	{
 		string json = INNERTUBE_PLAYLIST_INFO_TEMPLATE
 			.Replace("%%PLAYLIST_ID%%", Id)
-			.Replace("%%TITLE%%", Name)
+			.Replace("%%TITLE%%", Name.Replace("\"", "\\\""))
 			.Replace("%%VIDEO_COUNT%%", VideoIds.Count.ToString())
 			.Replace("%%CURRENT_INDEX%%", VideoIds.IndexOf(currentVideoId).ToString())
-			.Replace("%%CHANNEL_TITLE%%", Author)
+			.Replace("%%CHANNEL_TITLE%%", Author.Replace("\"", "\\\""))
 			.Replace("%%CHANNEL_ID%%", DatabaseManager.Users.GetUserFromId(Author).Result?.LTChannelID)
 			.Replace("%%CONTENTS%%", DatabaseManager.Playlists.GetPlaylistPanelVideosJson(Id, currentVideoId));
 		return new InnerTubePlaylistInfo(JObject.Parse(json));

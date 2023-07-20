@@ -9,7 +9,6 @@ public class ApiSearchResults
 	public long? EstimatedResultCount { get; }
 	public SearchParams? SearchParams { get; }
 	public string? ContinuationKey { get; }
-	public InnerTubeSearchResults.TypoFixer? TypoFixer { get; }
 
 	public ApiSearchResults(InnerTubeSearchResults results, SearchParams searchParams)
 	{
@@ -17,7 +16,6 @@ public class ApiSearchResults
 		SearchResults = results.Results;
 		ContinuationKey = results.Continuation;
 		EstimatedResultCount = results.EstimatedResults;
-		TypoFixer = results.DidYouMean;
 	}
 
 	public ApiSearchResults(InnerTubeContinuationResponse continuationResults)
@@ -25,6 +23,5 @@ public class ApiSearchResults
 		SearchResults = continuationResults.Contents;
 		ContinuationKey = continuationResults.Continuation;
 		EstimatedResultCount = null;
-		TypoFixer = null;
 	}
 }

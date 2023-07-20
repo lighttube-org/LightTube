@@ -26,7 +26,7 @@ public class DatabaseVideo
 		Thumbnails = new Thumbnail[] {
 			new()
 			{
-				Url = new Uri($"https://i.ytimg.com/vi/{player.Details.Id}/hqdefault.jpg")
+				Url = player.Details.Thumbnails[0].Url
 			}
 		};
 		UploadedAt = "";
