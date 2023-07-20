@@ -17,6 +17,7 @@ builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
 }));
 builder.Services.AddSingleton(new HttpClient());
 
+await JsCache.DownloadLibraries();
 ChoreManager.RegisterChores();
 DatabaseManager.Init(Configuration.GetVariable("LIGHTTUBE_MONGODB_CONNSTR"));
 
