@@ -43,12 +43,12 @@ public class PlaylistManager
 			string json = INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE
 				.Replace("%%ID%%", editable ? videoId + "!": videoId)
 				.Replace("%%INDEX%%", (i + 1).ToString())
-				.Replace("%%TITLE%%", video?.Title ?? "Uncached video. Click to fix")
+				.Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
 				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
 				.Replace("%%DURATION%%", video?.Duration ?? "00:00")
 				.Replace("%%DURATION_SECONDS%%", InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00").TotalSeconds.ToString())
 				.Replace("%%UPLADED_AT%%", video?.UploadedAt ?? "???")
-				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name ?? "???")
+				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
 				.Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???")
 				.Replace("%%VIEWS%%", (video?.Views ?? 0).ToString());
 			renderers.Add(new PlaylistVideoRenderer(JObject.Parse(json)));
@@ -72,10 +72,10 @@ public class PlaylistManager
 				.Replace("%%ID%%", videoId)
 				.Replace("%%SELECTED%%", (currentVideoId == videoId).ToString().ToLower())
 				.Replace("%%INDEX%%", currentVideoId == videoId ? ">" : (i + 1).ToString())
-				.Replace("%%TITLE%%", video?.Title ?? "Uncached video. Click to fix")
+				.Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
 				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
 				.Replace("%%DURATION%%", video?.Duration ?? "00:00")
-				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name ?? "???")
+				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
 				.Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???");
 			renderers.Add(new PlaylistPanelVideoRenderer(JObject.Parse(json)));
 		}
@@ -98,10 +98,10 @@ public class PlaylistManager
 				.Replace("%%ID%%", videoId)
 				.Replace("%%SELECTED%%", (currentVideoId == videoId).ToString().ToLower())
 				.Replace("%%INDEX%%", currentVideoId == videoId ? "▶" : (i + 1).ToString())
-				.Replace("%%TITLE%%", video?.Title ?? "Uncached video. Click to fix")
+				.Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
 				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
 				.Replace("%%DURATION%%", video?.Duration ?? "00:00")
-				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name ?? "???")
+				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
 				.Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???");
 			renderers.Add(json);
 		}
