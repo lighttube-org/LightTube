@@ -8,7 +8,9 @@ public static class JsCache
 {
 	private static Dictionary<string, Uri> LibraryUrls = new()
 	{
-		["hls.js"] = new Uri("https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js")
+		["hls.js"] = new Uri("https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"),
+		["ltplayer.js"] = new Uri("https://raw.githubusercontent.com/kuylar/LTPlayer/master/dist/player.min.js"),
+		["ltplayer.css"] = new Uri("https://raw.githubusercontent.com/kuylar/LTPlayer/master/dist/player.min.css"),
 	};
 	private static Dictionary<string, string> Hashes = new();
 	public static DateTimeOffset CacheUpdateTime = DateTimeOffset.MinValue;

@@ -44,7 +44,8 @@ public class HomeController : Controller
 	{
 		try
 		{
-			return File(Encoding.UTF8.GetBytes(JsCache.GetJsFileContents(name)), "text/javascript",
+			return File(Encoding.UTF8.GetBytes(JsCache.GetJsFileContents(name)),
+				name.EndsWith(".css") ? "text/css" : "text/javascript",
 				JsCache.CacheUpdateTime, new EntityTagHeaderValue($"\"{JsCache.GetHash(name)}\""));
 		}
 		catch (Exception e)
