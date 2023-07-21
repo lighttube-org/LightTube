@@ -21,10 +21,10 @@ public static class JsCache
 		foreach ((string? name, Uri? url) in LibraryUrls)
 		{
 			Console.WriteLine($"[JsCache] Downloading '{name}' from {url}");
-			StreamWriter jsFile = File.CreateText($"/tmp/lighttube/jsCache/{name}");
 
-			string jsData = await client.GetStringAsync(url);
-			await jsFile.WriteAsync(jsData);
+			HttpResponseMessage response = await client.GetAsync(url);
+			string jsData = await response.Content.ReadAsStringAsync();
+			await File.WriteAllTextAsync($"/tmp/lighttube/jsCache/{name}", jsData);
 			Console.WriteLine($"[JsCache] Calculating the MD5 hash of {name}...");
 			
 			using MD5 md5 = MD5.Create();
@@ -40,6 +40,7 @@ public static class JsCache
 	}
 
 	public static string GetJsFileContents(string name) => File.ReadAllText($"/tmp/lighttube/jsCache/{HttpUtility.UrlEncode(name)}");
+	public static Uri GetUrl(string name) => LibraryUrls.TryGetValue(name, out Uri? url) ? url : new Uri("/");
 
 	public static string GetHash(string name) =>
 		Hashes.TryGetValue(name, out string? h) ? h : "68b329da9893e34099c7d8ad5cb9c940"; // md5 sum of an empty buffer
