@@ -9,18 +9,19 @@ public class WatchContext : BaseContext
 	public InnerTubeNextResponse Video;
 	public InnerTubePlaylistInfo? Playlist;
 	public InnerTubeContinuationResponse? Comments;
-	
 	public int Dislikes;
+	public SponsorBlockSegment[] Sponsors;
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes) : base(context)
+		bool compatibility, int dislikes, SponsorBlockSegment[] sponsors) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility, context.Request.Query["q"]);
+		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility, context.Request.Query["q"], sponsors);
 		Video = innerTubeNextResponse;
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = sponsors;
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);
@@ -48,6 +49,7 @@ public class WatchContext : BaseContext
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = Array.Empty<SponsorBlockSegment>();
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);
@@ -63,9 +65,9 @@ public class WatchContext : BaseContext
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse, DatabasePlaylist? playlist,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes) : base(context)
+		bool compatibility, int dislikes, SponsorBlockSegment[] sponsors) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility, context.Request.Query["q"]);
+		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility, context.Request.Query["q"], sponsors);
 		Video = innerTubeNextResponse;
 		Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubePlayer.Details.Id);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.PRIVATE)
@@ -73,6 +75,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = sponsors;
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);
@@ -103,6 +106,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = Array.Empty<SponsorBlockSegment>();
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);

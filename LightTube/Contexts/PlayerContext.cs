@@ -16,15 +16,17 @@ public class PlayerContext : BaseContext
 	public string PreferredItag = "18";
 	public bool UseEmbedUi = false;
 	public string? ClassName;
+	public SponsorBlockSegment[] Sponsors;
 
 	public PlayerContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse video,
 		string className, bool compatibility,
-		string preferredItag) : base(context)
+		string preferredItag, SponsorBlockSegment[] sponsors) : base(context)
 	{
 		Player = innerTubePlayer;
 		Video = video;
 		ClassName = className;
 		PreferredItag = preferredItag;
+		Sponsors = sponsors;
 		UseHls = !compatibility; // Prefer HLS
 		UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;
 		// Formats
@@ -70,6 +72,8 @@ public class PlayerContext : BaseContext
 	public PlayerContext(HttpContext context, Exception e) : base(context)
 	{
 		Exception = e;
+		Video = null!;
+		Sponsors = Array.Empty<SponsorBlockSegment>();
 	}
 
 	public string? GetFirstItag() => GetPreferredFormat()?.Itag;

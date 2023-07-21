@@ -1,7 +1,6 @@
 ﻿@using InnerTube
 @using System.Text.Json
 @using InnerTube.Exceptions
-@using Newtonsoft.Json
 @using JsonSerializer = System.Text.Json.JsonSerializer
 @model PlayerContext
 
@@ -140,13 +139,11 @@ else
 			minimize: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#fullscreen-exit"/></svg>'
 		},
 		chapters: @Html.Raw(Model.GetChaptersJson()),
-		segments: [
-			
-		],
+		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds)) ?? Array.Empty<string>()))],
 		endscreen: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
-			{
-			  PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-			}))
+		           {
+			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+		           }))
 	};
 	videoInfo.endscreen.onClickHandler = item => {
 		switch (item.style) {
