@@ -1512,3 +1512,7 @@ code {
     user-select: all;
     color: var(--text-primary);
 }
+
+.ltp-root {
+    height: 100%;
+}
