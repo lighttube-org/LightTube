@@ -1,0 +1,109 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Publish win-x86
+      run: dotnet publish -c Release -r win-x86 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish win-x64
+      run: dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish win-arm64
+      run: dotnet publish -c Release -r win-arm64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish linux-x64
+      run: dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish linux-musl-x64
+      run: dotnet publish -c Release -r linux-musl-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish linux-arm
+      run: dotnet publish -c Release -r linux-arm -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish linux-arm64
+      run: dotnet publish -c Release -r linux-arm64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish linux-bionic-arm64
+      run: dotnet publish -c Release -r linux-bionic-arm64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish osx-x64
+      run: dotnet publish -c Release -r osx-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+    - name: Publish osx.11.0-arm64
+      run: dotnet publish -c Release -r osx.11.0-arm64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
+
+    - name: Upload win-x86 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: win-x86 R2R Binaries
+        path: /bin/Release/*/win-x86/publish/
+
+    - name: Upload win-x64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: win-x64 R2R Binaries
+        path: /bin/Release/*/win-x64/publish/
+
+    - name: Upload win-arm64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: win-arm64 R2R Binaries
+        path: /bin/Release/*/win-arm64/publish/
+
+    - name: Upload linux-x64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-x64 R2R Binaries
+        path: /bin/Release/*/linux-x64/publish/
+
+    - name: Upload linux-musl-x64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-musl-x64 R2R Binaries
+        path: /bin/Release/*/linux-musl-x64/publish/
+
+    - name: Upload linux-arm R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-arm R2R Binaries
+        path: /bin/Release/*/linux-arm/publish/
+
+    - name: Upload linux-arm64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-arm64 R2R Binaries
+        path: /bin/Release/*/linux-arm64/publish/
+
+    - name: Upload linux-bionic-arm64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-bionic-arm64 R2R Binaries
+        path: /bin/Release/*/linux-bionic-arm64/publish/
+
+    - name: Upload osx-x64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: osx-x64 R2R Binaries
+        path: /bin/Release/*/osx-x64/publish/
+
+    - name: Upload osx.11.0-arm64 R2R binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: osx.11.0-arm64 R2R Binaries
+        path: /bin/Release/*/osx.11.0-arm64/publish/
+      
