@@ -40,8 +40,6 @@ jobs:
       run: dotnet publish -c Release -r linux-arm -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
     - name: Publish linux-arm64
       run: dotnet publish -c Release -r linux-arm64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
-    - name: Publish linux-bionic-arm64
-      run: dotnet publish -c Release -r linux-bionic-arm64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
     - name: Publish osx-x64
       run: dotnet publish -c Release -r osx-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
     - name: Publish osx.11.0-arm64
@@ -88,12 +86,6 @@ jobs:
       with:
         name: linux-arm64 R2R Binaries
         path: /bin/Release/*/linux-arm64/publish/
-
-    - name: Upload linux-bionic-arm64 R2R binaries
-      uses: actions/upload-artifact@v3
-      with:
-        name: linux-bionic-arm64 R2R Binaries
-        path: /bin/Release/*/linux-bionic-arm64/publish/
 
     - name: Upload osx-x64 R2R binaries
       uses: actions/upload-artifact@v3
