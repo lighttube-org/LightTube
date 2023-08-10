@@ -49,53 +49,53 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: win-x86 R2R Binaries
-        path: /bin/Release/*/win-x86/publish/
+        path: '*/bin/Release/*/win-x86/publish/'
 
     - name: Upload win-x64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: win-x64 R2R Binaries
-        path: /bin/Release/*/win-x64/publish/
+        path: '*/bin/Release/*/win-x64/publish/'
 
     - name: Upload win-arm64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: win-arm64 R2R Binaries
-        path: /bin/Release/*/win-arm64/publish/
+        path: '*/bin/Release/*/win-arm64/publish/'
 
     - name: Upload linux-x64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: linux-x64 R2R Binaries
-        path: /bin/Release/*/linux-x64/publish/
+        path: '*/bin/Release/*/linux-x64/publish/'
 
     - name: Upload linux-musl-x64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: linux-musl-x64 R2R Binaries
-        path: /bin/Release/*/linux-musl-x64/publish/
+        path: '*/bin/Release/*/linux-musl-x64/publish/'
 
     - name: Upload linux-arm R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: linux-arm R2R Binaries
-        path: /bin/Release/*/linux-arm/publish/
+        path: '*/bin/Release/*/linux-arm/publish/'
 
     - name: Upload linux-arm64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: linux-arm64 R2R Binaries
-        path: /bin/Release/*/linux-arm64/publish/
+        path: '*/bin/Release/*/linux-arm64/publish/'
 
     - name: Upload osx-x64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: osx-x64 R2R Binaries
-        path: /bin/Release/*/osx-x64/publish/
+        path: '*/bin/Release/*/osx-x64/publish/'
 
     - name: Upload osx.11.0-arm64 R2R binaries
       uses: actions/upload-artifact@v3
       with:
         name: osx.11.0-arm64 R2R Binaries
-        path: /bin/Release/*/osx.11.0-arm64/publish/
+        path: '*/bin/Release/*/osx.11.0-arm64/publish/'
       
