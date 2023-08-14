@@ -50,9 +50,8 @@ jobs:
         name: ${{ matrix.platform }} R2R Binaries
         path: '*/bin/Release/*/${{ matrix.platform }}/publish/'
 
-    - uses: edgarrc/action-7z@v1
-      with:
-        args: '7z a "${{ matrix.platform }} R2R Binaries.zip" "*/bin/Release/*/${{ matrix.platform }}/publish/"'
+    - name: Pack with 7-zip
+      run: '7z a "${{ matrix.platform }} R2R Binaries.zip" "*/bin/Release/*/${{ matrix.platform }}/publish/"'
 
     - name: Create Release
       # You may pin to the exact commit or the version.
