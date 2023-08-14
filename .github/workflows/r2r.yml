@@ -49,8 +49,6 @@ jobs:
     - name: Pack with 7-zip
       run: '7z a "${{ matrix.platform }} R2R Binaries.zip" "*/bin/Release/*/${{ matrix.platform }}/publish/"'
 
-    - run: '$env:SHA_SHORT = $("${{github.sha}}".Substring(0, 6))'
-
     - uses: bhowell2/github-substring-action@1.0.2
       id: sha
       with:
