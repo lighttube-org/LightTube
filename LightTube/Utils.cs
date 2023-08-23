@@ -54,8 +54,7 @@ public static class Utils
 			DateTime buildTime = DateTime.Today;
 			_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
 #else
-			_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
-				.FileVersion?[2..];
+			_version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 #endif
 		}
 
