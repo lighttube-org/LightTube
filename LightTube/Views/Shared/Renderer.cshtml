@@ -2,6 +2,7 @@
 @using InnerTube
 @using Microsoft.Extensions.Primitives
 @using Utils = LightTube.Utils
+@using System.Web
 @model global::InnerTube.Renderers.IRenderer
 
 @switch (Model)
@@ -785,6 +786,22 @@
 				<span class="product-price__extra">@product.AdditionalFeesText</span>
 			</div>
 			<a class="product-link" href="@product.Url">From @product.Merchant</a>
+		</div>
+		break;
+	case DidYouMeanRenderer didYouMean:
+		<div>@didYouMean.DidYouMean:
+			<a href="/results?search_query=@HttpUtility.UrlEncode(didYouMean.CorrectedQuery)"><b>@didYouMean.CorrectedQuery</b></a>
+		</div>
+		break;
+	case ShowingResultsForRenderer showingResultsFor:
+		<div>
+			@showingResultsFor.ShowingResultsFor:
+			<a href="/results?search_query=@HttpUtility.UrlEncode(showingResultsFor.CorrectedQuery)"><b>@showingResultsFor.CorrectedQuery</b></a>
+			&nbsp;&nbsp;
+			@showingResultsFor.SearchInsteadFor:
+			<a href="/results?search_query=@HttpUtility.UrlEncode(showingResultsFor.OriginalQuery)&amp;exact=1">
+            	<b>@showingResultsFor.OriginalQuery</b>
+            </a>
 		</div>
 		break;
 	case UnknownRenderer:
