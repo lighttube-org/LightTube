@@ -246,7 +246,7 @@ public class ApiController : Controller
 		try
 		{
 			ApiChannel response;
-			if (id.StartsWith("LT"))
+			if (id?.StartsWith("LT") ?? false)
 			{
 				DatabaseUser? localUser = await DatabaseManager.Users.GetUserFromLTId(id);
 				if (localUser is null)
