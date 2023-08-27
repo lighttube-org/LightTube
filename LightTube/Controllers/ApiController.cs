@@ -284,15 +284,20 @@ public class ApiController : Controller
 
 	[Route("comments")]
 	[ApiDisableable]
-	public async Task<ApiResponse<InnerTubeContinuationResponse>> Comments(string continuation)
+	public async Task<ApiResponse<InnerTubeContinuationResponse>> Comments(string? continuation, string? id,
+		CommentsContext.Types.SortOrder sort = CommentsContext.Types.SortOrder.TopComments)
 	{
-		if (string.IsNullOrWhiteSpace(continuation))
-			return Error<InnerTubeContinuationResponse>($"Invalid continuation", 400, HttpStatusCode.BadRequest);
-
 		try
 		{
-			InnerTubeContinuationResponse comments =
-				await _youtube.GetVideoCommentsAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+			if (id != null && continuation == null)
+				continuation = InnerTube.Utils.PackCommentsContinuation(id, sort);
+			else if (id == null && continuation == null)
+				return Error<InnerTubeContinuationResponse>(
+					"Invalid request, either 'continuation' or 'id' must be present", 400,
+					HttpStatusCode.BadRequest);
+
+			InnerTubeContinuationResponse? comments = await _youtube.GetVideoCommentsAsync(continuation!,
+				HttpContext.GetLanguage(), HttpContext.GetRegion());
 
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);

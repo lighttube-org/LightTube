@@ -65,10 +65,13 @@ public class YoutubeController : Controller
 				region: HttpContext.GetRegion());
 		InnerTubeContinuationResponse? comments = null;
 
-		if (video.CommentsContinuation is not null)
-			comments = await _youtube.GetVideoCommentsAsync(video.CommentsContinuation,
+		try
+		{
+			string commentsContinuation = InnerTube.Utils.PackCommentsContinuation(v, CommentsContext.Types.SortOrder.TopComments);
+			comments = await _youtube.GetVideoCommentsAsync(commentsContinuation,
 				language: HttpContext.GetLanguage(),
 				region: HttpContext.GetRegion());
+		} catch { /* comments arent enabled, ignore */ }
 
 		int dislikes;
 		try
