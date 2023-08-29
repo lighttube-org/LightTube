@@ -124,7 +124,7 @@
 						<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
 						<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
 					</svg>
-					@Model.Video.CommentCount comments
+					@(Model.Video.CommentCount ?? (Model.Comments.Contents.Count() + (Model.Comments.Continuation != null ? "+" : ""))) comments
 					<div class="flex-divider hide-on-desktop"></div>
 					<label for="comments-toggle" class="hide-on-desktop">
 						<svg class="icon" width="32" height="32" fill="currentColor">
