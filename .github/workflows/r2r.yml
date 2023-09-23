@@ -3,13 +3,13 @@
 
 name: .NET R2R Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "master"
 
 jobs:
   build:
-    permissions:
-      contents: write # In order to be able to push releases
-
     strategy:
       matrix:
         platform:
@@ -27,6 +27,9 @@ jobs:
       !contains(github.event.head_commit.message, 'skip ci')
 
     runs-on: windows-latest
+
+    permissions:
+      contents: write # In order to be able to push releases
 
     steps:
     - uses: actions/checkout@v3
