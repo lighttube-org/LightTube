@@ -10,7 +10,7 @@
 	case VideoRenderer video:
 		<div class="renderer-videorenderer">
 			<a class="thumbnail" href="/watch?v=@video.Id">
-				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
 				<div class="thumbnail__duration__container">
 					<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -56,7 +56,7 @@
 	case ChannelRenderer channel:
 		<div class="renderer-channelrenderer">
 			<a href="/channel/@channel.Id" class="channel-avatar">
-				<img loading="lazy" src="@channel.Avatars.Last().Url" alt="@channel.Title">
+				<img loading="lazy" src="@channel.Avatars.LastOrDefault()?.Url" alt="@channel.Title">
 			</a>
 			<div class="info">
 				<a href="/channel/@channel.Id" class="title ml-2" title="@channel.Title">
@@ -79,8 +79,8 @@
 		break;
 	case PlaylistRenderer playlist:
 		<div class="renderer-playlistrenderer">
-			<a href="@(playlist.Videos.Any() ? $"/watch?v={playlist.Videos.First().Id}&list={playlist.Id}" : $"/playlist?list={playlist.Id}")" class="thumbnail">
-				<img loading="lazy" src="@playlist.Thumbnails.First().Url" alt="@playlist.Title">
+			<a href="@(playlist.Videos.Any() ? $"/watch?v={playlist.Videos.FirstOrDefault().Id}&list={playlist.Id}" : $"/playlist?list={playlist.Id}")" class="thumbnail">
+				<img loading="lazy" src="@playlist.Thumbnails.FirstOrDefault().Url" alt="@playlist.Title">
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -117,7 +117,7 @@
 	case RadioRenderer radio:
 		<div class="renderer-radiorenderer">
 			<a href="/watch?v=@radio.FirstVideoId&list=@radio.Id" class="thumbnail">
-				<img loading="lazy" src="@radio.Thumbnails.Last().Url" title="@radio.Title">
+				<img loading="lazy" src="@radio.Thumbnails.LastOrDefault()?.Url" title="@radio.Title">
 				<div class="thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#broadcast"/>
@@ -143,7 +143,7 @@
 		{
 			<div class="renderer-videorenderer ad">
 				<a class="thumbnail" href="/watch?v=@video.Id">
-					<img loading="lazy" src="@video.Thumbnails.First().Url" alt="@video.Title">
+					<img loading="lazy" src="@video.Thumbnails.FirstOrDefault().Url" alt="@video.Title">
 					<div class="thumbnail__duration__container">
 						<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
 					</div>
@@ -247,7 +247,7 @@
 	case CompactVideoRenderer video:
 		<div class="renderer-compactvideorenderer">
 			<a class="compact-thumbnail" href="/watch?v=@video.Id">
-				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -281,7 +281,7 @@
 	case CompactPlaylistRenderer playlist:
 		<div class="renderer-compactplaylistrenderer">
 			<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.Id" class="compact-thumbnail">
-				<img loading="lazy" src="@playlist.Thumbnails.Last().Url">
+				<img loading="lazy" src="@playlist.Thumbnails.LastOrDefault()?.Url">
 				<div class="compact-thumbnail__playlist__overlay">
 					<span>@playlist.VideoCountText.Split(" ")[0]</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -312,7 +312,7 @@
 	case CompactRadioRenderer radio:
 		<div class="renderer-compactradiorenderer">
 			<div class="compact-thumbnail">
-				<img loading="lazy" src="@radio.Thumbnails.Last().Url" alt="@radio.Title">
+				<img loading="lazy" src="@radio.Thumbnails.LastOrDefault()?.Url" alt="@radio.Title">
 				<div class="compact-thumbnail__radio__overlay">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#broadcast"/>
@@ -338,16 +338,16 @@
 			<div class="playlistvideo__index">
 				@video.IndexText
 			</div>
-			<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.First() : "")&params=@video.PlaylistParams" class="playlistvideo__thumbnail">
+			<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.FirstOrDefault() : "")&params=@video.PlaylistParams" class="playlistvideo__thumbnail">
 				<div class="playlistvideo__thumbnail">
-					<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
+					<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
 					<div class="playlistvideo__thumbnail__duration__container">
 						<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 					</div>
 				</div>
 			</a>
 			<div class="playlistvideo__info">
-				<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l2) ? l2.First() : "")&params=@video.PlaylistParams" class="title ml-2" title="@video.Title">
+				<a href="/watch?v=@video.Id&list=@(Context.Request.Query.TryGetValue("list", out StringValues l2) ? l2.FirstOrDefault() : "")&params=@video.PlaylistParams" class="title ml-2" title="@video.Title">
 					@video.Title
 				</a>
 				<a href="/channel/@video.Channel.Id" class="ml-1" title="@video.Channel.Title">
@@ -456,7 +456,7 @@
 	case GridVideoRenderer video:
 		<div class="renderer-gridvideorenderer">
 			<a href="/watch?v=@video.Id"  class="grid-thumbnail">
-				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title">
+				<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -488,7 +488,7 @@
 	case GridPlaylistRenderer playlist:
 		<div class="renderer-gridplaylistrenderer">
 			<a href="/playlist?list=@playlist.Id" class="grid-thumbnail">
-				<img loading="lazy" src="@playlist.Thumbnails.Last().Url" alt="@playlist.Title">
+				<img loading="lazy" src="@playlist.Thumbnails.LastOrDefault()?.Url" alt="@playlist.Title">
 				<div class="grid-thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -525,7 +525,7 @@
 	case GridChannelRenderer channel:
 		<div class="renderer-gridchannelrenderer">
         	<a href="/channel/@channel.Id" class="grid-avatar">
-        		<img loading="lazy" src="@channel.Avatars.Last().Url" alt="@channel.Title">
+        		<img loading="lazy" src="@channel.Avatars.LastOrDefault()?.Url" alt="@channel.Title">
         	</a>
         	<div class="info">
         		<a href="/channel/@channel.Id" class="title ml-1" alt="@channel.Title">
@@ -592,7 +592,7 @@
 	case ReelItemRenderer reel:
 		<a href="/shorts/@reel.Id" class="renderer-reelitemrenderer">
 			<div class="reel-thumbnail">
-				<img loading="lazy" src="@reel.Thumbnails.Last().Url" alt="@reel.Title">
+				<img loading="lazy" src="@reel.Thumbnails.LastOrDefault()?.Url" alt="@reel.Title">
 			</div>
 			<div class="reel-info">
 				<div class="ml-2 title" title="@reel.Title">@reel.Title</div>
@@ -636,14 +636,14 @@
 		break;
 	case BackstageImageRenderer image:
 		<div class="renderer-backstageimagerenderer">
-           	<img loading="lazy" src="@image.Images.Last().Url">
+           	<img loading="lazy" src="@image.Images.LastOrDefault()?.Url">
 		</div>
 		break;
 	case PostMultiImageRenderer images:
 		<div class="renderer-postmultiimagerenderer">
 			@foreach (BackstageImageRenderer img in images.Images)
 			{
-				<img loading="lazy" src="@img.Images.Last().Url">
+				<img loading="lazy" src="@img.Images.LastOrDefault()?.Url">
 			}
 		</div>
 		break;
@@ -656,7 +656,7 @@
 				Context.Request.Query.TryGetValue("list", out StringValues l);
 			}
 			<a href="/watch?v=@video.Id[..11]&list=@l" class="compact-thumbnail">
-				<img loading="lazy" src="@video.Thumbnails.Last().Url" alt="@video.Title"/>
+				<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title"/>
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 				</div>
@@ -687,7 +687,7 @@
 	case MovieRenderer movie:
 		<div class="renderer-videorenderer">
             <a class="thumbnail" href="/watch?v=@movie.Id">
-            	<img loading="lazy" src="@movie.Thumbnails.Last().Url" alt="@movie.Title">
+            	<img loading="lazy" src="@movie.Thumbnails.LastOrDefault()?.Url" alt="@movie.Title">
             	<div class="thumbnail__duration__container">
             		<span class="thumbnail__duration">@movie.Duration.ToDurationString()</span>
             	</div>
@@ -739,7 +739,7 @@
 	case CompactMovieRenderer movie:
 		<div class="renderer-compactvideorenderer">
 			<a class="compact-thumbnail" href="/watch?v=@movie.Id">
-				<img loading="lazy" src="@movie.Thumbnails.Last().Url" alt="@movie.Title">
+				<img loading="lazy" src="@movie.Thumbnails.LastOrDefault()?.Url" alt="@movie.Title">
 				<div class="compact-thumbnail__duration__container">
 					<span class="compact-thumbnail__duration">@movie.Duration.ToDurationString()</span>
 				</div>
@@ -776,7 +776,7 @@
 	case VerticalProductCardRenderer product:
 		<div class="renderer-verticalproductcardrenderer">
 			<div class="product-image">
-				<img src="@product.Thumbnails.Last().Url" alt="@product.Title"/>
+				<img src="@product.Thumbnails.LastOrDefault()?.Url" alt="@product.Title"/>
 			</div>
 			<div class="ml-2 product-title title">
 				@product.Title
