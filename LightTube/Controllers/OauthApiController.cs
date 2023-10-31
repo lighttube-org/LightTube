@@ -160,7 +160,7 @@ public class OauthApiController : Controller
 	[Route("subscriptions")]
 	[HttpGet]
 	[ApiAuthorization("subscriptions.read")]
-	public async Task<ApiResponse<Dictionary<string, DatabaseChannel>>> GetSubscriptions()
+	public async Task<ApiResponse<Dictionary<string, DatabaseChannel>>> GetSubscriptions(string? channelId = null)
 	{
 		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 		if (user is null)
@@ -168,13 +168,24 @@ public class OauthApiController : Controller
 
 		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 		Dictionary<string, DatabaseChannel> channels = new();
-		foreach (string channelId in user.Subscriptions.Keys)
+		if (string.IsNullOrEmpty(channelId))
 		{
-			DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(channelId);
-			if (channel is null) continue;
-			userData?.AddInfoForChannel(channelId);
-			channels.Add(channelId, channel);
+			foreach (string id in user.Subscriptions.Keys)
+			{
+				DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(id);
+				if (channel is null) continue;
+				userData?.AddInfoForChannel(id);
+				channels.Add(id, channel);
+			}
 		}
+		else
+		{
+			userData?.AddInfoForChannel(channelId);
+			DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(channelId);
+			if (channel is not null)
+				channels.Add(channelId, channel);
+		}
+
 		return new ApiResponse<Dictionary<string, DatabaseChannel>>(channels, userData);
 	}
 
@@ -213,23 +224,23 @@ public class OauthApiController : Controller
 
 		try
 		{
-			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
-			if (user.Subscriptions.ContainsKey(req.ChannelId))
-			{
-				if (!req.Subscribed)
-					user.Subscriptions.Remove(req.ChannelId);
-				else
-					user.Subscriptions[req.ChannelId] =
-						req.EnableNotifications
-							? SubscriptionType.NOTIFICATIONS_ON
-							: SubscriptionType.NOTIFICATIONS_OFF;
-			}
-			else if (req.Subscribed)
-				user.Subscriptions.Add(req.ChannelId, req.EnableNotifications
+			SubscriptionType type = req.Subscribed
+				? req.EnableNotifications
 					? SubscriptionType.NOTIFICATIONS_ON
-					: SubscriptionType.NOTIFICATIONS_OFF);
+					: SubscriptionType.NOTIFICATIONS_OFF
+				: SubscriptionType.NONE;
+			
+			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
+			(string? channelId, SubscriptionType subscriptionType) = await DatabaseManager.Users.UpdateSubscription(
+				Request.Headers["Authorization"].ToString()!, req.ChannelId,
+				type);
+			if (req.Subscribed)
+				await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
+			
+			userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
 
-			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, user), userData);
+			return new ApiResponse<UpdateSubscriptionResponse>(
+				new UpdateSubscriptionResponse(channel, subscriptionType), userData);
 		}
 		catch (Exception e)
 		{
@@ -251,8 +262,11 @@ public class OauthApiController : Controller
 		try
 		{
 			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id);
-			if (user.Subscriptions.ContainsKey(id)) user.Subscriptions.Remove(id);
-			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, user), userData);
+			(string? channelId, SubscriptionType type) = await DatabaseManager.Users.UpdateSubscription(
+				Request.Headers["Authorization"].ToString()!, id,
+				SubscriptionType.NONE);
+			userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
+			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, type), userData);
 		}
 		catch (Exception e)
 		{
