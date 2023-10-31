@@ -182,7 +182,7 @@ public class OauthApiController : Controller
 		{
 			userData?.AddInfoForChannel(channelId);
 			DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(channelId);
-			if (channel is not null) 
+			if (channel is not null)
 				channels.Add(channelId, channel);
 		}
 
@@ -224,23 +224,23 @@ public class OauthApiController : Controller
 
 		try
 		{
-			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
-			if (user.Subscriptions.ContainsKey(req.ChannelId))
-			{
-				if (!req.Subscribed)
-					user.Subscriptions.Remove(req.ChannelId);
-				else
-					user.Subscriptions[req.ChannelId] =
-						req.EnableNotifications
-							? SubscriptionType.NOTIFICATIONS_ON
-							: SubscriptionType.NOTIFICATIONS_OFF;
-			}
-			else if (req.Subscribed)
-				user.Subscriptions.Add(req.ChannelId, req.EnableNotifications
+			SubscriptionType type = req.Subscribed
+				? req.EnableNotifications
 					? SubscriptionType.NOTIFICATIONS_ON
-					: SubscriptionType.NOTIFICATIONS_OFF);
+					: SubscriptionType.NOTIFICATIONS_OFF
+				: SubscriptionType.NONE;
+			
+			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
+			(string? channelId, SubscriptionType subscriptionType) = await DatabaseManager.Users.UpdateSubscription(
+				Request.Headers["Authorization"].ToString()!, req.ChannelId,
+				type);
+			if (req.Subscribed)
+				await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
+			
+			userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
 
-			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, user), userData);
+			return new ApiResponse<UpdateSubscriptionResponse>(
+				new UpdateSubscriptionResponse(channel, subscriptionType), userData);
 		}
 		catch (Exception e)
 		{
@@ -262,8 +262,11 @@ public class OauthApiController : Controller
 		try
 		{
 			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id);
-			if (user.Subscriptions.ContainsKey(id)) user.Subscriptions.Remove(id);
-			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, user), userData);
+			(string? channelId, SubscriptionType type) = await DatabaseManager.Users.UpdateSubscription(
+				Request.Headers["Authorization"].ToString()!, id,
+				SubscriptionType.NONE);
+			userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
+			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, type), userData);
 		}
 		catch (Exception e)
 		{

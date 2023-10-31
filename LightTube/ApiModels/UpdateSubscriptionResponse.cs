@@ -11,11 +11,11 @@ public class UpdateSubscriptionResponse
 	public bool Subscribed { get; }
 	public bool Notifications { get; }
 
-	public UpdateSubscriptionResponse(InnerTubeChannelResponse channel, DatabaseUser user)
+	public UpdateSubscriptionResponse(InnerTubeChannelResponse channel, SubscriptionType subscription)
 	{
 		try
 		{
-			ApiSubscriptionInfo info = new(user.Subscriptions[channel.Metadata.Id]);
+			ApiSubscriptionInfo info = new(subscription);
 			Subscribed = info.Subscribed;
 			Notifications = info.Notifications;
 		}
