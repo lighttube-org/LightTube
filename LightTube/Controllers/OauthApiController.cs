@@ -86,6 +86,33 @@ public class OauthApiController : Controller
 	}
 
 	[Route("playlists/{id}")]
+	[HttpPatch]
+	[ApiAuthorization("playlists.write")]
+	public async Task<ApiResponse<DatabasePlaylist>> UpdatePlaylist(string id, [FromBody] CreatePlaylistRequest request)
+	{
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		if (user is null) return Error<DatabasePlaylist>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+		if (string.IsNullOrWhiteSpace(request.Title))
+			return Error<DatabasePlaylist>("Playlist title cannot be null, empty or whitespace", 400,
+				HttpStatusCode.BadRequest);
+
+		try
+		{
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			await DatabaseManager.Playlists.EditPlaylist(
+				Request.Headers["Authorization"].ToString()!, id, request.Title,
+				request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
+			DatabasePlaylist playlist = DatabaseManager.Playlists.GetPlaylist(id)!;
+			return new ApiResponse<DatabasePlaylist>(playlist, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<DatabasePlaylist>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
+	[Route("playlists/{id}")]
 	[HttpDelete]
 	[ApiAuthorization("playlists.write")]
 	public async Task<ApiResponse<string>> DeletePlaylist(string id)
@@ -229,14 +256,14 @@ public class OauthApiController : Controller
 					? SubscriptionType.NOTIFICATIONS_ON
 					: SubscriptionType.NOTIFICATIONS_OFF
 				: SubscriptionType.NONE;
-			
+
 			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
 			(string? channelId, SubscriptionType subscriptionType) = await DatabaseManager.Users.UpdateSubscription(
 				Request.Headers["Authorization"].ToString()!, req.ChannelId,
 				type);
 			if (req.Subscribed)
 				await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
-			
+
 			userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
 
 			return new ApiResponse<UpdateSubscriptionResponse>(
