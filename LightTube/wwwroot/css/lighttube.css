@@ -1520,3 +1520,9 @@ code {
 .ltp-root svg {
     color: white !important;
 }
+
+.ltp-root .ltp-skip {
+    border-right: none;
+    border-top-left-radius: calc(16px + 1rem);
+    border-bottom-left-radius: calc(16px + 1rem);
+}
