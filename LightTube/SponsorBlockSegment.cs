@@ -15,14 +15,46 @@ public class SponsorBlockSegment
 	public double StartMs => Segment[0];
 	public double EndMs => Segment[1];
 
-	public string ToLTPlayerJson(double videoDuration) => $"{{ from: {ToPercentage(StartMs, videoDuration)}, to: {ToPercentage(EndMs, videoDuration)}, color: '#ff0', onEnter: function(player) {{ player.showSkipButton('Skip {Category}', {EndMs});}},onExit:function(player) {{player.hideSkipButton();}} }}";
+	public string ToLTPlayerJson(double videoDuration) =>
+		$"{{ from: {ToPercentage(StartMs, videoDuration)}, to: {ToPercentage(EndMs, videoDuration)}, color: '#{GetColor()}', onEnter: function(player) {{ player.showSkipButton('Skip {GetName()}', {EndMs});}},onExit:function(player) {{player.hideSkipButton();}} }}";
+
+	private string GetName()
+	{
+		return Category switch
+		{
+			"sponsor" => "sponsor",
+			"selfpromo" => "self promotion",
+			"interaction" => "interaction",
+			"intro" => "intro",
+			"outro" => "outro",
+			"preview" => "preview",
+			"filler" => "filler",
+			_ => Category + "*"
+		};
+	}
+
+	private string GetColor()
+	{
+		return Category switch
+		{
+			"sponsor" => "00d400",
+			"selfpromo" => "ff0",
+			"interaction" => "cof",
+			"intro" => "0ff",
+			"outro" => "0202ed",
+			"preview" => "008fd6",
+			"filler" => "7300ff",
+			_ => "#ff0"
+		};
+	}
 
 	private double ToPercentage(double input, double max) => (input / max) * 100;
 
 	public static async Task<SponsorBlockSegment[]> GetSponsors(string videoId)
 	{
 		HttpResponseMessage sbResponse =
-			await new HttpClient().GetAsync($"https://sponsor.ajay.app/api/skipSegments?videoID={videoId}&category=sponsor&category=selfpromo&category=interaction&category=intro&category=outro&category=preview&category=music_offtopic&category=filler");
+			await new HttpClient().GetAsync(
+				$"https://sponsor.ajay.app/api/skipSegments?videoID={videoId}&category=sponsor&category=selfpromo&category=interaction&category=intro&category=outro&category=preview&category=music_offtopic&category=filler");
 		if (!sbResponse.IsSuccessStatusCode) return Array.Empty<SponsorBlockSegment>();
 		string json = await sbResponse.Content.ReadAsStringAsync();
 		return JsonConvert.DeserializeObject<SponsorBlockSegment[]>(json)!;
