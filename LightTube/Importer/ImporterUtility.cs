@@ -40,6 +40,8 @@ public static class ImporterUtility
 			ImportSource.YoutubeTakeoutZip => ExtractTakeoutZip(data),
 			ImportSource.InvidiousSubscriptionManagerXml => ExtractInvidiousOpml(data),
 			ImportSource.InvidiousSubscriptionManagerJson => ExtractInvidiousJson(data),
+			ImportSource.PipedSubscriptions => ExtractPipedSubscriptions(data),
+			ImportSource.PipedPlaylists => ExtractPipedPlaylists(data),
 			ImportSource.Unknown => throw new NotSupportedException("Could not detect file type"),
 			_ => throw new NotSupportedException($"Export type {src.ToString()} is not implemented")
 		};
@@ -173,6 +175,56 @@ public static class ImporterUtility
 					_ => PlaylistVisibility.PRIVATE
 				},
 				VideoIds = playlist["videos"]!.ToObject<string[]>()!
+			});
+		}
+
+		return importedData;
+	}
+
+	private static ImportedData ExtractPipedSubscriptions(byte[] data)
+	{
+		ImportedData importedData = new(ImportSource.PipedSubscriptions);
+		string json = Encoding.UTF8.GetString(data);
+		JObject obj = JObject.Parse(json);
+
+		foreach (JToken subscription in obj["subscriptions"]?.ToObject<JArray>() ?? new JArray())
+		{
+			if (subscription["service_id"]?.ToObject<int>() != 0) continue;
+
+			importedData.Subscriptions.Add(new ImportedData.Subscription
+			{
+				Id = subscription["url"]!.ToObject<string>()!.Split("/")[4],
+				Name = subscription["name"]?.ToObject<string>()
+			});
+		}
+
+		return importedData;
+	}
+
+	private static ImportedData ExtractPipedPlaylists(byte[] data)
+	{
+		ImportedData importedData = new(ImportSource.PipedPlaylists);
+		string json = Encoding.UTF8.GetString(data);
+		JObject obj = JObject.Parse(json);
+
+		foreach (JToken playlist in obj["playlists"]?.ToObject<JArray>() ?? new JArray())
+		{
+			// Piped seems to (plan to) support other types of playlists
+			// (watch later, history, etc.)
+			// https://github.com/TeamPiped/Piped/blob/1c74bd1196172e52da7f23fcbf08ba68bc3cd911/src/components/PlaylistsPage.vue#L179
+			if (playlist["type"]?.ToObject<string>() != "playlist") continue;
+
+			importedData.Playlists.Add(new ImportedData.Playlist
+			{
+				Title = playlist["name"]!.ToObject<string>()!,
+				Description = "", // Piped doesn't export playlist descriptions
+				TimeCreated = null,
+				TimeUpdated = null,
+				// Piped doesn't seem to have playlist privacy, and
+				// from my testing, I could just access a playlist I
+				// created without logging in (which makes it not private)
+				Visibility = PlaylistVisibility.UNLISTED,
+				VideoIds = playlist["videos"]!.ToObject<string[]>()!.Select(x => x.Split("?v=")[1]).ToArray()
 			});
 		}
 
