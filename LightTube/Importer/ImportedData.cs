@@ -33,8 +33,8 @@ public class ImportedData
 		{
 			sb.AppendLine("Title: " + p.Title)
 				.AppendLine("Description: " + p.Description)
-				.AppendLine("TimeCreated: " + (p.TimeCreated.ToString() ?? "<not provided>"))
-				.AppendLine("TimeUpdated: " + (p.TimeUpdated.ToString() ?? "<not provided>"))
+				.AppendLine("TimeCreated: " + (p.TimeCreated?.ToString() ?? "<not provided>"))
+				.AppendLine("TimeUpdated: " + (p.TimeUpdated?.ToString() ?? "<not provided>"))
 				.AppendLine("Visibility: " + p.Visibility)
 				.AppendLine(string.Join("\n", p.VideoIds.Select(x => $"- {x}")));
 			sb.AppendLine("==="); 

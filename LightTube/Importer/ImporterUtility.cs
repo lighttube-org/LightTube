@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text;
+using System.Xml.Linq;
 using LightTube.Database.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -37,6 +38,8 @@ public static class ImporterUtility
 		return src switch
 		{
 			ImportSource.YoutubeTakeoutZip => ExtractTakeoutZip(data),
+			ImportSource.InvidiousSubscriptionManagerXml => ExtractInvidiousOpml(data),
+			ImportSource.InvidiousSubscriptionManagerJson => ExtractInvidiousJson(data),
 			ImportSource.Unknown => throw new NotSupportedException("Could not detect file type"),
 			_ => throw new NotSupportedException($"Export type {src.ToString()} is not implemented")
 		};
@@ -108,6 +111,69 @@ public static class ImporterUtility
 
 			listReader.Close();
 			playlistStream.Close();
+		}
+
+		archive.Dispose();
+		zipStream.Dispose();
+		return importedData;
+	}
+
+	private static ImportedData ExtractInvidiousOpml(byte[] data)
+	{
+		ImportedData importedData = new(ImportSource.InvidiousSubscriptionManagerXml);
+		string xmlText = Encoding.UTF8.GetString(data);
+		XDocument xml = XDocument.Parse(xmlText);
+		XElement container =
+			xml.Descendants().First(x => x.Attribute("text")?.Value.Contains("Subscriptions") ?? false);
+		foreach (XElement el in container.Descendants())
+		{
+			string title = el.Attribute("title")!.Value;
+			Uri url = new(el.Attribute("xmlUrl")!.Value);
+			string id = url.Host.EndsWith("youtube.com") ? url.Query.Split("=")[1] : url.AbsolutePath.Split("/").Last();
+			importedData.Subscriptions.Add(new ImportedData.Subscription
+			{
+				Id = id,
+				Name = title
+			});
+		}
+
+		return importedData;
+	}
+
+	private static ImportedData ExtractInvidiousJson(byte[] data)
+	{
+		ImportedData importedData = new(ImportSource.InvidiousSubscriptionManagerJson);
+		string json = Encoding.UTF8.GetString(data);
+		JObject obj = JObject.Parse(json);
+
+		foreach (JToken jToken in obj["subscriptions"]?.ToObject<JArray>() ?? new JArray())
+		{
+			if (jToken.Type != JTokenType.String) continue;
+			string id = jToken.ToObject<string>()!;
+			importedData.Subscriptions.Add(new ImportedData.Subscription
+			{
+				Id = id
+			});
+		}
+
+		foreach (JToken playlist in obj["playlists"]?.ToObject<JArray>() ?? new JArray())
+		{
+			if (playlist.Type != JTokenType.Object) continue;
+			importedData.Playlists.Add(new ImportedData.Playlist
+			{
+				Title = playlist["title"]!.ToObject<string>()!,
+				Description = playlist["description"]!.ToObject<string>()!,
+				TimeCreated = null,
+				TimeUpdated = null,
+				Visibility = playlist["privacy"]!.ToObject<string>()! switch
+				{
+					"Public" => PlaylistVisibility.VISIBLE,
+					"Unlisted" => PlaylistVisibility.UNLISTED,
+					"Private" => PlaylistVisibility.PRIVATE,
+					_ => PlaylistVisibility.PRIVATE
+				},
+				VideoIds = playlist["videos"]!.ToObject<string[]>()!
+			});
 		}
 
 		return importedData;
