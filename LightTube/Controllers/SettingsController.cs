@@ -54,4 +54,23 @@ public class SettingsController : Controller
 
 	[Route("account")]
 	public IActionResult Account() => View(new BaseContext(HttpContext));
+
+	[Route("data")]
+	[HttpGet]
+	public IActionResult ImportExport() => View(new BaseContext(HttpContext));
+
+	[Route("data")]
+	[HttpPost]
+	public IActionResult Import()
+	{
+		IFormFile file = Request.Form.Files[0];
+		using Stream fileStream = file.OpenReadStream();
+		using MemoryStream memStr = new();
+		fileStream.CopyTo(memStr);
+		byte[] bytes = memStr.ToArray();
+		memStr.Dispose();
+		fileStream.Dispose();
+
+		return Ok(ImporterUtility.ExtractData(bytes).ToString());
+	}
 }
