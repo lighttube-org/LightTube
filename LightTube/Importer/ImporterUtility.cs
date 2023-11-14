@@ -9,9 +9,9 @@ namespace LightTube;
 
 public static class ImporterUtility
 {
-	private static readonly string TakeoutMagicBytes = "504B03";
+	private static readonly byte[] TakeoutMagicBytes = { 0x50, 0x4B, 0x03 };
 
-	public static ImportSource AutodetectSource(byte[] data)
+	private static ImportSource AutodetectSource(byte[] data)
 	{
 		if (data[0] == '{')
 		{
@@ -22,11 +22,11 @@ public static class ImporterUtility
 				return ImportSource.PipedSubscriptions;
 		}
 
-		if (string.Join("", data.Take(3).Select(x => x.ToString("X2"))) == TakeoutMagicBytes)
+		if (data[0] == TakeoutMagicBytes[0] && data[1] == TakeoutMagicBytes[1] && data[2] == TakeoutMagicBytes[2])
 			return ImportSource.YoutubeTakeoutZip;
+
 		if (Encoding.UTF8.GetString(data.Take(5).ToArray()) == "<opml")
 			return ImportSource.InvidiousSubscriptionManagerXml;
-
 
 		return ImportSource.Unknown;
 	}
