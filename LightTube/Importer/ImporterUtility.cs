@@ -13,6 +13,8 @@ public static class ImporterUtility
 
 	private static ImportSource AutodetectSource(byte[] data)
 	{
+		if (data.Length == 0) return ImportSource.Unknown;
+		
 		if (data[0] == '{')
 		{
 			JObject obj = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(data))!;
