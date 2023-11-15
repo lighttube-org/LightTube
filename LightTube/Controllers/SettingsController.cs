@@ -53,16 +53,31 @@ public class SettingsController : Controller
 	}
 
 	[Route("account")]
-	public IActionResult Account() => View(new BaseContext(HttpContext));
+	public IActionResult Account()
+	{
+		BaseContext context = new(HttpContext);
+		if (context.User == null) return Redirect("/account/login?redirectUrl=%2fsettings%2fdata");
+		
+		return View(new BaseContext(HttpContext));
+	}
 
 	[Route("data")]
 	[HttpGet]
-	public IActionResult ImportExport() => View(new BaseContext(HttpContext));
+	public IActionResult ImportExport()
+	{
+		BaseContext context = new(HttpContext);
+		if (context.User == null) return Redirect("/account/login?redirectUrl=%2fsettings%2fdata");
+		
+		return View(new BaseContext(HttpContext));
+	}
 
 	[Route("data")]
 	[HttpPost]
 	public IActionResult Import()
 	{
+		BaseContext context = new(HttpContext);
+		if (context.User == null) return Redirect("/account/login?redirectUrl=%2fsettings%2fdata");
+		
 		IFormFile file = Request.Form.Files[0];
 		using Stream fileStream = file.OpenReadStream();
 		using MemoryStream memStr = new();
