@@ -1512,3 +1512,31 @@ code {
     user-select: all;
     color: var(--text-primary);
 }
+
+.input-file::file-selector-button {
+    height: 36px;
+    flex-direction: row;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    justify-content: center;
+    align-items: center;
+    transition: background-color linear 100ms;
+    padding: 0 8px;
+    text-decoration: none;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    border-radius: 18px;
+    width: fit-content;
+    margin: 0 8px;
+    line-height: 24px;
+    font-weight: 500;
+    white-space: nowrap;
+    background-color: #fff;
+    color: #000;
+}
+
+.input-file::file-selector-button:hover {
+    background-color: var(--btn-hover-color-white);
+}
