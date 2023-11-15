@@ -1,5 +1,6 @@
 using System.Text;
 using LightTube.Database.Models;
+using Newtonsoft.Json;
 
 namespace LightTube;
 
@@ -51,11 +52,11 @@ public class ImportedData
 
 	public class Playlist
 	{
-		public string Title;
-		public string Description;
-		public DateTimeOffset? TimeCreated;
-		public DateTimeOffset? TimeUpdated;
-		public PlaylistVisibility Visibility;
-		public string[] VideoIds;
+		[JsonProperty("title")] public string Title;
+		[JsonProperty("description")] public string Description;
+		[JsonProperty("created")] public DateTimeOffset? TimeCreated;
+		[JsonProperty("updated")] public DateTimeOffset? TimeUpdated;
+		[JsonProperty("visibility")] public PlaylistVisibility Visibility;
+		[JsonProperty("videos")] public string[] VideoIds;
 	}
 }

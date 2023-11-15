@@ -20,6 +20,8 @@ public static class ImporterUtility
 			if (obj.ContainsKey("format")) return ImportSource.PipedPlaylists;
 			if (obj.ContainsKey("app_version") && obj.ContainsKey("subscriptions"))
 				return ImportSource.PipedSubscriptions;
+			if (obj["type"]?.ToObject<string>()?.StartsWith("LightTube/") ?? false)
+				return ImportSource.LightTubeExport;
 		}
 
 		if (data[0] == TakeoutMagicBytes[0] && data[1] == TakeoutMagicBytes[1] && data[2] == TakeoutMagicBytes[2])
@@ -42,6 +44,7 @@ public static class ImporterUtility
 			ImportSource.InvidiousSubscriptionManagerJson => ExtractInvidiousJson(data),
 			ImportSource.PipedSubscriptions => ExtractPipedSubscriptions(data),
 			ImportSource.PipedPlaylists => ExtractPipedPlaylists(data),
+			ImportSource.LightTubeExport => ExtractLightTube(data),
 			ImportSource.Unknown => throw new NotSupportedException("Could not detect file type"),
 			_ => throw new NotSupportedException($"Export type {src.ToString()} is not implemented")
 		};
@@ -230,6 +233,19 @@ public static class ImporterUtility
 
 		return importedData;
 	}
+
+	private static ImportedData ExtractLightTube(byte[] data)
+	{
+		ImportedData importedData = new(ImportSource.LightTubeExport);
+		string json = Encoding.UTF8.GetString(data);
+		LightTubeExport obj = JsonConvert.DeserializeObject<LightTubeExport>(json)!;
+
+		importedData.Subscriptions.AddRange(obj.Subscriptions
+			.Select(x => new ImportedData.Subscription { Id = x, Name = null }));
+		importedData.Playlists = obj.Playlists.ToList();
+
+		return importedData;
+	}
 }
 
 public enum ImportSource
@@ -239,5 +255,6 @@ public enum ImportSource
 	InvidiousSubscriptionManagerJson,
 	InvidiousSubscriptionManagerXml,
 	PipedSubscriptions,
-	PipedPlaylists
+	PipedPlaylists,
+	LightTubeExport
 }
