@@ -1,8 +1,15 @@
-@model BaseContext
+@model ImportContext
 
 @{
 	Layout = "_SettingsLayout";
 	Model.Title = "Account";
+}
+
+@if (Model.Message != null)
+{
+	<div class="renderer-null" style="@(Model.IsError ? "border-color: #f00" : "")">
+		@Html.Raw(Model.Message.Replace("\n", "<br>"))
+	</div>
 }
 
 <h1 class="title">Import Data</h1>
