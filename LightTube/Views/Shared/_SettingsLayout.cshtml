@@ -2,9 +2,11 @@
 @model BaseContext
 
 @{
-	SettingsTab[] tabs = {
+	SettingsTab[] tabs =
+	{
 		new("Account", "/settings/account"),
-		new("Appearance", "/settings/appearance")
+		new("Appearance", "/settings/appearance"),
+		new("Import/Export", "/settings/data")
 	};
 }
 
@@ -59,7 +61,7 @@
 				<partial name="SettingsTab" model="tab"/>
 			}
 		</div>
-		<form class="settings-form" method="post">
+		<form class="settings-form" method="post" enctype="@(Context.Request.Path.Value!.EndsWith("data") ? "multipart/form-data" : "application/x-www-form-urlencoded")">
 			@RenderBody()
 		</form>
 	</div>
