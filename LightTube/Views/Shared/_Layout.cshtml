@@ -8,10 +8,12 @@
 	<meta charset="UTF-8">
 	<title>@(string.IsNullOrWhiteSpace(Model.Title) ? "LightTube" : $"{Model.Title} - LightTube")</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<partial name="Icons"/>
 	@foreach (IHtmlContent item in Model.HeadTags)
 	{
 		@item
 	}
+	<link rel="search" type="application/opensearchdescription+xml" title="LightTube" href="/opensearch/osdd.xml"/>
 	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
