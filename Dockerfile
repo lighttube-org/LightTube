@@ -16,4 +16,5 @@ RUN dotnet publish "LightTube.csproj" -c Release -o /app/publish /p:Version=`dat
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN chmod 777 -R /tmp && chmod o+t -R /tmp
 CMD ASPNETCORE_URLS=http://*:$PORT dotnet LightTube.dll

@@ -305,25 +305,26 @@ public class ProxyController : Controller
 		}
 	}
 
-	[Route("caption/{videoId}/{language}")]
-	public async Task<IActionResult> SubtitleProxy(string videoId, string language)
+	[Route("caption/{videoId}/{vssId}")]
+	public async Task<IActionResult> SubtitleProxy(string videoId, string vssId)
 	{
 		try
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
 			InnerTubePlayer.VideoCaption?
-				subtitle = player.Captions.FirstOrDefault(x => x.LanguageCode == language);
+				subtitle = player.Captions.FirstOrDefault(x => x.VssId == vssId);
 
 			if (subtitle is null)
 			{
 				Response.StatusCode = (int)HttpStatusCode.NotFound;
 				return File(
 					new MemoryStream(Encoding.UTF8.GetBytes(
-						$"There are no available subtitles for {language}. Available language codes are: {string.Join(", ", player.Captions.Select(x => $"{x.LanguageCode} \"{x.Label}\""))}")),
+						$"There are no available subtitles for '{vssId}'. Available subtitle IDs are: {string.Join(", ", player.Captions.Select(x => $"{x.VssId} \"{x.Label}\""))}")),
 					"text/plain");
 			}
 
-			string url = subtitle.BaseUrl.ToString().Replace("fmt=srv3", "fmt=vtt");
+			string url = subtitle.BaseUrl.ToString();
+			url = url.Contains("fmt=") ? url.Replace("fmt=srv3", "fmt=vtt") : url + "&fmt=vtt";
 
 			if (!url.StartsWith("http://") && !url.StartsWith("https://"))
 				url = "https://" + url;

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace LightTube.Controllers;
 
@@ -36,5 +37,20 @@ public class HomeController : Controller
 		}
 
 		return NotFound();
+	}
+
+	[Route("/lib/{name}")]
+	public IActionResult CachedJs(string name)
+	{
+		try
+		{
+			return File(Encoding.UTF8.GetBytes(JsCache.GetJsFileContents(name)),
+				name.EndsWith(".css") ? "text/css" : "text/javascript",
+				JsCache.CacheUpdateTime, new EntityTagHeaderValue($"\"{JsCache.GetHash(name)}\""));
+		}
+		catch (Exception e)
+		{
+			return NotFound();
+		}
 	}
 }

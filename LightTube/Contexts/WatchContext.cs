@@ -9,18 +9,19 @@ public class WatchContext : BaseContext
 	public InnerTubeNextResponse Video;
 	public InnerTubePlaylistInfo? Playlist;
 	public InnerTubeContinuationResponse? Comments;
-	
 	public int Dislikes;
+	public SponsorBlockSegment[] Sponsors;
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes) : base(context)
+		bool compatibility, int dislikes, SponsorBlockSegment[] sponsors) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility, context.Request.Query["q"]);
+		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility, context.Request.Query["q"], sponsors);
 		Video = innerTubeNextResponse;
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = sponsors;
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);
@@ -33,20 +34,10 @@ public class WatchContext : BaseContext
 		AddMeta("twitter:player", $"https://{context.Request.Host}/embed/${Video.Id}");
 		AddMeta("twitter:player:stream", $"https://{context.Request.Host}/proxy/media/${Video.Id}/18");
 
-		AddStylesheet("/lib/videojs/video-js.min.css");
-		AddStylesheet("/lib/videojs-endscreen/videojs-endscreen.css");
-		AddStylesheet("/lib/videojs-vtt-thumbnails/videojs-vtt-thumbnails.min.css");
-		AddStylesheet("/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.css");
-		AddStylesheet("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.css");
-		AddStylesheet("/css/vjs-skin.css");
+		AddStylesheet("/lib/ltplayer.css");
 
-		AddScript("/lib/videojs/video.min.js");
-		AddScript("/lib/videojs-hotkeys/videojs.hotkeys.min.js");
-		AddScript("/lib/videojs-endscreen/videojs-endscreen.js");
-		AddScript("/lib/videojs-vtt-thumbnails/videojs-vtt-thumbnails.min.js");
-		AddScript("/lib/videojs-contrib-quality-levels/videojs-contrib-quality-levels.min.js");
-		AddScript("/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.min.js");
-		AddScript("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.min.js");
+		AddScript("/lib/ltplayer.js");
+		AddScript("/lib/hls.js");
 		AddScript("/js/player.js");
 	}
 
@@ -58,6 +49,7 @@ public class WatchContext : BaseContext
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = Array.Empty<SponsorBlockSegment>();
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);
@@ -73,9 +65,9 @@ public class WatchContext : BaseContext
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeNextResponse innerTubeNextResponse, DatabasePlaylist? playlist,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes) : base(context)
+		bool compatibility, int dislikes, SponsorBlockSegment[] sponsors) : base(context)
 	{
-		Player = new PlayerContext(context, innerTubePlayer, "embed", compatibility, context.Request.Query["q"]);
+		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility, context.Request.Query["q"], sponsors);
 		Video = innerTubeNextResponse;
 		Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubePlayer.Details.Id);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.PRIVATE)
@@ -83,6 +75,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = sponsors;
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);
@@ -95,20 +88,10 @@ public class WatchContext : BaseContext
 		AddMeta("twitter:player", $"https://{context.Request.Host}/embed/${Video.Id}");
 		AddMeta("twitter:player:stream", $"https://{context.Request.Host}/proxy/media/${Video.Id}/18");
 
-		AddStylesheet("/lib/videojs/video-js.min.css");
-		AddStylesheet("/lib/videojs-endscreen/videojs-endscreen.css");
-		AddStylesheet("/lib/videojs-vtt-thumbnails/videojs-vtt-thumbnails.min.css");
-		AddStylesheet("/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.css");
-		AddStylesheet("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.css");
-		AddStylesheet("/css/vjs-skin.css");
+		AddStylesheet("/lib/ltplayer.css");
 
-		AddScript("/lib/videojs/video.min.js");
-		AddScript("/lib/videojs-hotkeys/videojs.hotkeys.min.js");
-		AddScript("/lib/videojs-endscreen/videojs-endscreen.js");
-		AddScript("/lib/videojs-vtt-thumbnails/videojs-vtt-thumbnails.min.js");
-		AddScript("/lib/videojs-contrib-quality-levels/videojs-contrib-quality-levels.min.js");
-		AddScript("/lib/videojs-hls-quality-selector/videojs-hls-quality-selector.min.js");
-		AddScript("/lib/silvermine-videojs-quality-selector/silvermine-videojs-quality-selector.min.js");
+		AddScript("/lib/ltplayer.js");
+		AddScript("/lib/hls.js");
 		AddScript("/js/player.js");
 	}
 
@@ -123,6 +106,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
+		Sponsors = Array.Empty<SponsorBlockSegment>();
 		GuideHidden = true;
 
 		AddMeta("description", Video.Description);

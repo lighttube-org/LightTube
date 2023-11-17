@@ -34,12 +34,22 @@ public class YoutubeController : Controller
 			player = null;
 			e = ex;
 		}
+		
+		SponsorBlockSegment[] sponsors;
+		try
+		{
+			sponsors = await SponsorBlockSegment.GetSponsors(v);
+		}
+		catch
+		{
+			sponsors = Array.Empty<SponsorBlockSegment>();
+		}
 
 		InnerTubeNextResponse video =
 			await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
 		if (player is null || e is not null)
 			return View(new EmbedContext(HttpContext, e ?? new Exception("player is null"), video));
-		return View(new EmbedContext(HttpContext, player, video, compatibility));
+		return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors));
 	}
 
 	[Route("/watch")]
@@ -86,6 +96,16 @@ public class YoutubeController : Controller
 		catch
 		{
 			dislikes = -1;
+		} 
+		
+		SponsorBlockSegment[] sponsors;
+		try
+		{
+			sponsors = await SponsorBlockSegment.GetSponsors(v);
+		}
+		catch
+		{
+			sponsors = Array.Empty<SponsorBlockSegment>();
 		}
 
 		if (player is not null)
@@ -97,14 +117,14 @@ public class YoutubeController : Controller
 			if (player is null || e is not null)
 				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments,
 					dislikes));
-			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes));
+			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes, sponsors));
 		}
 		else
 		{
 			if (player is null || e is not null)
 				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments,
 					dislikes));
-			return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes));
+			return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, sponsors));
 		}
 	}
 

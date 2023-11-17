@@ -1,7 +1,7 @@
 ﻿@using InnerTube
 @using System.Text.Json
 @using InnerTube.Exceptions
-@using Utils = LightTube.Utils
+@using JsonSerializer = System.Text.Json.JsonSerializer
 @model PlayerContext
 
 @{
@@ -59,7 +59,7 @@
 }
 else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 {
-	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
+	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
 		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
@@ -84,7 +84,7 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 }
 else if (Model.Player.Formats.Any())
 {
-	<video controls id="vjs-player" class="player video-js @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
+	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
 		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
@@ -119,25 +119,49 @@ else
 @if (playable)
 {
 	<script id="video-data">
-	const videoId =  "@(Model.Player!.Details.Id)";
-	const elementId =  "vjs-player";
-	const endscreenData = @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
-	                      {
-		                      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-	                      }));
-	const playtype = "@(Model.UseHls ? "hls" : Model.UseDash ? "dash" : "html5")";
-	endscreenData.clickHandler = item => {
+	const videoInfo = {
+		author: {
+			icon: "@Model.Video.Channel.Avatar",
+			title: "@Model.Player!.Details.Author.Title", // .Replace("\"", "\\\"")
+			href: "/channel/@Model.Player!.Details.Author.Id"
+		},
+		title: "@Model.Player!.Details.Title", // .Replace("\"", "\\\"")
+		hlsManifest: "/proxy/media/@(Model.Player.Details.Id).m3u8",
+		buttons: {
+			play: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#play-fill"/></svg>',
+			pause: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#pause-fill"/></svg>',
+			volumeMute: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#volume-mute-fill"/></svg>',
+			volumeLow: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#volume-off-fill"/></svg>',
+			volumeMedium: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#volume-down-fill"/></svg>',
+			volumeHigh: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#volume-up-fill"/></svg>',
+			settings: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#gear-fill"/></svg>',
+			fullscreen: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#fullscreen"/></svg>',
+			minimize: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#fullscreen-exit"/></svg>'
+		},
+		loading: "<img style='width:15%;height:15%;' src='/svg/loading.svg'>",
+		chapters: @Html.Raw(Model.GetChaptersJson()),
+		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds)) ?? Array.Empty<string>()))],
+		endscreen: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
+		           {
+			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+		           })),
+		storyboard: {
+			type: "yt_l1",
+			src: "@Html.Raw(Model.Player.Storyboard.Levels[0].ToString())"
+		}
+	};
+	videoInfo.endscreen.onClickHandler = item => {
 		switch (item.style) {
 			case "VIDEO":
-        		window.location = "/watch?v=" + item.target;
-        		break;
-        	case "PLAYLIST":
-            	window.location = "/playlist?list=" + item.target;
-            	break;
-            case "CHANNEL":
+				window.location = "/watch?v=" + item.target;
+				break;
+			case "PLAYLIST":
+				window.location = "/playlist?list=" + item.target;
+				break;
+			  case "CHANNEL":
 				window.location = "/channel/" + item.target;
 				break;
-            case "WEBSITE":
+			  case "WEBSITE":
 				window.open(item.href, "_blank");
 				break;
 			default:
@@ -145,5 +169,8 @@ else
 				break;
 		}
 	};
+	const videoId =  "@(Model.Player!.Details.Id)";
+	const playerId = "player";
+	const playtype = @Html.Raw(Model.UseHls ? "\"hls.js\"" : "undefined");
 	</script>
 }

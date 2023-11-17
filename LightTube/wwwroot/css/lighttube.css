@@ -1513,6 +1513,20 @@ code {
     color: var(--text-primary);
 }
 
+.ltp-root {
+    height: 100%;
+}
+
+.ltp-root svg {
+    color: white !important;
+}
+
+.ltp-root .ltp-skip {
+    border-right: none;
+    border-top-left-radius: calc(16px + 1rem);
+    border-bottom-left-radius: calc(16px + 1rem);  
+}
+
 .input-file::file-selector-button {
     height: 36px;
     flex-direction: row;

@@ -547,8 +547,10 @@
 					// for anyone reading this part
 					// im sorry
 					InnerTubePlayer player = Context.RequestServices.GetService<InnerTube>()
-												!.GetPlayerAsync(video.Id).Result;
-					PlayerContext playerContext = new(Context, player, "channel-promoted-video", false, "18");
+						!.GetPlayerAsync(video.Id).Result;
+					InnerTubeNextResponse next = Context.RequestServices.GetService<InnerTube>()
+						!.GetVideoAsync(video.Id).Result;
+					PlayerContext playerContext = new(Context, player, next, "channel-promoted-video", false, "18", Array.Empty<SponsorBlockSegment>());
 				}
 				<partial name="Player" model="@playerContext"/>
 			</div>
