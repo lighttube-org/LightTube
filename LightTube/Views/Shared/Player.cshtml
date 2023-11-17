@@ -77,7 +77,7 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 
 		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
 		{
-			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.LanguageCode" label="@subtitle.Label" kind="subtitles">
+			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.VssId" label="@subtitle.Label" kind="subtitles">
 		}
 	</video>
 	<noscript style="z-index:999;color:white;position:relative;">This video requires JavaScript to play correctly</noscript>
@@ -102,7 +102,7 @@ else if (Model.Player.Formats.Any())
 
 		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
 		{
-			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.LanguageCode" label="@subtitle.Label" kind="subtitles">
+			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.VssId" label="@subtitle.Label" kind="subtitles">
 		}
 	</video>
 }
