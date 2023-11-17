@@ -28,6 +28,9 @@ jobs:
 
     runs-on: windows-latest
 
+    permissions:
+      contents: write # In order to be able to push releases
+
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -116,6 +119,6 @@ jobs:
         # An optional tag for the release. If this is omitted the git ref will be used (if it is a tag).
         tag: prerelease-r2r-${{steps.sha.outputs.substring}}-${{github.run_id}} # optional, default is
         # The Github token.
-        token: ${{secrets.RELEASE_TOKEN}} # optional, default is ${{ github.token }}
+        token: ${{ github.token }}
         # When allowUpdates is enabled, this will fail the action if the release it is updating is not a draft or a prerelease.
         # updateOnlyUnreleased: # optional, default is false
