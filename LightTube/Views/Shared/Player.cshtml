@@ -145,9 +145,9 @@ else
 		           {
 			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		           })),
-		storyboard: {
-			type: "yt_l1",
-			src: "@Html.Raw(Model.Player.Storyboard.Levels[0].ToString())"
+		@if (Model.Player.Storyboard.Levels.ContainsKey(0))
+		{
+			@:storyboard:{type:"yt_l1",src:"@Html.Raw(Model.Player.Storyboard.Levels[0].ToString())"}
 		}
 	};
 	videoInfo.endscreen.onClickHandler = item => {
