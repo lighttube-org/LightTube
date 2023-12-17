@@ -18,5 +18,10 @@
     "host": "https://tube.instellate.xyz",
     "api": true,
     "accounts": true
+  },
+  {
+    "host": "https://lighttube.plerx.de/",
+    "api": true,
+    "accounts": true
   }
 ]
