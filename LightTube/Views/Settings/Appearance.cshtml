@@ -123,5 +123,26 @@
 		}
 	</div>
 </label>
+
+<label class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Compatibility mode
+		</div>
+		<div>
+			Use MP4 streams instead of HLS streams. Breaks livestreams
+		</div>
+	</div>
+	<div class="settings-option__option">
+		@if (Context.GetDefaultCompatibility())
+		{
+			<input type="checkbox" name="compatibility" checked>
+		}
+		else
+		{
+			<input type="checkbox" name="compatibility">
+		}
+	</div>
+</label>
 <br>
 <input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Save Changes">
