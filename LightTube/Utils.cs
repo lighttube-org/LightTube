@@ -46,6 +46,11 @@ public static class Utils
 			? recommendations == "visible"
 			: true;
 
+	public static bool GetDefaultCompatibility(this HttpContext context) =>
+		context.Request.Cookies.TryGetValue("compatibility", out string compatibility)
+			? compatibility == "true"
+			: false;
+
 	public static string GetVersion()
 	{
 		if (_version is null)

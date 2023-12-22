@@ -45,6 +45,9 @@ public class YoutubeController : Controller
 			sponsors = Array.Empty<SponsorBlockSegment>();
 		}
 
+		if (HttpContext.GetDefaultCompatibility())
+			compatibility = true;
+
 		InnerTubeNextResponse video =
 			await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
 		if (player is null || e is not null)
@@ -74,6 +77,9 @@ public class YoutubeController : Controller
 			await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetLanguage(),
 				region: HttpContext.GetRegion());
 		InnerTubeContinuationResponse? comments = null;
+
+		if (HttpContext.GetDefaultCompatibility())
+			compatibility = true;
 
 		try
 		{
