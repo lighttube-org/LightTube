@@ -11,7 +11,7 @@ namespace LightTube.Contexts
 			{
 				Videos = Task.Run(async () =>
 				{
-					return (await YoutubeRSS.GetMultipleFeeds(User.Subscriptions.Where(x => x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key))).Take(Convert.ToInt32(context.Request.Cookies["maxvideos"])).ToArray();
+					return (await YoutubeRSS.GetMultipleFeeds(User.Subscriptions.Where(x => x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key))).Take(context.Request.Cookies["maxvideos"] is null ? 5:Convert.ToInt32(context.Request.Cookies["maxvideos"])).ToArray();
 				}).Result;
 			}
 		}
