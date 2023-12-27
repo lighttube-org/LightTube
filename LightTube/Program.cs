@@ -1,3 +1,4 @@
+using System.Globalization;
 using InnerTube;
 using LightTube;
 using LightTube.Chores;
@@ -32,7 +33,14 @@ if (!app.Environment.IsDevelopment())
 	app.UseHttpsRedirection();
 }
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions {
+	OnPrepareResponse = ctx =>
+	{
+		// Cache static files for 3 days
+		ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=259200");
+		ctx.Context.Response.Headers.Append("Expires", DateTime.UtcNow.AddDays(3).ToString("R", CultureInfo.InvariantCulture));
+	}
+});
 
 app.UseRouting();
 

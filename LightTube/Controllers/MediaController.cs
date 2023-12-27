@@ -37,7 +37,8 @@ public class ProxyController : Controller
 	}
 
 	[Route("media/{videoId}/{formatId}")]
-	public async Task Media(string videoId, string formatId, string? audioTrackId)
+	[Route("media/{videoId}/{formatId}.{extension}")]
+	public async Task Media(string videoId, string formatId, string? audioTrackId, string? extension = null)
 	{
 		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
 		{

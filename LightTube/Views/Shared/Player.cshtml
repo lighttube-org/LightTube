@@ -126,7 +126,10 @@ else
 			href: "/channel/@Model.Player!.Details.Author.Id"
 		},
 		title: "@Model.Player!.Details.Title", // .Replace("\"", "\\\"")
-		hlsManifest: "/proxy/media/@(Model.Player.Details.Id).m3u8",
+		@if (Model.UseHls)
+		{
+			@:hlsManifest: "/proxy/media/@(Model.Player.Details.Id).m3u8",
+		}
 		buttons: {
 			play: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#play-fill"/></svg>',
 			pause: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#pause-fill"/></svg>',
