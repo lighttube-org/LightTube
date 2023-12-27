@@ -142,6 +142,7 @@ else
 			minimize: '<svg class="bi" width="20" height="20" fill="currentColor"><use href="/svg/bootstrap-icons.svg#fullscreen-exit"/></svg>'
 		},
 		loading: "<img style='width:15%;height:15%;' src='/svg/loading.svg'>",
+		rememberVolume: true,
 		chapters: @Html.Raw(Model.GetChaptersJson()),
 		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds)) ?? Array.Empty<string>()))],
 		endscreen: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
