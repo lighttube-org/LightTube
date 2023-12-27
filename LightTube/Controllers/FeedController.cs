@@ -47,7 +47,7 @@ public class FeedController : Controller
 			string password = secretDecoded.Split(':')[1];
 			DatabaseUser? user = await DatabaseManager.Users.GetUserFromUsernamePassword(username, password);
 			if (user is null) throw new Exception();
-			FeedVideo[] feedVideos = await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Keys);
+			FeedVideo[] feedVideos = await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Where(x => x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key));
 
 			XmlDocument document = new();
 			XmlElement rss = document.CreateElement("rss");
