@@ -1467,7 +1467,7 @@ select:active {
     width: 100%;
 }
 
-input[type=text] {
+input[type=text], input[type="number"] {
     background-color: var(--chip-background);
     padding: 4px 8px;
     border-radius: 32px;
