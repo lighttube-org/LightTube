@@ -1,0 +1,166 @@
+# Default values for lighttube-helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: kuylar/lighttube
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+env:
+  # (Required) MongoDB Database Connection String
+  - name: LIGHTTUBE_MONGODB_CONNSTR
+    value: "mongodb://lighttube:lighttube@database:27017/lighttube"
+  # (Optional) MongoDB Database
+  - name: LIGHTTUBE_MONGODB_DATABASE
+    value: "lighttube"
+  # (Optional) This is the text that will be shown on the home page
+  # Default: Search something to get started!
+  - name: LIGHTTUBE_MOTD
+    value: "Search something to get started!"
+  # (Optional) Amount of video player data to hold in the cache
+  # Default: 50
+  - name: LIGHTTUBE_CACHE_SIZE
+    value: "50"
+  # (Optional) Default theme for the interface. Either "light" or "dark"
+  # Default: light
+  - name: LIGHTTUBE_DEFAULT_THEME
+    value: "light"
+  # (Optional) Disable new users from signing up
+  # Default: false
+  - name: LIGHTTUBE_DISABLE_REGISTRATION
+    value: "false"
+  # (Optional) Disable the video proxy
+  # Enable this if you don't want videos to be proxied over LightTube
+  # This will also disable HLS/DASH playback on browsers
+  # Default: false
+  - name: LIGHTTUBE_DISABLE_PROXY
+    value: "false"
+  # (Optional) Enable video proxy for 3rd party apps
+  # Apps may or may not choose to follow this setting
+  # Default: false
+  - name: LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY
+    value: "true"
+  # (Optional) Default content language (only effects video title/descriptions,
+  # "### views"/"### subscribers"/"Published # days ago" text on search results etc.)
+  # WARNING: An invalid value may cause LightTube to not work. Make sure you put in a 
+  #          valid language ID
+  # Default: en
+  - name: LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE
+    value: "en"
+  # (Optional) Default content region (only effects the browse screen. search results
+  # and recommendations still use the region that the server connects YouTube from)
+  # WARNING: An invalid value may cause LightTube to not work. Make sure you put in a 
+  #          valid region ID
+  # Default: US
+  - name: LIGHTTUBE_DEFAULT_CONTENT_REGION
+    value: "US"
+  # - name: LIGHTTUBE_CUSTOM_CSS_PATH
+  #   value: 
+  # (Optional) Authentication for age-gated videos
+  # Follow the following wiki page to get the required values
+  # https://github.com/kuylar/InnerTube/wiki/Authorization
+  # Only use one of the following (OAuth2 is recommended):
+  # OAuth2 based auth ========
+  # - name: LIGHTTUBE_AUTH_TYPE:
+  #   value: oauth2
+  # - name: LIGHTTUBE_AUTH_REFRESH_TOKEN:
+  #   value:
+  # Cookie based auth ========
+  # - name: LIGHTTUBE_AUTH_TYPE:
+  #   value: cookie
+  # - name: LIGHTTUBE_AUTH_SAPISID:
+  #   value:
+  # - name: LIGHTTUBE_AUTH_PSID:
+  #   value:
+  # ==========================
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  secretName: chart-example-tls
+  #    hosts:
+  #      chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
