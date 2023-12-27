@@ -14,19 +14,11 @@ public class BaseContext
 	public bool GuideHidden = false;
 	public HttpContext Context;
 	public DatabaseUser? User;
-	public FeedVideo[] Videos;
 
 	public BaseContext(HttpContext context)
 	{
 		Context = context;
 		User = DatabaseManager.Users.GetUserFromToken(context.Request.Cookies["token"] ?? "").Result;
-		if (User != null)
-		{
-			Videos = Task.Run(async () =>
-			{
-				return (await YoutubeRSS.GetMultipleFeeds(User.Subscriptions.Keys)).Chunk(5).First();
-			}).Result;
-		}
 		AddMeta("og:site_name", "lighttube");
 		AddMeta("og:type", "website");
 		AddMeta("theme-color", "#AA0000");

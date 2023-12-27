@@ -34,7 +34,7 @@ public class SettingsController : Controller
 
 	[Route("appearance")]
 	[HttpPost]
-	public IActionResult Appearance(string hl, string gl, string theme, string recommendations)
+	public IActionResult Appearance(string hl, string gl, string theme, string recommendations, string compatibility, string maxvideos)
 	{
 		Response.Cookies.Append("hl", hl, new CookieOptions
 		{
@@ -49,6 +49,14 @@ public class SettingsController : Controller
 			Expires = DateTimeOffset.MaxValue
 		});
 		Response.Cookies.Append("recommendations", recommendations == "on" ? "visible" : "collapsed", new CookieOptions
+		{
+			Expires = DateTimeOffset.MaxValue
+		});
+		Response.Cookies.Append("compatibility", recommendations == "on" ? "true" : "false", new CookieOptions
+		{
+			Expires = DateTimeOffset.MaxValue
+		});
+		Response.Cookies.Append("maxvideos", maxvideos, new CookieOptions
 		{
 			Expires = DateTimeOffset.MaxValue
 		});

@@ -1,9 +1,9 @@
-﻿<div style="display: flex;align-items: center;justify-content: center">
+﻿@using Humanizer
+<div style="display: flex;align-items: center;justify-content: center">
 	<h1 style="color:var(--text-primary);text-align:center;height:10%">@Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")</h1>
 </div>
 @if (Model.Videos is not null)
 {
-	@using Humanizer
 
 	<div class="renderer-gridrenderer">
 
