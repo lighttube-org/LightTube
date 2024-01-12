@@ -85,6 +85,8 @@ public class SettingsController : Controller
 		try
 		{
 			IFormFile file = Request.Form.Files[0];
+			if (file.Length is 0 or > 10 * 1024 * 1024)
+				return View(new ImportContext(HttpContext, "Imported file cannot be larger than 10 megabytes.", true));
 			using Stream fileStream = file.OpenReadStream();
 			using MemoryStream memStr = new();
 			fileStream.CopyTo(memStr);
