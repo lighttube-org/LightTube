@@ -25,8 +25,8 @@ public class ChannelContext : BaseContext
 	{
 		Id = id;
 		CurrentTab = tab;
-		BannerUrl = channel.Header?.Banner.Last().Url.ToString() ?? "";
-		AvatarUrl = channel.Header?.Avatars.Last().Url.ToString() ?? "";
+		BannerUrl = channel.Header?.Banner.LastOrDefault()?.Url.ToString();
+		AvatarUrl = channel.Header?.Avatars.LastOrDefault()?.Url.ToString() ?? "";
 		ChannelTitle = channel.Header?.Title ?? "";
 		SubscriberCountText = channel.Header?.SubscriberCountText ?? "";
 		LightTubeAccount = false;
@@ -68,7 +68,7 @@ public class ChannelContext : BaseContext
 	{
 		Id = id;
 		CurrentTab = tab;
-		BannerUrl = channel.Header?.Banner.Last().Url.ToString() ?? "";
+		BannerUrl = channel.Header?.Banner.LastOrDefault()?.Url.ToString();
 		AvatarUrl = channel.Header?.Avatars.Last().Url.ToString() ?? "";
 		ChannelTitle = channel.Header?.Title ?? "";
 		SubscriberCountText = channel.Header?.SubscriberCountText ?? "";
