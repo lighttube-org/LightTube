@@ -4,6 +4,7 @@ using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace LightTube.Controllers;
 
@@ -124,7 +125,7 @@ public class SettingsController : Controller
 					{
 						Task.WaitAll(channelTasks, TimeSpan.FromSeconds(30));
 						sp.Stop();
-						Console.WriteLine(
+						Log.Debug(
 							$"Subscribed to {channelTasks.Length} more channels in {sp.Elapsed}.");
 					}
 					catch (Exception)
@@ -150,7 +151,7 @@ public class SettingsController : Controller
 							}
 							catch (Exception e)
 							{
-								Console.WriteLine("error/video: " + e.Message);
+								Log.Error("error/video: " + e.Message);
 							}
 						}))
 						.ToArray();
@@ -159,16 +160,16 @@ public class SettingsController : Controller
 					{
 						Task.WaitAll(videoTasks, TimeSpan.FromSeconds(30));
 						sp.Stop();
-						Console.WriteLine(
+						Log.Debug(
 							$"Got {videoTasks.Length} more videos in {sp.Elapsed}. {videoNexts.Count} success");
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("Error while getting videos\n" + e);
+						Log.Error("Error while getting videos\n" + e);
 					}
 				}
 
-				Console.WriteLine(
+				Log.Debug(
 					$"From {videos.Length} videos, got {videoNexts.Count} videos.");
 
 				foreach (ImportedData.Playlist playlist in playlists)
