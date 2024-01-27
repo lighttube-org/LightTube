@@ -8,16 +8,21 @@ using Serilog.Events;
 
 
 Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
     .WriteTo.Console()
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .CreateLogger();
+    .CreateBootstrapLogger();
 
 try
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-    
-    builder.Host.UseSerilog();
- 
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.Console());
+
 // Add services to the container.
     builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 
