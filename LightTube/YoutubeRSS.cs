@@ -1,79 +1,120 @@
-using System.Net;
-using System.Xml.Linq;
+using InnerTube;
+using InnerTube.Renderers;
 
 namespace LightTube;
 
 public static class YoutubeRSS
 {
-    private static HttpClient _httpClient = new();
+	private static InnerTube.InnerTube _innerTube = new();
 
-    public static async Task<ChannelFeed> GetChannelFeed(string channelId)
-    {
-        HttpResponseMessage response =
-            await _httpClient.GetAsync("https://www.youtube.com/feeds/videos.xml?channel_id=" + channelId);
-        if (!response.IsSuccessStatusCode)
-            return new ChannelFeed
-            {
-                Name = $"Failed to get channel videos: HTTP {(int)response.StatusCode}",
-                Id = channelId,
-                Videos = Array.Empty<FeedVideo>()
-            };
-//            throw response.StatusCode switch
-//            {
-//                HttpStatusCode.NotFound => new KeyNotFoundException($"Channel '{channelId}' does not exist"),
-//                var _ => new Exception("Failed to fetch RSS feed for channel " + channelId)
-//            };
+	/*
+	 * BANDAID CODE AFTER YOUTUBE REMOVED THE RSS ENDPOINT
+	 * PLEASE, *PLEASE* DONT USE THIS IN v3
+	 *
+	 * here have a nyan cat
+	 *
+	 * ⠀⠀⠀ ⠀⠀⠀⢀⣀⣀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠀⠀
+	 *  ⠀⠀⠀⠀⠀⠀⣾⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⢀⠀⠈⡇⠀⠀⠀⠀
+	 *  ⠀⠀⠀⠀⠀⠀⣿⠀⠁⠀⠘⠁⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠈⠀⠀⡇⠀⠀⠀⠀
+	 *  ⣀⣀⣀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠄⠀⠀⠸⢰⡏⠉⠳⣄⠰⠀⠀⢰⣷⠶⠛⣧⠀
+	 *  ⢻⡀⠈⠙⠲⡄⣿⠀⠀⠀⠀⠀⠀⠀⠠⠀⢸⠀⠀⠀⠈⠓⠒⠒⠛⠁⠀⠀⣿⠀
+	 *  ⠀⠻⣄⠀⠀⠙⣿⠀⠀⠀⠈⠁⠀⢠⠄⣰⠟⠀⢀⡔⢠⠀⠀⠀⠀⣠⠠⡄⠘⢧
+	 *  ⠀⠀⠈⠛⢦⣀⣿⠀⠀⢠⡆⠀⠀⠈⠀⣯⠀⠀⠈⠛⠛⠀⠠⢦⠄⠙⠛⠃⠀⢸
+	 *  ⠀⠀⠀⠀⠀⠉⣿⠀⠀⠀⢠⠀⠀⢠⠀⠹⣆⠀⠀⠀⠢⢤⠠⠞⠤⡠⠄⠀⢀⡾
+	 *  ⠀⠀⠀⠀⠀⢀⡿⠦⢤⣤⣤⣤⣤⣤⣤⣤⡼⣷⠶⠤⢤⣤⣤⡤⢤⡤⠶⠖⠋⠀
+	 *  ⠀⠀⠀⠀⠀⠸⣤⡴⠋⠸⣇⣠⠼⠁⠀⠀⠀⠹⣄⣠⠞⠀⢾⡀⣠⠃⠀⠀⠀⠀
+	 *  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠁⠀⠀⠀⠀⠀
+	 */
+	public static async Task<ChannelFeed> GetChannelFeed(string channelId)
+	{
+		try
+		{
+			InnerTubeChannelResponse response = await _innerTube.GetChannelAsync(channelId, ChannelTabs.Videos);
+			DateTimeOffset reference = new(DateTime.Today);
+			List<FeedVideo> videos = new();
 
-        ChannelFeed feed = new();
+			foreach (IRenderer renderer in response.Contents.Select(x =>
+				         x is RichItemRenderer rir ? rir.Content : x
+			         ))
+			{
+				if (renderer is VideoRenderer video)
+				{
+					videos.Add(new FeedVideo
+					{
+						Id = video.Id,
+						Title = video.Title,
+						Description = video.Description,
+						ViewCount = (long)InnerTube.Utils.ParseNumber(video.ViewCount),
+						Thumbnail = video.Thumbnails.FirstOrDefault()?.Url.ToString() ?? "",
+						ChannelName = response.Metadata.Title,
+						ChannelId = response.Metadata.Id,
+						PublishedDate = ParseTimeAgo(reference, video.Published ?? "1 year ago")
+					});
+				}
+			}
 
-        string xml = await response.Content.ReadAsStringAsync();
-        XDocument doc = XDocument.Parse(xml);
+			return new ChannelFeed
+			{
+				Name = response.Metadata.Title,
+				Id = response.Metadata.Id,
+				Videos = videos.ToArray()
+			};
+		}
+		catch (Exception)
+		{
+			return new ChannelFeed
+			{
+				Name = "Failed to get videos for channel " + channelId,
+				Id = channelId
+			};
+		}
+	}
 
-        feed.Name = doc.Descendants().First(p => p.Name.LocalName == "title").Value;
-        feed.Id = doc.Descendants().First(p => p.Name.LocalName == "channelId").Value;
-        feed.Videos = doc.Descendants().Where(p => p.Name.LocalName == "entry").Select(x => new FeedVideo
-        {
-            Id = x.Descendants().First(p => p.Name.LocalName == "videoId").Value,
-            Title = x.Descendants().First(p => p.Name.LocalName == "title").Value,
-            Description = x.Descendants().First(p => p.Name.LocalName == "description").Value,
-            ViewCount = long.Parse(x.Descendants().First(p => p.Name.LocalName == "statistics").Attribute("views")?.Value ?? "-1"),
-            Thumbnail = x.Descendants().First(p => p.Name.LocalName == "thumbnail").Attribute("url")?.Value,
-            ChannelName = x.Descendants().First(p => p.Name.LocalName == "name").Value,
-            ChannelId = x.Descendants().First(p => p.Name.LocalName == "channelId").Value,
-            PublishedDate = DateTimeOffset.Parse(x.Descendants().First(p => p.Name.LocalName == "published").Value)
-        }).ToArray();
+	public static DateTimeOffset ParseTimeAgo(DateTimeOffset reference, string time)
+	{
+		string[] parts = time.ToLower().Split(" ");
+		int amount = int.Parse(parts[0]);
+		return parts[1].TrimEnd('s') switch
+		{
+			"second" => reference.AddSeconds(-amount),
+			"minute" => reference.AddMinutes(-amount),
+			"hour" => reference.AddHours(-amount),
+			"day" => reference.AddDays(-amount),
+			"week" => reference.AddDays(-amount * 7),
+			"month" => reference.AddMonths(-amount),
+			"year" => reference.AddYears(-amount),
+			_ => throw new KeyNotFoundException("Unknown timeago metric, " + parts[1].TrimEnd('s'))
+		};
+	}
 
-        return feed;
-    }
+	public static async Task<FeedVideo[]> GetMultipleFeeds(IEnumerable<string> channelIds)
+	{
+		Task<ChannelFeed>[] feeds = channelIds.Select(GetChannelFeed).ToArray();
+		await Task.WhenAll(feeds);
 
-    public static async Task<FeedVideo[]> GetMultipleFeeds(IEnumerable<string> channelIds)
-    {
-        Task<ChannelFeed>[] feeds = channelIds.Select(YoutubeRSS.GetChannelFeed).ToArray();
-        await Task.WhenAll(feeds);
+		List<FeedVideo> videos = new();
+		foreach (ChannelFeed feed in feeds.Select(x => x.Result)) videos.AddRange(feed.Videos);
 
-        List<FeedVideo> videos = new();
-        foreach (ChannelFeed feed in feeds.Select(x => x.Result)) videos.AddRange(feed.Videos);
-
-        videos.Sort((a, b) => DateTimeOffset.Compare(b.PublishedDate, a.PublishedDate));
-        return videos.ToArray();
-    }
+		videos.Sort((a, b) => DateTimeOffset.Compare(b.PublishedDate, a.PublishedDate));
+		return videos.ToArray();
+	}
 }
 
 public class ChannelFeed
 {
-    public string Name;
-    public string Id;
-    public FeedVideo[] Videos;
+	public string Name;
+	public string Id;
+	public FeedVideo[] Videos;
 }
 
 public class FeedVideo
 {
-    public string Id;
-    public string Title;
-    public string Description;
-    public long ViewCount;
-    public string Thumbnail;
-    public string ChannelName;
-    public string ChannelId;
-    public DateTimeOffset PublishedDate;
+	public string Id;
+	public string Title;
+	public string Description;
+	public long ViewCount;
+	public string Thumbnail;
+	public string ChannelName;
+	public string ChannelId;
+	public DateTimeOffset PublishedDate;
 }
