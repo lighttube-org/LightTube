@@ -30,7 +30,7 @@ public static class YoutubeRSS
 		try
 		{
 			InnerTubeChannelResponse response = await _innerTube.GetChannelAsync(channelId, ChannelTabs.Videos);
-			DateTimeOffset reference = new(DateTime.Today);
+			DateTimeOffset reference = DateTimeOffset.Now;
 			List<FeedVideo> videos = new();
 
 			foreach (IRenderer renderer in response.Contents.Select(x =>
