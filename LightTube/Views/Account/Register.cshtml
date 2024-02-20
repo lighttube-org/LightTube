@@ -5,7 +5,7 @@
 	Model.HtmlTitle = "Create an account";
 }
 
-@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "false") != "false")
+@if (!Configuration.RegistrationEnabled)
 {
 	<p>This instance doesn't allow account registrations</p>	
 

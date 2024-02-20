@@ -57,11 +57,11 @@ public class BaseContext
 	public bool IsDarkMode()
 	{
 		if (Context.Request.Cookies.TryGetValue("theme", out string? theme)) return theme == "dark";
-		return Configuration.GetVariable("LIGHTTUBE_DEFAULT_THEME", "light") == "dark";
+		return Configuration.DefaultTheme == "dark";
 	}
 
 	public string GetThemeClass() =>
 		Context.Request.Cookies.TryGetValue("theme", out string? theme)
 			? $"theme-{theme}"
-			: $"theme-{Configuration.GetVariable("LIGHTTUBE_DEFAULT_THEME", "auto")}";
+			: $"theme-{Configuration.DefaultTheme}";
 }

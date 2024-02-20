@@ -28,15 +28,14 @@ public class ApiController : Controller
 		{
 			Type = "lighttube",
 			Version = Utils.GetVersion(),
-			Messages = Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")!.Split("\n"),
-			Alert = Configuration.GetVariable("LIGHTTUBE_ALERT"),
+			Messages = Configuration.Messages,
+			Alert = Configuration.Alert,
 			Config = new Dictionary<string, object>()
 			{
-				["allowsApi"] = Configuration.GetVariable("LIGHTTUBE_DISABLE_API", "")?.ToLower() != "true",
-				["allowsNewUsers"] = Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "")?.ToLower() != "true",
-				["allowsOauthApi"] = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true",
-				["allowsThirdPartyProxyUsage"] =
-					Configuration.GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true"
+				["allowsApi"] = Configuration.ApiEnabled,
+				["allowsNewUsers"] = Configuration.RegistrationEnabled,
+				["allowsOauthApi"] = Configuration.OauthEnabled,
+				["allowsThirdPartyProxyUsage"] = Configuration.ThirdPartyProxyEnabled
 			}
 		};
 

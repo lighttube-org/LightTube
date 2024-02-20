@@ -32,14 +32,14 @@ public static class Utils
 			? h.ToString()
 			: context.Request.Cookies.TryGetValue("gl", out string region)
 				? region
-				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
+				: Configuration.DefaultContentRegion;
 
 	public static string GetLanguage(this HttpContext context) =>
 		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
 			? h.ToString()
 			: context.Request.Cookies.TryGetValue("hl", out string language)
 				? language
-				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
+				: Configuration.DefaultContentLanguage;
 
 	public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
 		context.Request.Cookies.TryGetValue("recommendations", out string recommendations)

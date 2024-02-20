@@ -25,18 +25,12 @@ public class HomeController : Controller
 	[Route("/css/custom.css")]
 	public IActionResult CustomCss()
 	{
-		string? fileName = Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
+		string? fileName = Configuration.CustomCssPath;
 
-		if (fileName != null)
-		{
-			using FileStream fs = System.IO.File.OpenRead(fileName);
-			using StreamReader sr = new(fs);
-			string contents = sr.ReadToEnd();
-			fs.Close();
-			return File(Encoding.UTF8.GetBytes(contents), "text/css");
-		}
-
-		return NotFound();
+		if (fileName == null) return NotFound();
+		
+		using FileStream fs = System.IO.File.OpenRead(fileName);
+		return File(fs, "text/css");
 	}
 
 	[Route("/lib/{name}")]

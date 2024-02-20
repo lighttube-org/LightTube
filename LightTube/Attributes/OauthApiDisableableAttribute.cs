@@ -17,7 +17,7 @@ public class OauthApiDisableableAttribute : Attribute, IActionFilter
 
 	public void OnActionExecuting(ActionExecutingContext context)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true") return;
+		if (Configuration.OauthEnabled) return;
 		context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 		context.Result = new ContentResult();
 	}
