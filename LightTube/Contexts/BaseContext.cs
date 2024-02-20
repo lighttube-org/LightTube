@@ -53,13 +53,6 @@ public class BaseContext
 		return Context.Request.Cookies.TryGetValue("lastSearch", out string? q) ? q : null;
 	}
 
-	[Obsolete("Use GetThemClass instead")]
-	public bool IsDarkMode()
-	{
-		if (Context.Request.Cookies.TryGetValue("theme", out string? theme)) return theme == "dark";
-		return Configuration.DefaultTheme == "dark";
-	}
-
 	public string GetThemeClass() =>
 		Context.Request.Cookies.TryGetValue("theme", out string? theme)
 			? $"theme-{theme}"
