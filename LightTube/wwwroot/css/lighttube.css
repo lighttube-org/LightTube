@@ -1159,39 +1159,46 @@ input#comments-toggle {
 /* Channel Page */
 
 .channel-banner {
-    width: 100%;
+    /*! width: 100%; */
+    margin-left: 16px;
+    margin-right: 16px;
 }
 
 .channel-banner__img {
     width: 100%;
+    aspect-ratio: 6;
+    background-color: var(--thumbnail-background);
+    max-width: 1200px;
+    margin: auto;
+    display: block;
+    border-radius: 16px;
 }
 
 .channel-info {
     max-width: 1200px;
-    margin: 16px auto 4px;
+    margin: 16px 16px 4px 16px;
+}
+
+.channel-info__container {
+    margin: auto;
+    max-width: 1200px;
+    width: 100%;
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 24px;
 }
 
-@media screen and (max-width: 700px) {
-    .channel-info {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-}
-
 .channel-info__avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 40px;
+    background-color: var(--thumbnail-background);
+    width: 160px;
+    height: 160px;
+    border-radius: 80px;
 }
 
 .channel-info__info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 12px;
 }
 
 .channel-info__info > * {
@@ -1199,8 +1206,8 @@ input#comments-toggle {
 }
 
 .channel-info__name {
-    font-size: 1.5rem;
-    font-weight: 450;
+    font-size: 2rem;
+    font-weight: bold;
 }
 
 .channel-info__buttons {
@@ -1208,16 +1215,18 @@ input#comments-toggle {
 }
 
 .channel-tabs {
-    width: 100%;
+    /*! width: 100%; */
     border-bottom: 1px solid var(--border-color);
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .channel-tabs__container {
     max-width: 1200px;
     margin: auto;
     font-size: 1rem;
-    text-transform: uppercase;
     display: flex;
+    gap: 24px;
 }
 
 @media screen and (max-width: 1000px) {
@@ -1233,11 +1242,11 @@ input#comments-toggle {
     line-height: 48px;
     height: 48px;
     display: inline-block;
-    padding: 0 32px;
+    /*! padding: 0 32px; */
+    font-size: 1.1rem;
 }
 
 .channel-tabs__item:hover {
-    color: var(--text-primary);
 }
 
 .channel-tabs__item.active {
@@ -1528,7 +1537,7 @@ code {
 .ltp-root .ltp-skip {
     border-right: none;
     border-top-left-radius: calc(16px + 1rem);
-    border-bottom-left-radius: calc(16px + 1rem);  
+    border-bottom-left-radius: calc(16px + 1rem);
 }
 
 .input-file::file-selector-button {
