@@ -4,6 +4,7 @@ using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace LightTube.Controllers;
 
@@ -34,7 +35,7 @@ public class SettingsController : Controller
 
 	[Route("appearance")]
 	[HttpPost]
-	public IActionResult Appearance(string hl, string gl, string theme, string recommendations, string compatibility)
+	public IActionResult Appearance(string hl, string gl, string theme, string recommendations, string compatibility, string maxvideos)
 	{
 		Response.Cookies.Append("hl", hl, new CookieOptions
 		{
@@ -53,6 +54,10 @@ public class SettingsController : Controller
 			Expires = DateTimeOffset.MaxValue
 		});
 		Response.Cookies.Append("compatibility", recommendations == "on" ? "true" : "false", new CookieOptions
+		{
+			Expires = DateTimeOffset.MaxValue
+		});
+  		Response.Cookies.Append("maxvideos", maxvideos, new CookieOptions
 		{
 			Expires = DateTimeOffset.MaxValue
 		});
@@ -81,6 +86,8 @@ public class SettingsController : Controller
 		try
 		{
 			IFormFile file = Request.Form.Files[0];
+			if (file.Length is 0 or > 10 * 1024 * 1024)
+				return View(new ImportContext(HttpContext, "Imported file cannot be larger than 10 megabytes.", true));
 			using Stream fileStream = file.OpenReadStream();
 			using MemoryStream memStr = new();
 			fileStream.CopyTo(memStr);
@@ -118,7 +125,7 @@ public class SettingsController : Controller
 					{
 						Task.WaitAll(channelTasks, TimeSpan.FromSeconds(30));
 						sp.Stop();
-						Console.WriteLine(
+						Log.Debug(
 							$"Subscribed to {channelTasks.Length} more channels in {sp.Elapsed}.");
 					}
 					catch (Exception)
@@ -144,7 +151,7 @@ public class SettingsController : Controller
 							}
 							catch (Exception e)
 							{
-								Console.WriteLine("error/video: " + e.Message);
+								Log.Error("error/video: " + e.Message);
 							}
 						}))
 						.ToArray();
@@ -153,16 +160,16 @@ public class SettingsController : Controller
 					{
 						Task.WaitAll(videoTasks, TimeSpan.FromSeconds(30));
 						sp.Stop();
-						Console.WriteLine(
+						Log.Debug(
 							$"Got {videoTasks.Length} more videos in {sp.Elapsed}. {videoNexts.Count} success");
 					}
 					catch (Exception e)
 					{
-						Console.WriteLine("Error while getting videos\n" + e);
+						Log.Error("Error while getting videos\n" + e);
 					}
 				}
 
-				Console.WriteLine(
+				Log.Debug(
 					$"From {videos.Length} videos, got {videoNexts.Count} videos.");
 
 				foreach (ImportedData.Playlist playlist in playlists)

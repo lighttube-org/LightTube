@@ -14,7 +14,7 @@ public class HomeController : Controller
 		_logger = logger;
 	}
 
-	public IActionResult Index() => View(new BaseContext(HttpContext));
+	public IActionResult Index() => View(new HomepageContext(HttpContext));
 
 	[Route("/rss")]
 	public IActionResult Rss() => View(new BaseContext(HttpContext));

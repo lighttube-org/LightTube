@@ -34,7 +34,6 @@ public static class DatabaseManager
 		Oauth2 = new Oauth2Manager(Oauth2TokensCollection);
 		Playlists = new PlaylistManager(PlaylistCollection, VideoCacheCollection);
 
-		ChoreManager.QueueChore("MigrateData");
 		ChoreManager.QueueChore("DatabaseCleanup");
 	}
 }

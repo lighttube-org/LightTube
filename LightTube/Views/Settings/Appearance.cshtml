@@ -53,9 +53,24 @@
 
 <div class="settings-option">
 	<div class="settings-option__info">
+		<div class="ml-2 title">
+			Last videos
+		</div>
+		<div>
+			Show last n videos from subscribed feed on homepage
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<input type="number" name="maxvideos" value="@(Context.Request.Cookies["maxvideos"] is null ? "5":Context.Request.Cookies["maxvideos"])" />
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
 		<div class="ml-1 title">
 			Content Language
 		</div>
+		
 		<div>
 			Only affects video title & descriptions
 		</div>

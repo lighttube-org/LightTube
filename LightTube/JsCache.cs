@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Serilog;
 
 namespace LightTube;
 
@@ -19,15 +20,15 @@ public static class JsCache
 	{
 		HttpClient client = new();
 		Directory.CreateDirectory("/tmp/lighttube/jsCache");
-		Console.WriteLine("[JsCache] Downloading libraries...");
+		Log.Information("[JsCache] Downloading libraries...");
 		foreach ((string? name, Uri? url) in LibraryUrls)
 		{
-			Console.WriteLine($"[JsCache] Downloading '{name}' from {url}");
+			Log.Information($"[JsCache] Downloading '{name}' from {url}");
 
 			HttpResponseMessage response = await client.GetAsync(url);
 			string jsData = await response.Content.ReadAsStringAsync();
 			await File.WriteAllTextAsync($"/tmp/lighttube/jsCache/{name}", jsData);
-			Console.WriteLine($"[JsCache] Calculating the MD5 hash of {name}...");
+			Log.Debug($"[JsCache] Calculating the MD5 hash of {name}...");
 			
 			using MD5 md5 = MD5.Create();
 			byte[] inputBytes = Encoding.ASCII.GetBytes(jsData);
@@ -36,7 +37,7 @@ public static class JsCache
 
 			Hashes[name] = hash;
 			
-			Console.WriteLine($"[JsCache] Downloaded '{name}'.");
+			Log.Information($"[JsCache] Downloaded '{name}'.");
 		}
 		CacheUpdateTime = DateTimeOffset.UtcNow;
 	}

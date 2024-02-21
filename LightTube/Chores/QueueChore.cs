@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Serilog;
 
 namespace LightTube.Chores;
 
@@ -20,7 +21,7 @@ public class QueueChore
 
 	public void Start()
 	{
-		Console.WriteLine($"[CHORE] [{Chore.Id}] Chore started");
+		Log.Information($"[CHORE] [{Chore.Id}] Chore started");
 		Running = true;
 		Stopwatch.Start();
 		Chore.RunChore(s => Status = s, Id)
@@ -29,7 +30,7 @@ public class QueueChore
 				Stopwatch.Stop();
 				Running = false;
 				Complete = true;
-				Console.WriteLine($"[CHORE] [{Chore.Id}] Chore complete in {Stopwatch.Elapsed}\n{task.Result}");
+				Log.Information($"[CHORE] [{Chore.Id}] Chore complete in {Stopwatch.Elapsed}\n{task.Result}");
 				ChoreManager.NextChore();
 			});
 	}
