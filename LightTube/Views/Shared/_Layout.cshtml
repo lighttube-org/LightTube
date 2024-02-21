@@ -17,6 +17,7 @@
 	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="https://@Context.Request.Host.Value/feed/rss.xml">
 	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
 	{
 		<link rel="stylesheet" href="/css/custom.css">
