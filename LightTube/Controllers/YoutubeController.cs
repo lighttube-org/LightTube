@@ -7,18 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
 
-public class YoutubeController : Controller
+public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) : Controller
 {
-	private readonly InnerTube.InnerTube _youtube;
-	private readonly HttpClient _client;
+	private readonly InnerTube.InnerTube _youtube = youtube;
+	private readonly HttpClient _client = client;
 
-	public YoutubeController(InnerTube.InnerTube youtube, HttpClient client)
-	{
-		_youtube = youtube;
-		_client = client;
-	}
-
-	[Route("/embed/{v}")]
+    [Route("/embed/{v}")]
 	public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false)
 	{
 		InnerTubePlayer player;
