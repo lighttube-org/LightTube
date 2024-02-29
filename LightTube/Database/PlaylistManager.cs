@@ -6,22 +6,16 @@ using Newtonsoft.Json.Linq;
 
 namespace LightTube.Database;
 
-public class PlaylistManager
+public class PlaylistManager(
+    IMongoCollection<DatabasePlaylist> playlistCollection,
+    IMongoCollection<DatabaseVideo> videoCacheCollection)
 {
 	private const string INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE = "{\"videoId\":\"%%ID%%\",\"isPlayable\":true,\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"title\":{\"runs\":[{\"text\":\"%%TITLE%%\"}]},\"index\":{\"simpleText\":\"%%INDEX%%\"},\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"navigationEndpoint\":{\"watchEndpoint\":{\"videoId\":\"%%ID%%\"}},\"lengthSeconds\":\"%%DURATION_SECONDS%%\",\"isPlayable\":true,\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"simpleText\":\"%%DURATION%%\"}}}],\"videoInfo\":{\"runs\":[{\"text\":\"%%VIEWS%%\"},{\"text\":\" • \"},{\"text\":\"%%UPLOADED_AT%%\"}]}}";
 	private const string INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE = "{\"title\":{\"simpleText\":\"%%TITLE%%\"},\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"indexText\":{\"simpleText\":\"%%INDEX%%\"},\"selected\":%%SELECTED%%,\"navigationEndpoint\":{\"watchEndpoint\":{\"params\":\"OAE%3D\"}},\"videoId\":\"%%ID%%\",\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]}}";
-	public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; }
-	public IMongoCollection<DatabaseVideo> VideoCacheCollection { get; }
+    public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; } = playlistCollection;
+    public IMongoCollection<DatabaseVideo> VideoCacheCollection { get; } = videoCacheCollection;
 
-	public PlaylistManager(
-		IMongoCollection<DatabasePlaylist> playlistCollection,
-		IMongoCollection<DatabaseVideo> videoCacheCollection)
-	{
-		PlaylistCollection = playlistCollection;
-		VideoCacheCollection = videoCacheCollection;
-	}
-
-	public DatabasePlaylist? GetPlaylist(string id) => PlaylistCollection.FindSync(x => x.Id == id).FirstOrDefault();
+    public DatabasePlaylist? GetPlaylist(string id) => PlaylistCollection.FindSync(x => x.Id == id).FirstOrDefault();
 
 	public IEnumerable<DatabasePlaylist> GetUserPlaylists(string userId, PlaylistVisibility minVisibility)
 	{

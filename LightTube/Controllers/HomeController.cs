@@ -5,16 +5,11 @@ using Microsoft.Net.Http.Headers;
 
 namespace LightTube.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ILogger<HomeController> logger) : Controller
 {
-	private readonly ILogger<HomeController> _logger;
+	private readonly ILogger<HomeController> _logger = logger;
 
-	public HomeController(ILogger<HomeController> logger)
-	{
-		_logger = logger;
-	}
-
-	public IActionResult Index() => View(new HomepageContext(HttpContext));
+    public IActionResult Index() => View(new HomepageContext(HttpContext));
 
 	[Route("/rss")]
 	public IActionResult Rss() => View(new BaseContext(HttpContext));

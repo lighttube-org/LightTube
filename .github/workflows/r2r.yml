@@ -21,7 +21,6 @@ jobs:
           - linux-arm
           - linux-arm64
           - osx-x64
-          - osx.11.0-arm64
 
     if: |
       !contains(github.event.head_commit.message, 'skip ci')
@@ -32,11 +31,11 @@ jobs:
       contents: write # In order to be able to push releases
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -47,7 +46,7 @@ jobs:
       run: dotnet publish -c Release -r ${{ matrix.platform }} -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunShowWarnings=true -p:PublishTrimmed=true -p:TrimMode=partial --self-contained true
 
     - name: Upload binaries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.platform }} R2R Binaries
         path: '*/bin/Release/*/${{ matrix.platform }}/publish/'
@@ -64,7 +63,7 @@ jobs:
     - name: Create Release
       # You may pin to the exact commit or the version.
       # uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e
-      uses: ncipollo/release-action@v1.12.0
+      uses: ncipollo/release-action@v1.13.0
       if: |
         github.event_name == 'push' && github.ref == 'refs/heads/master'
       with:

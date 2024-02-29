@@ -11,16 +11,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace LightTube.Controllers;
 
 [Route("/feed")]
-public class FeedController : Controller
+public class FeedController(InnerTube.InnerTube youtube) : Controller
 {
-	private InnerTube.InnerTube _youtube;
+	private InnerTube.InnerTube _youtube = youtube;
 
-	public FeedController(InnerTube.InnerTube youtube)
-	{
-		_youtube = youtube;
-	}
-
-	[Route("subscriptions")]
+    [Route("subscriptions")]
 	public async Task<IActionResult> Subscription()
 	{
 		SubscriptionsContext ctx = new(HttpContext);
