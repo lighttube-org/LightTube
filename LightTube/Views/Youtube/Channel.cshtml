@@ -15,14 +15,12 @@
 		</div>
 	}
 	<div class="channel-info">
-		<img loading="lazy" class="channel-info__avatar" src="@Model.AvatarUrl" alt="@Model.ChannelTitle">
-		<div class="channel-info__info">
-			<span class="channel-info__name ml-1 title">@Model.ChannelTitle</span>
-			<!--span class="channel-info__username">TODO</span-->
-			<span class="channel-info__subs">@Model.SubscriberCountText</span>
-		</div>
-		<div class="flex-divider"></div>
-			<div class="channel-info__buttons">
+		<div class="channel-info__container">
+			<img loading="lazy" class="channel-info__avatar" src="@Model.AvatarUrl" alt="@Model.ChannelTitle">
+			<div class="channel-info__info">
+				<span class="channel-info__name ml-1 title">@Model.ChannelTitle</span>
+				<!-- TODO follow format @@handle • @Model.SubscriberCountText • @@Model.VideoCountText  -->
+				<span class="channel-info__subs">@Model.SubscriberCountText</span>
 				@if (!Model.LightTubeAccount)
 				{
 					<partial name="SubscribeButton" model="Model.Id"/>
@@ -33,7 +31,8 @@
 						<span class="text">Account Settings</span>
 					</a>
 				}
-			</div>
+		</div>
+		</div>
 	</div>
 	<div class="channel-tabs">
 		<div class="channel-tabs__container">
