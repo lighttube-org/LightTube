@@ -30,7 +30,7 @@ public class PlayerContext : BaseContext
 		UseHls = !compatibility; // Prefer HLS
 		UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;
 		// Formats
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 		{
 			UseHls = false;
 			UseDash = false;

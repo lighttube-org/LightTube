@@ -25,7 +25,7 @@
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
 	<link rel="search" type="application/opensearchdescription+xml" title="LightTube" href="/opensearch/osdd.xml"/>
-	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
+	@if (Configuration.CustomCssPath != null)
 	{
 		<link rel="stylesheet" href="/css/custom.css">
 	}

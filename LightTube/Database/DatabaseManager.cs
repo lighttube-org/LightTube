@@ -21,7 +21,7 @@ public static class DatabaseManager
 	public static void Init(string connstr)
 	{
 		MongoClient client = new(connstr);
-		Database = client.GetDatabase(Configuration.GetVariable("LIGHTTUBE_MONGODB_DATABASE", "lighttube"));
+		Database = client.GetDatabase(Configuration.Database);
 		UserCollection = Database.GetCollection<DatabaseUser>("users");
 		TokensCollection = Database.GetCollection<DatabaseLogin>("tokens");
 		VideoCacheCollection = Database.GetCollection<DatabaseVideo>("videoCache");

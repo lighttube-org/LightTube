@@ -21,7 +21,7 @@ public class OAuth2Controller : Controller
 		[FromQuery(Name = "scope")] string? scope,
 		[FromQuery(Name = "state")] string? state = null)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
+		if (!Configuration.OauthEnabled)
 			return View(new OAuthContext("This instance does not allow OAuth2"));
 		if (string.IsNullOrEmpty(responseType))
 			return View(new OAuthContext("response_type cannot be empty"));
@@ -66,7 +66,7 @@ public class OAuth2Controller : Controller
 		[FromQuery(Name = "scope")] string scope,
 		[FromQuery(Name = "state")] string? state = null)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
+		if (!Configuration.OauthEnabled)
 			throw new Exception("Instance doesn't allow OAuth");
 
 		if (string.IsNullOrEmpty(responseType))
@@ -122,7 +122,7 @@ public class OAuth2Controller : Controller
 		[FromForm(Name = "client_id")] string clientId,
 		[FromForm(Name = "client_secret")] string clientSecret)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() == "true")
+		if (!Configuration.OauthEnabled)
 			return Unauthorized();
 		if (grantType is not ("code" or "authorization_code" or "refresh_token"))
 			return Unauthorized();
