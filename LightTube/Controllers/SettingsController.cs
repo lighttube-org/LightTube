@@ -53,7 +53,7 @@ public class SettingsController : Controller
 		{
 			Expires = DateTimeOffset.MaxValue
 		});
-		Response.Cookies.Append("compatibility", recommendations == "on" ? "true" : "false", new CookieOptions
+		Response.Cookies.Append("compatibility", compatibility == "on" ? "true" : "false", new CookieOptions
 		{
 			Expires = DateTimeOffset.MaxValue
 		});
