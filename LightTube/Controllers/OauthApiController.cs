@@ -11,11 +11,16 @@ namespace LightTube.Controllers;
 
 [Route("/api")]
 [ApiDisableable]
-public class OauthApiController(InnerTube.InnerTube youtube) : Controller
+public class OauthApiController : Controller
 {
-	private readonly InnerTube.InnerTube _youtube = youtube;
+	private readonly InnerTube.InnerTube _youtube;
 
-    private ApiResponse<T> Error<T>(string message, int code,
+	public OauthApiController(InnerTube.InnerTube youtube)
+	{
+		_youtube = youtube;
+	}
+
+	private ApiResponse<T> Error<T>(string message, int code,
 		HttpStatusCode statusCode)
 	{
 		Response.StatusCode = (int)statusCode;

@@ -10,14 +10,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace LightTube.Controllers;
 
 [Route("/api")]
-public class ApiController(InnerTube.InnerTube youtube) : Controller
+public class ApiController : Controller
 {
 	private const string VIDEO_ID_REGEX = @"[a-zA-Z0-9_-]{11}";
 	private const string CHANNEL_ID_REGEX = @"[a-zA-Z0-9_-]{24}";
 	private const string PLAYLIST_ID_REGEX = @"[a-zA-Z0-9_-]{34}";
-	private readonly InnerTube.InnerTube _youtube = youtube;
+	private readonly InnerTube.InnerTube _youtube;
 
-    [Route("info")]
+	public ApiController(InnerTube.InnerTube youtube)
+	{
+		_youtube = youtube;
+	}
+
+	[Route("info")]
 	public LightTubeInstanceInfo GetInstanceInfo() =>
 		new()
 		{

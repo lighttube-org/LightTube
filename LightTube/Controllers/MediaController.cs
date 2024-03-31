@@ -11,9 +11,9 @@ using Serilog;
 namespace LightTube.Controllers;
 
 [Route("/proxy")]
-public class ProxyController(InnerTube.InnerTube youtube) : Controller
+public class ProxyController : Controller
 {
-	private readonly InnerTube.InnerTube _youtube = youtube;
+	private readonly InnerTube.InnerTube _youtube;
 	private readonly HttpClient client = new HttpClient();
 
 	private string[] _blockedHeaders =
@@ -31,7 +31,12 @@ public class ProxyController(InnerTube.InnerTube youtube) : Controller
 		"cross-origin-resource-policy"
 	};
 
-    [Route("media/{videoId}/{formatId}")]
+	public ProxyController(InnerTube.InnerTube youtube)
+	{
+		_youtube = youtube;
+	}
+
+	[Route("media/{videoId}/{formatId}")]
 	[Route("media/{videoId}/{formatId}.{extension}")]
 	public async Task Media(string videoId, string formatId, string? audioTrackId, string? extension = null)
 	{

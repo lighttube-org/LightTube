@@ -2,7 +2,10 @@ using LightTube.Database.Models;
 
 namespace LightTube.Contexts;
 
-public class SubscriptionsContext(HttpContext context) : BaseContext(context)
+public class SubscriptionsContext : BaseContext
 {
 	public FeedVideo[] Videos;
+
+	public SubscriptionsContext(HttpContext context) : base(context)
+	{ }
 }

@@ -5,13 +5,19 @@ using MongoDB.Driver;
 
 namespace LightTube.Database;
 
-public class CacheManager(IMongoCollection<DatabaseChannel> channelCollection,
-    IMongoCollection<DatabaseVideo> videoCollection)
+public class CacheManager
 {
-	public IMongoCollection<DatabaseChannel> ChannelCollection = channelCollection;
-	public IMongoCollection<DatabaseVideo> VideoCollection = videoCollection;
+	public IMongoCollection<DatabaseChannel> ChannelCollection;
+	public IMongoCollection<DatabaseVideo> VideoCollection;
 
-    public async Task AddChannel(DatabaseChannel channel, bool updateOnly = false)
+	public CacheManager(IMongoCollection<DatabaseChannel> channelCollection,
+		IMongoCollection<DatabaseVideo> videoCollection)
+	{
+		ChannelCollection = channelCollection;
+		VideoCollection = videoCollection;
+	}
+
+	public async Task AddChannel(DatabaseChannel channel, bool updateOnly = false)
 	{
 		if (await ChannelCollection.CountDocumentsAsync(x => x.ChannelId == channel.ChannelId) > 0)
 			await ChannelCollection.ReplaceOneAsync(x => x.ChannelId == channel.ChannelId, channel);

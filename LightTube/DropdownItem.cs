@@ -1,8 +1,15 @@
 ﻿namespace LightTube;
 
-public class DropdownItem(string label, string target, string icon)
+public class DropdownItem
 {
-	public string Label = label;
-	public string Target = target;
-	public string Icon = icon;
+	public string Label;
+	public string Target;
+	public string Icon;
+
+	public DropdownItem(string label, string target, string icon)
+	{
+		Label = label;
+		Target = target;
+		Icon = icon;
+	}
 }

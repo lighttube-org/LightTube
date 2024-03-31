@@ -4,13 +4,20 @@ using Newtonsoft.Json;
 
 namespace LightTube;
 
-public class ImportedData(ImportSource source)
+public class ImportedData
 {
-	public ImportSource Source = source;
-	public List<Subscription> Subscriptions = new List<Subscription>();
-	public List<Playlist> Playlists = new List<Playlist>();
+	public ImportSource Source;
+	public List<Subscription> Subscriptions;
+	public List<Playlist> Playlists;
 
-    public override string ToString()
+	public ImportedData(ImportSource source)
+	{
+		Source = source;
+		Subscriptions = new List<Subscription>();
+		Playlists = new List<Playlist>();
+	}
+
+	public override string ToString()
 	{
 		StringBuilder sb = new();
 		sb.AppendLine("=== EXPORTED DATA ===")
