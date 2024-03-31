@@ -83,7 +83,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
 				region: HttpContext.GetRegion());
 		} catch { /* comments arent enabled, ignore */ }
 
-		int dislikes;
+		int dislikes, likes;
 		try
 		{
 			HttpResponseMessage rydResponse =
@@ -92,10 +92,12 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
 				JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
 					await rydResponse.Content.ReadAsStringAsync())!;
 			dislikes = rydJson["dislikes"].GetInt32();
+			likes = rydJson["likes"].GetInt32();
 		}
 		catch
 		{
 			dislikes = -1;
+			likes = -1;
 		} 
 		
 		SponsorBlockSegment[] sponsors;
@@ -116,15 +118,15 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
 			DatabasePlaylist? pl = DatabaseManager.Playlists.GetPlaylist(list);
 			if (player is null || e is not null)
 				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments,
-					dislikes));
-			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes, sponsors));
+					dislikes, likes));
+			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes, likes, sponsors));
 		}
 		else
 		{
 			if (player is null || e is not null)
 				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments,
-					dislikes));
-			return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, sponsors));
+					dislikes, likes));
+			return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, likes, sponsors));
 		}
 	}
 

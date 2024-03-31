@@ -43,7 +43,7 @@
 						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up"/>
 					</svg>
 					<div class="interaction-button__text">
-						@Model.Video.LikeCount
+						@(Model.Likes == -1 ? "Like" : Model.Likes.ToKMB())
 					</div>
 				</div>
 				<vr></vr>

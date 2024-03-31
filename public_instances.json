@@ -20,7 +20,12 @@
     "accounts": true
   },
   {
-    "host": "https://lighttube.plerx.de/",
+    "host": "https://lighttube.plerx.de",
+    "api": true,
+    "accounts": true
+  },
+  {
+    "host": "https://youtube.forsaken-borders.net",
     "api": true,
     "accounts": true
   }
