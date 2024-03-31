@@ -5,17 +5,25 @@ using MongoDB.Driver;
 
 namespace LightTube.Database;
 
-public class UserManager(IMongoCollection<DatabaseUser> userCollection,
-    IMongoCollection<DatabaseLogin> tokensCollection,
-    IMongoCollection<DatabasePlaylist> playlistCollection,
-    IMongoCollection<DatabaseOauthToken> oauth2TokensCollection)
+public class UserManager
 {
-    public IMongoCollection<DatabaseUser> UserCollection { get; } = userCollection;
-    public IMongoCollection<DatabaseLogin> TokensCollection { get; } = tokensCollection;
-    public IMongoCollection<DatabaseOauthToken> Oauth2TokensCollection { get; } = oauth2TokensCollection;
-    public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; } = playlistCollection;
+	public IMongoCollection<DatabaseUser> UserCollection { get; }
+	public IMongoCollection<DatabaseLogin> TokensCollection { get; }
+	public IMongoCollection<DatabaseOauthToken> Oauth2TokensCollection { get; }
+	public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; }
 
-    public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
+	public UserManager(IMongoCollection<DatabaseUser> userCollection,
+		IMongoCollection<DatabaseLogin> tokensCollection,
+		IMongoCollection<DatabasePlaylist> playlistCollection,
+		IMongoCollection<DatabaseOauthToken> oauth2TokensCollection)
+	{
+		UserCollection = userCollection;
+		TokensCollection = tokensCollection;
+		PlaylistCollection = playlistCollection;
+		Oauth2TokensCollection = oauth2TokensCollection;
+	}
+
+	public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
 	{
 		IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
 		if (!await users.AnyAsync())
@@ -124,11 +132,12 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
 	public async Task<(string channelId, SubscriptionType subscriptionType)> UpdateSubscription(string token,
 		string channelId, SubscriptionType type)
 	{
-		DatabaseUser? user = await GetUserFromToken(token) ?? throw new UnauthorizedAccessException();
+		DatabaseUser? user = await GetUserFromToken(token);
+		if (user is null) throw new UnauthorizedAccessException();
 
-        // TODO: update the channel cache
+		// TODO: update the channel cache
 
-        if (user.Subscriptions.ContainsKey(channelId))
+		if (user.Subscriptions.ContainsKey(channelId))
 			if (type == SubscriptionType.NONE)
 				user.Subscriptions.Remove(channelId);
 			else
@@ -138,7 +147,8 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
 
 		await UserCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
 
-		return user.Subscriptions.TryGetValue(channelId, out SubscriptionType value) ? (channelId, value)
+		return user.Subscriptions.ContainsKey(channelId)
+			? (channelId, user.Subscriptions[channelId])
 			: (channelId, SubscriptionType.NONE);
 	}
 

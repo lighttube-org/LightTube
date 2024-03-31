@@ -1,9 +1,17 @@
 ﻿namespace LightTube;
 
-public class GuideItem(string title, string iconId, string path, bool visibleOnMinifiedGuide)
+public class GuideItem
 {
-	public string Title = title;
-	public string IconId = iconId;
-	public string Path = path;
-	public bool VisibleOnMinifiedGuide = visibleOnMinifiedGuide;
+	public string Title;
+	public string IconId;
+	public string Path;
+	public bool VisibleOnMinifiedGuide;
+
+	public GuideItem(string title, string iconId, string path, bool visibleOnMinifiedGuide)
+	{
+		Title = title;
+		IconId = iconId;
+		Path = path;
+		VisibleOnMinifiedGuide = visibleOnMinifiedGuide;
+	}
 }
