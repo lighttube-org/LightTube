@@ -4,16 +4,11 @@ using MongoDB.Driver;
 
 namespace LightTube.Database;
 
-public class Oauth2Manager
+public class Oauth2Manager(IMongoCollection<DatabaseOauthToken> oauthTokensCollection)
 {
-	public IMongoCollection<DatabaseOauthToken> OauthTokensCollection { get; }
+    public IMongoCollection<DatabaseOauthToken> OauthTokensCollection { get; } = oauthTokensCollection;
 
-	public Oauth2Manager(IMongoCollection<DatabaseOauthToken> oauthTokensCollection)
-	{
-		OauthTokensCollection = oauthTokensCollection;
-	}
-
-	public async Task<string> CreateOauthToken(string loginToken, string clientId, string[] scopes)
+    public async Task<string> CreateOauthToken(string loginToken, string clientId, string[] scopes)
 	{
 		DatabaseUser user = (await DatabaseManager.Users.GetUserFromToken(loginToken))!;
 		string refreshToken = Utils.GenerateToken(512);
