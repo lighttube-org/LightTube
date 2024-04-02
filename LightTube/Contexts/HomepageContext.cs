@@ -7,6 +7,7 @@ namespace LightTube.Contexts
 		public FeedVideo[] Videos;
 		public HomepageContext(HttpContext context) : base(context)
 		{
+			AddRSSUrl(context.Request.Scheme + "://" + context.Request.Host + "/feed/rss.xml");
 			if (User != null)
 			{
 				Videos = Task.Run(async () =>

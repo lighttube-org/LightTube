@@ -43,6 +43,7 @@ public class ChannelContext : BaseContext
 		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
 		AddMeta("og:image", channel.Header?.Avatars.Last().Url.ToString() ?? "");
 		AddMeta("twitter:card", channel.Header?.Avatars.Last().Url.ToString() ?? "");
+		AddRSSUrl(context.Request.Scheme + "://" + context.Request.Host + "/feed/" + Id + "/rss.xml");
 
 		if (channel.Contents.Any(x => x is ChannelVideoPlayerRenderer || x is ItemSectionRenderer isr && isr.Contents.Any(y => y is ChannelVideoPlayerRenderer)))
 		{
@@ -85,6 +86,7 @@ public class ChannelContext : BaseContext
 		AddMeta("og:url", $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
 		AddMeta("og:image", channel.Header?.Avatars.Last().Url.ToString() ?? "");
 		AddMeta("twitter:card", channel.Header?.Avatars.Last().Url.ToString() ?? "");
+		AddRSSUrl(context.Request.Scheme + "://" + context.Request.Host + "/feed/" + Id + "/rss.xml");
 	}
 
 	public ChannelContext(HttpContext context, DatabaseUser? channel, string id) : base(context)
