@@ -66,6 +66,11 @@ public class YoutubeController : Controller
 			player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
 				HttpContext.GetRegion());
 			e = null;
+			if (player.Details.Id != v)
+			{
+				e = new Exception($"YouTube returned a different video than the requested one ({v} != {player.Details.Id})");
+				player = null;
+			}
 		}
 		catch (Exception ex)
 		{
