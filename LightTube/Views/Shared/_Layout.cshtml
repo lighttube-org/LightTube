@@ -17,6 +17,10 @@
 	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+	@foreach (IHtmlContent item in Model.rssElement)
+	{
+		@item
+	}
 	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
 	{
 		<link rel="stylesheet" href="/css/custom.css">
