@@ -11,7 +11,8 @@
 
 <div class="watch-page">
 	<input type="checkbox" id="comments-toggle">
-	<div class="player-container" style="color:white;margin-bottom:2rem">
+	<div class="player-container" style="color:white;margin-bottom:2rem;aspect-ratio:16/9">
+		<!-- TODO: Parse aspect ratio in InnerTube and put it here                   ^^^^ -->
 		<partial name="Player" model="Model.Player"/>
 		@if (!Model.Player.Player?.Details.IsLive ?? true)
 		{

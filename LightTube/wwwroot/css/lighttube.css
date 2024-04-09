@@ -748,8 +748,7 @@ body.no-guide .app {
     background-color: #000;
     max-width: var(--video-player-width-max);
     grid-area: player;
-    max-height: calc(100vh - 80px);
-    height: var(--video-player-height-max);
+    max-height: var(--video-player-height-max);
 }
 
 .player {
