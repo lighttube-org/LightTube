@@ -189,7 +189,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 			return Error<Dictionary<string, DatabaseChannel>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
 		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-		Dictionary<string, DatabaseChannel> channels = new();
+		Dictionary<string, DatabaseChannel> channels = [];
 		if (string.IsNullOrEmpty(channelId))
 		{
 			foreach (string id in user.Subscriptions.Keys)

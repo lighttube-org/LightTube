@@ -9,9 +9,9 @@ public class BaseContext
 {
 	public string Title;
 	public bool IsMobile;
-	public List<IHtmlContent> HeadTags = new();
-	public List<IHtmlContent> rssElement = new();
-	public List<IHtmlContent> EndTags = new();
+	public List<IHtmlContent> HeadTags = [];
+	public List<IHtmlContent> rssElement = [];
+	public List<IHtmlContent> EndTags = [];
 	public bool GuideHidden = false;
 	public HttpContext Context;
 	public DatabaseUser? User;

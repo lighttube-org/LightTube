@@ -45,9 +45,7 @@ public class ProxyController(InnerTube.InnerTube youtube) : Controller
 		try
 		{
 			InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
-			List<Format> formats = new();
-			formats.AddRange(player.Formats);
-			formats.AddRange(player.AdaptiveFormats);
+			List<Format> formats = [.. player.Formats, .. player.AdaptiveFormats];
 			if (formats.All(x => x.Itag != formatId))
 			{
 				Response.StatusCode = (int)HttpStatusCode.NotFound;

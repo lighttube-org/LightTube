@@ -7,8 +7,8 @@ public static class ChoreManager
 {
 	public static bool ChoreExecuting => _queue.Any(x => x.Value.Running);
 
-	private static Dictionary<string, Type> _chores = new();
-	private static Dictionary<Guid, QueueChore> _queue = new();
+	private static Dictionary<string, Type> _chores = [];
+	private static Dictionary<Guid, QueueChore> _queue = [];
 
 	public static void RegisterChores()
 	{

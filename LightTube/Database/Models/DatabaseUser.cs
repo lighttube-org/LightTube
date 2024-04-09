@@ -30,7 +30,7 @@ public class DatabaseUser
 		{
 			UserID = userId,
 			PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-			Subscriptions = new Dictionary<string, SubscriptionType>(),
+			Subscriptions = [],
 			LTChannelID = GetChannelId(userId)
 		};
 
@@ -39,7 +39,7 @@ public class DatabaseUser
 #pragma warning disable CS0618
 		if (SubscribedChannels is not null)
 		{
-			Subscriptions ??= new Dictionary<string, SubscriptionType>();
+			Subscriptions ??= [];
 			foreach (string id in SubscribedChannels)
 				if (!Subscriptions.ContainsKey(id))
 					Subscriptions.Add(id, SubscriptionType.NOTIFICATIONS_ON);

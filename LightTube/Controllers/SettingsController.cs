@@ -133,7 +133,7 @@ public class SettingsController(InnerTube.InnerTube youtube) : Controller
 			// import playlists
 			Task.Run(async () =>
 			{
-				Dictionary<string, InnerTubePlayer> videoNexts = new();
+				Dictionary<string, InnerTubePlayer> videoNexts = [];
 				foreach (string[] videoIds in videos.Chunk(100))
 				{
 					Stopwatch sp = Stopwatch.StartNew();

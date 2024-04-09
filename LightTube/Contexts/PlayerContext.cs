@@ -41,7 +41,7 @@ public class PlayerContext : BaseContext
 	{
 		if (Video.Chapters is null) return "[]";
 		ChapterRenderer[] c = Video.Chapters.ToArray();
-		List<LtVideoChapter> ltChapters = new();
+		List<LtVideoChapter> ltChapters = [];
 		for (int i = 0; i < c.Length; i++)
 		{
 			ChapterRenderer chapter = c[i];

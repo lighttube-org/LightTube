@@ -31,7 +31,7 @@ public static class YoutubeRSS
 		{
 			InnerTubeChannelResponse response = await _innerTube.GetChannelAsync(channelId, ChannelTabs.Videos);
 			DateTimeOffset reference = DateTimeOffset.Now;
-			List<FeedVideo> videos = new();
+			List<FeedVideo> videos = [];
 
 			foreach (IRenderer renderer in response.Contents.Select(x =>
 				         x is RichItemRenderer rir ? rir.Content : x
@@ -93,7 +93,7 @@ public static class YoutubeRSS
 		Task<ChannelFeed>[] feeds = channelIds.Select(GetChannelFeed).ToArray();
 		await Task.WhenAll(feeds);
 
-		List<FeedVideo> videos = new();
+		List<FeedVideo> videos = [];
 		foreach (ChannelFeed feed in feeds.Select(x => x.Result)) videos.AddRange(feed.Videos);
 
 		videos.Sort((a, b) => DateTimeOffset.Compare(b.PublishedDate, a.PublishedDate));

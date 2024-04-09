@@ -153,7 +153,7 @@ public static class ImporterUtility
 		string json = Encoding.UTF8.GetString(data);
 		JObject obj = JObject.Parse(json);
 
-		foreach (JToken jToken in obj["subscriptions"]?.ToObject<JArray>() ?? new JArray())
+		foreach (JToken jToken in obj["subscriptions"]?.ToObject<JArray>() ?? [])
 		{
 			if (jToken.Type != JTokenType.String) continue;
 			string id = jToken.ToObject<string>()!;
@@ -163,7 +163,7 @@ public static class ImporterUtility
 			});
 		}
 
-		foreach (JToken playlist in obj["playlists"]?.ToObject<JArray>() ?? new JArray())
+		foreach (JToken playlist in obj["playlists"]?.ToObject<JArray>() ?? [])
 		{
 			if (playlist.Type != JTokenType.Object) continue;
 			importedData.Playlists.Add(new ImportedData.Playlist
@@ -192,7 +192,7 @@ public static class ImporterUtility
 		string json = Encoding.UTF8.GetString(data);
 		JObject obj = JObject.Parse(json);
 
-		foreach (JToken subscription in obj["subscriptions"]?.ToObject<JArray>() ?? new JArray())
+		foreach (JToken subscription in obj["subscriptions"]?.ToObject<JArray>() ?? [])
 		{
 			if (subscription["service_id"]?.ToObject<int>() != 0) continue;
 
@@ -212,7 +212,7 @@ public static class ImporterUtility
 		string json = Encoding.UTF8.GetString(data);
 		JObject obj = JObject.Parse(json);
 
-		foreach (JToken playlist in obj["playlists"]?.ToObject<JArray>() ?? new JArray())
+		foreach (JToken playlist in obj["playlists"]?.ToObject<JArray>() ?? [])
 		{
 			// Piped seems to (plan to) support other types of playlists
 			// (watch later, history, etc.)

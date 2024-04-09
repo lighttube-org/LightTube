@@ -11,7 +11,7 @@ public static class JsCache
 		["ltplayer.js"] = new Uri("https://raw.githubusercontent.com/kuylar/LTPlayer/master/dist/player.min.js"),
 		["ltplayer.css"] = new Uri("https://raw.githubusercontent.com/kuylar/LTPlayer/master/dist/player.min.css"),
 	};
-	private static Dictionary<string, string> Hashes = new();
+	private static Dictionary<string, string> Hashes = [];
 	public static DateTimeOffset CacheUpdateTime = DateTimeOffset.MinValue;
 
 	public static async Task DownloadLibraries()

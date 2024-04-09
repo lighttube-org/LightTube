@@ -102,7 +102,7 @@ public static class Utils
 		string manifest = await reader.ReadToEndAsync();
 		StringBuilder proxyManifest = new();
 
-		List<string> types = new();
+		List<string> types = [];
 
 		if (proxyRoot is not null)
 			foreach (string s in manifest.Split("\n"))
@@ -359,7 +359,7 @@ public static class Utils
 		string[] parts = currentPath.Split("?");
 		NameValueCollection query = parts.Length > 1
 			? HttpUtility.ParseQueryString(parts[1])
-			: new NameValueCollection();
+			: [];
 		query.Set("continuation", contToken);
 		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
 	}
@@ -369,7 +369,7 @@ public static class Utils
 		string[] parts = currentPath.Split("?");
 		NameValueCollection query = parts.Length > 1
 			? HttpUtility.ParseQueryString(parts[1])
-			: new NameValueCollection();
+			: [];
 		query.Set("skip", skipAmount.ToString());
 		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
 	}
@@ -404,7 +404,7 @@ public static class Utils
 
 	public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes)
 	{
-		List<string> descriptions = new();
+		List<string> descriptions = [];
 
 		// dangerous ones are at the top
 		if (modelScopes.Contains("logins.read"))

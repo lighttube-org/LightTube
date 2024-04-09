@@ -7,8 +7,8 @@ namespace LightTube;
 public class ImportedData(ImportSource source)
 {
 	public ImportSource Source = source;
-	public List<Subscription> Subscriptions = new List<Subscription>();
-	public List<Playlist> Playlists = new List<Playlist>();
+	public List<Subscription> Subscriptions = [];
+	public List<Playlist> Playlists = [];
 
     public override string ToString()
 	{

@@ -14,7 +14,7 @@ public class ApiUserData
 		return new ApiUserData
 		{
 			User = user,
-			Channels = new Dictionary<string, ApiSubscriptionInfo>()
+			Channels = []
 		};
 	}
 

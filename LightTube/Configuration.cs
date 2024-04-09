@@ -6,7 +6,7 @@ namespace LightTube;
 
 public static class Configuration
 {
-	public static Dictionary<string, string> CustomThemeDefs { get; } = new();
+	public static Dictionary<string, string> CustomThemeDefs { get; } = [];
 	public static InnerTubeAuthorization? InnerTubeAuthorization { get; private set; }
 	public static bool ApiEnabled { get; private set; }
 	public static bool OauthEnabled { get; private set; }

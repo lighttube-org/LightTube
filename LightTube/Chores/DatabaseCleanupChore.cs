@@ -11,9 +11,9 @@ public class DatabaseCleanupChore : IChore
 
 	public async Task<string> RunChore(Action<string> updateStatus, Guid id)
 	{
-		List<string> channels = new();
-		List<string> videos = new();
-		List<string> users = new();
+		List<string> channels = [];
+		List<string> videos = [];
+		List<string> users = [];
 		int deletedChannels = 0;
 		int deletedVideos = 0;
 		int deletedPlaylists = 0;

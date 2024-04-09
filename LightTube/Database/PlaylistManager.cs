@@ -28,7 +28,7 @@ public class PlaylistManager(
 		DatabasePlaylist? pl = GetPlaylist(id);
 		if (pl == null) return Array.Empty<PlaylistVideoRenderer>();
 
-		List<PlaylistVideoRenderer> renderers = new();
+		List<PlaylistVideoRenderer> renderers = [];
 
 		for (int i = 0; i < pl.VideoIds.Count; i++)
 		{
@@ -56,7 +56,7 @@ public class PlaylistManager(
 		DatabasePlaylist? pl = GetPlaylist(id);
 		if (pl == null) return Array.Empty<PlaylistPanelVideoRenderer>();
 
-		List<PlaylistPanelVideoRenderer> renderers = new();
+		List<PlaylistPanelVideoRenderer> renderers = [];
 
 		for (int i = 0; i < pl.VideoIds.Count; i++)
 		{
@@ -82,7 +82,7 @@ public class PlaylistManager(
 		DatabasePlaylist? pl = GetPlaylist(id);
 		if (pl == null) return "";
 
-		List<string> renderers = new();
+		List<string> renderers = [];
 
 		for (int i = 0; i < pl.VideoIds.Count; i++)
 		{
@@ -116,7 +116,7 @@ public class PlaylistManager(
 			Name = title,
 			Description = description,
 			Visibility = visibility,
-			VideoIds = new(),
+			VideoIds = [],
 			Author = u.UserID,
 			LastUpdated = DateTimeOffset.UtcNow
 		};
