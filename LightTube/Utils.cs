@@ -21,12 +21,12 @@ public static class Utils
     public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
     public static string[] OauthScopes =
-    {
+    [
         "playlists.read",
         "playlists.write",
         "subscriptions.read",
         "subscriptions.write"
-    };
+    ];
 
     public static string GetRegion(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)

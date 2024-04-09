@@ -39,12 +39,12 @@ public class ApiPlaylist
     public ApiPlaylist(InnerTubeContinuationResponse playlist)
     {
         Id = "";
-        Alerts = Array.Empty<string>();
+        Alerts = [];
         Title = "";
         Description = "";
-        Badges = Array.Empty<Badge>();
+        Badges = [];
         Channel = new Channel();
-        Thumbnails = Array.Empty<Thumbnail>();
+        Thumbnails = [];
         LastUpdated = "";
         VideoCountText = "";
         ViewCountText = "";
@@ -55,10 +55,10 @@ public class ApiPlaylist
     public ApiPlaylist(DatabasePlaylist playlist)
     {
         Id = playlist.Id;
-        Alerts = Array.Empty<string>();
+        Alerts = [];
         Title = playlist.Name;
         Description = playlist.Description;
-        Badges = Array.Empty<Badge>();
+        Badges = [];
         DatabaseUser user = DatabaseManager.Users.GetUserFromId(playlist.Author).Result!;
         Channel = new Channel
         {
@@ -66,17 +66,17 @@ public class ApiPlaylist
             Title = user.UserID,
             Avatar = null,
             Subscribers = null,
-            Badges = Array.Empty<Badge>()
+            Badges = []
         };
-        Thumbnails = new[]
-        {
+        Thumbnails =
+        [
             new Thumbnail
             {
                 Width = null,
                 Height = null,
                 Url = new Uri($"https://i.ytimg.com/vi/{playlist.VideoIds.FirstOrDefault()}/hqdefault.jpg")
             }
-        };
+        ];
         LastUpdated = $"Last updated on {playlist.LastUpdated:MMM d, yyyy}";
         VideoCountText = playlist.VideoIds.Count switch
         {

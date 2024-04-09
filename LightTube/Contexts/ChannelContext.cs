@@ -99,12 +99,12 @@ public class ChannelContext : BaseContext
         SubscriberCountText = "LightTube account";
         LightTubeAccount = true;
         Editable = channel?.UserID == User?.UserID;
-        Tabs = new[] {
+        Tabs = [
             ChannelTabs.Playlists
-        };
+        ];
 
-        Content = new IRenderer[1] {
+        Content = [
             channel?.PlaylistRenderers()
-        };
+        ];
     }
 }

@@ -239,11 +239,11 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     {
         ModalContext ctx = new ModalContext(HttpContext);
         if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
-        ctx.Buttons = new[]
-        {
+        ctx.Buttons =
+        [
             new ModalButton(v ?? "", "|", ""),
             new ModalButton("Create Playlist", "__submit", "primary"),
-        };
+        ];
         ctx.Title = "Create new playlist";
         ctx.AlignToStart = true;
         return View(ctx);
@@ -286,11 +286,11 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         ctx.ItemSubtitle = playlist.Description;
         ctx.ItemThumbnail = ((int)playlist.Visibility).ToString();
 
-        ctx.Buttons = new[]
-        {
+        ctx.Buttons =
+        [
             new ModalButton("", "|", ""),
             new ModalButton("Confirm", "__submit", "primary"),
-        };
+        ];
         ctx.Title = "Edit playlist";
         ctx.AlignToStart = true;
         return View(ctx);
@@ -328,11 +328,11 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         ctx.ItemSubtitle = playlist.VideoIds.Count + " videos";
         ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{playlist.VideoIds.FirstOrDefault()}/hqdefault.jpg";
 
-        ctx.Buttons = new[]
-        {
+        ctx.Buttons =
+        [
             new ModalButton("", "|", ""),
             new ModalButton("Delete", "__submit", "primary"),
-        };
+        ];
         ctx.Title = "Delete playlist";
         return View(ctx);
     }
@@ -360,11 +360,11 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext, intr);
         if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
         pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.PRIVATE);
-        pvc.Buttons = new[]
-        {
+        pvc.Buttons =
+        [
             new ModalButton("", "|", ""),
             new ModalButton("Add", "__submit", "primary"),
-        };
+        ];
         pvc.Title = "Add video to playlist";
         return View(pvc);
     }
@@ -401,11 +401,11 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
 
         if (playlist.Author != pvc.User.UserID) return Redirect("/");
 
-        pvc.Buttons = new[]
-        {
+        pvc.Buttons =
+        [
             new ModalButton(@playlist.Name, "|", @playlist.Id),
             new ModalButton("Delete", "__submit", "primary"),
-        };
+        ];
         pvc.Title = "Add video to playlist";
         return View(pvc);
     }

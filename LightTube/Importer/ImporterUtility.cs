@@ -9,7 +9,7 @@ namespace LightTube;
 
 public static class ImporterUtility
 {
-    private static readonly byte[] TakeoutMagicBytes = { 0x50, 0x4B, 0x03 };
+    private static readonly byte[] TakeoutMagicBytes = [0x50, 0x4B, 0x03];
 
     private static ImportSource AutodetectSource(byte[] data)
     {

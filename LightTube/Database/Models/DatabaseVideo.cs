@@ -23,24 +23,24 @@ public class DatabaseVideo
     {
         Id = player.Details.Id;
         Title = player.Details.Title;
-        Thumbnails = new Thumbnail[] {
+        Thumbnails = [
             new()
             {
                 Url = player.Details.Thumbnails[0].Url
             }
-        };
+        ];
         UploadedAt = "";
         Views = 0;
         Channel = new()
         {
             Id = player.Details.Author.Id!,
             Name = player.Details.Author.Title,
-            Avatars = new Thumbnail[] {
+            Avatars = [
                 new Thumbnail()
                 {
                     Url = player.Details.Author.Avatar!
                 }
-            }
+            ]
         };
         Duration = player.Details.Length.ToDurationString();
     }

@@ -59,7 +59,7 @@ public class WatchContext : BaseContext
         Comments = comments;
         Dislikes = dislikes;
         Likes = likes;
-        Sponsors = Array.Empty<SponsorBlockSegment>();
+        Sponsors = [];
         GuideHidden = true;
 
         AddMeta("description", Video.Description);
@@ -131,7 +131,7 @@ public class WatchContext : BaseContext
         Comments = comments;
         Dislikes = dislikes;
         Likes = likes;
-        Sponsors = Array.Empty<SponsorBlockSegment>();
+        Sponsors = [];
         GuideHidden = true;
 
         AddMeta("description", Video.Description);

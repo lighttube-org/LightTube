@@ -26,7 +26,7 @@ public class PlaylistManager(
     public IEnumerable<PlaylistVideoRenderer> GetPlaylistVideos(string id, bool editable)
     {
         DatabasePlaylist? pl = GetPlaylist(id);
-        if (pl == null) return Array.Empty<PlaylistVideoRenderer>();
+        if (pl == null) return [];
 
         List<PlaylistVideoRenderer> renderers = [];
 
@@ -54,7 +54,7 @@ public class PlaylistManager(
     public IEnumerable<PlaylistPanelVideoRenderer> GetPlaylistPanelVideos(string id, string currentVideoId)
     {
         DatabasePlaylist? pl = GetPlaylist(id);
-        if (pl == null) return Array.Empty<PlaylistPanelVideoRenderer>();
+        if (pl == null) return [];
 
         List<PlaylistPanelVideoRenderer> renderers = [];
 
@@ -148,23 +148,23 @@ public class PlaylistManager(
         {
             Id = video.Details.Id,
             Title = video.Details.Title,
-            Thumbnails = new Thumbnail[] {
+            Thumbnails = [
                 new()
                 {
                     Url = new Uri($"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg")
                 }
-            },
+            ],
             Views = 0,
             Channel = new()
             {
                 Id = video.Details.Author.Id!,
                 Name = video.Details.Author.Title,
-                Avatars = new Thumbnail[] {
+                Avatars = [
                 new()
                 {
                     Url = video.Details.Author.Avatar!
                 }
-            }
+            ]
             },
             Duration = video.Details.Length.ToDurationString()
         });

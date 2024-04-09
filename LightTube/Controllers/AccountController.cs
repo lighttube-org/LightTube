@@ -16,6 +16,8 @@ public class AccountController : Controller
             Redirect = redirectUrl
         });
 
+    private static readonly string[] scopes = ["web"];
+
     [Route("register")]
     [HttpPost]
     public async Task<IActionResult> Register(string? redirectUrl, string userId, string password, string passwordCheck,
@@ -52,7 +54,7 @@ public class AccountController : Controller
             {
                 await DatabaseManager.Users.CreateUser(userId, password);
                 DatabaseLogin login = await DatabaseManager.Users.CreateToken(userId, password, Request.Headers.UserAgent.First(),
-                    new[] { "web" });
+                    scopes);
 
                 Response.Cookies.Append("token", login.Token, new CookieOptions
                 {
@@ -95,7 +97,7 @@ public class AccountController : Controller
             {
                 DatabaseLogin login =
                     await DatabaseManager.Users.CreateToken(userId, password, Request.Headers.UserAgent,
-                        new[] { "web" });
+                        scopes);
 
                 Response.Cookies.Append("token", login.Token, new CookieOptions
                 {

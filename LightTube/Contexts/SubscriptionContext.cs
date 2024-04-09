@@ -16,12 +16,12 @@ public class SubscriptionContext : ModalContext
             User?.Subscriptions.TryGetValue(channel.Header?.Id ?? "", out CurrentType);
         else
             CurrentType = subscriptionType.Value;
-        Buttons = new[]
-        {
+        Buttons =
+        [
             new ModalButton("Go to channel", $"/channel/{channel.Header?.Id}", "secondary"),
             new ModalButton("", "|", ""),
             new ModalButton("Confirm", "__submit", "primary"),
-        };
+        ];
         Title = "Manage Subscription";
     }
 }

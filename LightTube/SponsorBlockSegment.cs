@@ -55,7 +55,7 @@ public class SponsorBlockSegment
         HttpResponseMessage sbResponse =
             await new HttpClient().GetAsync(
                 $"https://sponsor.ajay.app/api/skipSegments?videoID={videoId}&category=sponsor&category=selfpromo&category=interaction&category=intro&category=outro&category=preview&category=music_offtopic&category=filler");
-        if (!sbResponse.IsSuccessStatusCode) return Array.Empty<SponsorBlockSegment>();
+        if (!sbResponse.IsSuccessStatusCode) return [];
         string json = await sbResponse.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<SponsorBlockSegment[]>(json)!;
     }

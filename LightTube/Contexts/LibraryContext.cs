@@ -11,6 +11,6 @@ public class LibraryContext : BaseContext
     {
         Playlists = User != null
             ? DatabaseManager.Playlists.GetUserPlaylists(User.UserID, PlaylistVisibility.PRIVATE)
-            : Array.Empty<DatabasePlaylist>();
+            : [];
     }
 }

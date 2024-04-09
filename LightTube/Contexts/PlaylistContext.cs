@@ -102,7 +102,7 @@ public class PlaylistContext : BaseContext
             AuthorId = "";
             ViewCountText = "LightTube playlist";
             LastUpdatedText = "";
-            Items = Array.Empty<IRenderer>();
+            Items = [];
             Editable = false;
         }
     }

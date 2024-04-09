@@ -36,7 +36,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         }
         catch
         {
-            sponsors = Array.Empty<SponsorBlockSegment>();
+            sponsors = [];
         }
 
         if (HttpContext.GetDefaultCompatibility())
@@ -113,7 +113,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         }
         catch
         {
-            sponsors = Array.Empty<SponsorBlockSegment>();
+            sponsors = [];
         }
 
         if (player is not null)
@@ -292,7 +292,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         ctx.Extra = player;
         ctx.Title = "Download video";
         ctx.AlignToStart = true;
-        ctx.Buttons = Array.Empty<ModalButton>();
+        ctx.Buttons = [];
         return View(ctx);
     }
 }

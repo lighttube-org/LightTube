@@ -79,7 +79,7 @@ public static class Configuration
         }
         catch (Exception)
         {
-            Messages = new[] { "Search something to get started!" };
+            Messages = ["Search something to get started!"];
         }
 
         Alert = GetVariable("LIGHTTUBE_ALERT") ?? ":3 check! press the X to :3";

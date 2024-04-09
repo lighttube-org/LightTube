@@ -36,10 +36,10 @@ public class ApiChannel
             Id = channel.Metadata.Id;
             Title = channel.Metadata.Title;
             Avatars = channel.Metadata.Avatar;
-            Banner = Array.Empty<Thumbnail>();
-            Badges = Array.Empty<Badge>();
-            PrimaryLinks = Array.Empty<ChannelLink>();
-            SecondaryLinks = Array.Empty<ChannelLink>();
+            Banner = [];
+            Badges = [];
+            PrimaryLinks = [];
+            SecondaryLinks = [];
             SubscriberCountText = "Unavailable";
         }
 
@@ -53,13 +53,13 @@ public class ApiChannel
     {
         Id = "";
         Title = "";
-        Avatars = Array.Empty<Thumbnail>();
-        Banner = Array.Empty<Thumbnail>();
-        Badges = Array.Empty<Badge>();
-        PrimaryLinks = Array.Empty<ChannelLink>();
-        SecondaryLinks = Array.Empty<ChannelLink>();
+        Avatars = [];
+        Banner = [];
+        Badges = [];
+        PrimaryLinks = [];
+        SecondaryLinks = [];
         SubscriberCountText = "Unavailable";
-        EnabledTabs = Array.Empty<string>();
+        EnabledTabs = [];
         Contents = channel.Contents;
         Continuation = channel.Continuation;
     }
@@ -68,17 +68,17 @@ public class ApiChannel
     {
         Id = channel.LTChannelID;
         Title = channel.UserID;
-        Avatars = Array.Empty<Thumbnail>();
-        Banner = Array.Empty<Thumbnail>();
-        Badges = Array.Empty<Badge>();
-        PrimaryLinks = Array.Empty<ChannelLink>();
-        SecondaryLinks = Array.Empty<ChannelLink>();
+        Avatars = [];
+        Banner = [];
+        Badges = [];
+        PrimaryLinks = [];
+        SecondaryLinks = [];
         SubscriberCountText = "LightTube account";
-        EnabledTabs = new[]
-        {
+        EnabledTabs =
+        [
             ChannelTabs.Playlists.ToString()
-        };
-        Contents = new[] { channel.PlaylistRenderers() };
+        ];
+        Contents = [channel.PlaylistRenderers()];
         Continuation = null;
     }
 }

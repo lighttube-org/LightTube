@@ -11,7 +11,7 @@ public class PlayerContext : BaseContext
     public Exception? Exception;
     public bool UseHls;
     public bool UseDash;
-    public Thumbnail[] Thumbnails = Array.Empty<Thumbnail>();
+    public Thumbnail[] Thumbnails = [];
     public string? ErrorMessage = null;
     public string PreferredItag = "18";
     public bool UseEmbedUi = false;
@@ -73,7 +73,7 @@ public class PlayerContext : BaseContext
     {
         Exception = e;
         Video = null!;
-        Sponsors = Array.Empty<SponsorBlockSegment>();
+        Sponsors = [];
     }
 
     public string? GetFirstItag() => GetPreferredFormat()?.Itag;

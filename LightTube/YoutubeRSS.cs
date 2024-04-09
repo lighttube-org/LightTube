@@ -66,7 +66,7 @@ public static class YoutubeRSS
             {
                 Name = "Failed to get videos for channel " + channelId,
                 Id = channelId,
-                Videos = Array.Empty<FeedVideo>()
+                Videos = []
             };
         }
     }
