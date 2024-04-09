@@ -124,8 +124,7 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
     public async Task<(string channelId, SubscriptionType subscriptionType)> UpdateSubscription(string token,
         string channelId, SubscriptionType type)
     {
-        DatabaseUser? user = await GetUserFromToken(token);
-        if (user is null) throw new UnauthorizedAccessException();
+        DatabaseUser? user = await GetUserFromToken(token) ?? throw new UnauthorizedAccessException();
 
         // TODO: update the channel cache
 
