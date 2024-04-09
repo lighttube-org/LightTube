@@ -26,11 +26,11 @@ public class ApiController : Controller
 	public LightTubeInstanceInfo GetInstanceInfo() =>
 		new()
 		{
-			Type = "lighttube",
+			Type = "lighttube/2.0",
 			Version = Utils.GetVersion(),
 			Messages = Configuration.Messages,
 			Alert = Configuration.Alert,
-			Config = new Dictionary<string, object>()
+			Config = new Dictionary<string, object>
 			{
 				["allowsApi"] = Configuration.ApiEnabled,
 				["allowsNewUsers"] = Configuration.RegistrationEnabled,
