@@ -7,16 +7,11 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace LightTube.Attributes;
 
-public class ApiAuthorizationAttribute : Attribute, IActionFilter
+public class ApiAuthorizationAttribute(params string[] scopes) : Attribute, IActionFilter
 {
-	private string[] _scopes;
+	private string[] _scopes = scopes;
 
-	public ApiAuthorizationAttribute(params string[] scopes)
-	{
-		_scopes = scopes;
-	}
-
-	public void OnActionExecuting(ActionExecutingContext context)
+    public void OnActionExecuting(ActionExecutingContext context)
 	{
 		DatabaseOauthToken? login = DatabaseManager.Oauth2.GetLoginFromHttpContext(context.HttpContext).Result;
 		if (login != null && _scopes.All(scope => login.Scopes.Contains(scope))) return;

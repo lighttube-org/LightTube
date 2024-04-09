@@ -6,16 +6,11 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace LightTube.Attributes;
 
-public class ApiDisableableAttribute : Attribute, IActionFilter
+public class ApiDisableableAttribute(params string[] scopes) : Attribute, IActionFilter
 {
-	private string[] _scopes;
+	private string[] _scopes = scopes;
 
-	public ApiDisableableAttribute(params string[] scopes)
-	{
-		_scopes = scopes;
-	}
-
-	public void OnActionExecuting(ActionExecutingContext context)
+    public void OnActionExecuting(ActionExecutingContext context)
 	{
 		if (Configuration.ApiEnabled) return;
 		context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;

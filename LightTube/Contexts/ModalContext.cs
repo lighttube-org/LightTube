@@ -1,26 +1,15 @@
 ﻿namespace LightTube.Contexts;
 
-public class ModalContext : BaseContext
+public class ModalContext(HttpContext context) : BaseContext(context)
 {
 	public string Title { get; set; }
 	public ModalButton[] Buttons { get; set; }
 	public bool AlignToStart { get; set; }
-
-	public ModalContext(HttpContext context) : base(context)
-	{
-	}
 }
 
-public class ModalButton
+public class ModalButton(string label, string target, string type)
 {
-	public string Type;
-	public string Target;
-	public string Label;
-	
-	public ModalButton(string label, string target, string type)
-	{
-		Label = label;
-		Target = target;
-		Type = type;
-	}
+	public string Type = type;
+	public string Target = target;
+	public string Label = label;
 }

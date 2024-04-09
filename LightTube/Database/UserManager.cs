@@ -5,25 +5,17 @@ using MongoDB.Driver;
 
 namespace LightTube.Database;
 
-public class UserManager
+public class UserManager(IMongoCollection<DatabaseUser> userCollection,
+    IMongoCollection<DatabaseLogin> tokensCollection,
+    IMongoCollection<DatabasePlaylist> playlistCollection,
+    IMongoCollection<DatabaseOauthToken> oauth2TokensCollection)
 {
-	public IMongoCollection<DatabaseUser> UserCollection { get; }
-	public IMongoCollection<DatabaseLogin> TokensCollection { get; }
-	public IMongoCollection<DatabaseOauthToken> Oauth2TokensCollection { get; }
-	public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; }
+    public IMongoCollection<DatabaseUser> UserCollection { get; } = userCollection;
+    public IMongoCollection<DatabaseLogin> TokensCollection { get; } = tokensCollection;
+    public IMongoCollection<DatabaseOauthToken> Oauth2TokensCollection { get; } = oauth2TokensCollection;
+    public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; } = playlistCollection;
 
-	public UserManager(IMongoCollection<DatabaseUser> userCollection,
-		IMongoCollection<DatabaseLogin> tokensCollection,
-		IMongoCollection<DatabasePlaylist> playlistCollection,
-		IMongoCollection<DatabaseOauthToken> oauth2TokensCollection)
-	{
-		UserCollection = userCollection;
-		TokensCollection = tokensCollection;
-		PlaylistCollection = playlistCollection;
-		Oauth2TokensCollection = oauth2TokensCollection;
-	}
-
-	public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
+    public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
 	{
 		IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
 		if (!await users.AnyAsync())

@@ -7,16 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace LightTube.Controllers;
 
 [Route("/opensearch")]
-public class OpenSearchController : Controller
+public class OpenSearchController(InnerTube.InnerTube youtube) : Controller
 {
-	private readonly InnerTube.InnerTube _youtube;
+	private readonly InnerTube.InnerTube _youtube = youtube;
 
-	public OpenSearchController(InnerTube.InnerTube youtube)
-	{
-		_youtube = youtube;
-	}
-
-	[Route("osdd.xml")]
+    [Route("osdd.xml")]
 	public IActionResult OpenSearchDescriptionDocument()
 	{
 		XmlDocument doc = new();

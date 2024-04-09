@@ -9,16 +9,11 @@ using Serilog;
 namespace LightTube.Controllers;
 
 [Route("/settings")]
-public class SettingsController : Controller
+public class SettingsController(InnerTube.InnerTube youtube) : Controller
 {
-	private readonly InnerTube.InnerTube _youtube;
+	private readonly InnerTube.InnerTube _youtube = youtube;
 
-	public SettingsController(InnerTube.InnerTube youtube)
-	{
-		_youtube = youtube;
-	}
-
-	[Route("/settings")]
+    [Route("/settings")]
 	public IActionResult Settings() => RedirectPermanent("/settings/appearance");
 
 	[Route("content")]

@@ -3,23 +3,16 @@ using Serilog;
 
 namespace LightTube.Chores;
 
-public class QueueChore
+public class QueueChore(Type chore)
 {
-	public IChore Chore;
-	public Guid Id;
-	public Stopwatch Stopwatch;
+	public IChore Chore = (IChore)Activator.CreateInstance(chore)!;
+	public Guid Id = Guid.NewGuid();
+	public Stopwatch Stopwatch = new Stopwatch();
 	public string Status = "";
 	public bool Running;
 	public bool Complete;
 
-	public QueueChore(Type chore)
-	{
-		Chore = (IChore)Activator.CreateInstance(chore)!;
-		Id = Guid.NewGuid();
-		Stopwatch = new Stopwatch();
-	}
-
-	public void Start()
+    public void Start()
 	{
 		Log.Information($"[CHORE] [{Chore.Id}] Chore started");
 		Running = true;
