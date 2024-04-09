@@ -2,7 +2,7 @@
 
 public enum SubscriptionType
 {
-	NONE,
-	NOTIFICATIONS_OFF,
-	NOTIFICATIONS_ON
+    NONE,
+    NOTIFICATIONS_OFF,
+    NOTIFICATIONS_ON
 }

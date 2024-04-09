@@ -9,289 +9,290 @@ namespace LightTube.Controllers;
 
 public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) : Controller
 {
-	private readonly InnerTube.InnerTube _youtube = youtube;
-	private readonly HttpClient _client = client;
+    private readonly InnerTube.InnerTube _youtube = youtube;
+    private readonly HttpClient _client = client;
 
     [Route("/embed/{v}")]
-	public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false)
-	{
-		InnerTubePlayer player;
-		Exception? e;
-		try
-		{
-			player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
-				HttpContext.GetRegion());
-			e = null;
-		}
-		catch (Exception ex)
-		{
-			player = null;
-			e = ex;
-		}
-		
-		SponsorBlockSegment[] sponsors;
-		try
-		{
-			sponsors = await SponsorBlockSegment.GetSponsors(v);
-		}
-		catch
-		{
-			sponsors = Array.Empty<SponsorBlockSegment>();
-		}
+    public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false)
+    {
+        InnerTubePlayer player;
+        Exception? e;
+        try
+        {
+            player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
+                HttpContext.GetRegion());
+            e = null;
+        }
+        catch (Exception ex)
+        {
+            player = null;
+            e = ex;
+        }
 
-		if (HttpContext.GetDefaultCompatibility())
-			compatibility = true;
+        SponsorBlockSegment[] sponsors;
+        try
+        {
+            sponsors = await SponsorBlockSegment.GetSponsors(v);
+        }
+        catch
+        {
+            sponsors = Array.Empty<SponsorBlockSegment>();
+        }
 
-		InnerTubeNextResponse video =
-			await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
-		if (player is null || e is not null)
-			return View(new EmbedContext(HttpContext, e ?? new Exception("player is null"), video));
-		return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors));
-	}
+        if (HttpContext.GetDefaultCompatibility())
+            compatibility = true;
 
-	[Route("/watch")]
-	public async Task<IActionResult> Watch(string v, string? list, bool contentCheckOk, bool compatibility = false)
-	{
-		InnerTubePlayer? player;
-		Exception? e;
-		bool localPlaylist = list?.StartsWith("LT-PL") ?? false;
-		try
-		{
-			player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
-				HttpContext.GetRegion());
-			e = null;
-			if (player.Details.Id != v)
-			{
-				e = new Exception($"YouTube returned a different video than the requested one ({v} != {player.Details.Id})");
-				player = null;
-			}
-		}
-		catch (Exception ex)
-		{
-			player = null;
-			e = ex;
-		}
+        InnerTubeNextResponse video =
+            await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
+        if (player is null || e is not null)
+            return View(new EmbedContext(HttpContext, e ?? new Exception("player is null"), video));
+        return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors));
+    }
 
-		InnerTubeNextResponse video =
-			await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetLanguage(),
-				region: HttpContext.GetRegion());
-		InnerTubeContinuationResponse? comments = null;
+    [Route("/watch")]
+    public async Task<IActionResult> Watch(string v, string? list, bool contentCheckOk, bool compatibility = false)
+    {
+        InnerTubePlayer? player;
+        Exception? e;
+        bool localPlaylist = list?.StartsWith("LT-PL") ?? false;
+        try
+        {
+            player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
+                HttpContext.GetRegion());
+            e = null;
+            if (player.Details.Id != v)
+            {
+                e = new Exception($"YouTube returned a different video than the requested one ({v} != {player.Details.Id})");
+                player = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            player = null;
+            e = ex;
+        }
 
-		if (HttpContext.GetDefaultCompatibility())
-			compatibility = true;
+        InnerTubeNextResponse video =
+            await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetLanguage(),
+                region: HttpContext.GetRegion());
+        InnerTubeContinuationResponse? comments = null;
 
-		try
-		{
-			string commentsContinuation = InnerTube.Utils.PackCommentsContinuation(v, CommentsContext.Types.SortOrder.TopComments);
-			comments = await _youtube.GetVideoCommentsAsync(commentsContinuation,
-				language: HttpContext.GetLanguage(),
-				region: HttpContext.GetRegion());
-		} catch { /* comments arent enabled, ignore */ }
+        if (HttpContext.GetDefaultCompatibility())
+            compatibility = true;
 
-		int dislikes, likes;
-		try
-		{
-			HttpResponseMessage rydResponse =
-				await _client.GetAsync("https://returnyoutubedislikeapi.com/votes?videoId=" + v);
-			Dictionary<string, JsonElement> rydJson =
-				JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
-					await rydResponse.Content.ReadAsStringAsync())!;
-			dislikes = rydJson["dislikes"].GetInt32();
-			likes = rydJson["likes"].GetInt32();
-		}
-		catch
-		{
-			dislikes = -1;
-			likes = -1;
-		} 
-		
-		SponsorBlockSegment[] sponsors;
-		try
-		{
-			sponsors = await SponsorBlockSegment.GetSponsors(v);
-		}
-		catch
-		{
-			sponsors = Array.Empty<SponsorBlockSegment>();
-		}
+        try
+        {
+            string commentsContinuation = InnerTube.Utils.PackCommentsContinuation(v, CommentsContext.Types.SortOrder.TopComments);
+            comments = await _youtube.GetVideoCommentsAsync(commentsContinuation,
+                language: HttpContext.GetLanguage(),
+                region: HttpContext.GetRegion());
+        }
+        catch { /* comments arent enabled, ignore */ }
 
-		if (player is not null)
-			await DatabaseManager.Cache.AddVideo(new DatabaseVideo(player), true);
+        int dislikes, likes;
+        try
+        {
+            HttpResponseMessage rydResponse =
+                await _client.GetAsync("https://returnyoutubedislikeapi.com/votes?videoId=" + v);
+            Dictionary<string, JsonElement> rydJson =
+                JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
+                    await rydResponse.Content.ReadAsStringAsync())!;
+            dislikes = rydJson["dislikes"].GetInt32();
+            likes = rydJson["likes"].GetInt32();
+        }
+        catch
+        {
+            dislikes = -1;
+            likes = -1;
+        }
 
-		if (localPlaylist && list != null)
-		{
-			DatabasePlaylist? pl = DatabaseManager.Playlists.GetPlaylist(list);
-			if (player is null || e is not null)
-				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments,
-					dislikes, likes));
-			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes, likes, sponsors));
-		}
-		else
-		{
-			if (player is null || e is not null)
-				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments,
-					dislikes, likes));
-			return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, likes, sponsors));
-		}
-	}
+        SponsorBlockSegment[] sponsors;
+        try
+        {
+            sponsors = await SponsorBlockSegment.GetSponsors(v);
+        }
+        catch
+        {
+            sponsors = Array.Empty<SponsorBlockSegment>();
+        }
 
-	[Route("/results")]
-	public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null)
-	{
-		if (!string.IsNullOrWhiteSpace(search_query))
-			Response.Cookies.Append("lastSearch", search_query);
-		if (continuation is null)
-		{
-			SearchParams searchParams = Request.GetSearchParams();
+        if (player is not null)
+            await DatabaseManager.Cache.AddVideo(new DatabaseVideo(player), true);
 
-			InnerTubeSearchResults search =
-				await _youtube.SearchAsync(search_query, searchParams, HttpContext.GetLanguage(),
-					HttpContext.GetRegion());
-			return View(new SearchContext(HttpContext, search_query, searchParams, search));
-		}
-		else
-		{
-			InnerTubeContinuationResponse search =
-				await _youtube.ContinueSearchAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return View(new SearchContext(HttpContext, search_query, null, search));
-		}
-	}
+        if (localPlaylist && list != null)
+        {
+            DatabasePlaylist? pl = DatabaseManager.Playlists.GetPlaylist(list);
+            if (player is null || e is not null)
+                return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments,
+                    dislikes, likes));
+            return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes, likes, sponsors));
+        }
+        else
+        {
+            if (player is null || e is not null)
+                return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments,
+                    dislikes, likes));
+            return View(new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, likes, sponsors));
+        }
+    }
 
-	[Route("/c/{vanity}")]
-	public async Task<IActionResult> ChannelFromVanity(string vanity)
-	{
-		string? id = await _youtube.GetChannelIdFromVanity(vanity);
-		return Redirect(id is null ? "/" : $"/channel/{id}");
-	}
+    [Route("/results")]
+    public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null)
+    {
+        if (!string.IsNullOrWhiteSpace(search_query))
+            Response.Cookies.Append("lastSearch", search_query);
+        if (continuation is null)
+        {
+            SearchParams searchParams = Request.GetSearchParams();
 
-	[Route("/@{vanity}")]
-	public async Task<IActionResult> ChannelFromHandle(string vanity)
-	{
-		string? id = await _youtube.GetChannelIdFromVanity("@" + vanity);
-		return Redirect(id is null ? "/" : $"/channel/{id}");
-	}
+            InnerTubeSearchResults search =
+                await _youtube.SearchAsync(search_query, searchParams, HttpContext.GetLanguage(),
+                    HttpContext.GetRegion());
+            return View(new SearchContext(HttpContext, search_query, searchParams, search));
+        }
+        else
+        {
+            InnerTubeContinuationResponse search =
+                await _youtube.ContinueSearchAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+            return View(new SearchContext(HttpContext, search_query, null, search));
+        }
+    }
 
-	[Route("/channel/{id}")]
-	public async Task<IActionResult> Channel(string id, string? continuation = null) =>
-		await Channel(id, ChannelTabs.Home, continuation);
+    [Route("/c/{vanity}")]
+    public async Task<IActionResult> ChannelFromVanity(string vanity)
+    {
+        string? id = await _youtube.GetChannelIdFromVanity(vanity);
+        return Redirect(id is null ? "/" : $"/channel/{id}");
+    }
 
-	[Route("/channel/{id}/subscription")]
-	[HttpGet]
-	public async Task<IActionResult> Subscription(string id)
-	{
-		if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
-		InnerTubeChannelResponse channel =
-			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
-				HttpContext.GetRegion());
-		await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
-		SubscriptionContext ctx = new(HttpContext, channel);
-		if (ctx.User is null)
-		{
-			return Redirect($"/account/login?redirectUrl=%2Fchannel%2F{id}%2Fsubscription");
-		}
-		return View(ctx);
-	}
+    [Route("/@{vanity}")]
+    public async Task<IActionResult> ChannelFromHandle(string vanity)
+    {
+        string? id = await _youtube.GetChannelIdFromVanity("@" + vanity);
+        return Redirect(id is null ? "/" : $"/channel/{id}");
+    }
 
-	[Route("/channel/{id}/subscription")]
-	[HttpPost]
-	public async Task<IActionResult> Subscription(string id, SubscriptionType type)
-	{
-		if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
-		(string? _, SubscriptionType subscriptionType) =
-			await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, type);
-		InnerTubeChannelResponse channel =
-			await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
-				HttpContext.GetRegion());
-		await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
-		return Ok("You can now close this window.");
-	}
+    [Route("/channel/{id}")]
+    public async Task<IActionResult> Channel(string id, string? continuation = null) =>
+        await Channel(id, ChannelTabs.Home, continuation);
 
-	[Route("/channel/{id}/{tab}")]
-	public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home, string? continuation = null)
-	{
-		if (id.StartsWith("LT"))
-		{
-			DatabaseUser? user = await DatabaseManager.Users.GetUserFromLTId(id);
-			return View(new ChannelContext(HttpContext, user, id));
-		}
+    [Route("/channel/{id}/subscription")]
+    [HttpGet]
+    public async Task<IActionResult> Subscription(string id)
+    {
+        if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
+        InnerTubeChannelResponse channel =
+            await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
+                HttpContext.GetRegion());
+        await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
+        SubscriptionContext ctx = new(HttpContext, channel);
+        if (ctx.User is null)
+        {
+            return Redirect($"/account/login?redirectUrl=%2Fchannel%2F{id}%2Fsubscription");
+        }
+        return View(ctx);
+    }
 
-		if (continuation is null)
-		{
-			InnerTubeChannelResponse channel =
-				await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
-			return View(new ChannelContext(HttpContext, tab, channel, id));
-		}
-		else
-		{
-			InnerTubeChannelResponse channel =
-				await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			InnerTubeContinuationResponse cont =
-				await _youtube.ContinueChannelAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			return View(new ChannelContext(HttpContext, tab, channel, cont, id));
-		}
-	}
+    [Route("/channel/{id}/subscription")]
+    [HttpPost]
+    public async Task<IActionResult> Subscription(string id, SubscriptionType type)
+    {
+        if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
+        (string? _, SubscriptionType subscriptionType) =
+            await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, type);
+        InnerTubeChannelResponse channel =
+            await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
+                HttpContext.GetRegion());
+        await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
+        return Ok("You can now close this window.");
+    }
 
-	[Route("/playlist")]
-	public async Task<IActionResult> Playlist(string list, int? skip = null)
-	{
-		if (list.StartsWith("LT-PL"))
-		{
-			DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(list);
-			return View(new PlaylistContext(HttpContext, playlist));
-		}
-		else
-		{
-			InnerTubePlaylist playlist =
-				await _youtube.GetPlaylistAsync(list, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
-			if (skip is null)
-			{
-				return View(new PlaylistContext(HttpContext, playlist));
-			}
-			else
-			{
-				InnerTubeContinuationResponse continuationRes =
-					await _youtube.ContinuePlaylistAsync(list, skip.Value, HttpContext.GetLanguage(),
-						HttpContext.GetRegion());
-				return View(new PlaylistContext(HttpContext, playlist, continuationRes));
-			}
-		}
-	}
+    [Route("/channel/{id}/{tab}")]
+    public async Task<IActionResult> Channel(string id, ChannelTabs tab = ChannelTabs.Home, string? continuation = null)
+    {
+        if (id.StartsWith("LT"))
+        {
+            DatabaseUser? user = await DatabaseManager.Users.GetUserFromLTId(id);
+            return View(new ChannelContext(HttpContext, user, id));
+        }
 
-	[Route("/shorts/{v}")]
-	public IActionResult Shorts(string v) => RedirectPermanent($"/watch?v={v}");
+        if (continuation is null)
+        {
+            InnerTubeChannelResponse channel =
+                await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+            await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
+            return View(new ChannelContext(HttpContext, tab, channel, id));
+        }
+        else
+        {
+            InnerTubeChannelResponse channel =
+                await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+            InnerTubeContinuationResponse cont =
+                await _youtube.ContinueChannelAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+            return View(new ChannelContext(HttpContext, tab, channel, cont, id));
+        }
+    }
 
-	[Route("/download/{v}")]
-	public async Task<IActionResult> Download(string v)
-	{
-		InnerTubePlayer? player;
-		Exception? e;
+    [Route("/playlist")]
+    public async Task<IActionResult> Playlist(string list, int? skip = null)
+    {
+        if (list.StartsWith("LT-PL"))
+        {
+            DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(list);
+            return View(new PlaylistContext(HttpContext, playlist));
+        }
+        else
+        {
+            InnerTubePlaylist playlist =
+                await _youtube.GetPlaylistAsync(list, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
+            if (skip is null)
+            {
+                return View(new PlaylistContext(HttpContext, playlist));
+            }
+            else
+            {
+                InnerTubeContinuationResponse continuationRes =
+                    await _youtube.ContinuePlaylistAsync(list, skip.Value, HttpContext.GetLanguage(),
+                        HttpContext.GetRegion());
+                return View(new PlaylistContext(HttpContext, playlist, continuationRes));
+            }
+        }
+    }
 
-		try
-		{
-			player = await _youtube.GetPlayerAsync(v, true, false, HttpContext.GetLanguage(),
-				HttpContext.GetRegion());
-			e = null;
-		}
-		catch (Exception ex)
-		{
-			player = null;
-			e = ex;
-		}
+    [Route("/shorts/{v}")]
+    public IActionResult Shorts(string v) => RedirectPermanent($"/watch?v={v}");
 
-		if (player is null || e is not null)
-			return BadRequest(e?.Message ?? "player is null");
-		if (player.Details.IsLive)
-			return BadRequest("You cannot download live videos");
-		PlaylistVideoContext<InnerTubePlayer> ctx = new PlaylistVideoContext<InnerTubePlayer>(HttpContext);
-		ctx.ItemId = player.Details.Id;
-		ctx.ItemTitle = player.Details.Title;
-		ctx.ItemSubtitle = player.Details.Author.Title;
-		ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{player.Details.Id}/hqdefault.jpg";
-		ctx.Extra = player;
-		ctx.Title = "Download video";
-		ctx.AlignToStart = true;
-		ctx.Buttons = Array.Empty<ModalButton>();
-		return View(ctx);
-	}
+    [Route("/download/{v}")]
+    public async Task<IActionResult> Download(string v)
+    {
+        InnerTubePlayer? player;
+        Exception? e;
+
+        try
+        {
+            player = await _youtube.GetPlayerAsync(v, true, false, HttpContext.GetLanguage(),
+                HttpContext.GetRegion());
+            e = null;
+        }
+        catch (Exception ex)
+        {
+            player = null;
+            e = ex;
+        }
+
+        if (player is null || e is not null)
+            return BadRequest(e?.Message ?? "player is null");
+        if (player.Details.IsLive)
+            return BadRequest("You cannot download live videos");
+        PlaylistVideoContext<InnerTubePlayer> ctx = new PlaylistVideoContext<InnerTubePlayer>(HttpContext);
+        ctx.ItemId = player.Details.Id;
+        ctx.ItemTitle = player.Details.Title;
+        ctx.ItemSubtitle = player.Details.Author.Title;
+        ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{player.Details.Id}/hqdefault.jpg";
+        ctx.Extra = player;
+        ctx.Title = "Download video";
+        ctx.AlignToStart = true;
+        ctx.Buttons = Array.Empty<ModalButton>();
+        return View(ctx);
+    }
 }
