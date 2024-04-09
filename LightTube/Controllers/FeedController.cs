@@ -20,6 +20,78 @@ public class FeedController : Controller
 		_youtube = youtube;
 	}
 
+	[Route("channel/{c}/rss.xml")]
+	[HttpGet]
+	public async Task<IActionResult> ChannelFeed(string c)
+	{
+		ChannelFeed ytchannel = await YoutubeRSS.GetChannelFeed(c);
+		try
+		{
+			XmlDocument document = new();
+			XmlElement rss = document.CreateElement("rss");
+			rss.SetAttribute("version", "2.0");
+
+			XmlElement channel = document.CreateElement("channel");
+
+			XmlElement title = document.CreateElement("title");
+			title.InnerText = "LightTube channnel RSS feed for " + ytchannel.Name;
+			channel.AppendChild(title);
+
+			XmlElement description = document.CreateElement("description");
+			description.InnerText = $"LightTube channnel RSS feed for {ytchannel.Name}";
+			channel.AppendChild(description);
+
+			foreach (FeedVideo video in ytchannel.Videos.Take(15))
+			{
+				XmlElement item = document.CreateElement("item");
+
+				XmlElement id = document.CreateElement("id");
+				id.InnerText = $"id:video:{video.Id}";
+				item.AppendChild(id);
+
+				XmlElement vtitle = document.CreateElement("title");
+				vtitle.InnerText = video.Title;
+				item.AppendChild(vtitle);
+
+				XmlElement vdescription = document.CreateElement("description");
+				vdescription.InnerText = video.Description;
+				item.AppendChild(vdescription);
+
+				XmlElement link = document.CreateElement("link");
+				link.InnerText = $"https://{Request.Host}/watch?v={video.Id}";
+				item.AppendChild(link);
+
+				XmlElement published = document.CreateElement("pubDate");
+				published.InnerText = video.PublishedDate.ToString("R");
+				item.AppendChild(published);
+
+				XmlElement author = document.CreateElement("author");
+
+				XmlElement name = document.CreateElement("name");
+				name.InnerText = video.ChannelName;
+				author.AppendChild(name);
+
+				XmlElement uri = document.CreateElement("uri");
+				uri.InnerText = $"https://{Request.Host}/channel/{video.ChannelId}";
+				author.AppendChild(uri);
+
+				item.AppendChild(author);
+				channel.AppendChild(item);
+			}
+
+			rss.AppendChild(channel);
+
+			document.AppendChild(rss);
+			return File(Encoding.UTF8.GetBytes(document.OuterXml), "application/xml");
+
+		}
+		catch (Exception)
+		{
+
+			throw;
+		}
+	}
+
 	[Route("subscriptions")]
 	public async Task<IActionResult> Subscription()
 	{

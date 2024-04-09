@@ -41,19 +41,36 @@
 		}
 		else
 		{
-			<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
-				<span>
-					@Model.Exception.Message
-				</span>
+			<div class="player-error-container">
+				<div class="player-error-icon">
+					<svg class="icon" fill="currentColor" style="color: white;" width="128" height="128">
+						<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+					</svg>
+				</div>
+				<div class="player-error-info">
+					<div class="title">An error has occurred @(Model.Exception.GetType() == typeof(Exception) ? "" : $"({Model.Exception.GetType().Name})")</div>
+					<p class="ml-1">@Model.Exception.Message</p>
+					<p>
+						This error might not occur in other instances. Find them <a href="https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md">here</a>
+					</p>
+				</div>
 			</div>
 		}
 	}
 	else
 	{
-		<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
-			<span>
-				Failed to load player
-			</span>
+		<div class="player-error-container">
+			<div class="player-error-icon">
+				<svg class="icon" fill="currentColor" style="color: white;" width="128" height="128">
+					<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+				</svg>
+			</div>
+			<div class="player-error-info">
+				<div class="title">Failed to load the player</div>
+				<p>
+					This might not occur in other instances. Find them <a href="https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md">here</a>
+				</p>
+			</div>
 		</div>
 	}
 }
@@ -109,10 +126,16 @@ else if (Model.Player.Formats.Any())
 else
 {
 	playable = false;
-	<div id="player" class="player @(Model.GetClass()) error" style="background-image: url('@Model.Thumbnails.LastOrDefault()?.Url')">
-		<span>
-			No muxed formats were returned by YouTube
-		</span>
+	<div class="player-error-container">
+		<div class="player-error-icon">
+			<svg class="icon" fill="currentColor" style="color: white;" width="128" height="128">
+				<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+			</svg>
+		</div>
+		<div class="player-error-info">
+			<div class="title">An error has occurred</div>
+			<p>No muxed formats were returned from YouTube</p>
+		</div>
 	</div>
 }
 

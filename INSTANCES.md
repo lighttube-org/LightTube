@@ -5,3 +5,4 @@
 | [tube.inftord.tech](https://tube.inftord.tech/)       | Enabled    | Enabled        |
 | [tube.instellate.xyz](https://tube.instellate.xyz/)   | Enabled    | Enabled        |
 | [lighttube.plerx.de](https://lighttube.plerx.de/)     | Enabled    | Enabled        |
+| [youtube.forsaken-borders.net](https://youtube.forsaken-borders.net/)     | Enabled    | Enabled        |

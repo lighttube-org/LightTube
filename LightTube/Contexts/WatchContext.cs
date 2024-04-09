@@ -10,12 +10,13 @@ public class WatchContext : BaseContext
 	public InnerTubePlaylistInfo? Playlist;
 	public InnerTubeContinuationResponse? Comments;
 	public int Dislikes;
+	public int Likes;
 	public SponsorBlockSegment[] Sponsors;
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer,
 		InnerTubeNextResponse innerTubeNextResponse,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes, SponsorBlockSegment[] sponsors) : base(context)
+		bool compatibility, int dislikes, int likes, SponsorBlockSegment[] sponsors) : base(context)
 	{
 		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility,
 			context.Request.Query["q"], sponsors);
@@ -23,6 +24,7 @@ public class WatchContext : BaseContext
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
+		Likes = likes;
 		Sponsors = sponsors;
 		GuideHidden = true;
 
@@ -49,13 +51,14 @@ public class WatchContext : BaseContext
 	}
 
 	public WatchContext(HttpContext context, Exception e, InnerTubeNextResponse innerTubeNextResponse,
-		InnerTubeContinuationResponse? comments, int dislikes) : base(context)
+		InnerTubeContinuationResponse? comments, int dislikes, int likes) : base(context)
 	{
 		Player = new PlayerContext(context, e);
 		Video = innerTubeNextResponse;
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
+		Likes = likes;
 		Sponsors = Array.Empty<SponsorBlockSegment>();
 		GuideHidden = true;
 
@@ -78,7 +81,7 @@ public class WatchContext : BaseContext
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer,
 		InnerTubeNextResponse innerTubeNextResponse, DatabasePlaylist? playlist,
 		InnerTubeContinuationResponse? comments,
-		bool compatibility, int dislikes, SponsorBlockSegment[] sponsors) : base(context)
+		bool compatibility, int dislikes, int likes, SponsorBlockSegment[] sponsors) : base(context)
 	{
 		Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility,
 			context.Request.Query["q"], sponsors);
@@ -89,6 +92,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
+		Likes = likes;
 		Sponsors = sponsors;
 		GuideHidden = true;
 
@@ -116,7 +120,7 @@ public class WatchContext : BaseContext
 
 	public WatchContext(HttpContext context, Exception e, InnerTubeNextResponse innerTubeNextResponse,
 		DatabasePlaylist? playlist,
-		InnerTubeContinuationResponse? comments, int dislikes) : base(context)
+		InnerTubeContinuationResponse? comments, int dislikes, int likes) : base(context)
 	{
 		Player = new PlayerContext(context, e);
 		Video = innerTubeNextResponse;
@@ -126,6 +130,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
+		Likes = likes;
 		Sponsors = Array.Empty<SponsorBlockSegment>();
 		GuideHidden = true;
 
