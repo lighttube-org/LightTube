@@ -67,11 +67,7 @@ public class OpenSearchController(InnerTube.InnerTube youtube) : Controller
     [Route("suggestions.json")]
     public async Task<object[]> Suggestions(string q)
     {
-        object[] res = new object[4];
-        res[0] = q;
-        res[1] = new List<string>();
-        res[2] = new List<string>();
-        res[3] = new List<string>();
+        object[] res = [q, new List<string>(), new List<string>(), new List<string>()];
         InnerTubeSearchAutocomplete autocomplete = await _youtube.GetSearchAutocompleteAsync(q);
         foreach (string s in autocomplete.Autocomplete)
         {
