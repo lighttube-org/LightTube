@@ -1175,7 +1175,7 @@ input#comments-toggle {
 
 .channel-info {
     max-width: 1200px;
-    margin: 16px 16px 4px 16px;
+    margin: 16px auto 4px;
 }
 
 .channel-info__container {
