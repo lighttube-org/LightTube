@@ -70,7 +70,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 		{
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			DatabasePlaylist playlist = await DatabaseManager.Playlists.CreatePlaylist(
-				Request.Headers["Authorization"].ToString(), request.Title,
+				Request.Headers.Authorization.ToString(), request.Title,
 				request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
 			return new ApiResponse<DatabasePlaylist>(playlist, userData);
 		}
@@ -96,7 +96,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 		{
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			await DatabaseManager.Playlists.EditPlaylist(
-				Request.Headers["Authorization"].ToString()!, id, request.Title,
+				Request.Headers.Authorization.ToString()!, id, request.Title,
 				request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
 			DatabasePlaylist playlist = DatabaseManager.Playlists.GetPlaylist(id)!;
 			return new ApiResponse<DatabasePlaylist>(playlist, userData);
@@ -118,7 +118,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 		try
 		{
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-			await DatabaseManager.Playlists.DeletePlaylist(Request.Headers["Authorization"].ToString(), id);
+			await DatabaseManager.Playlists.DeletePlaylist(Request.Headers.Authorization.ToString(), id);
 			return new ApiResponse<string>($"Deleted playlist '{id}'", userData);
 		}
 		catch (Exception e)
@@ -141,7 +141,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 			InnerTubePlayer video = await _youtube.GetPlayerAsync(videoId);
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			await DatabaseManager.Playlists.AddVideoToPlaylist(
-				Request.Headers["Authorization"].ToString(),
+				Request.Headers.Authorization.ToString(),
 				playlistId,
 				video);
 			return new ApiResponse<ModifyPlaylistContentResponse>(new ModifyPlaylistContentResponse(video), userData);
@@ -164,7 +164,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 		{
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 			await DatabaseManager.Playlists.RemoveVideoFromPlaylist(
-				Request.Headers["Authorization"].ToString(),
+				Request.Headers.Authorization.ToString(),
 				playlistId,
 				videoId);
 			return new ApiResponse<string>($"Removed '{videoId}' from playlist '{playlistId}'", userData);
@@ -254,7 +254,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 
 			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
 			(string? channelId, SubscriptionType subscriptionType) = await DatabaseManager.Users.UpdateSubscription(
-				Request.Headers["Authorization"].ToString()!, req.ChannelId,
+				Request.Headers.Authorization.ToString()!, req.ChannelId,
 				type);
 			if (req.Subscribed)
 				await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
@@ -285,7 +285,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 		{
 			InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id);
 			(string? channelId, SubscriptionType type) = await DatabaseManager.Users.UpdateSubscription(
-				Request.Headers["Authorization"].ToString()!, id,
+				Request.Headers.Authorization.ToString()!, id,
 				SubscriptionType.NONE);
 			userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
 			return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, type), userData);
