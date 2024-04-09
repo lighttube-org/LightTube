@@ -77,7 +77,7 @@
 else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 {
 	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		@if (Configuration.ProxyEnabled)
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
@@ -102,7 +102,7 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 else if (Model.Player.Formats.Any())
 {
 	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		@if (Configuration.ProxyEnabled)
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{

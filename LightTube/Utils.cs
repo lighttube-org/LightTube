@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Xml;
@@ -32,14 +33,14 @@ public static class Utils
 			? h.ToString()
 			: context.Request.Cookies.TryGetValue("gl", out string region)
 				? region
-				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
+				: Configuration.DefaultContentRegion;
 
 	public static string GetLanguage(this HttpContext context) =>
 		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
 			? h.ToString()
 			: context.Request.Cookies.TryGetValue("hl", out string language)
 				? language
-				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
+				: Configuration.DefaultContentLanguage;
 
 	public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
 		context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
@@ -479,5 +480,23 @@ public static class Utils
 		if (request.Query.TryGetValue("exact", out StringValues _)) searchParams.QueryFlags.ExactSearch = true;
 
 		return searchParams;
+	}
+
+	public static bool ShouldShowAlert(HttpRequest request)
+	{
+		if (Configuration.AlertHash == null) return false;
+
+		if (request.Cookies.TryGetValue("dismissedAlert", out string? cookieVal))
+			return cookieVal != Configuration.AlertHash;
+
+		return true;
+	}
+
+	public static string Md5Sum(string input)
+	{
+		using MD5 md5 = MD5.Create();
+		byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+		byte[] hashBytes = md5.ComputeHash(inputBytes);
+		return Convert.ToHexString(hashBytes);
 	}
 }

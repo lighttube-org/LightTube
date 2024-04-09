@@ -27,7 +27,7 @@ public class AccountController : Controller
 			UserID = userId
 		};
 
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "false") != "false")
+		if (!Configuration.RegistrationEnabled)
 			return View(ac);
 
 		if (userId is null || password is null || passwordCheck is null)

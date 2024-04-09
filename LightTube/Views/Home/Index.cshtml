@@ -1,32 +1,30 @@
 ﻿@using Humanizer
 <div style="display: flex;align-items: center;justify-content: center">
-	<h1 style="color:var(--text-primary);text-align:center;height:10%">@Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")</h1>
+	<h1 style="color:var(--text-primary);text-align:center;height:10%">@Configuration.RandomMessage()</h1>
 </div>
 @if (Model.Videos is not null)
 {
-
 	<div class="renderer-gridrenderer">
-
 		@foreach (FeedVideo video in Model.Videos)
 		{
-					<div class="renderer-gridvideorenderer">
-						<a href="/watch?v=@video.Id"  class="grid-thumbnail">
-							<img loading="lazy" src="@video.Thumbnail" alt="@video.Title">
-						</a>
-						<div class="info">
-							<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
+			<div class="renderer-gridvideorenderer">
+				<a href="/watch?v=@video.Id"  class="grid-thumbnail">
+					<img loading="lazy" src="@video.Thumbnail" alt="@video.Title">
+				</a>
+				<div class="info">
+					<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
 						@video.Title
-							</a>
-							<div class="info__channel">
-								<a href="/channel/@video.ChannelId" title="@video.ChannelName" class="ml-1">
+					</a>
+					<div class="info__channel">
+						<a href="/channel/@video.ChannelId" title="@video.ChannelName" class="ml-1">
 							@video.ChannelName
-								</a>
-							</div>
-							<div>
-						@video.ViewCount.ToString("N0") views • @video.PublishedDate.Humanize(DateTimeOffset.UtcNow)
-							</div>
-						</div>
+						</a>
 					</div>
+					<div>
+						@video.ViewCount.ToString("N0") views • @video.PublishedDate.Humanize(DateTimeOffset.UtcNow)
+					</div>
+				</div>
+			</div>
 		}
 	</div>
 }

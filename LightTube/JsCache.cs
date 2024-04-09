@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Web;
 using Serilog;
 
@@ -29,13 +27,8 @@ public static class JsCache
 			string jsData = await response.Content.ReadAsStringAsync();
 			await File.WriteAllTextAsync($"/tmp/lighttube/jsCache/{name}", jsData);
 			Log.Debug($"[JsCache] Calculating the MD5 hash of {name}...");
-			
-			using MD5 md5 = MD5.Create();
-			byte[] inputBytes = Encoding.ASCII.GetBytes(jsData);
-			byte[] hashBytes = md5.ComputeHash(inputBytes);
-			string hash = Convert.ToHexString(hashBytes);
 
-			Hashes[name] = hash;
+			Hashes[name] = Utils.Md5Sum(jsData);
 			
 			Log.Information($"[JsCache] Downloaded '{name}'.");
 		}

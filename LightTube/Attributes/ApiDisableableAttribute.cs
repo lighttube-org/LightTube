@@ -17,7 +17,7 @@ public class ApiDisableableAttribute : Attribute, IActionFilter
 
 	public void OnActionExecuting(ActionExecutingContext context)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_API", "")?.ToLower() != "true") return;
+		if (Configuration.ApiEnabled) return;
 		context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 		context.Result = new ContentResult();
 	}

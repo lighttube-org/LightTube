@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Html
 @using System.Web
+@using Microsoft.AspNetCore.Http.Extensions
 @model BaseContext
 
 <!DOCTYPE html>
@@ -21,7 +22,7 @@
 	{
 		@item
 	}
-	@if (Configuration.GetVariable("LIGHTTUBE_CUSTOM_CSS_PATH") != null)
+	@if (Configuration.CustomCssPath != null)
 	{
 		<link rel="stylesheet" href="/css/custom.css">
 	}
@@ -58,6 +59,19 @@
 	</div>
 </div>
 <div class="app">
+	@if (Utils.ShouldShowAlert(Context.Request))
+	{
+		<div class="layout-alert">
+			<div class="layout-alert_text">
+				@Configuration.Alert
+			</div>
+			<a href="/dismiss_alert?redirectUrl=@HttpUtility.UrlEncode(Context.Request.GetEncodedPathAndQuery())" class="layout-alert_close" title="dismiss">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#x-lg"/>
+				</svg>
+			</a>
+		</div>
+	}
 	@RenderBody()
 </div>
 @foreach (IHtmlContent item in Model.EndTags)

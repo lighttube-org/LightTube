@@ -20,7 +20,7 @@
 }
 
 <!DOCTYPE html>
-<html lang="en" class="@(Model.IsDarkMode() ? "dark-mode" : "")">
+<html lang="en" class="@Model.GetThemeClass()">
 <head>
 	<meta charset="UTF-8">
 	<title>Error - LightTube</title>
@@ -28,6 +28,10 @@
 	<link rel="stylesheet" href="~/css/lighttube.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/css/renderers.css?v=@Utils.GetVersion()">
 	<link rel="stylesheet" href="~/fonts/roboto/roboto.css">
+	@if (Configuration.CustomCssPath != null)
+	{
+		<link rel="stylesheet" href="/css/custom.css">
+	}
 </head>
 <body class="error-container">
 <h1 class="title">Whoops!</h1>

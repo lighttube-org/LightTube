@@ -26,14 +26,17 @@ public class ApiController : Controller
 	public LightTubeInstanceInfo GetInstanceInfo() =>
 		new()
 		{
-			Type = "lighttube",
+			Type = "lighttube/2.0",
 			Version = Utils.GetVersion(),
-			Motd = Configuration.GetVariable("LIGHTTUBE_MOTD", "Search something to get started!")!,
-			AllowsApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_API", "")?.ToLower() != "true",
-			AllowsNewUsers = Configuration.GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "")?.ToLower() != "true",
-			AllowsOauthApi = Configuration.GetVariable("LIGHTTUBE_DISABLE_OAUTH", "")?.ToLower() != "true",
-			AllowsThirdPartyProxyUsage =
-				Configuration.GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true"
+			Messages = Configuration.Messages,
+			Alert = Configuration.Alert,
+			Config = new Dictionary<string, object>
+			{
+				["allowsApi"] = Configuration.ApiEnabled,
+				["allowsNewUsers"] = Configuration.RegistrationEnabled,
+				["allowsOauthApi"] = Configuration.OauthEnabled,
+				["allowsThirdPartyProxyUsage"] = Configuration.ThirdPartyProxyEnabled
+			}
 		};
 
 	private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)

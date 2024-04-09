@@ -40,7 +40,7 @@ public class ProxyController : Controller
 	[Route("media/{videoId}/{formatId}.{extension}")]
 	public async Task Media(string videoId, string formatId, string? audioTrackId, string? extension = null)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 		{
 			Response.StatusCode = (int)HttpStatusCode.NotFound;
 			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
@@ -133,7 +133,7 @@ public class ProxyController : Controller
 	public async Task<IActionResult> HlsProxy(string videoId, string formatId, bool useProxy = true,
 		bool skipCaptions = false)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 			useProxy = false;
 
 		try
@@ -170,7 +170,7 @@ public class ProxyController : Controller
 	public async Task<IActionResult> DashProxy(string videoId, string formatId, bool useProxy = true,
 		bool skipCaptions = false)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 			useProxy = false;
 
 		try
@@ -196,7 +196,7 @@ public class ProxyController : Controller
 	[Route("hls/playlist/{path}")]
 	public async Task<IActionResult> HlsPlaylistProxy(string path, bool useProxy = true)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 			return NotFound("This instance has disabled media proxies.");
 
 		try
@@ -222,7 +222,7 @@ public class ProxyController : Controller
 	[Route("hls/timedtext/{path}")]
 	public async Task<IActionResult> HlsSubtitleProxy(string path, bool useProxy = true)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 			return NotFound("This instance has disabled media proxies.");
 
 		try
@@ -248,7 +248,7 @@ public class ProxyController : Controller
 	[Route("hls/segment/{path}")]
 	public async Task HlsSegmentProxy(string path)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 		{
 			Response.StatusCode = (int)HttpStatusCode.NotFound;
 			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
@@ -359,7 +359,7 @@ public class ProxyController : Controller
 	[Route("thumbnail/{videoId}/{index:int}")]
 	public async Task ThumbnailProxy(string videoId, int index = 0)
 	{
-		if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		if (!Configuration.ProxyEnabled)
 		{
 			Response.StatusCode = (int)HttpStatusCode.NotFound;
 			await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));

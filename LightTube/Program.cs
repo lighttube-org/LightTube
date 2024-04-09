@@ -13,6 +13,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
+Configuration.InitConfig();
 try
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -26,18 +27,18 @@ try
 // Add services to the container.
     builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 
-    InnerTubeAuthorization? auth = Configuration.GetInnerTubeAuthorization();
+    InnerTubeAuthorization? auth = Configuration.InnerTubeAuthorization;
     builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
     {
         Authorization = auth,
-        CacheSize = int.Parse(Configuration.GetVariable("LIGHTTUBE_CACHE_SIZE", "50")!),
+        CacheSize = Configuration.CacheSize,
         CacheExpirationPollingInterval = default
     }));
     builder.Services.AddSingleton(new HttpClient());
 
     await JsCache.DownloadLibraries();
     ChoreManager.RegisterChores();
-    DatabaseManager.Init(Configuration.GetVariable("LIGHTTUBE_MONGODB_CONNSTR"));
+    DatabaseManager.Init(Configuration.ConnectionString);
 
     WebApplication app = builder.Build();
 

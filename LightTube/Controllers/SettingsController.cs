@@ -29,7 +29,7 @@ public class SettingsController : Controller
 	public async Task<IActionResult> Appearance()
 	{
 		InnerTubeLocals locals = await _youtube.GetLocalsAsync();
-		AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.GetCustomThemeDefs());
+		AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.CustomThemeDefs);
 		return View(ctx);
 	}
 

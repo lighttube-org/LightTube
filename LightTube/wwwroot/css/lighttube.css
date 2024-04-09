@@ -1554,3 +1554,22 @@ code {
 .input-file::file-selector-button:hover {
     background-color: var(--btn-hover-color-white);
 }
+
+/* LightTube Alerts */
+.layout-alert {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--thumbnail-background);
+}
+
+.layout-alert_text {
+    flex-grow: 1;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.layout-alert_close {
+    color: var(--text-primary);
+    height: 20px;
+}
