@@ -22,6 +22,7 @@ public static class Configuration
 	public static string? CustomCssPath { get; private set; }
 	public static string[] Messages { get; private set; }
 	public static string? Alert { get; private set; }
+	public static string? AlertHash { get; private set; }
 	private static Random random = new();
 
 	private static string? GetVariable(string var, string? def = null) =>
@@ -81,7 +82,8 @@ public static class Configuration
 			Messages = new[] { "Search something to get started!" };
 		}
 
-		Alert = GetVariable("LIGHTTUBE_ALERT");
+		Alert = GetVariable("LIGHTTUBE_ALERT") ?? ":3 check! press the X to :3";
+		AlertHash = Alert != null ? Utils.Md5Sum(Alert) : null;
 	}
 
 	public static string RandomMessage() => Messages[random.Next(0, Messages.Length)];

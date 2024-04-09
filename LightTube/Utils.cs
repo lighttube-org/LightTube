@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Xml;
@@ -479,5 +480,23 @@ public static class Utils
 		if (request.Query.TryGetValue("exact", out StringValues _)) searchParams.QueryFlags.ExactSearch = true;
 
 		return searchParams;
+	}
+
+	public static bool ShouldShowAlert(HttpRequest request)
+	{
+		if (Configuration.AlertHash == null) return false;
+
+		if (request.Cookies.TryGetValue("dismissedAlert", out string? cookieVal))
+			return cookieVal != Configuration.AlertHash;
+
+		return true;
+	}
+
+	public static string Md5Sum(string input)
+	{
+		using MD5 md5 = MD5.Create();
+		byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+		byte[] hashBytes = md5.ComputeHash(inputBytes);
+		return Convert.ToHexString(hashBytes);
 	}
 }

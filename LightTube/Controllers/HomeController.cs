@@ -2,6 +2,7 @@
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace LightTube.Controllers;
 
@@ -28,7 +29,7 @@ public class HomeController : Controller
 		string? fileName = Configuration.CustomCssPath;
 
 		if (fileName == null) return NotFound();
-		
+
 		using FileStream fs = System.IO.File.OpenRead(fileName);
 		return File(fs, "text/css");
 	}
@@ -46,5 +47,16 @@ public class HomeController : Controller
 		{
 			return NotFound();
 		}
+	}
+
+	[Route("/dismiss_alert")]
+	public IActionResult DismissAlert(string redirectUrl)
+	{
+		if (Configuration.AlertHash == null) return Redirect(redirectUrl);
+		Response.Cookies.Append("dismissedAlert", Configuration.AlertHash!, new CookieOptions
+		{
+			Expires = DateTimeOffset.UtcNow.AddDays(15)
+		});
+		return Redirect(redirectUrl);
 	}
 }
