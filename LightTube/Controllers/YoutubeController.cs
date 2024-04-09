@@ -284,7 +284,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
             return BadRequest(e?.Message ?? "player is null");
         if (player.Details.IsLive)
             return BadRequest("You cannot download live videos");
-        PlaylistVideoContext<InnerTubePlayer> ctx = new PlaylistVideoContext<InnerTubePlayer>(HttpContext);
+        PlaylistVideoContext<InnerTubePlayer> ctx = new(HttpContext);
         ctx.ItemId = player.Details.Id;
         ctx.ItemTitle = player.Details.Title;
         ctx.ItemSubtitle = player.Details.Author.Title;

@@ -112,8 +112,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
             string secretDecoded = Encoding.UTF8.GetString(Convert.FromBase64String(secret));
             string username = secretDecoded.Split(':')[0];
             string password = secretDecoded.Split(':')[1];
-            DatabaseUser? user = await DatabaseManager.Users.GetUserFromUsernamePassword(username, password);
-            if (user is null) throw new Exception();
+            DatabaseUser? user = await DatabaseManager.Users.GetUserFromUsernamePassword(username, password) ?? throw new Exception();
             FeedVideo[] feedVideos = await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Where(x => x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key));
 
             XmlDocument document = new();
@@ -237,7 +236,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     [HttpGet]
     public IActionResult NewPlaylist(string? v)
     {
-        ModalContext ctx = new ModalContext(HttpContext);
+        ModalContext ctx = new(HttpContext);
         if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
         ctx.Buttons =
         [
@@ -273,7 +272,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     [HttpGet]
     public IActionResult EditPlaylist(string id)
     {
-        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> ctx = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext);
+        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> ctx = new(HttpContext);
         if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
 
         DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
@@ -315,7 +314,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     [HttpGet]
     public IActionResult DeletePlaylist(string id)
     {
-        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> ctx = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext);
+        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> ctx = new(HttpContext);
         if (ctx.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
 
         DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
@@ -357,7 +356,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     public async Task<IActionResult> AddToPlaylist(string v)
     {
         InnerTubeNextResponse intr = await _youtube.GetVideoAsync(v);
-        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext, intr);
+        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new(HttpContext, intr);
         if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
         pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.PRIVATE);
         pvc.Buttons =
@@ -393,7 +392,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     {
         DatabaseVideo? video = DatabaseManager.Cache.GetVideo(v[..11]);
 
-        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new PlaylistVideoContext<IEnumerable<DatabasePlaylist>>(HttpContext, video, v);
+        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new(HttpContext, video, v);
         if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
 
         DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(list);

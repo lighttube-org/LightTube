@@ -7,7 +7,7 @@ public class QueueChore(Type chore)
 {
     public IChore Chore = (IChore)Activator.CreateInstance(chore)!;
     public Guid Id = Guid.NewGuid();
-    public Stopwatch Stopwatch = new Stopwatch();
+    public Stopwatch Stopwatch = new();
     public string Status = "";
     public bool Running;
     public bool Complete;

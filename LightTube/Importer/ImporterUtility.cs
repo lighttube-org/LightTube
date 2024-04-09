@@ -76,7 +76,7 @@ public static class ImporterUtility
             foreach (string line in lines)
             {
                 string[] parts = line.Split(',');
-                ImportedData.Subscription? item = new ImportedData.Subscription();
+                ImportedData.Subscription? item = new();
                 item.Id = parts[0];
                 item.Name = parts[2];
                 importedData.Subscriptions.Add(item);

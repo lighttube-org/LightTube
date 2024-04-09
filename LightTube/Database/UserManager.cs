@@ -138,8 +138,7 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
 
         await UserCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
 
-        return user.Subscriptions.ContainsKey(channelId)
-            ? (channelId, user.Subscriptions[channelId])
+        return user.Subscriptions.TryGetValue(channelId, out SubscriptionType value) ? (channelId, value)
             : (channelId, SubscriptionType.NONE);
     }
 

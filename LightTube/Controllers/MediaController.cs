@@ -14,7 +14,7 @@ namespace LightTube.Controllers;
 public class ProxyController(InnerTube.InnerTube youtube) : Controller
 {
     private readonly InnerTube.InnerTube _youtube = youtube;
-    private readonly HttpClient client = new HttpClient();
+    private readonly HttpClient client = new();
 
     private string[] _blockedHeaders =
     [

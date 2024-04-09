@@ -110,7 +110,7 @@ public class PlaylistManager(
         if (u is null)
             throw new UnauthorizedAccessException("Unauthorized");
 
-        DatabasePlaylist pl = new DatabasePlaylist()
+        DatabasePlaylist pl = new()
         {
             Id = DatabasePlaylist.GenerateId(),
             Name = title,
