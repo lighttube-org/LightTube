@@ -24,7 +24,7 @@ try
         .Enrich.FromLogContext()
         .WriteTo.Console());
 
-// Add services to the container.
+    // Add services to the container.
     builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 
     InnerTubeAuthorization? auth = Configuration.InnerTubeAuthorization;
@@ -42,7 +42,7 @@ try
 
     WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Home/Error");
