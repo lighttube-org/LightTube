@@ -89,7 +89,7 @@ public class LocalizationManager(string locale)
 		return new LocalizationManager(preferredLocale)
 		{
 			PreferredLocaleStrings = preferredLocaleStrings,
-			FallbackLocaleStrings = Localizations["en-US"]
+			FallbackLocaleStrings = Localizations["en"]
 		};
 	}
 }

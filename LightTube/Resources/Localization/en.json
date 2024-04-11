@@ -1,0 +1,7 @@
+{
+  "test.1": "Localization Test",
+  "test.2": "<b>Localization</b> Test",
+  "test.3": "exists only on locale en-us",
+  "format.1": "Formatting test: {0}",
+  "format.2": "<b>Formatting test</b>: {0}"
+}
