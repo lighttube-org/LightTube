@@ -1,0 +1,32 @@
+@model BaseContext
+
+@{
+Model.Title = "Locale Test";
+}
+
+<h1 class="title">Localization Test</h1>
+
+<p><b class="title">Current Locale:</b> @Model.Localization.CurrentLocale</p>
+
+<table>
+    <thead>
+    <tr>
+        <td class="title">Normal Test</td>
+        <td class="title">Format Test</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>@Model.Localization.GetString("test.1")</td>
+        <td>@Model.Localization.FormatString("format.1", "{argument}")</td>
+    </tr>
+    <tr>
+        <td>@Model.Localization.GetString("test.2")</td>
+        <td>@Model.Localization.FormatString("format.2", "{argument}")</td>
+    </tr>
+    <tr>
+        <td>@Model.Localization.GetString("test.3")</td>
+        <td>@Model.Localization.FormatString("format.3", "{argument}")</td>
+    </tr>
+    </tbody>
+</table>

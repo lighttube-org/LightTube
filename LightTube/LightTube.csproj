@@ -2,25 +2,25 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-        <Nullable>enable``</Nullable>
+        <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
-        <PublishReadyToRunExclude Include="ZstdSharp.dll" />
-        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-        <PackageReference Include="Humanizer.Core" Version="2.14.1" />
-        <PackageReference Include="InnerTube" Version="1.1.4" /> 
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.3" />
-        <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Serilog" Version="3.1.1" />
-        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-        <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
+        <PublishReadyToRunExclude Include="ZstdSharp.dll"/>
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
+        <PackageReference Include="Humanizer.Core" Version="2.14.1"/>
+        <PackageReference Include="InnerTube" Version="1.1.4"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.3"/>
+        <PackageReference Include="MongoDB.Driver" Version="2.24.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Serilog" Version="3.1.1"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1"/>
+        <PackageReference Include="System.Runtime.Caching" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot\icons\" />
+        <Folder Include="wwwroot\icons\"/>
     </ItemGroup>
 
 </Project>

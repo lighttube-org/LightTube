@@ -499,4 +499,11 @@ public static class Utils
         byte[] hashBytes = md5.ComputeHash(inputBytes);
         return Convert.ToHexString(hashBytes);
     }
+
+    public static float ExtractHeaderQualityValue(string s)
+    {
+        // https://developer.mozilla.org/en-US/docs/Glossary/Quality_values
+        string[] parts = s.Split("q=");
+        return parts.Length > 1 && float.TryParse(parts[1], out float val) ? val : 1;
+    }
 }

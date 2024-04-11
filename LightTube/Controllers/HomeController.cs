@@ -54,4 +54,7 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         });
         return Redirect(redirectUrl);
     }
+
+    [Route("/locale_test")]
+    public IActionResult LocaleTest() => View(new BaseContext(HttpContext));
 }

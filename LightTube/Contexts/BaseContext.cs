@@ -1,5 +1,6 @@
 ﻿using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -15,11 +16,13 @@ public class BaseContext
     public bool GuideHidden = false;
     public HttpContext Context;
     public DatabaseUser? User;
+    public LocalizationManager Localization;
 
     public BaseContext(HttpContext context)
     {
         Context = context;
         User = DatabaseManager.Users.GetUserFromToken(context.Request.Cookies["token"] ?? "").Result;
+        Localization = LocalizationManager.GetFromHttpContext(context);
         AddMeta("og:site_name", "lighttube");
         AddMeta("og:type", "website");
         AddMeta("theme-color", "#AA0000");
