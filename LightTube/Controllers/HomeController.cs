@@ -2,7 +2,6 @@
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace LightTube.Controllers;
 
@@ -54,7 +53,4 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         });
         return Redirect(redirectUrl);
     }
-
-    [Route("/locale_test")]
-    public IActionResult LocaleTest() => View(new BaseContext(HttpContext));
 }
