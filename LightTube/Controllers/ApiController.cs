@@ -57,8 +57,8 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
         try
         {
             InnerTubePlayer player =
-                await _youtube.GetPlayerAsync(id, contentCheckOk, includeHls, HttpContext.GetLanguage(),
-                    HttpContext.GetRegion());
+                await _youtube.GetPlayerAsync(id, contentCheckOk, includeHls, HttpContext.GetInnerTubeLanguage(),
+                    HttpContext.GetInnerTubeRegion());
 
             DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
@@ -91,7 +91,7 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
         try
         {
             InnerTubeNextResponse video = await _youtube.GetVideoAsync(id, playlistId, playlistIndex, playlistParams,
-                HttpContext.GetLanguage(), HttpContext.GetRegion());
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
             DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
@@ -122,15 +122,15 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
         if (continuation is null)
         {
             SearchParams searchParams = Request.GetSearchParams();
-            InnerTubeSearchResults results = await _youtube.SearchAsync(query, searchParams, HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+            InnerTubeSearchResults results = await _youtube.SearchAsync(query, searchParams, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             result = new ApiSearchResults(results, searchParams);
         }
         else
         {
             InnerTubeContinuationResponse results = await _youtube.ContinueSearchAsync(continuation,
-                HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+                HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             result = new ApiSearchResults(results);
         }
 
@@ -153,8 +153,8 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
             DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             return new ApiResponse<InnerTubeSearchAutocomplete>(await _youtube.GetSearchAutocompleteAsync(query,
-                HttpContext.GetLanguage(),
-                HttpContext.GetRegion()), userData);
+                HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion()), userData);
         }
         catch (Exception e)
         {
@@ -210,14 +210,14 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
             else if (skip is null)
             {
                 InnerTubePlaylist playlist =
-                    await _youtube.GetPlaylistAsync(id, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
+                    await _youtube.GetPlaylistAsync(id, true, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
                 result = new ApiPlaylist(playlist);
             }
             else
             {
                 InnerTubeContinuationResponse playlist =
-                    await _youtube.ContinuePlaylistAsync(id, skip.Value, HttpContext.GetLanguage(),
-                        HttpContext.GetRegion());
+                    await _youtube.ContinuePlaylistAsync(id, skip.Value, HttpContext.GetInnerTubeLanguage(),
+                        HttpContext.GetInnerTubeRegion());
                 result = new ApiPlaylist(playlist);
             }
 
@@ -257,8 +257,8 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
                     id = await _youtube.GetChannelIdFromVanity(id) ?? id;
 
                 InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id, tab, searchQuery,
-                    HttpContext.GetLanguage(),
-                    HttpContext.GetRegion());
+                    HttpContext.GetInnerTubeLanguage(),
+                    HttpContext.GetInnerTubeRegion());
                 response = new ApiChannel(channel);
             }
             else
@@ -295,7 +295,7 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
                     HttpStatusCode.BadRequest);
 
             InnerTubeContinuationResponse? comments = await _youtube.GetVideoCommentsAsync(continuation!,
-                HttpContext.GetLanguage(), HttpContext.GetRegion());
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
             DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);

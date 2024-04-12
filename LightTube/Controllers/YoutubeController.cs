@@ -20,8 +20,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         Exception? e;
         try
         {
-            player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+            player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             e = null;
         }
         catch (Exception ex)
@@ -44,7 +44,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
             compatibility = true;
 
         InnerTubeNextResponse video =
-            await _youtube.GetVideoAsync(v, language: HttpContext.GetLanguage(), region: HttpContext.GetRegion());
+            await _youtube.GetVideoAsync(v, language: HttpContext.GetInnerTubeLanguage(), region: HttpContext.GetInnerTubeRegion());
         if (player is null || e is not null)
             return View(new EmbedContext(HttpContext, e ?? new Exception("player is null"), video));
         return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors));
@@ -58,8 +58,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         bool localPlaylist = list?.StartsWith("LT-PL") ?? false;
         try
         {
-            player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+            player = await _youtube.GetPlayerAsync(v, contentCheckOk, false, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             e = null;
             if (player.Details.Id != v)
             {
@@ -74,8 +74,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         }
 
         InnerTubeNextResponse video =
-            await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetLanguage(),
-                region: HttpContext.GetRegion());
+            await _youtube.GetVideoAsync(v, localPlaylist ? null : list, language: HttpContext.GetInnerTubeLanguage(),
+                region: HttpContext.GetInnerTubeRegion());
         InnerTubeContinuationResponse? comments = null;
 
         if (HttpContext.GetDefaultCompatibility())
@@ -85,8 +85,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         {
             string commentsContinuation = InnerTube.Utils.PackCommentsContinuation(v, CommentsContext.Types.SortOrder.TopComments);
             comments = await _youtube.GetVideoCommentsAsync(commentsContinuation,
-                language: HttpContext.GetLanguage(),
-                region: HttpContext.GetRegion());
+                language: HttpContext.GetInnerTubeLanguage(),
+                region: HttpContext.GetInnerTubeRegion());
         }
         catch { /* comments arent enabled, ignore */ }
 
@@ -147,14 +147,14 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
             SearchParams searchParams = Request.GetSearchParams();
 
             InnerTubeSearchResults search =
-                await _youtube.SearchAsync(search_query, searchParams, HttpContext.GetLanguage(),
-                    HttpContext.GetRegion());
+                await _youtube.SearchAsync(search_query, searchParams, HttpContext.GetInnerTubeLanguage(),
+                    HttpContext.GetInnerTubeRegion());
             return View(new SearchContext(HttpContext, search_query, searchParams, search));
         }
         else
         {
             InnerTubeContinuationResponse search =
-                await _youtube.ContinueSearchAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+                await _youtube.ContinueSearchAsync(continuation, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             return View(new SearchContext(HttpContext, search_query, null, search));
         }
     }
@@ -183,8 +183,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
     {
         if (id.StartsWith("LT")) return BadRequest("You cannot subscribe to other LightTube users");
         InnerTubeChannelResponse channel =
-            await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+            await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
         await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
         SubscriptionContext ctx = new(HttpContext, channel);
         if (ctx.User is null)
@@ -202,8 +202,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         (string? _, SubscriptionType subscriptionType) =
             await DatabaseManager.Users.UpdateSubscription(Request.Cookies["token"] ?? "", id, type);
         InnerTubeChannelResponse channel =
-            await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+            await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
         await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
         return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
     }
@@ -220,7 +220,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         if (continuation is null)
         {
             InnerTubeChannelResponse channel =
-                await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+                await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             try
             {
                 await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
@@ -235,9 +235,9 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         else
         {
             InnerTubeChannelResponse channel =
-                await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
+                await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             InnerTubeContinuationResponse cont =
-                await _youtube.ContinueChannelAsync(continuation, HttpContext.GetLanguage(), HttpContext.GetRegion());
+                await _youtube.ContinueChannelAsync(continuation, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             return View(new ChannelContext(HttpContext, tab, channel, cont, id));
         }
     }
@@ -253,7 +253,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         else
         {
             InnerTubePlaylist playlist =
-                await _youtube.GetPlaylistAsync(list, true, HttpContext.GetLanguage(), HttpContext.GetRegion());
+                await _youtube.GetPlaylistAsync(list, true, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             if (skip is null)
             {
                 return View(new PlaylistContext(HttpContext, playlist));
@@ -261,8 +261,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
             else
             {
                 InnerTubeContinuationResponse continuationRes =
-                    await _youtube.ContinuePlaylistAsync(list, skip.Value, HttpContext.GetLanguage(),
-                        HttpContext.GetRegion());
+                    await _youtube.ContinuePlaylistAsync(list, skip.Value, HttpContext.GetInnerTubeLanguage(),
+                        HttpContext.GetInnerTubeRegion());
                 return View(new PlaylistContext(HttpContext, playlist, continuationRes));
             }
         }
@@ -279,8 +279,8 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
 
         try
         {
-            player = await _youtube.GetPlayerAsync(v, true, false, HttpContext.GetLanguage(),
-                HttpContext.GetRegion());
+            player = await _youtube.GetPlayerAsync(v, true, false, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             e = null;
         }
         catch (Exception ex)

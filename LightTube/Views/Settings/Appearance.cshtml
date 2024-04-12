@@ -78,7 +78,7 @@
 		<select name="hl" class="subscription-dropdown">
 			@foreach ((string id, string label) in Model.Locals.Languages)
 			{
-				@if (id == Context.GetLanguage())
+				@if (id == Context.GetInnerTubeLanguage())
 				{
 					<option value="@id" selected>@label</option>
 				}
@@ -104,7 +104,7 @@
 		<select name="gl" class="subscription-dropdown">
 			@foreach ((string id, string label) in Model.Locals.Regions)
 			{
-				@if (id == Context.GetRegion())
+				@if (id == Context.GetInnerTubeRegion())
 				{
 					<option value="@id" selected>@label</option>
 				}

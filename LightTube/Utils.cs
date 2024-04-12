@@ -29,19 +29,19 @@ public static class Utils
         "subscriptions.write"
     ];
 
-    public static string GetRegion(this HttpContext context) =>
+    public static string GetInnerTubeRegion(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)
             ? h.ToString()
             : context.Request.Cookies.TryGetValue("gl", out string region)
                 ? region
                 : Configuration.DefaultContentRegion;
 
-    public static string GetLanguage(this HttpContext context) =>
+    public static string GetInnerTubeLanguage(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
             ? h.ToString()
-            : context.Request.Cookies.TryGetValue("hl", out string language)
+            : context.Request.Cookies.TryGetValue("hl", out string language) && language != "localized"
                 ? language
-                : Configuration.DefaultContentLanguage;
+                : LocalizationManager.GetFromHttpContext(context).GetRawString("language.innertube");
 
     public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
         context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
