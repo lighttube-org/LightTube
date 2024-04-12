@@ -19,7 +19,7 @@
 </div>
 
 <p>
-	Please select a format to download.
+	Model.Localization.GetString("download.format.select")
 </p>
 
 <table>
@@ -30,7 +30,7 @@
 			</svg>
 		</td>
 		<td>
-			Direct download
+			@Model.Localization.GetString("download.direct")
 		</td>
 	</tr>
 	<tr>
@@ -40,7 +40,7 @@
 			</svg>
 		</td>
 		<td>
-			Proxied download (not recommended)
+			@Model.Localization.GetString("download.proxy")
 		</td>
 	</tr>
 </table>
@@ -82,14 +82,14 @@
 		<div class="settings-option__info">
 			@if (f.MimeType.StartsWith("video")) {
 				<div class="ml-1 title">
-					Video Only - @f.QualityLabel
+					@Model.Localization.GetString("download.format.video") - @f.QualityLabel
 				</div>
 				<div class="ml-2">
 						@f.Fps FPS, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
 				</div>
 			} else {
 				<div class="ml-1 title">
-					Audio only - @f.AudioQuality.Replace("AUDIO_QUALITY_", "")
+					@Model.Localization.GetString("download.format.audio") - @f.AudioQuality.Replace("AUDIO_QUALITY_", "")
 				</div>
 				<div class="ml-2">
 					@f.AudioChannels channels, @(f.AudioSampleRate)Hz (@(f.MimeType.Split(";")[0]))

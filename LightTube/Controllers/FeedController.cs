@@ -241,9 +241,9 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         ctx.Buttons =
         [
             new ModalButton(v ?? "", "|", ""),
-            new ModalButton("Create Playlist", "__submit", "primary"),
+            new ModalButton(ctx.Localization.GetRawString("playlist.create.confirm"), "__submit", "primary"),
         ];
-        ctx.Title = "Create new playlist";
+        ctx.Title = ctx.Localization.GetRawString("playlist.create.title");
         ctx.AlignToStart = true;
         return View(ctx);
     }
@@ -288,9 +288,9 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         ctx.Buttons =
         [
             new ModalButton("", "|", ""),
-            new ModalButton("Confirm", "__submit", "primary"),
+            new ModalButton(ctx.Localization.GetRawString("playlist.edit.confirm"), "__submit", "primary"),
         ];
-        ctx.Title = "Edit playlist";
+        ctx.Title = ctx.Localization.GetRawString("playlist.edit.title");
         ctx.AlignToStart = true;
         return View(ctx);
     }
@@ -324,15 +324,15 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
 
         ctx.ItemId = playlist.Id;
         ctx.ItemTitle = playlist.Name;
-        ctx.ItemSubtitle = playlist.VideoIds.Count + " videos";
+        ctx.ItemSubtitle = string.Format(ctx.Localization.GetRawString("playlist.videos.count"), playlist.VideoIds.Count);
         ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{playlist.VideoIds.FirstOrDefault()}/hqdefault.jpg";
 
         ctx.Buttons =
         [
             new ModalButton("", "|", ""),
-            new ModalButton("Delete", "__submit", "primary"),
+            new ModalButton(ctx.Localization.GetRawString("playlist.delete.confirm"), "__submit", "primary"),
         ];
-        ctx.Title = "Delete playlist";
+        ctx.Title = ctx.Localization.GetRawString("playlist.delete.title");
         return View(ctx);
     }
 
@@ -362,9 +362,9 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         pvc.Buttons =
         [
             new ModalButton("", "|", ""),
-            new ModalButton("Add", "__submit", "primary"),
+            new ModalButton(pvc.Localization.GetRawString("playlist.add.confirm"), "__submit", "primary"),
         ];
-        pvc.Title = "Add video to playlist";
+        pvc.Title = pvc.Localization.GetRawString("playlist.add.title");
         return View(pvc);
     }
 
@@ -402,10 +402,10 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
 
         pvc.Buttons =
         [
-            new ModalButton(@playlist.Name, "|", @playlist.Id),
-            new ModalButton("Delete", "__submit", "primary"),
+            new ModalButton(playlist.Name, "|", playlist.Id),
+            new ModalButton(pvc.Localization.GetRawString("playlist.removevideo.confirm"), "__submit", "primary"),
         ];
-        pvc.Title = "Add video to playlist";
+        pvc.Title = pvc.Localization.GetRawString("playlist.removevideo.title");
         return View(pvc);
     }
 

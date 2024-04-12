@@ -3,9 +3,9 @@
 @using Microsoft.Extensions.Primitives
 @using Utils = LightTube.Utils
 @using System.Web
-@model global::InnerTube.Renderers.IRenderer
+@model (global::InnerTube.Renderers.IRenderer Renderer, LightTube.Localization.LocalizationManager Localization)
 
-@switch (Model)
+@switch (Model.Renderer)
 {
 	case VideoRenderer video:
 		<div class="renderer-videorenderer">
@@ -73,14 +73,14 @@
 				</div>
 			</div>
 			<div class="subscribe-container">
-				<partial name="SubscribeButton" model="channel.Id"/>
+				<partial name="SubscribeButton" model="(channel.Id, Model.Localization)"/>
 			</div>
 		</div>
 		break;
 	case PlaylistRenderer playlist:
 		<div class="renderer-playlistrenderer">
-			<a href="@(playlist.Videos.Any() ? $"/watch?v={playlist.Videos.FirstOrDefault().Id}&list={playlist.Id}" : $"/playlist?list={playlist.Id}")" class="thumbnail">
-				<img loading="lazy" src="@playlist.Thumbnails.FirstOrDefault().Url" alt="@playlist.Title">
+			<a href="@(playlist.Videos.Any() ? $"/watch?v={playlist.Videos.FirstOrDefault()?.Id}&list={playlist.Id}" : $"/playlist?list={playlist.Id}")" class="thumbnail">
+				<img loading="lazy" src="@playlist.Thumbnails.FirstOrDefault()?.Url" alt="@playlist.Title">
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoCount</span>
 					<svg class="bi" width="20" height="20" fill="currentColor">
@@ -89,7 +89,7 @@
 				</div>
 			</a>
 			<div class="info">
-				<a href="#" class="ml-2 title" title="@playlist.Title">
+				<a href="@(playlist.Videos.Any() ? $"/watch?v={playlist.Videos.FirstOrDefault()?.Id}&list={playlist.Id}" : $"/playlist?list={playlist.Id}")" class="ml-2 title" title="@playlist.Title">
 					@playlist.Title
 				</a>
 				<div class="info__more">
@@ -108,7 +108,7 @@
 						}
 					</div>
 					<a href="/playlist?list=@playlist.Id" class="link-view-full-playlist">
-						View Full Playlist
+						@Model.Localization.GetString("playlist.view.full")
 					</a>
 				</div>
 			</div>
@@ -365,7 +365,7 @@
 				<div class="header ml-1">
 					@if (comment.Pinned)
 					{
-						<svg class="bi" width="12" height="12" fill="currentColor" title="Pinned">
+						<svg class="bi" width="12" height="12" fill="currentColor" title="@Model.Localization.GetString("watch.comments.pinned")">
 							<use xlink:href="/svg/bootstrap-icons.svg#pin-angle-fill"/>
 						</svg>
 					}
@@ -386,8 +386,8 @@
 					@comment.LikeCount
 					@if (Context.Request.Query.TryGetValue("v", out StringValues v))
 					{
-						<a href="/watch?v=@v&lc=@comment.Id">
-							Open on YouTube
+						<a href="https://youtube.com/watch?v=@v&lc=@comment.Id">
+							@Model.Localization.GetString("watch.comments.youtube")
 						</a>
 					}
 				</div>
@@ -395,6 +395,7 @@
 		</div>
 		break;
 	case ChannelAboutFullMetadataRenderer about:
+		<!-- not translated cus it isnt used by youtube anymore -->
 		<div class="renderer-channelaboutfullmetadatarenderer">
 			<div class="channel-about-description">
 				<h2 class="ml-1 title">Description</h2>
@@ -430,7 +431,7 @@
 			<div class="recognition-shelf-items">
 				@foreach (Thumbnail avatar in recognition.Avatars.Take(7))
 				{
-					<img loading="lazy" src="@avatar.Url" alt="User Avatar">
+					<img loading="lazy" src="@avatar.Url" alt="@Model.Localization.GetString("channel.supporter.avatar")">
 				}
 			</div>
 		</div>
@@ -516,7 +517,9 @@
 						</div>
 					}
 					<div>
-						<a class="playlist-view-all" href="/playlist?list=@playlist.Id">View full playlist</a>
+						<a class="playlist-view-all" href="/playlist?list=@playlist.Id">
+							@Model.Localization.GetString("playlist.view.full")
+						</a>
 					</div>
 				</div>
 			</div>
@@ -535,7 +538,7 @@
         			@channel.SubscriberCountText
         		</div>
 	            <div>
-		            <partial name="SubscribeButton" model="channel.Id"/>
+		            <partial name="SubscribeButton" model="(channel.Id, Model.Localization)"/>
 	            </div>
         	</div>
         </div>
@@ -572,7 +575,7 @@
 		break;
 	case ContinuationItemRenderer cont:
 		<a href="@Utils.GetContinuationUrl(Context.Request.Path.ToString(), cont.Token)" class="renderer-continuationitemrenderer">
-			Next Page
+			@Model.Localization.GetString("pagination.next")
 		</a>
 		break;
 	case ReelShelfRenderer shelf:
@@ -630,7 +633,7 @@
 					</svg>
 					@post.LikeCount
 					<a href="/post/@post.Id">
-						Open on YouTube
+						@Model.Localization.GetString("watch.comments.youtube"/* casually reuses an irrelevant translation key */)
 					</a>
 				</div>
 			</div>
@@ -769,7 +772,13 @@
 			            }
 					</div>
 					<div>
-						<br><span class="badge">Movie</span><span class="badge">Unavailable</span>
+						<br>
+						<span class="badge">
+							@Model.Localization.GetString("video.movie")
+						</span>
+						<span class="badge">
+							@Model.Localization.GetString("video.unavailable")
+						</span>
 					</div>
 				</div>
 			</div>
@@ -808,7 +817,7 @@
 		break;
 	case UnknownRenderer:
 		<div class="renderer-null">
-			Unknown renderer type: @Model.Type
+			@Model.Localization.FormatString("error.renderer.unknown", Model.Renderer.Type)
 		</div>
 		break;
 	case AdSlotRenderer:
@@ -816,7 +825,7 @@
 		break;
 	default:
 		<div class="renderer-null">
-			Couldn't render: @Model.GetType().Name
+			@Model.Localization.FormatString("error.renderer.default", Model.Renderer.GetType().Name)
 		</div>
 		break;
 }

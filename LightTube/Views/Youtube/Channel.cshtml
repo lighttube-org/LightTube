@@ -11,7 +11,7 @@
 	@if (Model.BannerUrl != null)
 	{
 		<div class="channel-banner">
-			<img loading="lazy" class="channel-banner__img" src="@Model.BannerUrl" alt="Channel Banner">
+			<img loading="lazy" class="channel-banner__img" src="@Model.BannerUrl" alt="@Model.Localization.GetString("channel.banner")">
 		</div>
 	}
 	<div class="channel-info">
@@ -23,12 +23,12 @@
 				<span class="channel-info__subs">@Model.SubscriberCountText</span>
 				@if (!Model.LightTubeAccount)
 				{
-					<partial name="SubscribeButton" model="Model.Id"/>
+					<partial name="SubscribeButton" model="(Model.Id, Model.Localization)"/>
 				}
 				else if (Model.Editable)
 				{
 					<a class="btn-subscribed" href="/settings/account">
-						<span class="text">Account Settings</span>
+						<span class="text">@Model.Localization.GetString("channel.accountsettings")</span>
 					</a>
 				}
 		</div>
@@ -38,7 +38,7 @@
 		<div class="channel-tabs__container">
 			@foreach (ChannelTabs tab in Model.Tabs.Where(x => x != ChannelTabs.Search))
 			{
-				<partial name="ChannelTabItem" model="@(tab, Model.Id)"/>
+				<partial name="ChannelTabItem" model="@(tab, Model.Id, Model.Localization)"/>
 			}
 		</div>
 	</div>
@@ -81,6 +81,6 @@
 	<div class="next-page">
 		<span></span>
 		<span>•</span>
-		<a href="@Utils.GetContinuationUrl(Context.Request.Path.ToString(), Model.Continuation)">Next Page</a>
+		<a href="@Utils.GetContinuationUrl(Context.Request.Path.ToString(), Model.Continuation)">@Model.Localization.GetString("pagination.next")</a>
 	</div>
 }

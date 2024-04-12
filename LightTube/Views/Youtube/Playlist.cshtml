@@ -21,12 +21,12 @@
 		@if (Model.Editable)
 		{
 			<div class="playlist-page-buttons">
-				<a href="/editPlaylist?id=@Model.Id" target="_blank" class="icon-button" title="Edit">
+				<a href="/editPlaylist?id=@Model.Id" target="_blank" class="icon-button" title="@Model.Localization.GetString("playlist.lighttube.delete")">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#pencil"/>
 					</svg>
 				</a>
-				<a href="/deletePlaylist?id=@Model.Id" target="_blank" class="icon-button" title="Delete">
+				<a href="/deletePlaylist?id=@Model.Id" target="_blank" class="icon-button" title="@Model.Localization.GetString("playlist.lighttube.delete")">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#trash"/>
 					</svg>
@@ -46,7 +46,7 @@
 	<span>•</span>
 	@if (Model.Continuation is not null)
 	{
-		<a href="@Utils.GetSkipUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation.Value)">Next Page</a>
+		<a href="@Utils.GetSkipUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation.Value)">@Model.Localization.GetString("pagination.next")</a>
 	}
 	else
 	{

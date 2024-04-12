@@ -18,11 +18,11 @@
 		{
 			<noscript>
 				<div class="noscript-quality-switcher">
-					Current video resolution:
+					@Model.Localization.GetString("watch.noscript.resolution")
 					<b>
 						@Model.Player.GetPreferredFormat()?.QualityLabel
 					</b>
-					Switch to
+					@Model.Localization.GetString("watch.noscript.resolution.switch")
 					@foreach (Format f in Model.Player.Player?.Formats.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
 					{
 						<b>
@@ -44,7 +44,7 @@
 						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up"/>
 					</svg>
 					<div class="interaction-button__text">
-						@(Model.Likes == -1 ? "Like" : Model.Likes.ToKMB())
+						@(Model.Likes == -1 ? Model.Localization.GetString("watch.like.unavailable") : Model.Likes.ToKMB())
 					</div>
 				</div>
 				<vr></vr>
@@ -53,7 +53,7 @@
 						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-down"/>
 					</svg>
 					<div class="interaction-button__text">
-						@(Model.Dislikes == -1 ? "Dislike" : Model.Dislikes.ToKMB())
+						@(Model.Dislikes == -1 ? Model.Localization.GetString("watch.dislike.unavailable") : Model.Dislikes.ToKMB())
 					</div>
 				</div>
 			</div>
@@ -65,7 +65,7 @@
 							<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
 						</svg>
 						<div class="interaction-button__text">
-							Comments
+							@Model.Localization.GetString("watch.comments")
 						</div>
 					</label>
 				</div>
@@ -76,7 +76,7 @@
 						<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
 					</svg>
 					<div class="interaction-button__text">
-						Save
+						@Model.Localization.GetString("watch.save")
 					</div>
 				</a>
 			</div>
@@ -86,12 +86,12 @@
 						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
 					</svg>
 					<div class="interaction-button__text">
-						Download
+						@Model.Localization.GetString("watch.download")
 					</div>
 				</a>
 			</div>
 			<div class="interaction-buttons">
-				<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)">
+				<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)" title="@Model.Localization.GetString("watch.youtube")">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#youtube"/>
 					</svg>
@@ -107,11 +107,11 @@
 				<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
 				<span class="subs">@Model.Video.Channel.Subscribers</span>
 			</div>
-			<partial name="SubscribeButton" model="Model.Video.Channel.Id"/>
+			<partial name="SubscribeButton" model="(Model.Video.Channel.Id, Model.Localization)"/>
 		</div>
 		<details class="description">
 			<summary>
-				@Model.Video.ViewCount • @Model.Video.DateText • Click to toggle description
+				@Model.Video.ViewCount • @Model.Video.DateText • @Model.Localization.GetString("watch.description.toggle")
 			</summary>
 			@Html.Raw(desc)
 		</details>
@@ -125,7 +125,7 @@
 						<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
 						<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
 					</svg>
-					@(Model.Video.CommentCount ?? (Model.Comments.Contents.Count() + (Model.Comments.Continuation != null ? "+" : ""))) comments
+					@(Model.Video.CommentCount ?? (Model.Comments.Contents.Count() + (Model.Comments.Continuation != null ? "+" : ""))) @Model.Localization.GetString("watch.comments.count")
 					<div class="flex-divider hide-on-desktop"></div>
 					<label for="comments-toggle" class="hide-on-desktop">
 						<svg class="icon" width="32" height="32" fill="currentColor">
@@ -143,7 +143,7 @@
 		}
 		else
 		{
-			@:Comments are disabled
+			@Model.Localization.GetString("watch.comments.disabled")
 		}
 	</div>
 	<div class="second-column">
@@ -167,7 +167,7 @@
 		<div class="recommendations-container compact-renderer-list">
 			<details @(Context.GetDefaultRecommendationsVisibility() ? "open" : "")>
 				<summary>
-					Recommended
+					@Model.Localization.GetString("watch.recommended")
 				</summary>
 				<div class="recommended-videos">
 					@foreach (IRenderer renderer in Model.Video.Recommended.Where(x => x is not ContinuationItemRenderer))
@@ -191,5 +191,6 @@
 			playlistContainerElement.style.height = "unset";
 		requestAnimationFrame(() => updatePlaylistElementHeight());
 	}
-	updatePlaylistElementHeight();
+	if (playlistContainerElement != null)
+		updatePlaylistElementHeight();
 </script>

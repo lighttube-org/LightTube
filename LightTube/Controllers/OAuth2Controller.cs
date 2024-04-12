@@ -4,6 +4,7 @@ using LightTube.Attributes;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,12 +23,12 @@ public class OAuth2Controller : Controller
         [FromQuery(Name = "state")] string? state = null)
     {
         if (!Configuration.OauthEnabled)
-            return View(new OAuthContext("This instance does not allow OAuth2"));
+            return View(new OAuthContext(HttpContext, "error.oauth2.disabled"));
         if (string.IsNullOrEmpty(responseType))
-            return View(new OAuthContext("response_type cannot be empty"));
+            return View(new OAuthContext(HttpContext, "error.oauth2.response_type.empty"));
 
         if (responseType != "code")
-            return View(new OAuthContext("response_type must be `code`"));
+            return View(new OAuthContext(HttpContext, "error.oauth2.response_type.code"));
 
         // ...client ids
         // yeah idk how to do that
@@ -36,19 +37,19 @@ public class OAuth2Controller : Controller
         // thats not centralized
 
         if (string.IsNullOrEmpty(clientId))
-            return View(new OAuthContext("client_id cannot be empty"));
+            return View(new OAuthContext(HttpContext, "error.oauth2.client_id.empty"));
 
         Uri? redirectUrl = null;
         if (string.IsNullOrEmpty(redirectUri))
-            return View(new OAuthContext("redirect_uri is not valid"));
+            return View(new OAuthContext(HttpContext, "error.oauth2.redirect_uri.invalid"));
         redirectUrl = new(redirectUri);
 
         if (scope == null)
-            return View(new OAuthContext("scope cannot be empty"));
+            return View(new OAuthContext(HttpContext, "error.oauth2.scope.empty"));
 
         string[] invalidScopes = Utils.FindInvalidScopes(scope.Split(" "));
         if (invalidScopes.Length > 0)
-            return View(new OAuthContext($"Invalid scope(s): {string.Join(", ", invalidScopes)}"));
+            return View(new OAuthContext(HttpContext, error: "error.oauth2.scope.invalid", format: string.Join(", ", invalidScopes)));
 
 
         OAuthContext ctx = new(HttpContext, clientId, scope.Split(" "));
@@ -66,14 +67,15 @@ public class OAuth2Controller : Controller
         [FromQuery(Name = "scope")] string scope,
         [FromQuery(Name = "state")] string? state = null)
     {
+        LocalizationManager localization = LocalizationManager.GetFromHttpContext(HttpContext);
         if (!Configuration.OauthEnabled)
-            throw new Exception("Instance doesn't allow OAuth");
-
+            throw new Exception(localization.GetRawString("error.oauth2.disabled"));
+        
         if (string.IsNullOrEmpty(responseType))
-            throw new Exception("Response type invalid!");
+            throw new Exception(localization.GetRawString("error.oauth2.response_type.empty"));
 
         if (responseType != "code")
-            throw new Exception("response_type must be `code`!");
+            throw new Exception(localization.GetRawString("error.oauth2.response_type.code"));
 
         // ...client ids
         // yeah idk how to do that
@@ -82,27 +84,27 @@ public class OAuth2Controller : Controller
         // thats not centralized
 
         if (string.IsNullOrEmpty(clientId))
-            throw new Exception("client_id cannot be empty");
+            throw new Exception(localization.GetRawString("error.oauth2.client_id.empty"));
 
         Uri? redirectUrl = null;
         if (string.IsNullOrEmpty(redirectUri))
-            throw new Exception("redirect_uri is not valid");
+            throw new Exception(localization.GetRawString("error.oauth2.redirect_uri.invalid"));
 
         redirectUrl = new(redirectUri);
 
         if (scope == null)
-            throw new Exception("scope cannot be empty");
+            throw new Exception(localization.GetRawString("error.oauth2.scope.empty"));
 
         string[] invalidScopes = Utils.FindInvalidScopes(scope.Split(" "));
         if (invalidScopes.Length > 0)
-            throw new Exception($"Invalid scope(s): {string.Join(", ", invalidScopes)}");
+            throw new Exception(localization.GetRawString("error.oauth2.scope.invalid"));
 
         BaseContext ctx = new(HttpContext);
         if (ctx.User is null)
-            throw new Exception("User not logged in");
+            throw new Exception(localization.GetRawString("error.oauth2.user.loggedout"));
 
         if (redirectUrl == null)
-            throw new Exception("redirect_uri is not valid");
+            throw new Exception(localization.GetRawString("error.oauth2.redirect_uri.invalid"));
         string returnUrl =
             $"{redirectUrl}{(redirectUrl.Query.Length > 0 ? "&" : "?")}code=%%%CODE%%%{(state is not null ? $"&state={state}" : "")}";
         string code =

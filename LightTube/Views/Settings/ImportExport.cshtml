@@ -2,7 +2,7 @@
 
 @{
 	Layout = "_SettingsLayout";
-	Model.Title = "Account";
+	Model.Title = Model.Localization.GetRawString("settings.import.htmltitle");
 }
 
 @if (Model.Message != null)
@@ -12,15 +12,15 @@
 	</div>
 }
 
-<h1 class="title">Import Data</h1>
+<h1 class="title">@Model.Localization.GetString("settings.import.title")</h1>
 
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			File
+			@Model.Localization.GetString("settings.import.file.title")
 		</div>
 		<div>
-			(up to 10MB) See below for supported formats
+			@Model.Localization.GetString("settings.import.file.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -28,20 +28,15 @@
 	</div>
 </div>
 <br/>
-<input class="btn-outline btn-blue" type="submit" value="Import Data"/>
+<input class="btn-outline btn-blue" type="submit" value="@Model.Localization.GetString("settings.import.button")"/>
 
-<h1 class="title">Export Data</h1>
-<a href="/export/fullData.json" class="btn-blue btn-outline">Export all data as JSON</a>
+<h1 class="title">@Model.Localization.GetString("settings.import.export.title")</h1>
+<a href="/export/fullData.json" class="btn-blue btn-outline">@Model.Localization.GetString("settings.import.export.json")</a>
 
-<h1 class="title">Supported formats for importing</h1>
+<h1 class="title">@Model.Localization.GetString("settings.import.supported.title")</h1>
 <ul>
-	<li>YouTube takeouts (.zip)</li>
-	<li>Invidious XML/OPML exports (.xml)</li>
-	<li>Invidious JSON exports (.json)</li>
-	<li>Piped playlists (.json)</li>
-	<li>Piped subscriptions (.json)</li>
-	<li>LightTube exports (.json)</li>
+	@Model.Localization.GetString("settings.import.supported.body")
 </ul>
 <p>
-	If you need support for other websites/apps, please <a href="https://github.com/kuylar/LightTube/issues">open an issue on GitHub</a>
+	@Model.Localization.GetString("settings.import.supported.more")
 </p>

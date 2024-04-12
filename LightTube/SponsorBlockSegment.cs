@@ -1,3 +1,4 @@
+using LightTube.Localization;
 using Newtonsoft.Json;
 
 namespace LightTube;
@@ -15,23 +16,12 @@ public class SponsorBlockSegment
     public double StartMs => Segment[0];
     public double EndMs => Segment[1];
 
-    public string ToLTPlayerJson(double videoDuration) =>
-        $"{{ from: {ToPercentage(StartMs, videoDuration)}, to: {ToPercentage(EndMs, videoDuration)}, color: '#{GetColor()}', onEnter: function(player) {{ player.showSkipButton('Skip {GetName()}', {EndMs});}},onExit:function(player) {{player.hideSkipButton();}} }}";
+    public string ToLTPlayerJson(double videoDuration, LocalizationManager localization) =>
+        $"{{ from: {ToPercentage(StartMs, videoDuration)}, to: {ToPercentage(EndMs, videoDuration)}, color: '#{GetColor()}', onEnter: function(player) {{ player.showSkipButton('{GetName(localization)}', {EndMs});}},onExit:function(player) {{player.hideSkipButton();}} }}";
 
-    private string GetName()
-    {
-        return Category switch
-        {
-            "sponsor" => "sponsor",
-            "selfpromo" => "self promotion",
-            "interaction" => "interaction",
-            "intro" => "intro",
-            "outro" => "outro",
-            "preview" => "preview",
-            "filler" => "filler",
-            _ => Category + "*"
-        };
-    }
+    private string GetName(LocalizationManager localization) => string.Format(
+        localization.GetRawString("sponsorblock.button.template"),
+        localization.GetRawString("sponsorblock.category." + Category));
 
     private string GetColor()
     {

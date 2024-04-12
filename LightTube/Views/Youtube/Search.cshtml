@@ -34,7 +34,7 @@
 			{
 				<input type="radio" name="uploadDate" value="null" checked>
 			}
-			Clear
+			@Model.Localization.GetString("search.filters.uploaddate.clear")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.LastHour)
@@ -45,7 +45,7 @@
 			{
 				<input type="radio" name="uploadDate" value="1">
 			}
-			Last Hour
+			@Model.Localization.GetString("search.filters.uploaddate.hour")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.Today)
@@ -56,7 +56,7 @@
 			{
 				<input type="radio" name="uploadDate" value="2">
 			}
-			Today
+			@Model.Localization.GetString("search.filters.uploaddate.day")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisWeek)
@@ -67,7 +67,7 @@
 			{
 				<input type="radio" name="uploadDate" value="3">
 			}
-			This week
+			@Model.Localization.GetString("search.filters.uploaddate.week")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisMonth)
@@ -78,7 +78,7 @@
 			{
 				<input type="radio" name="uploadDate" value="4">
 			}
-			This month
+			@Model.Localization.GetString("search.filters.uploaddate.month")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisYear)
@@ -89,13 +89,13 @@
 			{
 				<input type="radio" name="uploadDate" value="5">
 			}
-			This year
+			@Model.Localization.GetString("search.filters.uploaddate.year")
 		</label>
 	</div>
 
 	<div class="search-filter">
 		<div class="search-filter__category">
-			Type
+			@Model.Localization.GetString("search.filters.category.title")
 		</div>
 		<hr>
 		<label class="search-filter__item">
@@ -107,7 +107,7 @@
 			{
 				<input type="radio" name="type" value="null" checked>
 			}
-			Clear
+			@Model.Localization.GetString("search.filters.category.clear")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Video)
@@ -118,7 +118,7 @@
 			{
 				<input type="radio" name="type" value="1">
 			}
-			Video
+			@Model.Localization.GetString("search.filters.category.video")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Channel)
@@ -129,7 +129,7 @@
 			{
 				<input type="radio" name="type" value="2">
 			}
-			Channel
+			@Model.Localization.GetString("search.filters.category.channel")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Playlist)
@@ -140,7 +140,7 @@
 			{
 				<input type="radio" name="type" value="3">
 			}
-			Playlist
+			@Model.Localization.GetString("search.filters.category.playlist")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Movie)
@@ -151,13 +151,13 @@
 			{
 				<input type="radio" name="type" value="4">
 			}
-			Movie
+			@Model.Localization.GetString("search.filters.category.movie")
 		</label>
 	</div>
 
 	<div class="search-filter">
 		<div class="search-filter__category">
-			Duration
+			@Model.Localization.GetString("search.filters.duration.title")
 		</div>
 		<hr>
 		<label class="search-filter__item">
@@ -169,7 +169,7 @@
 			{
 				<input type="radio" name="duration" value="null" checked>
 			}
-			Clear
+			@Model.Localization.GetString("search.filters.duration.clear")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Short)
@@ -180,7 +180,7 @@
 			{
 				<input type="radio" name="duration" value="1">
 			}
-			Under 4 minutes
+			@Model.Localization.GetString("search.filters.duration.short")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Medium)
@@ -191,7 +191,7 @@
 			{
 				<input type="radio" name="duration" value="3">
 			}
-			4 - 20 minutes
+			@Model.Localization.GetString("search.filters.duration.medium")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Long)
@@ -202,7 +202,7 @@
 			{
 				<input type="radio" name="duration" value="2">
 			}
-			Over 20 minutes
+			@Model.Localization.GetString("search.filters.duration.long")
 		</label>
 	</div>
 
@@ -217,7 +217,7 @@
 			} else {
 				<input type="checkbox" name="live">
 			}
-			Live
+			@Model.Localization.GetString("search.filters.features.live")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasResolution4K) {
@@ -225,7 +225,7 @@
 			} else {
 				<input type="checkbox" name="4k">
 			}
-			4K
+			@Model.Localization.GetString("search.filters.features.4k")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasHd) {
@@ -233,7 +233,7 @@
 			} else {
 				<input type="checkbox" name="hd">
 			}
-			HD
+			@Model.Localization.GetString("search.filters.features.hd")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasSubtitles) {
@@ -241,7 +241,7 @@
 			} else {
 				<input type="checkbox" name="subs">
 			}
-			Subtitles/CC
+			@Model.Localization.GetString("search.filters.features.subs")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasCreativeCommons) {
@@ -249,7 +249,7 @@
 			} else {
 				<input type="checkbox" name="cc">
 			}
-			Creative Commons
+			@Model.Localization.GetString("search.filters.features.cc")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasVr360) {
@@ -257,7 +257,7 @@
 			} else {
 				<input type="checkbox" name="vr360">
 			}
-			360°
+			@Model.Localization.GetString("search.filters.features.360")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasVr180) {
@@ -265,7 +265,7 @@
 			} else {
 				<input type="checkbox" name="vr180">
 			}
-			VR180
+			@Model.Localization.GetString("search.filters.features.vr180")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasResolution3D) {
@@ -273,7 +273,7 @@
 			} else {
 				<input type="checkbox" name="3d">
 			}
-			3D
+			@Model.Localization.GetString("search.filters.features.3d")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasHdr) {
@@ -281,7 +281,7 @@
 			} else {
 				<input type="checkbox" name="hdr">
 			}
-			HDR
+			@Model.Localization.GetString("search.filters.features.hdr")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasLocation) {
@@ -289,7 +289,7 @@
 			} else {
 				<input type="checkbox" name="location">
 			}
-			Location
+			@Model.Localization.GetString("search.filters.features.location")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.Filters.HasPurchased) {
@@ -297,7 +297,7 @@
 			} else {
 				<input type="checkbox" name="purchased">
 			}
-			Purchased
+			@Model.Localization.GetString("search.filters.features.purchased")
 		</label>
 	</div>
 
@@ -315,7 +315,7 @@
 			{
 				<input type="radio" name="sortField" value="0">
 			}
-			Relevance
+			@Model.Localization.GetString("search.filters.sort.relevance")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.UploadDate)
@@ -326,7 +326,7 @@
 			{
 				<input type="radio" name="sortField" value="2">
 			}
-			Upload date
+			@Model.Localization.GetString("search.filters.sort.date")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.ViewCount)
@@ -337,7 +337,7 @@
 			{
 				<input type="radio" name="sortField" value="3">
 			}
-			View count
+			@Model.Localization.GetString("search.filters.sort.views")
 		</label>
 		<label class="search-filter__item">
 			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.Rating)
@@ -348,14 +348,14 @@
 			{
 				<input type="radio" name="sortField" value="1">
 			}
-			Rating
+			@Model.Localization.GetString("search.filters.sort.rating")
 		</label>
 	</div>
 	</div>
 
 	<button type="submit" class="btn filters-button">
 		<div class="text">
-			Apply Filters
+			@Model.Localization.GetString("search.filters.apply")
 		</div>
 	</button>
 	</form>
@@ -369,7 +369,7 @@
 <div class="next-page">
 	@if (Context.Request.Query.ContainsKey("continuation"))
 	{
-		<a href="/results?search_query=@Model.Query">First Page</a>
+		<a href="/results?search_query=@Model.Query">@Model.Localization.GetString("pagination.first")</a>
 	}
 	else
 	{
@@ -378,7 +378,7 @@
 	<span>•</span>
 	@if (Model.Continuation is not null)
 	{
-		<a href="/results?search_query=@Model.Query&continuation=@Model.Continuation">Next Page</a>
+		<a href="/results?search_query=@Model.Query&continuation=@Model.Continuation">@Model.Localization.GetString("pagination.next")</a>
 	}
 	else
 	{

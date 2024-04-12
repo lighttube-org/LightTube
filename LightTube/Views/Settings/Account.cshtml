@@ -2,13 +2,13 @@
 
 @{
 	Layout = "_SettingsLayout";
-	Model.Title = "Account";
+	Model.Title = Model.Localization.GetRawString("settings.account.htmltitle");
 }
 
-<h1 class="title">Account Settings</h1>
+<h1 class="title">@Model.Localization.GetString("settings.account.title")</h1>
 
 <a href="/account/delete" class="btn-outline btn-blue" style="width:fit-content;">
 	<span class="text">
-		Delete Account
+		@Model.Localization.GetString("settings.account.delete")
 	</span>
 </a>

@@ -1,18 +1,18 @@
 @model BaseContext
 
 @{
-	Model.Title = "RSS";
+	Model.Title = Model.Localization.GetRawString("rss.title");
 }
 
-<h1 class="title">How to use an RSS feed reader with LightTube</h1>
+<h1 class="title">@Model.Localization.GetString("rss.explain.title")</h1>
 
-<p>To get a customized RSS feed that contains all the videos of the channels you're subscribed to, just enter the following parameters in your RSS reader:</p>
+<p>@Model.Localization.GetString("rss.explain.title")</p>
 
 <table>
 	<tbody>
 		<tr>
 			<th class="title">
-				URL
+				@Model.Localization.GetString("rss.explain.url")
 			</th>
 			<td>
 				<code>https://@Context.Request.Host/feed/rss.xml</code>
@@ -20,7 +20,7 @@
 		</tr>
 		<tr>
 			<th class="title">
-				Username
+				@Model.Localization.GetString("rss.explain.username")
 			</th>
 			<td>
 				@if (Model.User is not null) {
@@ -28,27 +28,27 @@
 				}
 				else
 				{
-					@:Your UserID in this LightTube instance
+					@Model.Localization.GetString("rss.explain.username.explain")
 				}
 			</td>
 		</tr>
 		<tr>
 			<th class="title">
-				Password
+				@Model.Localization.GetString("rss.explain.password")
 			</th>
 			<td>
-				Your password in this LightTube instance
+				@Model.Localization.GetString("rss.explain.password.explain")
 			</td>
 		</tr>
 	</tbody>
 </table>
 
-<p>If the RSS reader you use does not support username/password authentication, just put the following in the URL parameter:</p>
+<p>@Model.Localization.GetString("rss.explain.authentication")</p>
 
 @if (Model.User is not null) {
-	<code>https://@Model.User.UserID:&lt;your password&gt;@@@Context.Request.Host/feed/rss.xml</code>
+	<code>https://@Model.User.UserID:&lt;@Model.Localization.GetString("rss.explain.password.url")&gt;@@@Context.Request.Host/feed/rss.xml</code>
 }
 else
 {
-	<code>https://&lt;username&gt;:&lt;password&gt;@@@Context.Request.Host/feed/rss.xml</code>
+	<code>https://&lt;@Model.Localization.GetString("rss.explain.username.url")&gt;:&lt;@Model.Localization.GetString("rss.explain.password.url")&gt;@@@Context.Request.Host/feed/rss.xml</code>
 }

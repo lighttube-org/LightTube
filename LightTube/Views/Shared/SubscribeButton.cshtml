@@ -1,27 +1,27 @@
 ﻿@using LightTube.Database.Models
-@model string
+@model (string ChannelId, LightTube.Localization.LocalizationManager Localization)
 @{
-	SubscriptionType type = Context.GetSubscriptionType(Model);
+	SubscriptionType type = Context.GetSubscriptionType(Model.ChannelId);
 }
 
 
 @switch (type)
 {
 	case SubscriptionType.NOTIFICATIONS_ON:
-		<a class="btn-subscribed" target="_blank" href="/channel/@Model/subscription">
-			<span class="text">Subscribed</span>
+		<a class="btn-subscribed" target="_blank" href="/channel/@Model.ChannelId/subscription">
+			<span class="text">@Model.Localization.GetString("subscription.button.unsubscribe")</span>
 		</a>
-		<a class="icon-button" target="_blank" href="/channel/@Model/subscription">
+		<a class="icon-button" target="_blank" href="/channel/@Model.ChannelId/subscription">
 			<svg class="bi" width="20" height="20" fill="currentColor">
 				<use xlink:href="/svg/bootstrap-icons.svg#bell-fill"/>
 			</svg>
 		</a>
 		break;
 	case SubscriptionType.NOTIFICATIONS_OFF:
-		<a class="btn-subscribed" target="_blank" href="/channel/@Model/subscription">
-			<span class="text">Subscribed</span>
+		<a class="btn-subscribed" target="_blank" href="/channel/@Model.ChannelId/subscription">
+			<span class="text">@Model.Localization.GetString("subscription.button.unsubscribe")</span>
 		</a>
-		<a class="icon-button" target="_blank" href="/channel/@Model/subscription">
+		<a class="icon-button" target="_blank" href="/channel/@Model.ChannelId/subscription">
 			<svg class="bi" width="20" height="20" fill="currentColor">
 				<use xlink:href="/svg/bootstrap-icons.svg#bell-slash-fill"/>
 			</svg>
@@ -29,8 +29,8 @@
 		break;
 	case SubscriptionType.NONE:
 	default:
-		<a class="btn-subscribe" target="_blank" href="/channel/@Model/subscription">
-			<span class="text">Subscribe</span>
+		<a class="btn-subscribe" target="_blank" href="/channel/@Model.ChannelId/subscription">
+			<span class="text">@Model.Localization.GetString("subscription.button.subscribe")</span>
 		</a>
 		break;
 }

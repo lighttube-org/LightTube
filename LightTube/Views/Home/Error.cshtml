@@ -1,3 +1,4 @@
+@using LightTube.Localization
 @using Microsoft.AspNetCore.Diagnostics
 @{
 	Layout = null;
@@ -6,6 +7,7 @@
 		error.Error.InnerException ?? 
 		error.Error ?? 
 		new Exception("Nothing went wrong..?");
+	LocalizationManager localization = LocalizationManager.GetFromHttpContext(Context);
 
 	bool innertubeError = exception.StackTrace?.Contains("InnerTube") ?? false;
 	bool errorReportable = true;
@@ -34,37 +36,39 @@
 	}
 </head>
 <body class="error-container">
-<h1 class="title">Whoops!</h1>
+<h1 class="title">@localization.GetString("error.title")</h1>
 <h2 class="title">@message</h2>
 
 @if (errorReportable) {
 	@if (innertubeError) {
-		<p>This problem was caused while interacting with YouTube. If you want to report it, head over to <a href="https://github.com/kuylar/InnerTube/issues">InnerTube GitHub issues page</a> and open an issue with the following information:</p>
+		<p>@localization.GetString("error.body.innertube")</p>
 	} else {
-		<p>If you want to report this error, head over to <a href="https://github.com/kuylar/LightTube/issues">LightTube GitHub issues page</a> and open an issue with the following information:</p>
+		<p>@localization.GetString("error.body.lighttube")</p>
 	}
 
 	<ul>
-		<li><b class="title">LightTube instance this error occured on</b> (@Context.Request.Host)</li>
-		<li><b class="title">LightTube & InnerTube versions</b> (@Utils.GetVersion() / @Utils.GetInnerTubeVersion())</li>
-		<li><b class="title">The full resource path</b> (@path)</li>
-		<li><b class="title">InnerTube language & region</b> (@Context.GetLanguage()_@Context.GetRegion())</li>
-		<li><b class="title">The following text (the whole thing):</b></li>
+		<li><b class="title">@localization.GetString("error.body.details.instance")</b> (@Context.Request.Host)</li>
+		<li><b class="title">@localization.GetString("error.body.details.version")</b> (@Utils.GetVersion() / @Utils.GetInnerTubeVersion())</li>
+		<li><b class="title">@localization.GetString("error.body.details.path")</b> (@path)</li>
+		<li><b class="title">@localization.GetString("error.body.details.locale")</b> (@Context.GetLanguage()_@Context.GetRegion())</li>
+		<li><b class="title">@localization.GetString("error.body.details.stacktrace")</b></li>
 	</ul>
 	<code style="text-align:start">
 		@Html.Raw(string.Join("<br>",
-			(exception.ToString() ?? "Huh... There was supposed to be a stack trace here.")
+			exception.ToString()
 				.Split('\n')
 				.Where(x => !x.Contains("Microsoft.AspNetCore."))))
 	</code>
 }
 
 <p>
-	You can still try other alternatives to access this resource such as 
+	@localization.GetString("error.alternatives")
 	<b>
-		<a href="https://invidio.us@(path)">Invidious,</a>
-	</b>
-	or
+		<a href="https://piped.video@(path)">Piped</a>
+	</b>,
+	<b>
+		<a href="https://invidio.us@(path)">Invidious</a>
+	</b>,
 	<b>
 		<a href="https://youtube.com@(path)">YouTube</a>
 	</b>

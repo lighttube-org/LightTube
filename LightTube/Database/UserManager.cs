@@ -72,10 +72,10 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
     {
         IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
         if (!await users.AnyAsync())
-            throw new UnauthorizedAccessException("Invalid credentials");
+            throw new UnauthorizedAccessException("error.login.invalid");
         DatabaseUser user = (await UserCollection.FindAsync(x => x.UserID == userId)).First();
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-            throw new UnauthorizedAccessException("Invalid credentials");
+            throw new UnauthorizedAccessException("error.login.invalid");
 
         DatabaseLogin login = new()
         {

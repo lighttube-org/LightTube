@@ -290,7 +290,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         ctx.ItemSubtitle = player.Details.Author.Title;
         ctx.ItemThumbnail = $"https://i.ytimg.com/vi/{player.Details.Id}/hqdefault.jpg";
         ctx.Extra = player;
-        ctx.Title = "Download video";
+        ctx.Title = ctx.Localization.GetRawString("download.title");
         ctx.AlignToStart = true;
         ctx.Buttons = [];
         return View(ctx);

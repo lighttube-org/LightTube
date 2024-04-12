@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Web;
 using Microsoft.AspNetCore.Html;
@@ -92,4 +93,6 @@ public class LocalizationManager(string locale)
 			FallbackLocaleStrings = Localizations["en"]
 		};
 	}
+
+	public CultureInfo GetCulture() => CultureInfo.GetCultureInfoByIetfLanguageTag(GetRawString("language.ietf"));
 }

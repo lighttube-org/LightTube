@@ -2,13 +2,13 @@
 @model LibraryContext
 
 @{
-	Model.Title = "Library";
+	Model.Title = Model.Localization.GetRawString("feed.library.title");
 }
 
 <div class="search-container">
 	<a href="/newPlaylist" class="btn-outline btn-blue" style="width:fit-content;">
 		<div class="text">
-			New Playlist
+			@Model.Localization.GetString("feed.library.playlist.new")
 		</div>
 	</a>
 
@@ -30,7 +30,7 @@
 				</a>
 				<div class="info__more">
 					<a href="/playlist?list=@playlist.Id" class="link-view-full-playlist">
-						View Full Playlist
+						@Model.Localization.GetString("playlist.view.full")
 					</a>
 				</div>
 			</div>

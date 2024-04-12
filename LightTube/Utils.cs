@@ -10,6 +10,7 @@ using System.Xml;
 using InnerTube;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.Extensions.Primitives;
 
 namespace LightTube;
@@ -402,33 +403,33 @@ public static class Utils
     public static string[] FindInvalidScopes(string[] scopes) =>
         scopes.Where(x => !OauthScopes.Contains(x)).ToArray();
 
-    public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes)
+    public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes, LocalizationManager localization)
     {
         List<string> descriptions = [];
 
         // dangerous ones are at the top
         if (modelScopes.Contains("logins.read"))
-            descriptions.Add("!See your other logins");
+            descriptions.Add("!" + localization.GetRawString("oauth2.scope.logins.read"));
         if (modelScopes.Contains("logins.delete"))
-            descriptions.Add("!Log out from another place");
+            descriptions.Add("!" + localization.GetRawString("oauth2.scope.logins.write"));
 
         descriptions.Add("Access YouTube data");
 
         if (modelScopes.Contains("playlists.read") && modelScopes.Contains("playlists.write"))
-            descriptions.Add("Access and modify your playlists");
+            descriptions.Add(localization.GetRawString("oauth2.scope.playlists.rw"));
         else if (modelScopes.Contains("playlists.read"))
-            descriptions.Add("Access your playlists");
+            descriptions.Add(localization.GetRawString("oauth2.scope.playlists.read"));
         else if (modelScopes.Contains("playlists.write"))
-            descriptions.Add("Modify your playlists");
+            descriptions.Add(localization.GetRawString("oauth2.scope.playlists.write"));
 
         if (modelScopes.Contains("subscriptions.read"))
         {
-            descriptions.Add("Get a list of your subscribed channels");
-            descriptions.Add("Get your subscription feed");
+            descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.read"));
+            descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.feed"));
         }
 
         if (modelScopes.Contains("subscriptions.write"))
-            descriptions.Add("Subscribe & unsubscribe from channels");
+            descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.write"));
 
         return descriptions;
     }

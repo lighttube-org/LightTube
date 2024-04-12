@@ -2,23 +2,23 @@
 
 @{
 	Layout = "_SettingsLayout";
-	Model.Title = "Appearance settings";
+	Model.Title = Model.Localization.GetRawString("settings.appearance.title");
 }
 
-<h1 class="title">Theme</h1>
+<h1 class="title">@Model.Localization.GetString("settings.appearance.interface")</h1>
 
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Theme
+			@Model.Localization.GetString("settings.appearance.theme.title")
 		</div>
 		<div>
-			Change how LightTube looks like!
+			@Model.Localization.GetString("settings.appearance.theme.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
 		<select name="theme" class="subscription-dropdown">
-			<option disabled>Built-in</option>
+			<option disabled>@Model.Localization.GetString("settings.appearance.theme.builtin")</option>
 			@foreach ((string className, string name) in Model.BuiltinThemes)
 			{
 				@if (Model.GetThemeClass() == $"theme-{className}")
@@ -32,7 +32,7 @@
 			}
 			@if (Model.CustomThemes.Count > 0)
 			{
-				<option disabled>Custom</option>
+				<option disabled>@Model.Localization.GetString("settings.appearance.theme.custom")</option>
 				@foreach ((string className, string name) in Model.CustomThemes)
 				{
 					@if (Model.GetThemeClass() == $"theme-{className}")
@@ -49,15 +49,13 @@
 	</div>
 </div>
 
-<h1 class="title">Content Settings</h1>
-
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Last videos
+			@Model.Localization.GetString("settings.appearance.homescreensubs.title")
 		</div>
 		<div>
-			Show last n videos from subscribed feed on homepage
+			@Model.Localization.GetString("settings.appearance.homescreensubs.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -65,14 +63,15 @@
 	</div>
 </div>
 
+<h1 class="title">Content Settings</h1>
+
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-1 title">
-			Content Language
+			@Model.Localization.GetString("settings.appearance.innertube.language.title")
 		</div>
-		
 		<div>
-			Only affects video title & descriptions
+			@Model.Localization.GetString("settings.appearance.innertube.language.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -94,11 +93,11 @@
 
 <div class="settings-option">
 	<div class="settings-option__info">
-		<div class="ml-2 title">
-			Content Region
+		<div class="ml-1 title">
+			@Model.Localization.GetString("settings.appearance.innertube.region.title")
 		</div>
 		<div>
-			Affects the recommended content
+			@Model.Localization.GetString("settings.appearance.innertube.region.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -121,10 +120,10 @@
 <label class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Show Recommended Videos By Default
+			@Model.Localization.GetString("settings.appearance.recommendations.title")
 		</div>
 		<div>
-			If unchecked, recommendations will be collapsed by default
+			@Model.Localization.GetString("settings.appearance.recommendations.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -142,10 +141,10 @@
 <label class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Compatibility mode
+			@Model.Localization.GetString("settings.appearance.compatibility.title")
 		</div>
 		<div>
-			Use MP4 streams instead of HLS streams. Breaks livestreams
+			@Model.Localization.GetString("settings.appearance.compatibility.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -160,4 +159,4 @@
 	</div>
 </label>
 <br>
-<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Save Changes">
+<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="@Model.Localization.GetString("settings.save")">

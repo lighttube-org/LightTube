@@ -1,11 +1,11 @@
 ﻿@using System.Web
 @model BaseContext
 @{
-	List<DropdownItem> generalItems = new()
-	{
-		new DropdownItem("Settings", "/settings/appearance", "gear"),
-		new DropdownItem("About", "https://github.com/kuylar/lighttube", "info-circle")
-	};
+	List<DropdownItem> generalItems =
+	[
+		new DropdownItem(Model.Localization.GetRawString("layout.dropdown.settings"), "/settings/appearance", "gear"),
+		new DropdownItem(Model.Localization.GetRawString("layout.dropdown.about"), "https://github.com/lighttube-org/lighttube", "info-circle")
+	];
 }
 
 @if (Model.User is not null)
@@ -33,13 +33,13 @@
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#person-circle"/>
 					</svg>
-					Logged in as: @Model.User.UserID
+					@Model.Localization.FormatString("layout.dropdown.user", Model.User.UserID)
 				</a>
 				<a href="/account/logout?redirectUrl=@HttpUtility.UrlEncode(Context.Request.Path)" class="dropdown__item">
 					<svg class="bi" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#box-arrow-right"/>
 					</svg>
-					Log Out
+					@Model.Localization.GetString("layout.dropdown.logout")
 				</a>
 				<hr>
 				@foreach (DropdownItem item in generalItems)
@@ -101,7 +101,7 @@ else
 				<use xlink:href="/svg/bootstrap-icons.svg#person-circle"/>
 			</svg>
 			<span class="text">
-				Sign in
+				@Model.Localization.GetString("layout.dropdown.login")
 			</span>
 		</a>
 	</div>

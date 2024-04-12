@@ -25,7 +25,7 @@
 					@if (e.Code == "LOGIN_REQUIRED")
 					{
 						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
-						<p class="ml-1">Please contact the instance administrator to include InnerTube login details</p>
+						<p class="ml-1">@Model.Localization.GetString("error.player.agerestricted")</p>
 					}
 					else
 					{
@@ -33,7 +33,7 @@
 						<p class="ml-1">@e.Description</p>
 						@if (e.Code is "CONTENT_CHECK_REQUIRED" or "AGE_CHECK_REQUIRED")
 						{
-							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">I understand and wish to proceed</a>
+							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">@Model.Localization.GetString("error.player.contentcheck")</a>
 						}
 					}
 				</div>
@@ -48,10 +48,10 @@
 					</svg>
 				</div>
 				<div class="player-error-info">
-					<div class="title">An error has occurred @(Model.Exception.GetType() == typeof(Exception) ? "" : $"({Model.Exception.GetType().Name})")</div>
+					<div class="title">@Model.Localization.GetString("error.player.exception") @(Model.Exception.GetType() == typeof(Exception) ? "" : $"({Model.Exception.GetType().Name})")</div>
 					<p class="ml-1">@Model.Exception.Message</p>
 					<p>
-						This error might not occur in other instances. Find them <a href="https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md">here</a>
+						@Model.Localization.GetString("error.player.useother")
 					</p>
 				</div>
 			</div>
@@ -66,9 +66,9 @@
 				</svg>
 			</div>
 			<div class="player-error-info">
-				<div class="title">Failed to load the player</div>
+				<div class="title">@Model.Localization.GetString("error.player.fail")</div>
 				<p>
-					This might not occur in other instances. Find them <a href="https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md">here</a>
+					@Model.Localization.GetString("error.player.useother")
 				</p>
 			</div>
 		</div>
@@ -97,7 +97,7 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.VssId" label="@subtitle.Label" kind="subtitles">
 		}
 	</video>
-	<noscript style="z-index:999;color:white;position:relative;">This video requires JavaScript to play correctly</noscript>
+	<noscript style="z-index:999;color:white;position:relative;">@Model.Localization.GetString("error.player.javascript")</noscript>
 }
 else if (Model.Player.Formats.Any())
 {
@@ -133,8 +133,8 @@ else
 			</svg>
 		</div>
 		<div class="player-error-info">
-			<div class="title">An error has occurred</div>
-			<p>No muxed formats were returned from YouTube</p>
+			<div class="title">@Model.Localization.GetString("error.player.exception")</div>
+			<p>@Model.Localization.GetString("error.player.nomuxed")</p>
 		</div>
 	</div>
 }
@@ -167,7 +167,7 @@ else
 		loading: "<img style='width:15%;height:15%;' src='/svg/loading.svg'>",
 		rememberVolume: true,
 		chapters: @Html.Raw(Model.GetChaptersJson()),
-		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds)) ?? Array.Empty<string>()))],
+		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds, Model.Localization)) ?? Array.Empty<string>()))],
 		endscreen: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
 		           {
 			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase

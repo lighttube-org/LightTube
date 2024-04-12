@@ -8,7 +8,7 @@
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Title
+			@Model.Localization.GetString("playlist.edit.label.title")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -19,7 +19,7 @@
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Description
+			@Model.Localization.GetString("playlist.edit.label.description")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -30,7 +30,7 @@
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Visibility
+			@Model.Localization.GetString("playlist.edit.label.visibility")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -38,20 +38,20 @@
 			@switch (Model.ItemThumbnail)
 			{
 				case "2":
-					<option value="2" selected>Public</option>
-					<option value="1">Unlisted</option>
-					<option value="0">Private</option>
+					<option value="2" selected>@Model.Localization.GetString("playlist.visibility.2")</option>
+					<option value="1">@Model.Localization.GetString("playlist.visibility.1")</option>
+					<option value="0">@Model.Localization.GetString("playlist.visibility.0")</option>
 					break;
 				case "0":
-					<option value="2">Public</option>
-					<option value="1">Unlisted</option>
-					<option value="0" selected>Private</option>
+					<option value="2">@Model.Localization.GetString("playlist.visibility.2")</option>
+					<option value="1">@Model.Localization.GetString("playlist.visibility.1")</option>
+					<option value="0" selected>@Model.Localization.GetString("playlist.visibility.0")</option>
 					break;
 				default:
 				case "1":
-					<option value="2">Public</option>
-					<option value="1" selected>Unlisted</option>
-					<option value="0">Private</option>
+					<option value="2">@Model.Localization.GetString("playlist.visibility.2")</option>
+					<option value="1" selected>@Model.Localization.GetString("playlist.visibility.1")</option>
+					<option value="0">@Model.Localization.GetString("playlist.visibility.0")</option>
 					break;
 			}
 		</select>

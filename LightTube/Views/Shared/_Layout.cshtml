@@ -31,7 +31,7 @@
 <div class="@(Context.Request.Path.Value == "/results" ? "top-bar search" : "top-bar")">
 	<a class="logo" href="/">
 		Light<b>Tube</b>
-		<sup class="hide-on-mobile region" title="InnerTube Content Region">
+		<sup class="hide-on-mobile region" title="@Model.Localization.GetString("layout.region")">
 			@Context.GetRegion()
 		</sup>
 	</a>
@@ -48,14 +48,14 @@
 	<partial name="AccountDropdown" model="Model"/>
 </div>
 <div class="guide">
-	<partial name="GuideItem" model="@(new GuideItem("Home", "house", "/", true))"/>
-	<partial name="GuideItem" model="@(new GuideItem("Subscriptions", "rss", "/feed/subscriptions", true))"/>
-	<partial name="GuideItem" model="@(new GuideItem("Library", "folder", "/feed/library", true))"/>
+	<partial name="GuideItem" model="@(new GuideItem(Model.Localization.GetRawString("layout.guide.home"), "house", "/", true))"/>
+	<partial name="GuideItem" model="@(new GuideItem(Model.Localization.GetRawString("layout.guide.subscriptions"), "rss", "/feed/subscriptions", true))"/>
+	<partial name="GuideItem" model="@(new GuideItem(Model.Localization.GetRawString("layout.guide.library"), "folder", "/feed/library", true))"/>
 	<hr>
 	<div class="guide-links hide-on-mobile">
-		<a href="https://github.com/lighttube-org/lighttube">Source code</a>
-		<a href="https://github.com/lighttube-org/lighttube/blob/master/LICENSE">License</a><br>
-		<span style="font-weight: normal">Running on LightTube v@(Utils.GetVersion())</span>
+		<a href="https://github.com/lighttube-org/LightTube">@Model.Localization.GetString("layout.guide.source")</a>
+		<a href="https://github.com/lighttube-org/LightTube/blob/master/LICENSE">@Model.Localization.GetString("layout.guide.license")</a><br>
+		<span style="font-weight: normal">@Model.Localization.FormatString("layout.guide.version", Utils.GetVersion())</span>
 	</div>
 </div>
 <div class="app">

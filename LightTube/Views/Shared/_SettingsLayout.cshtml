@@ -3,11 +3,11 @@
 
 @{
 	SettingsTab[] tabs =
-	{
-		new("Account", "/settings/account"),
-		new("Appearance", "/settings/appearance"),
-		new("Import/Export", "/settings/data")
-	};
+	[
+		new SettingsTab(Model.Localization.GetRawString("settings.account.htmltitle"), "/settings/account"),
+		new SettingsTab(Model.Localization.GetRawString("settings.appearance.title"), "/settings/appearance"),
+		new SettingsTab(Model.Localization.GetRawString("settings.import.htmltitle"), "/settings/data")
+	];
 }
 
 <!DOCTYPE html>

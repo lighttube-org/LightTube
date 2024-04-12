@@ -11,7 +11,7 @@ public class AccountController : Controller
     [Route("register")]
     [HttpGet]
     public IActionResult Register(string? redirectUrl) =>
-        View(new AccountContext
+        View(new AccountContext(HttpContext)
         {
             Redirect = redirectUrl
         });
@@ -20,10 +20,10 @@ public class AccountController : Controller
 
     [Route("register")]
     [HttpPost]
-    public async Task<IActionResult> Register(string? redirectUrl, string userId, string password, string passwordCheck,
+    public async Task<IActionResult> Register(string? redirectUrl, string? userId, string? password, string? passwordCheck,
         string? remember)
     {
-        AccountContext ac = new()
+        AccountContext ac = new(HttpContext)
         {
             Redirect = redirectUrl,
             UserID = userId
@@ -33,28 +33,28 @@ public class AccountController : Controller
             return View(ac);
 
         if (userId is null || password is null || passwordCheck is null)
-            ac.Error = "Invalid request";
+            ac.Error = ac.Localization.GetRawString("error.request.invalid");
         else
         {
             if (userId.Except(Utils.UserIdAlphabet).Any())
-                ac.Error = "User ID contains invalid character(s)";
+                ac.Error = ac.Localization.GetRawString("error.register.useridinvalidchars");
 
             if (password != passwordCheck)
-                ac.Error = "Passwords do not match";
+                ac.Error = ac.Localization.GetRawString("error.register.password.match");
 
             if (password.Length < 8)
-                ac.Error = "Password must be longer than 8 characters";
+                ac.Error = ac.Localization.GetRawString("error.register.password.length");
 
             if (password.Contains(':') || password.Contains(' '))
-                ac.Error = "Invalid password";
+                ac.Error = ac.Localization.GetRawString("error.register.password.invalid");
         }
 
         if (ac.Error == null)
             try
             {
-                await DatabaseManager.Users.CreateUser(userId, password);
-                DatabaseLogin login = await DatabaseManager.Users.CreateToken(userId, password, Request.Headers.UserAgent.First(),
-                    scopes);
+                await DatabaseManager.Users.CreateUser(userId!, password!);
+                DatabaseLogin login = await DatabaseManager.Users.CreateToken(userId!, password!,
+                    Request.Headers.UserAgent.First()!, scopes);
 
                 Response.Cookies.Append("token", login.Token, new CookieOptions
                 {
@@ -74,30 +74,29 @@ public class AccountController : Controller
     [Route("login")]
     [HttpGet]
     public IActionResult Login(string? redirectUrl) =>
-        View(new AccountContext
+        View(new AccountContext(HttpContext)
         {
             Redirect = redirectUrl
         });
 
     [Route("login")]
     [HttpPost]
-    public async Task<IActionResult> Login(string? redirectUrl, string userId, string password, string? remember)
+    public async Task<IActionResult> Login(string? redirectUrl, string? userId, string? password, string? remember)
     {
-        AccountContext ac = new()
+        AccountContext ac = new(HttpContext)
         {
             Redirect = redirectUrl,
             UserID = userId
         };
 
         if (userId is null || password is null)
-            ac.Error = "Invalid request";
+            ac.Error = ac.Localization.GetRawString("error.request.invalid");
 
         if (ac.Error == null)
             try
             {
                 DatabaseLogin login =
-                    await DatabaseManager.Users.CreateToken(userId, password, Request.Headers.UserAgent,
-                        scopes);
+                    await DatabaseManager.Users.CreateToken(userId!, password!, Request.Headers.UserAgent!, scopes);
 
                 Response.Cookies.Append("token", login.Token, new CookieOptions
                 {
@@ -108,7 +107,7 @@ public class AccountController : Controller
             }
             catch (Exception e)
             {
-                ac.Error = e.Message;
+                ac.Error = ac.Localization.GetRawString(e.Message);
             }
 
         return View(ac);
@@ -117,36 +116,36 @@ public class AccountController : Controller
     [Route("delete")]
     [HttpGet]
     public IActionResult Delete(string? redirectUrl) =>
-        View(new AccountContext
+        View(new AccountContext(HttpContext)
         {
             Redirect = redirectUrl
         });
 
     [Route("delete")]
     [HttpPost]
-    public async Task<IActionResult> Delete(string? redirectUrl, string userId, string password, string passwordCheck, string? consent)
+    public async Task<IActionResult> Delete(string? redirectUrl, string? userId, string? password, string? passwordCheck, string? consent)
     {
-        AccountContext ac = new()
+        AccountContext ac = new(HttpContext)
         {
             Redirect = redirectUrl,
             UserID = userId
         };
 
         if (userId is null || password is null || passwordCheck is null)
-            ac.Error = "Invalid request";
+            ac.Error = ac.Localization.GetRawString("error.request.invalid");
         else
         {
             if (password != passwordCheck)
-                ac.Error = "Passwords don't match";
+                ac.Error = ac.Localization.GetRawString("error.register.password.match");
 
             if (consent is null)
-                ac.Error = "Please check the checkbox to delete your account";
+                ac.Error = ac.Localization.GetRawString("error.delete.consent");
         }
 
         if (ac.Error == null)
             try
             {
-                await DatabaseManager.Users.DeleteUser(userId, password);
+                await DatabaseManager.Users.DeleteUser(userId!, password!);
 
                 Response.Cookies.Delete("token");
 
@@ -163,7 +162,7 @@ public class AccountController : Controller
     [Route("logout")]
     public async Task<IActionResult> Logout(string? redirectUrl)
     {
-        await DatabaseManager.Users.RemoveToken(Request.Headers["token"]);
+        await DatabaseManager.Users.RemoveToken(Request.Cookies["token"]!);
         Response.Cookies.Delete("token");
         return Redirect(redirectUrl ?? "/");
     }
