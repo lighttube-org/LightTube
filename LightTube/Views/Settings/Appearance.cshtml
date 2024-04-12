@@ -3,6 +3,7 @@
 @{
 	Layout = "_SettingsLayout";
 	Model.Title = Model.Localization.GetRawString("settings.appearance.title");
+	bool innerTubeLanguageLocalized = Context.IsInnerTubeLanguageLocalized();
 }
 
 <h1 class="title">@Model.Localization.GetString("settings.appearance.interface")</h1>
@@ -76,9 +77,17 @@
 	</div>
 	<div class="settings-option__option">
 		<select name="hl" class="subscription-dropdown">
+			@if (innerTubeLanguageLocalized)
+			{
+				<option value="localized" selected>@Model.Localization.FormatString("settings.appearance.innertube.language.localized", Model.Localization.GetString("language.name"))</option>
+			}
+			else
+			{
+				<option value="localized">@Model.Localization.FormatString("settings.appearance.innertube.language.localized", Model.Localization.GetString("language.name"))</option>
+			}
 			@foreach ((string id, string label) in Model.Locals.Languages)
 			{
-				@if (id == Context.GetInnerTubeLanguage())
+				@if (id == Context.GetInnerTubeLanguage() && !innerTubeLanguageLocalized)
 				{
 					<option value="@id" selected>@label</option>
 				}

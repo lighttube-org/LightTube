@@ -1,6 +1,6 @@
 {
   "language.code": "en",
-  "language.name.translated": "English",
+  "language.name": "English",
   "language.name.english": "English",
   "language.ietf": "en",
   "language.innertube": "tr",
@@ -178,6 +178,7 @@
   "settings.appearance.homescreensubs.subtitle": "Amount of videos to show in your homepage from your subscription feed",
   "settings.appearance.innertube.language.title": "Content Language",
   "settings.appearance.innertube.language.subtitle": "Only affects video title & descriptions",
+  "settings.appearance.innertube.language.localized": "Language default ({0})",
   "settings.appearance.innertube.region.title": "Content Region",
   "settings.appearance.innertube.region.subtitle": "Affects the recommended content",
   "settings.appearance.recommendations.title": "Show Recommended Videos By Default",

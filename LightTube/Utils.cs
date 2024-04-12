@@ -43,6 +43,9 @@ public static class Utils
                 ? language
                 : LocalizationManager.GetFromHttpContext(context).GetRawString("language.innertube");
 
+    public static bool IsInnerTubeLanguageLocalized(this HttpContext context) =>
+        context.Request.Cookies.TryGetValue("hl", out string language) ? language == "localized" : true;
+
     public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
         context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
             ? recommendations == "visible"
