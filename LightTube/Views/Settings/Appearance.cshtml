@@ -1,3 +1,5 @@
+@using LightTube.Localization
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model AppearanceSettingsContext
 
 @{
@@ -22,28 +24,54 @@
 			<option disabled>@Model.Localization.GetString("settings.appearance.theme.builtin")</option>
 			@foreach ((string className, string name) in Model.BuiltinThemes)
 			{
-				@if (Model.GetThemeClass() == $"theme-{className}")
-				{
-					<option value="@className" selected>@name</option>
-				}
-				else
-				{
-					<option value="@className">@name</option>
-				}
+			@if (Model.GetThemeClass() == $"theme-{className}")
+			{
+			<option value="@className" selected>@name</option>
+			}
+			else
+			{
+			<option value="@className">@name</option>
+			}
 			}
 			@if (Model.CustomThemes.Count > 0)
 			{
-				<option disabled>@Model.Localization.GetString("settings.appearance.theme.custom")</option>
-				@foreach ((string className, string name) in Model.CustomThemes)
+			<option disabled>@Model.Localization.GetString("settings.appearance.theme.custom")</option>
+			@foreach ((string className, string name) in Model.CustomThemes)
+			{
+			@if (Model.GetThemeClass() == $"theme-{className}")
+			{
+			<option value="@className" selected>@name</option>
+			}
+			else
+			{
+			<option value="@className">@name</option>
+			}
+			}
+			}
+		</select>
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			@Model.Localization.GetString("settings.appearance.language.title")
+		</div>
+		<div>
+			@Model.Localization.GetString("settings.appearance.language.subtitle")
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="language" class="subscription-dropdown">
+			@foreach (Language language in Model.Languages)
+			{
+				@if (Model.Localization.CurrentLocale == language.Code)
 				{
-					@if (Model.GetThemeClass() == $"theme-{className}")
-					{
-						<option value="@className" selected>@name</option>
-					}
-					else
-					{
-						<option value="@className">@name</option>
-					}
+					<option value="@language.Code" selected>@language.Name</option>
+				}
+				else
+				{
+					<option value="@language.Code">@language.Name</option>
 				}
 			}
 		</select>

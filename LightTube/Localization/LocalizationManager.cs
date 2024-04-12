@@ -50,6 +50,7 @@ public class LocalizationManager(string locale)
 		return new HtmlString(res);
 	}
 
+	public CultureInfo GetCulture() => CultureInfo.GetCultureInfoByIetfLanguageTag(GetRawString("language.ietf"));
 
 	public static void Init()
 	{
@@ -69,22 +70,31 @@ public class LocalizationManager(string locale)
 
 	public static LocalizationManager GetFromHttpContext(HttpContext context)
 	{
-		string preferredLocale = "en_US";
-
-		string acceptLanguageHeaderValue = context.Request.Headers.AcceptLanguage.FirstOrDefault() ?? "en-US";
+		string preferredLocale = "en";
 		Dictionary<string, string> preferredLocaleStrings = [];
 
-		foreach (string language in acceptLanguageHeaderValue.Split(',')
-			         .Select(x => x.Trim())
-			         .Where(x => !string.IsNullOrEmpty(x))
-			         .OrderByDescending(Utils.ExtractHeaderQualityValue))
+		string? cookie = context.Request.Cookies["languageOverride"];
+		if (cookie != null && Localizations.ContainsKey(cookie))
 		{
-			string code = language.Split(';')[0];
-			if (!Localizations.TryGetValue(code, out Dictionary<string, string>? preferredStr)) continue;
+			preferredLocale = cookie;
+			preferredLocaleStrings = Localizations[preferredLocale];
+		}
+		else
+		{
+			string acceptLanguageHeaderValue = context.Request.Headers.AcceptLanguage.FirstOrDefault() ?? "en";
 
-			preferredLocale = code;
-			preferredLocaleStrings = preferredStr;
-			break;
+			foreach (string language in acceptLanguageHeaderValue.Split(',')
+				         .Select(x => x.Trim())
+				         .Where(x => !string.IsNullOrEmpty(x))
+				         .OrderByDescending(Utils.ExtractHeaderQualityValue))
+			{
+				string code = language.Split(';')[0];
+				if (!Localizations.TryGetValue(code, out Dictionary<string, string>? preferredStr)) continue;
+
+				preferredLocale = code;
+				preferredLocaleStrings = preferredStr;
+				break;
+			}
 		}
 
 		return new LocalizationManager(preferredLocale)
@@ -94,5 +104,20 @@ public class LocalizationManager(string locale)
 		};
 	}
 
-	public CultureInfo GetCulture() => CultureInfo.GetCultureInfoByIetfLanguageTag(GetRawString("language.ietf"));
+	public static Language[] GetAllLanguages()
+	{
+		List<Language> languages = [];
+		foreach ((string? code, Dictionary<string, string>? localization) in Localizations)
+		{
+			languages.Add(new Language
+			{
+				Code = code,
+				Name = localization["language.name"],
+				EnglishName = localization["language.name.english"],
+				Culture = CultureInfo.GetCultureInfoByIetfLanguageTag(localization["language.ietf"])
+			});
+		}
+
+		return languages.OrderBy(x => x.Name).ToArray();
+	}
 }
