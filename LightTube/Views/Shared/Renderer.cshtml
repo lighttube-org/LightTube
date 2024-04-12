@@ -227,7 +227,7 @@
 							<partial name="Renderer" model="(renderer, Model.Localization)"/>
 						}
 						<div class="shelf-expand-button">
-							+@(shelf.Items.Count() - shelf.CollapsedItemCount) More
+							@Model.Localization.FormatString("shelf.more", shelf.Items.Count() - shelf.CollapsedItemCount)
 						</div>
 					</summary>
 					@foreach (IRenderer renderer in shelf.Items.Skip(shelf.CollapsedItemCount))

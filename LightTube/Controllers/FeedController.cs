@@ -6,6 +6,7 @@ using InnerTube;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
@@ -260,7 +261,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
                 InnerTubePlayer video = await _youtube.GetPlayerAsync(firstVideo);
                 await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], pl.Id, video);
             }
-            return Ok("You can now close this window");
+            return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
         catch (Exception e)
         {
@@ -302,7 +303,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         try
         {
             await DatabaseManager.Playlists.EditPlaylist(Request.Cookies["token"], id, title, description, visibility);
-            return Ok("You can now close this window");
+            return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
         catch (Exception e)
         {
@@ -343,7 +344,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         try
         {
             await DatabaseManager.Playlists.DeletePlaylist(Request.Cookies["token"], id);
-            return Ok("You can now close this window");
+            return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
         catch (Exception e)
         {
@@ -378,7 +379,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
 
             InnerTubePlayer v = await _youtube.GetPlayerAsync(video);
             await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], playlist, v);
-            return Ok("You can now close this window");
+            return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
         catch (Exception e)
         {
@@ -416,7 +417,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         try
         {
             await DatabaseManager.Playlists.RemoveVideoFromPlaylist(Request.Cookies["token"], playlist, video);
-            return Ok("You can now close this window");
+            return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
         catch (Exception e)
         {

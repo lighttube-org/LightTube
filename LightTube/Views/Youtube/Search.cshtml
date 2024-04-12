@@ -14,7 +14,7 @@
 			<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
 		</svg>
 		<div class="text">
-			Filters
+			@Model.Localization.GetString("search.filters.title")
 		</div>
 	</summary>
 	<form class="search-filters__form">
@@ -22,7 +22,7 @@
 	<div class="search-filters">
 	<div class="search-filter">
 		<div class="search-filter__category">
-			Upload Date
+			@Model.Localization.GetString("search.filters.uploaddate.title")
 		</div>
 		<hr>
 		<label class="search-filter__item">

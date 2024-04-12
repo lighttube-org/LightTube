@@ -3,6 +3,7 @@ using InnerTube;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
@@ -204,7 +205,7 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
             await _youtube.GetChannelAsync(id, ChannelTabs.Home, null, HttpContext.GetLanguage(),
                 HttpContext.GetRegion());
         await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
-        return Ok("You can now close this window.");
+        return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
     }
 
     [Route("/channel/{id}/{tab}")]
@@ -220,7 +221,15 @@ public class YoutubeController(InnerTube.InnerTube youtube, HttpClient client) :
         {
             InnerTubeChannelResponse channel =
                 await _youtube.GetChannelAsync(id, tab, null, HttpContext.GetLanguage(), HttpContext.GetRegion());
-            await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
+            try
+            {
+                await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
             return View(new ChannelContext(HttpContext, tab, channel, id));
         }
         else

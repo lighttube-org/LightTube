@@ -3,6 +3,7 @@
   "language.name.translated": "English",
   "language.name.english": "English",
   "language.ietf": "en",
+  "language.innertube": "tr",
   
   "titles.account.register": "Create an account",
   "titles.account.login": "Sign in",
@@ -48,7 +49,7 @@
 
   "feed.title": "Subscriptions",
   "feed.library.title": "Library",
-  "feed.library.playlist.new": "Library",
+  "feed.library.playlist.new": "New Playlist",
   "feed.subscriptions.title": "All Subscriptions",
   "feed.subscriptions.apply": "Apply Changes",
   "feed.subscriptions.manage": "Manage Subscriptions",
@@ -58,13 +59,15 @@
   "layout.dropdown.about": "About",
   "layout.dropdown.user": "Logged in as: {0}",
   "layout.dropdown.login": "Sign in",
-  "layout.dropdown.logout": "Logged in as: {0}",
+  "layout.dropdown.logout": "Log out",
   "layout.guide.home": "Home",
   "layout.guide.subscriptions": "Subscriptions",
   "layout.guide.library": "Library",
   "layout.guide.source": "Source Code",
   "layout.guide.license": "License",
   "layout.guide.version": "Running on LightTube v{0}",
+  
+  "modal.close": "You can now close this window",
 
   "oauth2.title": "Authorize application",
   "oauth2.user": "Logged in as <b>{0}</b>",
@@ -192,6 +195,8 @@
   "settings.import.supported.body": "<li>YouTube takeouts (.zip)</li>\n<li>Invidious XML/OPML exports (.xml)</li>\n<li>Invidious JSON exports (.json)</li>\n<li>Piped playlists (.json)</li>\n<li>Piped subscriptions (.json)</li>\n<li>LightTube exports (.json)</li>",
   "settings.import.supported.more": "If you need support for other websites/apps, please <a href=\"https://github.com/lighttube-org/LightTube/issues\">open an issue on GitHub</a>",
   "settings.save": "Save Changes",
+  
+  "shelf.more": "+{0} more",
 
   "sponsorblock.button.template": "Skip {0}",
   "sponsorblock.category.sponsor": "sponsor",
@@ -224,7 +229,7 @@
   "watch.like.unavailable": "Like",
   "watch.dislike.unavailable": "Dislike",
   "watch.comments": "Comments",
-  "watch.comments.count": "{0} comments",
+  "watch.comments.count": "comments",
   "watch.comments.disabled": "Comments are disabled",
   "watch.comments.pinned": "Pinned",
   "watch.comments.youtube": "Open in YouTube",
