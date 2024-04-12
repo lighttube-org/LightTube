@@ -363,7 +363,7 @@
 }
 @foreach (IRenderer renderer in Model.Results)
 {
-	<partial name="Renderer" model="renderer"/>
+	<partial name="Renderer" model="(renderer, Model.Localization)"/>
 }
 </div>
 <div class="next-page">

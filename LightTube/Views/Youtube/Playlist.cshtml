@@ -37,7 +37,7 @@
 	<div class="playlist-page-items">
 		@foreach (IRenderer renderer in Model.Items)
 		{
-			<partial name="Renderer" model="renderer"/>
+			<partial name="Renderer" model="(renderer, Model.Localization)"/>
 		}
 	</div>
 </div>

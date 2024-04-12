@@ -49,7 +49,7 @@
 			<div class="channel-content search-container">
 				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
 				{
-					<partial name="Renderer" model="@renderer"/>
+					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}
 			</div>
 			break;
@@ -59,7 +59,7 @@
 			<div class="channel-content reel-grid">
 				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
 				{
-					<partial name="Renderer" model="@renderer"/>
+					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}
 			</div>
 			break;
@@ -69,7 +69,7 @@
 			<div class="channel-content">
 				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
 				{
-					<partial name="Renderer" model="@renderer"/>
+					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}
 			</div>
 			break;

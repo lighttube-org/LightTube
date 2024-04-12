@@ -195,7 +195,7 @@
 					<div class="shelf-contents-horizontal">
 						@foreach (IRenderer renderer in shelf.Items)
 						{
-							<partial name="Renderer" model="renderer"/>
+							<partial name="Renderer" model="(renderer, Model.Localization)"/>
 						}
 					</div>
 				</div>
@@ -211,7 +211,7 @@
 					<div class="shelf-contents-grid">
 						@foreach (IRenderer renderer in shelf.Items)
 						{
-							<partial name="Renderer" model="renderer"/>
+							<partial name="Renderer" model="(renderer, Model.Localization)"/>
 						}
 					</div>
 				</div>
@@ -224,7 +224,7 @@
 						</div>
 						@foreach (IRenderer renderer in shelf.Items.Take(shelf.CollapsedItemCount))
 						{
-							<partial name="Renderer" model="renderer"/>
+							<partial name="Renderer" model="(renderer, Model.Localization)"/>
 						}
 						<div class="shelf-expand-button">
 							+@(shelf.Items.Count() - shelf.CollapsedItemCount) More
@@ -232,7 +232,7 @@
 					</summary>
 					@foreach (IRenderer renderer in shelf.Items.Skip(shelf.CollapsedItemCount))
 					{
-						<partial name="Renderer" model="renderer"/>
+						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}
 				</details>
 				break;
@@ -241,7 +241,7 @@
 	case ItemSectionRenderer section:
 		@foreach (IRenderer renderer in section.Contents)
 		{
-			<partial name="Renderer" model="renderer"/>
+			<partial name="Renderer" model="(renderer, Model.Localization)"/>
 		}
 		break;
 	case CompactVideoRenderer video:
@@ -449,7 +449,7 @@
 			<div class="grid-items">
 				@foreach (IRenderer renderer in grid.Items)
 				{
-					<partial name="Renderer" model="@renderer"/>
+					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}
 			</div>
 		</div>
@@ -571,7 +571,7 @@
 		</div>
 		break;
 	case RichItemRenderer item:
-		<partial name="Renderer" model="@item.Content"/>
+		<partial name="Renderer" model="(item.Content, Model.Localization)"/>
 		break;
 	case ContinuationItemRenderer cont:
 		<a href="@Utils.GetContinuationUrl(Context.Request.Path.ToString(), cont.Token)" class="renderer-continuationitemrenderer">
@@ -587,9 +587,9 @@
 				@shelf.Title
 			</div>
 			<div class="reelshelf-items">
-				@foreach (ReelItemRenderer reel in shelf.Items)
+				@foreach (IRenderer reel in shelf.Items)
 				{
-					<partial name="Renderer" model="@reel"/>
+					<partial name="Renderer" model="(reel, Model.Localization)"/>
 				}
 			</div>
 		</div>
@@ -606,7 +606,7 @@
 		</a>
 		break;
 	case BackstagePostThreadRenderer thread:
-		<partial name="Renderer" model="@thread.Post"/>
+		<partial name="Renderer" model="((IRenderer)thread.Post, Model.Localization)"/>
 		break;
 	case BackstagePostRenderer post:
 		<div class="renderer-backstagepostthreadrenderer">
@@ -625,7 +625,7 @@
 				</div>
 				@if (post.Attachment is not null)
 				{
-					<partial name="Renderer" model="@post.Attachment"/>
+					<partial name="Renderer" model="(post.Attachment, Model.Localization)"/>
 				}
 				<div class="post-buttons">
 					<svg class="bi" width="20" height="20" fill="currentColor">

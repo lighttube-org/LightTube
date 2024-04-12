@@ -136,7 +136,7 @@
 				<div class="comments-container__flex">
 					@foreach (IRenderer renderer in Model.Comments.Contents)
 					{
-						<partial name="Renderer" model="renderer"/>
+						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}
 				</div>
 			</details>
@@ -159,7 +159,7 @@
 				<div class="playlist-view__content">
 					@foreach (IRenderer renderer in Model.Playlist.Videos)
 					{
-						<partial name="Renderer" model="renderer"/>
+						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}
 				</div>
 			</details>
@@ -172,7 +172,7 @@
 				<div class="recommended-videos">
 					@foreach (IRenderer renderer in Model.Video.Recommended.Where(x => x is not ContinuationItemRenderer))
 					{
-						<partial name="Renderer" model="renderer"/>
+						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}
 				</div>
 			</details>
