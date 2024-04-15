@@ -82,7 +82,7 @@ public static class Configuration
             Messages = ["Search something to get started!"];
         }
 
-        Alert = GetVariable("LIGHTTUBE_ALERT") ?? ":3 check! press the X to :3";
+        Alert = GetVariable("LIGHTTUBE_ALERT");
         AlertHash = Alert != null ? Utils.Md5Sum(Alert) : null;
     }
 
