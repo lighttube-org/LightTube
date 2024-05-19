@@ -10,6 +10,7 @@ using System.Xml;
 using InnerTube;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.Extensions.Primitives;
 
 namespace LightTube;
@@ -28,19 +29,22 @@ public static class Utils
         "subscriptions.write"
     ];
 
-    public static string GetRegion(this HttpContext context) =>
+    public static string GetInnerTubeRegion(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)
             ? h.ToString()
             : context.Request.Cookies.TryGetValue("gl", out string region)
                 ? region
                 : Configuration.DefaultContentRegion;
 
-    public static string GetLanguage(this HttpContext context) =>
+    public static string GetInnerTubeLanguage(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
             ? h.ToString()
-            : context.Request.Cookies.TryGetValue("hl", out string language)
+            : context.Request.Cookies.TryGetValue("hl", out string language) && language != "localized"
                 ? language
-                : Configuration.DefaultContentLanguage;
+                : LocalizationManager.GetFromHttpContext(context).GetRawString("language.innertube");
+
+    public static bool IsInnerTubeLanguageLocalized(this HttpContext context) =>
+        context.Request.Cookies.TryGetValue("hl", out string language) ? language == "localized" : true;
 
     public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
         context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
@@ -402,33 +406,33 @@ public static class Utils
     public static string[] FindInvalidScopes(string[] scopes) =>
         scopes.Where(x => !OauthScopes.Contains(x)).ToArray();
 
-    public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes)
+    public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes, LocalizationManager localization)
     {
         List<string> descriptions = [];
 
         // dangerous ones are at the top
         if (modelScopes.Contains("logins.read"))
-            descriptions.Add("!See your other logins");
+            descriptions.Add("!" + localization.GetRawString("oauth2.scope.logins.read"));
         if (modelScopes.Contains("logins.delete"))
-            descriptions.Add("!Log out from another place");
+            descriptions.Add("!" + localization.GetRawString("oauth2.scope.logins.write"));
 
         descriptions.Add("Access YouTube data");
 
         if (modelScopes.Contains("playlists.read") && modelScopes.Contains("playlists.write"))
-            descriptions.Add("Access and modify your playlists");
+            descriptions.Add(localization.GetRawString("oauth2.scope.playlists.rw"));
         else if (modelScopes.Contains("playlists.read"))
-            descriptions.Add("Access your playlists");
+            descriptions.Add(localization.GetRawString("oauth2.scope.playlists.read"));
         else if (modelScopes.Contains("playlists.write"))
-            descriptions.Add("Modify your playlists");
+            descriptions.Add(localization.GetRawString("oauth2.scope.playlists.write"));
 
         if (modelScopes.Contains("subscriptions.read"))
         {
-            descriptions.Add("Get a list of your subscribed channels");
-            descriptions.Add("Get your subscription feed");
+            descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.read"));
+            descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.feed"));
         }
 
         if (modelScopes.Contains("subscriptions.write"))
-            descriptions.Add("Subscribe & unsubscribe from channels");
+            descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.write"));
 
         return descriptions;
     }
@@ -498,5 +502,12 @@ public static class Utils
         byte[] inputBytes = Encoding.ASCII.GetBytes(input);
         byte[] hashBytes = md5.ComputeHash(inputBytes);
         return Convert.ToHexString(hashBytes);
+    }
+
+    public static float ExtractHeaderQualityValue(string s)
+    {
+        // https://developer.mozilla.org/en-US/docs/Glossary/Quality_values
+        string[] parts = s.Split("q=");
+        return parts.Length > 1 && float.TryParse(parts[1], out float val) ? val : 1;
     }
 }

@@ -2,7 +2,6 @@
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace LightTube.Controllers;
 

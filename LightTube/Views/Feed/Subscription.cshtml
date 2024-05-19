@@ -2,34 +2,35 @@
 @model SubscriptionsContext
 
 @{
-	Model.Title = "Subscriptions";
+    Model.Title = Model.Localization.GetRawString("feed.title");
 }
 
 <a href="/feed/channels" class="btn-outline btn-blue" style="width:fit-content;">
-	<span class="text">
-		Manage Subscriptions
-	</span>
+    <span class="text">
+        @Model.Localization.GetString("feed.subscriptions.manage")
+    </span>
 </a>
 
 <div class="renderer-gridrenderer">
-	@foreach(FeedVideo video in Model.Videos) {
-		<div class="renderer-gridvideorenderer">
-			<a href="/watch?v=@video.Id"  class="grid-thumbnail">
-				<img loading="lazy" src="@video.Thumbnail" alt="@video.Title">
-			</a>
-			<div class="info">
-				<a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
-					@video.Title
-				</a>
-				<div class="info__channel">
-					<a href="/channel/@video.ChannelId" title="@video.ChannelName" class="ml-1">
-						@video.ChannelName
-					</a>
-				</div>
-				<div>
-					@video.ViewCount.ToString("N0") views • @video.PublishedDate.Humanize(DateTimeOffset.UtcNow)
-				</div>
-			</div>
-		</div>
-	}
+    @foreach (FeedVideo video in Model.Videos)
+    {
+        <div class="renderer-gridvideorenderer">
+            <a href="/watch?v=@video.Id" class="grid-thumbnail">
+                <img loading="lazy" src="@video.Thumbnail" alt="@video.Title">
+            </a>
+            <div class="info">
+                <a href="/watch?v=@video.Id" class="ml-2 title" title="@video.Title">
+                    @video.Title
+                </a>
+                <div class="info__channel">
+                    <a href="/channel/@video.ChannelId" title="@video.ChannelName" class="ml-1">
+                        @video.ChannelName
+                    </a>
+                </div>
+                <div>
+                    @Model.Localization.FormatString("video.subtitle", video.ViewCount.ToString("N0"), video.PublishedDate.Humanize(DateTimeOffset.UtcNow, Model.Localization.GetCulture()))
+                </div>
+            </div>
+        </div>
+    }
 </div>

@@ -20,7 +20,7 @@
 </div>
 
 <p>
-	Are you sure that you want to remove this video from playlist <b>"@Model.Buttons[0].Label"</b>
+	@Model.Localization.FormatString("playlist.removevideo.body", Model.Buttons[0].Label)
 </p>
 
 <input style="display:none;" name="video" value="@Model.ItemId">

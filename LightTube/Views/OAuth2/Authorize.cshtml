@@ -9,16 +9,16 @@
 @if (Model.Error is null)
 {
 	<p style="text-align:center;color:#555;font-style:italic">
-		Logged in as <b>@Model.User!.UserID</b>
+		@Model.Localization.FormatString("oauth2.user", Model.User!.UserID)
 	</p>
 	<p>
-		<b>@Model.Name</b> wants to access your LightTube account
+		@Model.Localization.FormatString("oauth2.user", Model.Name)
 		<br/><br/>
-		This application will be able to:
+		@Model.Localization.GetString("oauth2.scopes")
 	</p>
 
 	<div class="scope-list">
-		@foreach (string scope in Utils.GetScopeDescriptions(Model.Scopes))
+		@foreach (string scope in Utils.GetScopeDescriptions(Model.Scopes, Model.Localization))
 		{
 			@if (scope.StartsWith("!"))
 			{
@@ -43,7 +43,7 @@
 
 
 	<div class="signin-buttons">
-		<a href="/account/logout?redirectUrl=@(HttpUtility.UrlEncode("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Context.Request.GetEncodedPathAndQuery())))" class="signin-button-secondary">Use another account</a>
-		<input type="submit" class="signin-button-primary" value="Authorize">
+		<a href="/account/logout?redirectUrl=@(HttpUtility.UrlEncode("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Context.Request.GetEncodedPathAndQuery())))" class="signin-button-secondary">@Model.Localization.GetString("oauth2.changeuser")</a>
+		<input type="submit" class="signin-button-primary" value="@Model.Localization.GetString("oauth2.authorize")">
 	</div>
 }

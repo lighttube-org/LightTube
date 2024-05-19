@@ -20,7 +20,7 @@
 </div>
 
 <p>
-	Please select the playlist to add this video into.
+	@Model.Localization.GetString("playlist.add.body")
 </p>
 
 <input style="display:none;" name="video" value="@Model.ItemId">
@@ -29,5 +29,5 @@
 	{
 		<option value="@playlist.Id">@playlist.Name</option>
 	}
-	<option value="__NEW">Create New Playlist</option>
+	<option value="__NEW">@Model.Localization.GetString("playlist.create.title")</option>
 </select>

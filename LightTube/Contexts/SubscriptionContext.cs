@@ -18,10 +18,10 @@ public class SubscriptionContext : ModalContext
             CurrentType = subscriptionType.Value;
         Buttons =
         [
-            new ModalButton("Go to channel", $"/channel/{channel.Header?.Id}", "secondary"),
+            new ModalButton(Localization.GetRawString("subscription.edit.channel"), $"/channel/{channel.Header?.Id}", "secondary"),
             new ModalButton("", "|", ""),
-            new ModalButton("Confirm", "__submit", "primary"),
+            new ModalButton(Localization.GetRawString("subscription.edit.confirm"), "__submit", "primary"),
         ];
-        Title = "Manage Subscription";
+        Title = Localization.GetRawString("subscription.edit.title");
     }
 }

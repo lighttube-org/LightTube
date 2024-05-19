@@ -3,6 +3,7 @@ using InnerTube;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
@@ -24,13 +25,14 @@ public class SettingsController(InnerTube.InnerTube youtube) : Controller
     public async Task<IActionResult> Appearance()
     {
         InnerTubeLocals locals = await _youtube.GetLocalsAsync();
-        AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.CustomThemeDefs);
+        AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.CustomThemeDefs, LocalizationManager.GetAllLanguages());
         return View(ctx);
     }
 
     [Route("appearance")]
     [HttpPost]
-    public IActionResult Appearance(string hl, string gl, string theme, string recommendations, string compatibility, string maxvideos)
+    public IActionResult Appearance(string hl, string gl, string theme, string recommendations, string compatibility,
+        string maxvideos, string language)
     {
         Response.Cookies.Append("hl", hl, new CookieOptions
         {
@@ -56,6 +58,11 @@ public class SettingsController(InnerTube.InnerTube youtube) : Controller
         {
             Expires = DateTimeOffset.MaxValue
         });
+        if (language != LocalizationManager.GetFromHttpContext(HttpContext).CurrentLocale)
+            Response.Cookies.Append("languageOverride", language, new CookieOptions
+            {
+                Expires = DateTimeOffset.MaxValue
+            });
         return Redirect("/settings/appearance");
     }
 

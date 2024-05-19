@@ -3,6 +3,7 @@ using InnerTube;
 using LightTube;
 using LightTube.Chores;
 using LightTube.Database;
+using LightTube.Localization;
 using Serilog;
 using Serilog.Events;
 
@@ -14,6 +15,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateBootstrapLogger();
 
 Configuration.InitConfig();
+LocalizationManager.Init();
 try
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

@@ -1,5 +1,5 @@
 ﻿@using InnerTube
-@model (ChannelTabs Tab, string Id)
+@model (ChannelTabs Tab, string Id, LightTube.Localization.LocalizationManager Localization)
 @{
 	string className = "channel-tabs__item";
 	string lastPathPart = Context.Request.Path.Value.Split("/").Last().Split("?").First();
@@ -9,4 +9,4 @@
 		className += " active";
 	}
 }
-<a href="/channel/@Model.Id/@Model.Tab.ToString().ToLower()" class="@className">@Model.Tab.ToString()</a>
+<a href="/channel/@Model.Id/@Model.Tab.ToString().ToLower()" class="@className">@Model.Localization.GetString("channel.tab." + Model.Tab.ToString().ToLower())</a>

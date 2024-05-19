@@ -88,19 +88,19 @@ public class PlaylistContext : BaseContext
             PlaylistDescription = playlist.Description;
             AuthorName = playlist.Author;
             AuthorId = DatabaseManager.Users.GetUserFromId(playlist.Author).Result?.LTChannelID ?? "";
-            ViewCountText = "LightTube playlist";
-            LastUpdatedText = $"Last updated on {playlist.LastUpdated:MMM d, yyyy}";
+            ViewCountText = Localization.GetRawString("playlist.lighttube.views");
+            LastUpdatedText = string.Format(Localization.GetRawString("playlist.lastupdated"), playlist.LastUpdated.ToString("MMM d, yyyy"));
             Editable = User != null && User.UserID == playlist.Author;
             Items = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Editable);
         }
         else
         {
             PlaylistThumbnail = $"https://i.ytimg.com/vi//hqdefault.jpg";
-            PlaylistTitle = "Playlist unavailable";
+            PlaylistTitle = Localization.GetRawString("playlist.unavailable");
             PlaylistDescription = "";
             AuthorName = "";
             AuthorId = "";
-            ViewCountText = "LightTube playlist";
+            ViewCountText = "";
             LastUpdatedText = "";
             Items = [];
             Editable = false;
