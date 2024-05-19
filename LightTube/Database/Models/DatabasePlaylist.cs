@@ -23,6 +23,11 @@ public class DatabasePlaylist
             playlistId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
         return playlistId;
     }
+
+    public VideoPlaylistInfo? GetVideoPlaylistInfo(string detailsId)
+    {
+        throw new NotImplementedException("empty ctor not implemented");
+    }
 }
 
 public enum PlaylistVisibility

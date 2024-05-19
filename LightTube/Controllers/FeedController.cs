@@ -15,7 +15,7 @@ namespace LightTube.Controllers;
 public class FeedController(SimpleInnerTubeClient innerTube) : Controller
 {
     
-    [Route("channel/{c}/rss.xml")]
+    [Route("channel/{c}.xml")]
     [HttpGet]
     public async Task<IActionResult> ChannelFeed(string c)
     {

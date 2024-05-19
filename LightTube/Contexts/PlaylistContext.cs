@@ -1,4 +1,4 @@
-﻿using InnerTube;
+﻿using InnerTube.Models;
 using InnerTube.Renderers;
 using LightTube.Database;
 using LightTube.Database.Models;
@@ -16,22 +16,22 @@ public class PlaylistContext : BaseContext
     public string ViewCountText;
     public string LastUpdatedText;
     public bool Editable;
-    public IEnumerable<IRenderer> Items;
-    public int? Continuation;
+    public IEnumerable<RendererContainer> Items;
+    public string? Continuation;
 
     public PlaylistContext(HttpContext context, InnerTubePlaylist playlist) : base(context)
     {
         Id = playlist.Id;
-        PlaylistThumbnail = playlist.Sidebar.Thumbnails.Last().Url.ToString();
+        PlaylistThumbnail = playlist.Sidebar.Thumbnails.Last().Url;
         PlaylistTitle = playlist.Sidebar.Title;
         PlaylistDescription = playlist.Sidebar.Description;
-        AuthorName = playlist.Sidebar.Channel.Title;
-        AuthorId = playlist.Sidebar.Channel.Id!;
+        AuthorName = playlist.Sidebar.Channel?.Title ?? "????";
+        AuthorId = playlist.Sidebar.Channel?.Id ?? "UC";
         ViewCountText = playlist.Sidebar.ViewCountText;
         LastUpdatedText = playlist.Sidebar.LastUpdated;
         Editable = false;
-        Items = playlist.Videos;
-        Continuation = playlist.Continuation?.ContinueFrom;
+        Items = playlist.Contents;
+        Continuation = playlist.Continuation;
 
         AddMeta("description", playlist.Sidebar.Description);
         AddMeta("author", playlist.Sidebar.Title);
@@ -40,27 +40,25 @@ public class PlaylistContext : BaseContext
         AddMeta("og:url",
             $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
         AddMeta("og:image",
-            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
+            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{(playlist.Contents.First(x => x.Type == "video").Data as VideoRendererData)?.VideoId}/-1");
         AddMeta("twitter:card",
-            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
+            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{(playlist.Contents.First(x => x.Type == "video").Data as VideoRendererData)?.VideoId}/-1");
     }
 
-    public PlaylistContext(HttpContext context, InnerTubePlaylist playlist, InnerTubeContinuationResponse continuation)
+    public PlaylistContext(HttpContext context, InnerTubePlaylist playlist, ContinuationResponse continuation)
         : base(context)
     {
         Id = playlist.Id;
-        PlaylistThumbnail = playlist.Sidebar.Thumbnails.Last().Url.ToString();
+        PlaylistThumbnail = playlist.Sidebar.Thumbnails.Last().Url;
         PlaylistTitle = playlist.Sidebar.Title;
         PlaylistDescription = playlist.Sidebar.Description;
-        AuthorName = playlist.Sidebar.Channel.Title;
-        AuthorId = playlist.Sidebar.Channel.Id!;
+        AuthorName = playlist.Sidebar.Channel?.Title ?? "????";
+        AuthorId = playlist.Sidebar.Channel?.Id ?? "UC";
         ViewCountText = playlist.Sidebar.ViewCountText;
         LastUpdatedText = playlist.Sidebar.LastUpdated;
         Editable = false;
-        Items = continuation.Contents;
-        Continuation = continuation.Continuation is not null
-            ? InnerTube.Utils.UnpackPlaylistContinuation(continuation.Continuation).ContinueFrom
-            : null;
+        Items = continuation.Results;
+        Continuation = continuation.ContinuationToken;
 
         AddMeta("description", playlist.Sidebar.Description);
         AddMeta("author", playlist.Sidebar.Title);
@@ -69,16 +67,14 @@ public class PlaylistContext : BaseContext
         AddMeta("og:url",
             $"{context.Request.Scheme}://{context.Request.Host}/{context.Request.Path}{context.Request.QueryString}");
         AddMeta("og:image",
-            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
+            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{(playlist.Contents.First(x => x.Type == "video").Data as VideoRendererData)?.VideoId}/-1");
         AddMeta("twitter:card",
-            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{playlist.Videos.First().Id}/-1");
+            $"{context.Request.Scheme}://{context.Request.Host}/proxy/thumbnail/{(playlist.Contents.First(x => x.Type == "video").Data as VideoRendererData)?.VideoId}/-1");
     }
 
     public PlaylistContext(HttpContext context, DatabasePlaylist? playlist) : base(context)
     {
-        bool visible = (playlist?.Visibility == PlaylistVisibility.Private)
-            ? User != null && User.UserID == playlist.Author
-            : true;
+        bool visible = playlist?.Visibility != PlaylistVisibility.Private || User != null && User.UserID == playlist.Author;
 
         if (visible && playlist != null)
         {
@@ -91,11 +87,12 @@ public class PlaylistContext : BaseContext
             ViewCountText = Localization.GetRawString("playlist.lighttube.views");
             LastUpdatedText = string.Format(Localization.GetRawString("playlist.lastupdated"), playlist.LastUpdated.ToString("MMM d, yyyy"));
             Editable = User != null && User.UserID == playlist.Author;
-            Items = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Editable);
+            Items = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Editable, Localization);
         }
         else
         {
-            PlaylistThumbnail = $"https://i.ytimg.com/vi//hqdefault.jpg";
+            Id = "";
+            PlaylistThumbnail = "https://i.ytimg.com/vi//hqdefault.jpg";
             PlaylistTitle = Localization.GetRawString("playlist.unavailable");
             PlaylistDescription = "";
             AuthorName = "";

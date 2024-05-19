@@ -1,4 +1,5 @@
 ﻿using InnerTube;
+using InnerTube.Models;
 using LightTube.Database.Models;
 
 namespace LightTube.Contexts;
@@ -6,21 +7,20 @@ namespace LightTube.Contexts;
 public class WatchContext : BaseContext
 {
     public PlayerContext Player;
-    public InnerTubeNextResponse Video;
-    public InnerTubePlaylistInfo? Playlist;
-    public InnerTubeContinuationResponse? Comments;
+    public InnerTubeVideo Video;
+    public VideoPlaylistInfo? Playlist;
+    public ContinuationResponse? Comments;
     public int Dislikes;
     public int Likes;
     public SponsorBlockSegment[] Sponsors;
 
-    public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer,
-        InnerTubeNextResponse innerTubeNextResponse,
-        InnerTubeContinuationResponse? comments,
-        bool compatibility, int dislikes, int likes, SponsorBlockSegment[] sponsors) : base(context)
+    public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo innerTubeVideo,
+        ContinuationResponse? comments, bool compatibility, int dislikes, int likes,
+        SponsorBlockSegment[] sponsors) : base(context)
     {
-        Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility,
+        Player = new PlayerContext(context, innerTubePlayer, innerTubeVideo, "embed", compatibility,
             context.Request.Query["q"], sponsors);
-        Video = innerTubeNextResponse;
+        Video = innerTubeVideo;
         Playlist = Video.Playlist;
         Comments = comments;
         Dislikes = dislikes;
@@ -50,11 +50,11 @@ public class WatchContext : BaseContext
         AddScript("/js/player.js");
     }
 
-    public WatchContext(HttpContext context, Exception e, InnerTubeNextResponse innerTubeNextResponse,
-        InnerTubeContinuationResponse? comments, int dislikes, int likes) : base(context)
+    public WatchContext(HttpContext context, Exception e, InnerTubeVideo innerTubeVideo, ContinuationResponse? comments,
+        int dislikes, int likes) : base(context)
     {
         Player = new PlayerContext(context, e);
-        Video = innerTubeNextResponse;
+        Video = innerTubeVideo;
         Playlist = Video.Playlist;
         Comments = comments;
         Dislikes = dislikes;
@@ -78,15 +78,14 @@ public class WatchContext : BaseContext
         AddMeta("twitter:player:stream", $"https://{context.Request.Host}/proxy/media/{Video.Id}/18.mp4");
     }
 
-    public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer,
-        InnerTubeNextResponse innerTubeNextResponse, DatabasePlaylist? playlist,
-        InnerTubeContinuationResponse? comments,
-        bool compatibility, int dislikes, int likes, SponsorBlockSegment[] sponsors) : base(context)
+    public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo innerTubeVideo,
+        DatabasePlaylist? playlist, ContinuationResponse? comments, bool compatibility, int dislikes, int likes,
+        SponsorBlockSegment[] sponsors) : base(context)
     {
-        Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility,
+        Player = new PlayerContext(context, innerTubePlayer, innerTubeVideo, "embed", compatibility,
             context.Request.Query["q"], sponsors);
-        Video = innerTubeNextResponse;
-        Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubePlayer.Details.Id);
+        Video = innerTubeVideo;
+        Playlist = playlist?.GetVideoPlaylistInfo(innerTubePlayer.Details.Id);
         if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
             if (playlist.Author != User?.UserID)
                 Playlist = null;
@@ -118,13 +117,12 @@ public class WatchContext : BaseContext
         AddScript("/js/player.js");
     }
 
-    public WatchContext(HttpContext context, Exception e, InnerTubeNextResponse innerTubeNextResponse,
-        DatabasePlaylist? playlist,
-        InnerTubeContinuationResponse? comments, int dislikes, int likes) : base(context)
+    public WatchContext(HttpContext context, Exception e, InnerTubeVideo innerTubeVideo, DatabasePlaylist? playlist,
+        ContinuationResponse? comments, int dislikes, int likes) : base(context)
     {
         Player = new PlayerContext(context, e);
-        Video = innerTubeNextResponse;
-        Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubeNextResponse.Id);
+        Video = innerTubeVideo;
+        Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id);
         if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
             if (playlist.Author != User?.UserID)
                 Playlist = null;

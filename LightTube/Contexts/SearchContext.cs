@@ -1,4 +1,6 @@
 ﻿using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf.Params;
 using InnerTube.Renderers;
 
 namespace LightTube.Contexts;
@@ -8,7 +10,7 @@ public class SearchContext : BaseContext
     public string Query;
     public SearchParams? Filter;
     public InnerTubeSearchResults? Search;
-    public IEnumerable<IRenderer> Results;
+    public IEnumerable<RendererContainer> Results;
     public string? Continuation;
 
     public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeSearchResults search) : base(context)
@@ -20,12 +22,12 @@ public class SearchContext : BaseContext
         Continuation = Search.Continuation;
     }
 
-    public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeContinuationResponse search) : base(context)
+    public SearchContext(HttpContext context, string query, SearchParams? filter, ContinuationResponse search) : base(context)
     {
         Query = query;
         Filter = filter;
         Search = null;
-        Results = search.Contents;
-        Continuation = search.Continuation;
+        Results = search.Results;
+        Continuation = search.ContinuationToken;
     }
 }
