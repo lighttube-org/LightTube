@@ -76,7 +76,7 @@ public class PlaylistContext : BaseContext
 
     public PlaylistContext(HttpContext context, DatabasePlaylist? playlist) : base(context)
     {
-        bool visible = (playlist?.Visibility == PlaylistVisibility.PRIVATE)
+        bool visible = (playlist?.Visibility == PlaylistVisibility.Private)
             ? User != null && User.UserID == playlist.Author
             : true;
 

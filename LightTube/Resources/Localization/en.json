@@ -39,6 +39,7 @@
   "channel.tab.store": "Store",
   "channel.tab.about": "About",
   "channel.tab.search": "Search",
+  "channel.noplaylists": "This user doesn't have any public playlists.",
   
   "download.title": "Download video",
   "download.format.select": "Please select a format to download.",
@@ -109,6 +110,7 @@
   "playlist.removevideo.body": "Are you sure that you want to remove this video from playlist <b>\"{0}\"</b>",
   "playlist.removevideo.confirm": "Remove",
   "playlist.unavailable": "Playlist unavailable",
+  "playlist.video.uncached": "Uncached video. Load the video to update the cache",
   "playlist.videos.count": "{0} videos",
   "playlist.view.full": "View Full Playlist",
   "playlist.visibility.0": "Private",

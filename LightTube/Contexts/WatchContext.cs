@@ -87,7 +87,7 @@ public class WatchContext : BaseContext
             context.Request.Query["q"], sponsors);
         Video = innerTubeNextResponse;
         Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubePlayer.Details.Id);
-        if (playlist != null && playlist.Visibility == PlaylistVisibility.PRIVATE)
+        if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
             if (playlist.Author != User?.UserID)
                 Playlist = null;
         Comments = comments;
@@ -125,7 +125,7 @@ public class WatchContext : BaseContext
         Player = new PlayerContext(context, e);
         Video = innerTubeNextResponse;
         Playlist = playlist?.GetInnerTubePlaylistInfo(innerTubeNextResponse.Id);
-        if (playlist != null && playlist.Visibility == PlaylistVisibility.PRIVATE)
+        if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
             if (playlist.Author != User?.UserID)
                 Playlist = null;
         Comments = comments;

@@ -21,7 +21,7 @@ public class ExportController : Controller
             Type = $"LightTube/{Utils.GetVersion()}",
             Host = Request.Host.ToString(),
             Subscriptions = [.. context.User.Subscriptions.Keys],
-            Playlists = DatabaseManager.Playlists.GetUserPlaylists(context.User.UserID, PlaylistVisibility.PRIVATE)
+            Playlists = DatabaseManager.Playlists.GetUserPlaylists(context.User.UserID, PlaylistVisibility.Private)
                 .Select(x => new ImportedData.Playlist
                 {
                     Title = x.Name,

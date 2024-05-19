@@ -1,13 +1,13 @@
 ﻿using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.Net;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Xml;
 using InnerTube;
+using InnerTube.Protobuf.Params;
+using InnerTube.Protobuf.Responses;
 using LightTube.Database;
 using LightTube.Database.Models;
 using LightTube.Localization;
@@ -17,8 +17,8 @@ namespace LightTube;
 
 public static class Utils
 {
-    private static string? _version;
-    private static string? _itVersion;
+    private static string? version;
+    private static string? itVersion;
     public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
     public static string[] OauthScopes =
@@ -32,50 +32,46 @@ public static class Utils
     public static string GetInnerTubeRegion(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)
             ? h.ToString()
-            : context.Request.Cookies.TryGetValue("gl", out string region)
+            : context.Request.Cookies.TryGetValue("gl", out string? region)
                 ? region
                 : Configuration.DefaultContentRegion;
 
     public static string GetInnerTubeLanguage(this HttpContext context) =>
         context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
             ? h.ToString()
-            : context.Request.Cookies.TryGetValue("hl", out string language) && language != "localized"
+            : context.Request.Cookies.TryGetValue("hl", out string? language) && language != "localized"
                 ? language
                 : LocalizationManager.GetFromHttpContext(context).GetRawString("language.innertube");
 
     public static bool IsInnerTubeLanguageLocalized(this HttpContext context) =>
-        context.Request.Cookies.TryGetValue("hl", out string language) ? language == "localized" : true;
+        !context.Request.Cookies.TryGetValue("hl", out string? language) || language == "localized";
 
     public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
-        context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
-            ? recommendations == "visible"
-            : true;
+        !context.Request.Cookies.TryGetValue("recommendations", out string? recommendations) || recommendations == "visible";
 
     public static bool GetDefaultCompatibility(this HttpContext context) =>
-        context.Request.Cookies.TryGetValue("compatibility", out string compatibility)
-            ? compatibility == "true"
-            : false;
+        context.Request.Cookies.TryGetValue("compatibility", out string? compatibility) && compatibility == "true";
 
     public static string GetVersion()
     {
-        if (_version is null)
+        if (version is null)
         {
 #if DEBUG
             DateTime buildTime = DateTime.Today;
-            _version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
+            version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
 #else
 			_version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[2..];
 #endif
         }
 
-        return _version;
+        return version;
     }
 
     public static string GetInnerTubeVersion()
     {
-        _itVersion ??= typeof(InnerTube.InnerTube).Assembly.GetName().Version!.ToString();
+        itVersion ??= typeof(InnerTube.InnerTube).Assembly.GetName().Version!.ToString();
 
-        return _itVersion;
+        return itVersion;
     }
 
     public static string GetCodecFromMimeType(string mime)
@@ -207,7 +203,7 @@ public static class Utils
 
         period.AppendChild(doc.CreateComment("Audio Adaptation Sets"));
         List<Format> audios = player.AdaptiveFormats
-            .Where(x => x.AudioChannels.HasValue)
+            .Where(x => x.AudioChannels != null)
             .ToList();
         IEnumerable<IGrouping<string?, Format>> grouped = audios.GroupBy(x => x.AudioTrack?.Id);
         foreach (IGrouping<string?, Format> formatGroup in grouped.OrderBy(x => x.First().AudioTrack?.AudioIsDefault))
@@ -215,7 +211,7 @@ public static class Utils
             XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 
             audioAdaptationSet.SetAttribute("mimeType",
-                HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+                HttpUtility.ParseQueryString(audios.First().Url.Split('?')[1]).Get("mime"));
             audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
             audioAdaptationSet.SetAttribute("contentType", "audio");
             audioAdaptationSet.SetAttribute("lang", formatGroup.Key);
@@ -223,27 +219,27 @@ public static class Utils
             if (formatGroup.First().AudioTrack != null)
             {
                 XmlElement label = doc.CreateElement("Label");
-                label.InnerText = formatGroup.First().AudioTrack?.DisplayName;
+                label.InnerText = formatGroup.First().AudioTrack.DisplayName;
                 audioAdaptationSet.AppendChild(label);
             }
 
             foreach (Format format in formatGroup)
             {
                 XmlElement representation = doc.CreateElement("Representation");
-                representation.SetAttribute("id", format.Itag);
-                representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+                representation.SetAttribute("id", format.Itag.ToString());
+                representation.SetAttribute("codecs", GetCodecFromMimeType(format.Mime));
                 representation.SetAttribute("startWithSAP", "1");
                 representation.SetAttribute("bandwidth", format.Bitrate.ToString());
 
                 XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
                 audioChannelConfiguration.SetAttribute("schemeIdUri",
                     "urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
-                audioChannelConfiguration.SetAttribute("value", format.AudioChannels?.ToString());
+                audioChannelConfiguration.SetAttribute("value", format.AudioChannels.ToString());
                 representation.AppendChild(audioChannelConfiguration);
 
                 XmlElement baseUrl = doc.CreateElement("BaseURL");
                 baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-                    ? format.Url.ToString()
+                    ? format.Url
                     : $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}?audioTrackId={format.AudioTrack?.Id}";
                 representation.AppendChild(baseUrl);
 
@@ -269,11 +265,11 @@ public static class Utils
 
         period.AppendChild(doc.CreateComment("Video Adaptation Set"));
 
-        List<Format> videos = player.AdaptiveFormats.Where(x => !x.AudioChannels.HasValue).ToList();
+        List<Format> videos = player.AdaptiveFormats.Where(x => x.AudioChannels == null).ToList();
 
         XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
         videoAdaptationSet.SetAttribute("mimeType",
-            HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Query ?? "mime=video/mp4")
+            HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Split('?')[0] ?? "mime=video/mp4")
                 .Get("mime"));
         videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
         videoAdaptationSet.SetAttribute("contentType", "video");
@@ -281,8 +277,8 @@ public static class Utils
         foreach (Format format in videos)
         {
             XmlElement representation = doc.CreateElement("Representation");
-            representation.SetAttribute("id", format.Itag);
-            representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+            representation.SetAttribute("id", format.Itag.ToString());
+            representation.SetAttribute("codecs", GetCodecFromMimeType(format.Mime));
             representation.SetAttribute("startWithSAP", "1");
             representation.SetAttribute("width", format.Width.ToString());
             representation.SetAttribute("height", format.Height.ToString());
@@ -290,7 +286,7 @@ public static class Utils
 
             XmlElement baseUrl = doc.CreateElement("BaseURL");
             baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-                ? format.Url.ToString()
+                ? format.Url
                 : $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}";
             representation.AppendChild(baseUrl);
 
@@ -388,17 +384,14 @@ public static class Utils
 
     public static string GetExtension(this Format format)
     {
-        if (format.MimeType.StartsWith("video"))
-            format.MimeType
+        if (format.Mime.StartsWith("video"))
+            return format.Mime
                 .Split("/").Last()
                 .Split(";").First();
-        else
-        {
-            if (format.MimeType.Contains("opus"))
-                return "opus";
-            if (format.MimeType.Contains("mp4a"))
-                return "mp3";
-        }
+        if (format.Mime.Contains("opus"))
+            return "opus";
+        if (format.Mime.Contains("mp4a"))
+            return "mp3";
 
         return "mp4";
     }

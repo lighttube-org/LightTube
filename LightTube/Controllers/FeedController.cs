@@ -12,15 +12,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace LightTube.Controllers;
 
 [Route("/feed")]
-public class FeedController(InnerTube.InnerTube youtube) : Controller
+public class FeedController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private InnerTube.InnerTube _youtube = youtube;
-
+    
     [Route("channel/{c}/rss.xml")]
     [HttpGet]
     public async Task<IActionResult> ChannelFeed(string c)
     {
-        ChannelFeed ytchannel = await YoutubeRSS.GetChannelFeed(c);
+        ChannelFeed ytchannel = await YoutubeRss.GetChannelFeed(c);
         try
         {
             XmlDocument document = new();
@@ -93,7 +92,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
     {
         SubscriptionsContext ctx = new(HttpContext);
         if (ctx.User is null) return Redirect("/account/login?redirectUrl=%2ffeed%2fsubscriptions");
-        ctx.Videos = await YoutubeRSS.GetMultipleFeeds(ctx.User.Subscriptions.Keys);
+        ctx.Videos = await YoutubeRss.GetMultipleFeeds(ctx.User.Subscriptions.Keys);
         return View(ctx);
     }
 
@@ -114,7 +113,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
             string username = secretDecoded.Split(':')[0];
             string password = secretDecoded.Split(':')[1];
             DatabaseUser? user = await DatabaseManager.Users.GetUserFromUsernamePassword(username, password) ?? throw new Exception();
-            FeedVideo[] feedVideos = await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Where(x => x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key));
+            FeedVideo[] feedVideos = await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Where(x => x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key));
 
             XmlDocument document = new();
             XmlElement rss = document.CreateElement("rss");
@@ -359,7 +358,7 @@ public class FeedController(InnerTube.InnerTube youtube) : Controller
         InnerTubeNextResponse intr = await _youtube.GetVideoAsync(v);
         PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new(HttpContext, intr);
         if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
-        pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.PRIVATE);
+        pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.Private);
         pvc.Buttons =
         [
             new ModalButton("", "|", ""),

@@ -1,6 +1,9 @@
 using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf;
 using InnerTube.Renderers;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 
@@ -10,7 +13,6 @@ public class PlaylistManager(
     IMongoCollection<DatabasePlaylist> playlistCollection,
     IMongoCollection<DatabaseVideo> videoCacheCollection)
 {
-    private const string INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE = "{\"videoId\":\"%%ID%%\",\"isPlayable\":true,\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"title\":{\"runs\":[{\"text\":\"%%TITLE%%\"}]},\"index\":{\"simpleText\":\"%%INDEX%%\"},\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"navigationEndpoint\":{\"watchEndpoint\":{\"videoId\":\"%%ID%%\"}},\"lengthSeconds\":\"%%DURATION_SECONDS%%\",\"isPlayable\":true,\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"simpleText\":\"%%DURATION%%\"}}}],\"videoInfo\":{\"runs\":[{\"text\":\"%%VIEWS%%\"},{\"text\":\" • \"},{\"text\":\"%%UPLOADED_AT%%\"}]}}";
     private const string INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE = "{\"title\":{\"simpleText\":\"%%TITLE%%\"},\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"indexText\":{\"simpleText\":\"%%INDEX%%\"},\"selected\":%%SELECTED%%,\"navigationEndpoint\":{\"watchEndpoint\":{\"params\":\"OAE%3D\"}},\"videoId\":\"%%ID%%\",\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]}}";
     public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; } = playlistCollection;
     public IMongoCollection<DatabaseVideo> VideoCacheCollection { get; } = videoCacheCollection;
@@ -23,55 +25,106 @@ public class PlaylistManager(
         return unfiltered.ToList().Where(x => x.Visibility >= minVisibility);
     }
 
-    public IEnumerable<PlaylistVideoRenderer> GetPlaylistVideos(string id, bool editable)
+    public IEnumerable<RendererContainer> GetPlaylistVideos(string id, bool editable, LocalizationManager localization)
     {
         DatabasePlaylist? pl = GetPlaylist(id);
         if (pl == null) return [];
 
-        List<PlaylistVideoRenderer> renderers = [];
+        List<RendererContainer> renderers = [];
 
         for (int i = 0; i < pl.VideoIds.Count; i++)
         {
             string videoId = pl.VideoIds[i];
             DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-            string json = INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE
-                .Replace("%%ID%%", editable ? videoId + "!" : videoId)
-                .Replace("%%INDEX%%", (i + 1).ToString())
-                .Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
-                .Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
-                .Replace("%%DURATION%%", video?.Duration ?? "00:00")
-                .Replace("%%DURATION_SECONDS%%", InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00").TotalSeconds.ToString())
-                .Replace("%%UPLADED_AT%%", video?.UploadedAt ?? "???")
-                .Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
-                .Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???")
-                .Replace("%%VIEWS%%", (video?.Views ?? 0).ToString());
-            renderers.Add(new PlaylistVideoRenderer(JObject.Parse(json)));
+            RendererContainer container = new()
+            {
+                Type = "video",
+                OriginalType = "playlistVideoContainer",
+                Data = new PlaylistVideoRendererData
+                {
+                    VideoId = editable ? videoId + "!" : videoId,
+                    Title = video?.Title.Replace("\"", "\\\"") ?? localization.GetRawString("playlist.video.uncached"),
+                    Thumbnails =
+                    [
+                        new Thumbnail
+                        {
+                            Url = video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg",
+                            Width = 480,
+                            Height = 360
+                        }
+                    ],
+                    Author = video?.Channel.Id != null
+                        ? new Channel(
+                            video.Channel.Id,
+                            video?.Channel.Name.Replace("\"", "\\\"") ?? "???",
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        : null,
+                    Duration = InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00"),
+                    PublishedText = video?.UploadedAt,
+                    ViewCountText = (video?.Views ?? 0).ToString(),
+                    Badges = [],
+                    Description = null,
+                    VideoIndexText = (i + 1).ToString()
+                }
+            };
+            renderers.Add(container);
         }
 
         return renderers;
     }
 
-    public IEnumerable<PlaylistPanelVideoRenderer> GetPlaylistPanelVideos(string id, string currentVideoId)
+    public List<RendererContainer> GetPlaylistPanelVideos(string id, string currentVideoId,
+        LocalizationManager localization)
     {
         DatabasePlaylist? pl = GetPlaylist(id);
         if (pl == null) return [];
 
-        List<PlaylistPanelVideoRenderer> renderers = [];
+        List<RendererContainer> renderers = [];
 
         for (int i = 0; i < pl.VideoIds.Count; i++)
         {
             string videoId = pl.VideoIds[i];
             DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-            string json = INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE
-                .Replace("%%ID%%", videoId)
-                .Replace("%%SELECTED%%", (currentVideoId == videoId).ToString().ToLower())
-                .Replace("%%INDEX%%", currentVideoId == videoId ? ">" : (i + 1).ToString())
-                .Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
-                .Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
-                .Replace("%%DURATION%%", video?.Duration ?? "00:00")
-                .Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
-                .Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???");
-            renderers.Add(new PlaylistPanelVideoRenderer(JObject.Parse(json)));
+            RendererContainer container = new()
+            {
+                Type = "video",
+                OriginalType = "playlistPanelVideoRenderer",
+                Data = new PlaylistVideoRendererData
+                {
+                    VideoId = videoId,
+                    Title = video?.Title.Replace("\"", "\\\"") ?? localization.GetRawString("playlist.video.uncached"),
+                    Thumbnails = video?.Thumbnails ??
+                    [
+                        new Thumbnail
+                        {
+                            Url = $"https://i.ytimg.com/vi/{videoId}/hqdefault.jpg",
+                            Width = 480,
+                            Height = 360
+                        }
+                    ],
+                    Author = video?.Channel.Id != null
+                        ? new Channel(
+                            video.Channel.Id,
+                            video?.Channel.Name.Replace("\"", "\\\"") ?? "???",
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        : null,
+                    Duration = InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00"),
+                    PublishedText = video?.UploadedAt,
+                    ViewCountText = (video?.Views ?? 0).ToString(),
+                    Badges = [],
+                    Description = null,
+                    VideoIndexText = (i + 1).ToString()
+                }
+            };
+            renderers.Add(container);
         }
 
         return renderers;
@@ -144,27 +197,30 @@ public class PlaylistManager(
         playlist.LastUpdated = DateTimeOffset.UtcNow;
 
         await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
-        await DatabaseManager.Cache.AddVideo(new DatabaseVideo()
+        await DatabaseManager.Cache.AddVideo(new DatabaseVideo
         {
             Id = video.Details.Id,
             Title = video.Details.Title,
             Thumbnails = [
-                new()
+                new Thumbnail
                 {
-                    Url = new Uri($"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg")
+                    Url = $"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg",
+                    Width = 480,
+                    Height = 360
                 }
             ],
             Views = 0,
-            Channel = new()
+            Channel = new DatabaseVideoAuthor
             {
                 Id = video.Details.Author.Id!,
                 Name = video.Details.Author.Title,
-                Avatars = [
-                new()
-                {
-                    Url = video.Details.Author.Avatar!
-                }
-            ]
+                Avatars =
+                [
+                    new Thumbnail
+                    {
+                        Url = video.Details.Author.Avatar!.First().Url
+                    }
+                ]
             },
             Duration = video.Details.Length.ToDurationString()
         });

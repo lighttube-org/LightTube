@@ -1,4 +1,5 @@
 ﻿using InnerTube;
+using InnerTube.Protobuf;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace LightTube.Database.Models;
@@ -23,24 +24,14 @@ public class DatabaseVideo
     {
         Id = player.Details.Id;
         Title = player.Details.Title;
-        Thumbnails = [
-            new()
-            {
-                Url = player.Details.Thumbnails[0].Url
-            }
-        ];
+        Thumbnails = player.Details.Thumbnails.Thumbnails_.ToArray();
         UploadedAt = "";
         Views = 0;
         Channel = new()
         {
-            Id = player.Details.Author.Id!,
+            Id = player.Details.Author.Id,
             Name = player.Details.Author.Title,
-            Avatars = [
-                new Thumbnail()
-                {
-                    Url = player.Details.Author.Avatar!
-                }
-            ]
+            Avatars = player.Details.Author.Avatar!
         };
         Duration = player.Details.Length.ToDurationString();
     }

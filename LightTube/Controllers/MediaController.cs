@@ -11,10 +11,9 @@ using Serilog;
 namespace LightTube.Controllers;
 
 [Route("/proxy")]
-public class ProxyController(InnerTube.InnerTube youtube) : Controller
+public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private readonly InnerTube.InnerTube _youtube = youtube;
-    private readonly HttpClient client = new();
+        private readonly HttpClient client = new();
 
     private string[] _blockedHeaders =
     [

@@ -30,7 +30,7 @@ try
     builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 
     InnerTubeAuthorization? auth = Configuration.InnerTubeAuthorization;
-    builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
+    builder.Services.AddSingleton(new SimpleInnerTubeClient(new InnerTubeConfiguration
     {
         Authorization = auth,
         CacheSize = Configuration.CacheSize,

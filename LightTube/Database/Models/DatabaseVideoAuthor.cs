@@ -1,4 +1,5 @@
 ﻿using InnerTube;
+using InnerTube.Protobuf;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace LightTube.Database.Models;

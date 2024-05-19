@@ -10,13 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace LightTube.Controllers;
 
 [Route("/api")]
-public class ApiController(InnerTube.InnerTube youtube) : Controller
+public class ApiController(SimpleInnerTubeClient innerTube) : Controller
 {
     private const string VIDEO_ID_REGEX = @"[a-zA-Z0-9_-]{11}";
     private const string CHANNEL_ID_REGEX = @"[a-zA-Z0-9_-]{24}";
     private const string PLAYLIST_ID_REGEX = @"[a-zA-Z0-9_-]{34}";
-    private readonly InnerTube.InnerTube _youtube = youtube;
-
+    
     [Route("info")]
     public LightTubeInstanceInfo GetInstanceInfo() =>
         new()
@@ -43,8 +42,7 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
 
     [Route("player")]
     [ApiDisableable]
-    public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? id, bool contentCheckOk = true,
-        bool includeHls = false)
+    public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? id, bool contentCheckOk = true)
     {
         if (id is null)
             return Error<InnerTubePlayer>("Missing video ID (query parameter `id`)", 400,
@@ -57,7 +55,7 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
         try
         {
             InnerTubePlayer player =
-                await _youtube.GetPlayerAsync(id, contentCheckOk, includeHls, HttpContext.GetInnerTubeLanguage(),
+                await _youtube.GetPlayerAsync(id, contentCheckOk, HttpContext.GetInnerTubeLanguage(),
                     HttpContext.GetInnerTubeRegion());
 
             DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
@@ -194,7 +192,7 @@ public class ApiController(InnerTube.InnerTube youtube) : Controller
                     return Error<ApiPlaylist>("The playlist does not exist.", 500,
                         HttpStatusCode.InternalServerError);
 
-                if (playlist.Visibility == PlaylistVisibility.PRIVATE)
+                if (playlist.Visibility == PlaylistVisibility.Private)
                 {
                     if (user == null)
                         return Error<ApiPlaylist>("The playlist does not exist.", 500,

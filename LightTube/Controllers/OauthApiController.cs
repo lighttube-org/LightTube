@@ -11,10 +11,9 @@ namespace LightTube.Controllers;
 
 [Route("/api")]
 [ApiDisableable]
-public class OauthApiController(InnerTube.InnerTube youtube) : Controller
+public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private readonly InnerTube.InnerTube _youtube = youtube;
-
+    
     private ApiResponse<T> Error<T>(string message, int code,
         HttpStatusCode statusCode)
     {
@@ -50,7 +49,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
         if (user is null) return Error<IEnumerable<IRenderer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
         ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-        return new ApiResponse<IEnumerable<IRenderer>>(user.PlaylistRenderers(PlaylistVisibility.PRIVATE).Items,
+        return new ApiResponse<IEnumerable<IRenderer>>(user.PlaylistRenderers(PlaylistVisibility.Private).Items,
             userData);
     }
 
@@ -71,7 +70,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             DatabasePlaylist playlist = await DatabaseManager.Playlists.CreatePlaylist(
                 Request.Headers.Authorization.ToString(), request.Title,
-                request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
+                request.Description ?? "", request.Visibility ?? PlaylistVisibility.Private);
             return new ApiResponse<DatabasePlaylist>(playlist, userData);
         }
         catch (Exception e)
@@ -97,7 +96,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             await DatabaseManager.Playlists.EditPlaylist(
                 Request.Headers.Authorization.ToString()!, id, request.Title,
-                request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
+                request.Description ?? "", request.Visibility ?? PlaylistVisibility.Private);
             DatabasePlaylist playlist = DatabaseManager.Playlists.GetPlaylist(id)!;
             return new ApiResponse<DatabasePlaylist>(playlist, userData);
         }
@@ -222,8 +221,8 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
             return Error<FeedVideo[]>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
         FeedVideo[] feed = includeNonNotification
-            ? await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Keys)
-            : await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Where(x =>
+            ? await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Keys)
+            : await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Where(x =>
                 x.Value == SubscriptionType.NOTIFICATIONS_OFF).Select(x => x.Key));
 
         feed = feed.Skip(skip).Take(limit).ToArray();
