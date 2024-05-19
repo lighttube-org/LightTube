@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using InnerTube;
 using InnerTube.Models;
 using InnerTube.Protobuf.Params;
+using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
 using LightTube.Database;
@@ -77,8 +78,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		bool contentCheckOk = true,
 		string? playlistId = null,
 		int? playlistIndex = null,
-		string? playlistParams = null,
-		string? continuation = null)
+		string? playlistParams = null)
 	{
 		if (id is null)
 			return Error<InnerTubeVideo>("Missing video ID (query parameter `id`)", 400,
@@ -89,8 +89,6 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 
 		try
 		{
-			if (continuation == null)
-			{
 				InnerTubeVideo video = await innerTube.GetVideoDetailsAsync(id, contentCheckOk, playlistId,
 					playlistIndex, playlistParams, HttpContext.GetInnerTubeLanguage(),
 					HttpContext.GetInnerTubeRegion());
@@ -101,23 +99,59 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 				userData?.CalculateWithRenderers(video.Recommended);
 
 				return new ApiResponse<InnerTubeVideo>(video, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<InnerTubeVideo>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+	
+	[Route("recommendations")]
+	[ApiDisableable]
+	public async Task<ApiResponse<ContinuationResponse>> GetVideoRecommendations(string? id, string? continuation)
+	{
+		if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
+		{
+			return Error<ContinuationResponse>(
+				"Missing video id (query parameter `id`) or continuation token (query parameter `continuation`)",
+				400, HttpStatusCode.BadRequest);
+		}
+
+		try
+		{
+			if (id != null)
+			{
+				InnerTubeVideo cont = await innerTube.GetVideoDetailsAsync(id, true, null, null, null,
+					HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.CalculateWithRenderers(cont.Recommended);
+
+				return new ApiResponse<ContinuationResponse>(new ContinuationResponse
+				{
+					ContinuationToken =
+						(cont.Recommended.FirstOrDefault(x => x.Type == "continuation")?.Data as
+							ContinuationRendererData)
+						?.ContinuationToken,
+					Results = cont.Recommended.Where(x => x.Type != "continuation").ToArray()
+				}, userData);
 			}
 			else
 			{
-				return Error<InnerTubeVideo>("empty ctors not implemented yet", 501, HttpStatusCode.NotImplemented);
-				ContinuationResponse cont = await innerTube.ContinueVideoRecommendationsAsync(id,
+				ContinuationResponse cont = await innerTube.ContinueVideoRecommendationsAsync(continuation!,
 					HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
 				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
 				userData?.CalculateWithRenderers(cont.Results);
-				
-				//return new ApiResponse<ContinuationResponse>(video, userData);
+
+				return new ApiResponse<ContinuationResponse>(cont, userData);
 			}
 		}
 		catch (Exception e)
 		{
-			return Error<InnerTubeVideo>(e.Message, 500, HttpStatusCode.InternalServerError);
+			return Error<ContinuationResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
 		}
 	}
 
@@ -128,7 +162,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
 		{
 			return Error<ApiSearchResults>(
-				"Missing query (query parameter `query`) or continuation key (query parameter `continuation`)",
+				"Missing query (query parameter `query`) or continuation token (query parameter `continuation`)",
 				400, HttpStatusCode.BadRequest);
 		}
 
