@@ -18,55 +18,24 @@ public class ApiUserData
         };
     }
 
-    public void CalculateWithRenderers(IEnumerable<IRenderer> renderers)
+    public void CalculateWithRenderers(IEnumerable<RendererContainer> renderers)
     {
-        foreach (IRenderer renderer in renderers)
+        foreach (RendererContainer renderer in renderers)
             CalculateWithRenderer(renderer);
     }
 
-    private void CalculateWithRenderer(IRenderer renderer)
+    private void CalculateWithRenderer(RendererContainer renderer)
     {
-        switch (renderer)
+        switch (renderer.Type)
         {
-            case ChannelRenderer channel:
-                AddInfoForChannel(channel.Id);
+            case "channel":
+                AddInfoForChannel((renderer.Data as ChannelRendererData)?.ChannelId);
                 break;
-            case VideoRenderer video:
-                AddInfoForChannel(video.Channel.Id);
+            case "video":
+                AddInfoForChannel((renderer.Data as VideoRendererData)?.Author?.Id);
                 break;
-            case CompactVideoRenderer video:
-                AddInfoForChannel(video.Channel.Id);
-                break;
-            case GridVideoRenderer video:
-                AddInfoForChannel(video.Channel.Id);
-                break;
-            case PlaylistVideoRenderer video:
-                AddInfoForChannel(video.Channel.Id);
-                break;
-            case PlaylistPanelVideoRenderer video:
-                AddInfoForChannel(video.Channel.Id);
-                break;
-
-            case ShelfRenderer shelf:
-                CalculateWithRenderers(shelf.Items);
-                break;
-            case ReelShelfRenderer shelf:
-                CalculateWithRenderers(shelf.Items);
-                break;
-            case RichShelfRenderer shelf:
-                CalculateWithRenderers(shelf.Contents);
-                break;
-            case SectionListRenderer list:
-                CalculateWithRenderers(list.Contents);
-                break;
-            case ItemSectionRenderer section:
-                CalculateWithRenderers(section.Contents);
-                break;
-            case RichSectionRenderer section:
-                CalculateWithRenderer(section.Content);
-                break;
-            case GridRenderer grid:
-                CalculateWithRenderers(grid.Items);
+            case "container":
+                CalculateWithRenderers((renderer.Data as ContainerRendererData)?.Items ?? []);
                 break;
         }
     }
@@ -74,7 +43,7 @@ public class ApiUserData
     public void AddInfoForChannel(string? channelId)
     {
         if (channelId == null) return;
-        if (User.Subscriptions.ContainsKey(channelId) && !Channels.ContainsKey(channelId))
-            Channels.Add(channelId, new ApiSubscriptionInfo(User.Subscriptions[channelId]));
+        if (User.Subscriptions.TryGetValue(channelId, out SubscriptionType value) && !Channels.ContainsKey(channelId))
+            Channels.Add(channelId, new ApiSubscriptionInfo(value));
     }
 }

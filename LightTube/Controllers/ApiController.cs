@@ -1,317 +1,326 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
 using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf.Params;
 using LightTube.ApiModels;
 using LightTube.Attributes;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
 
 [Route("/api")]
-public class ApiController(SimpleInnerTubeClient innerTube) : Controller
+public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private const string VIDEO_ID_REGEX = @"[a-zA-Z0-9_-]{11}";
-    private const string CHANNEL_ID_REGEX = @"[a-zA-Z0-9_-]{24}";
-    private const string PLAYLIST_ID_REGEX = @"[a-zA-Z0-9_-]{34}";
-    
-    [Route("info")]
-    public LightTubeInstanceInfo GetInstanceInfo() =>
-        new()
-        {
-            Type = "lighttube/2.0",
-            Version = Utils.GetVersion(),
-            Messages = Configuration.Messages,
-            Alert = Configuration.Alert,
-            Config = new Dictionary<string, object>
-            {
-                ["allowsApi"] = Configuration.ApiEnabled,
-                ["allowsNewUsers"] = Configuration.RegistrationEnabled,
-                ["allowsOauthApi"] = Configuration.OauthEnabled,
-                ["allowsThirdPartyProxyUsage"] = Configuration.ThirdPartyProxyEnabled
-            }
-        };
+	private readonly Regex videoIdRegex = VideoIdRegex();
 
-    private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
-    {
-        Response.StatusCode = (int)statusCode;
-        return new ApiResponse<T>(statusCode == HttpStatusCode.BadRequest ? "BAD_REQUEST" : "ERROR",
-            message, code);
-    }
+	[Route("info")]
+	public LightTubeInstanceInfo GetInstanceInfo() =>
+		new()
+		{
+			Type = "lighttube/2.0",
+			Version = Utils.GetVersion(),
+			Messages = Configuration.Messages,
+			Alert = Configuration.Alert,
+			Config = new Dictionary<string, object>
+			{
+				["allowsApi"] = Configuration.ApiEnabled,
+				["allowsNewUsers"] = Configuration.RegistrationEnabled,
+				["allowsOauthApi"] = Configuration.OauthEnabled,
+				["allowsThirdPartyProxyUsage"] = Configuration.ThirdPartyProxyEnabled
+			}
+		};
 
-    [Route("player")]
-    [ApiDisableable]
-    public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? id, bool contentCheckOk = true)
-    {
-        if (id is null)
-            return Error<InnerTubePlayer>("Missing video ID (query parameter `id`)", 400,
-                HttpStatusCode.BadRequest);
+	private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
+	{
+		Response.StatusCode = (int)statusCode;
+		return new ApiResponse<T>(statusCode == HttpStatusCode.BadRequest ? "BAD_REQUEST" : "ERROR",
+			message, code);
+	}
 
-        Regex regex = new(VIDEO_ID_REGEX);
-        if (!regex.IsMatch(id) || id.Length != 11)
-            return Error<InnerTubePlayer>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
+	[Route("player")]
+	[ApiDisableable]
+	public async Task<ApiResponse<InnerTubePlayer>> GetPlayerInfo(string? id, bool contentCheckOk = true)
+	{
+		if (id is null)
+			return Error<InnerTubePlayer>("Missing video ID (query parameter `id`)", 400,
+				HttpStatusCode.BadRequest);
 
-        try
-        {
-            InnerTubePlayer player =
-                await _youtube.GetPlayerAsync(id, contentCheckOk, HttpContext.GetInnerTubeLanguage(),
-                    HttpContext.GetInnerTubeRegion());
+		if (!videoIdRegex.IsMatch(id) || id.Length != 11)
+			return Error<InnerTubePlayer>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
 
-            DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-            ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-            userData?.AddInfoForChannel(player.Details.Author.Id);
+		try
+		{
+			InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(id, contentCheckOk,
+				HttpContext.GetInnerTubeLanguage(),
+				HttpContext.GetInnerTubeRegion());
 
-            return new ApiResponse<InnerTubePlayer>(player, userData);
-        }
-        catch (Exception e)
-        {
-            return Error<InnerTubePlayer>(e.Message, 500, HttpStatusCode.InternalServerError);
-        }
-    }
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			userData?.AddInfoForChannel(player.Details.Author.Id);
 
-    [Route("video")]
-    [ApiDisableable]
-    public async Task<ApiResponse<InnerTubeNextResponse>> GetVideoInfo(
-        string? id,
-        string? playlistId = null,
-        int? playlistIndex = null,
-        string? playlistParams = null)
-    {
-        if (id is null)
-            return Error<InnerTubeNextResponse>("Missing video ID (query parameter `id`)", 400,
-                HttpStatusCode.BadRequest);
+			return new ApiResponse<InnerTubePlayer>(player, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<InnerTubePlayer>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
 
-        Regex regex = new(VIDEO_ID_REGEX);
-        if (!regex.IsMatch(id) || id.Length != 11)
-            return Error<InnerTubeNextResponse>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
+	[Route("video")]
+	[ApiDisableable]
+	public async Task<ApiResponse<InnerTubeVideo>> GetVideoInfo(
+		string? id,
+		bool contentCheckOk = true,
+		string? playlistId = null,
+		int? playlistIndex = null,
+		string? playlistParams = null,
+		string? continuation = null)
+	{
+		if (id is null)
+			return Error<InnerTubeVideo>("Missing video ID (query parameter `id`)", 400,
+				HttpStatusCode.BadRequest);
 
-        try
-        {
-            InnerTubeNextResponse video = await _youtube.GetVideoAsync(id, playlistId, playlistIndex, playlistParams,
-                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+		if (!videoIdRegex.IsMatch(id) || id.Length != 11)
+			return Error<InnerTubeVideo>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
 
-            DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-            ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-            userData?.AddInfoForChannel(video.Channel.Id);
-            userData?.CalculateWithRenderers(video.Recommended);
+		try
+		{
+			if (continuation == null)
+			{
+				InnerTubeVideo video = await innerTube.GetVideoDetailsAsync(id, contentCheckOk, playlistId,
+					playlistIndex, playlistParams, HttpContext.GetInnerTubeLanguage(),
+					HttpContext.GetInnerTubeRegion());
 
-            return new ApiResponse<InnerTubeNextResponse>(video, userData);
-        }
-        catch (Exception e)
-        {
-            return Error<InnerTubeNextResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
-        }
-    }
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.AddInfoForChannel(video.Channel.Id);
+				userData?.CalculateWithRenderers(video.Recommended);
 
-    [Route("search")]
-    [ApiDisableable]
-    public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null)
-    {
-        if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
-        {
-            return Error<ApiSearchResults>(
-                "Missing query (query parameter `query`) or continuation key (query parameter `continuation`)",
-                400, HttpStatusCode.BadRequest);
-        }
+				return new ApiResponse<InnerTubeVideo>(video, userData);
+			}
+			else
+			{
+				return Error<InnerTubeVideo>("empty ctors not implemented yet", 501, HttpStatusCode.NotImplemented);
+				ContinuationResponse cont = await innerTube.ContinueVideoRecommendationsAsync(id,
+					HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
+				DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+				ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+				userData?.CalculateWithRenderers(cont.Results);
+				
+				//return new ApiResponse<ContinuationResponse>(video, userData);
+			}
+		}
+		catch (Exception e)
+		{
+			return Error<InnerTubeVideo>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
 
-        ApiSearchResults result;
-        if (continuation is null)
-        {
-            SearchParams searchParams = Request.GetSearchParams();
-            InnerTubeSearchResults results = await _youtube.SearchAsync(query, searchParams, HttpContext.GetInnerTubeLanguage(),
-                HttpContext.GetInnerTubeRegion());
-            result = new ApiSearchResults(results, searchParams);
-        }
-        else
-        {
-            InnerTubeContinuationResponse results = await _youtube.ContinueSearchAsync(continuation,
-                HttpContext.GetInnerTubeLanguage(),
-                HttpContext.GetInnerTubeRegion());
-            result = new ApiSearchResults(results);
-        }
-
-        DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-        ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-        userData?.CalculateWithRenderers(result.SearchResults);
-
-        return new ApiResponse<ApiSearchResults>(result, userData);
-    }
-
-    [Route("searchSuggestions")]
-    [ApiDisableable]
-    public async Task<ApiResponse<InnerTubeSearchAutocomplete>> SearchSuggestions(string query)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-            return Error<InnerTubeSearchAutocomplete>("Missing query (query parameter `query`)", 400,
-                HttpStatusCode.BadRequest);
-        try
-        {
-            DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-            ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-            return new ApiResponse<InnerTubeSearchAutocomplete>(await _youtube.GetSearchAutocompleteAsync(query,
-                HttpContext.GetInnerTubeLanguage(),
-                HttpContext.GetInnerTubeRegion()), userData);
-        }
-        catch (Exception e)
-        {
-            return Error<InnerTubeSearchAutocomplete>(e.Message, 500, HttpStatusCode.InternalServerError);
-        }
-    }
-
-    [Route("playlist")]
-    [ApiDisableable]
-    public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, int? skip)
-    {
-        if (id.StartsWith("LT-PL"))
-        {
-            if (id.Length != 24)
-                return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
-        }
-        else
-        {
-            Regex regex = new(PLAYLIST_ID_REGEX);
-            if (!regex.IsMatch(id) || id.Length != 34)
-                return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
-        }
+	[Route("search")]
+	[ApiDisableable]
+	public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null)
+	{
+		if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
+		{
+			return Error<ApiSearchResults>(
+				"Missing query (query parameter `query`) or continuation key (query parameter `continuation`)",
+				400, HttpStatusCode.BadRequest);
+		}
 
 
-        if (string.IsNullOrWhiteSpace(id) && skip is null)
-            return Error<ApiPlaylist>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
+		ApiSearchResults result;
+		if (continuation is null)
+		{
+			SearchParams searchParams = Request.GetSearchParams();
+			InnerTubeSearchResults results = await innerTube.SearchAsync(query, searchParams,
+				HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+			result = new ApiSearchResults(results, searchParams);
+		}
+		else
+		{
+			ContinuationResponse results = await innerTube.ContinueSearchAsync(continuation,
+				HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+			result = new ApiSearchResults(results);
+		}
 
-        try
-        {
-            DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-            ApiPlaylist result;
-            if (id.StartsWith("LT-PL"))
-            {
-                DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
+		DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+		ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+		userData?.CalculateWithRenderers(result.Results);
 
-                if (playlist is null)
-                    return Error<ApiPlaylist>("The playlist does not exist.", 500,
-                        HttpStatusCode.InternalServerError);
+		return new ApiResponse<ApiSearchResults>(result, userData);
+	}
 
-                if (playlist.Visibility == PlaylistVisibility.Private)
-                {
-                    if (user == null)
-                        return Error<ApiPlaylist>("The playlist does not exist.", 500,
-                            HttpStatusCode.InternalServerError);
+	/* TODO: search suggestions
+	[Route("searchSuggestions")]
+	[ApiDisableable]
+	public async Task<ApiResponse<InnerTubeSearchAutocomplete>> SearchSuggestions(string query)
+	{
+	    if (string.IsNullOrWhiteSpace(query))
+	        return Error<InnerTubeSearchAutocomplete>("Missing query (query parameter `query`)", 400,
+	            HttpStatusCode.BadRequest);
+	    try
+	    {
+	        DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+	        ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+	        return new ApiResponse<InnerTubeSearchAutocomplete>(await _youtube.GetSearchAutocompleteAsync(query,
+	            HttpContext.GetInnerTubeLanguage(),
+	            HttpContext.GetInnerTubeRegion()), userData);
+	    }
+	    catch (Exception e)
+	    {
+	        return Error<InnerTubeSearchAutocomplete>(e.Message, 500, HttpStatusCode.InternalServerError);
+	    }
+	}
+	*/
 
-                    if (playlist.Author != user.UserID)
-                        return Error<ApiPlaylist>("The playlist does not exist.", 500,
-                            HttpStatusCode.InternalServerError);
-                }
+	[Route("playlist")]
+	[ApiDisableable]
+	public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, PlaylistFilter filter = PlaylistFilter.All,
+		string? continuation = null)
+	{
+		if (id.StartsWith("LT-PL"))
+		{
+			if (id.Length != 24)
+				return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
+		}
 
-                result = new ApiPlaylist(playlist);
-            }
-            else if (skip is null)
-            {
-                InnerTubePlaylist playlist =
-                    await _youtube.GetPlaylistAsync(id, true, HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
-                result = new ApiPlaylist(playlist);
-            }
-            else
-            {
-                InnerTubeContinuationResponse playlist =
-                    await _youtube.ContinuePlaylistAsync(id, skip.Value, HttpContext.GetInnerTubeLanguage(),
-                        HttpContext.GetInnerTubeRegion());
-                result = new ApiPlaylist(playlist);
-            }
+		if (string.IsNullOrWhiteSpace(id) && continuation is null)
+			return Error<ApiPlaylist>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
 
-            ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-            userData?.AddInfoForChannel(result.Channel.Id);
-            userData?.CalculateWithRenderers(result.Videos);
-            return new ApiResponse<ApiPlaylist>(result, userData);
-        }
-        catch (Exception e)
-        {
-            return Error<ApiPlaylist>(e.Message, 500, HttpStatusCode.InternalServerError);
-        }
-    }
+		try
+		{
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+			ApiPlaylist result;
+			if (id.StartsWith("LT-PL"))
+			{
+				DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
 
-    [Route("channel")]
-    [ApiDisableable]
-    public async Task<ApiResponse<ApiChannel>> Channel(string id, ChannelTabs tab = ChannelTabs.Home,
-        string? searchQuery = null, string? continuation = null)
-    {
-        if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
-            return Error<ApiChannel>($"Invalid request: missing both `id` and `continuation`", 400,
-                HttpStatusCode.BadRequest);
+				if (playlist is null)
+					return Error<ApiPlaylist>("The playlist does not exist.", 404,
+						HttpStatusCode.InternalServerError);
 
-        try
-        {
-            ApiChannel response;
-            if (id?.StartsWith("LT") ?? false)
-            {
-                DatabaseUser? localUser = await DatabaseManager.Users.GetUserFromLTId(id);
-                if (localUser is null)
-                    throw new Exception("This user does not exist.");
-                response = new ApiChannel(localUser);
-            }
-            else if (continuation is null)
-            {
-                if (!id.StartsWith("UC"))
-                    id = await _youtube.GetChannelIdFromVanity(id) ?? id;
+				if (playlist.Visibility == PlaylistVisibility.Private)
+				{
+					if (playlist.Author != user?.UserID)
+						return Error<ApiPlaylist>("The playlist does not exist.", 404,
+							HttpStatusCode.InternalServerError);
+				}
 
-                InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id, tab, searchQuery,
-                    HttpContext.GetInnerTubeLanguage(),
-                    HttpContext.GetInnerTubeRegion());
-                response = new ApiChannel(channel);
-            }
-            else
-            {
-                InnerTubeContinuationResponse channel = await _youtube.ContinueChannelAsync(continuation);
-                response = new ApiChannel(channel);
-            }
+				result = new ApiPlaylist(playlist, LocalizationManager.GetFromHttpContext(HttpContext));
+			}
+			else if (continuation is null)
+			{
+				InnerTubePlaylist playlist =
+					await innerTube.GetPlaylistAsync(id, true, filter, HttpContext.GetInnerTubeLanguage(),
+						HttpContext.GetInnerTubeRegion());
+				result = new ApiPlaylist(playlist);
+			}
+			else
+			{
+				ContinuationResponse playlist = await innerTube.ContinuePlaylistAsync(continuation,
+					HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+				result = new ApiPlaylist(playlist);
+			}
 
-            DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-            ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-            userData?.AddInfoForChannel(response.Id);
-            userData?.CalculateWithRenderers(response.Contents);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			userData?.AddInfoForChannel(result.Sidebar?.Channel?.Id);
+			userData?.CalculateWithRenderers(result.Contents);
+			return new ApiResponse<ApiPlaylist>(result, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<ApiPlaylist>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
 
-            return new ApiResponse<ApiChannel>(response, userData);
-        }
-        catch (Exception e)
-        {
-            return Error<ApiChannel>(e.Message, 500, HttpStatusCode.InternalServerError);
-        }
-    }
+	[Route("channel")]
+	[ApiDisableable]
+	public async Task<ApiResponse<ApiChannel>> Channel(string id, ChannelTabs tab = ChannelTabs.Featured,
+		string? continuation = null)
+	{
+		if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
+			return Error<ApiChannel>($"Invalid request: missing both `id` and `continuation`", 400,
+				HttpStatusCode.BadRequest);
 
-    [Route("comments")]
-    [ApiDisableable]
-    public async Task<ApiResponse<InnerTubeContinuationResponse>> Comments(string? continuation, string? id,
-        CommentsContext.Types.SortOrder sort = CommentsContext.Types.SortOrder.TopComments)
-    {
-        try
-        {
-            if (id != null && continuation == null)
-                continuation = InnerTube.Utils.PackCommentsContinuation(id, sort);
-            else if (id == null && continuation == null)
-                return Error<InnerTubeContinuationResponse>(
-                    "Invalid request, either 'continuation' or 'id' must be present", 400,
-                    HttpStatusCode.BadRequest);
+		try
+		{
+			ApiChannel response;
+			if (id?.StartsWith("LT") ?? false)
+			{
+				DatabaseUser? localUser = await DatabaseManager.Users.GetUserFromLTId(id);
+				if (localUser is null)
+					return Error<ApiChannel>("This user does not exist", 404, HttpStatusCode.BadRequest);
+				response = new ApiChannel(localUser);
+			}
+			else if (continuation is null && id != null)
+			{
+				if (!id.StartsWith("UC"))
+					return Error<ApiChannel>("resolveUrl not implemented yet", 501, HttpStatusCode.NotImplemented);
+				//id = await innerTube.ResolveUrl(id) ?? id;
 
-            InnerTubeContinuationResponse? comments = await _youtube.GetVideoCommentsAsync(continuation!,
-                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+				InnerTubeChannel channel = await innerTube.GetChannelAsync(id, tab,
+					HttpContext.GetInnerTubeLanguage(),
+					HttpContext.GetInnerTubeRegion());
+				response = new ApiChannel(channel);
+			}
+			else
+			{
+				ContinuationResponse channel = await innerTube.ContinueChannelAsync(continuation,
+					HttpContext.GetInnerTubeLanguage(),
+					HttpContext.GetInnerTubeRegion());
+				response = new ApiChannel(channel);
+			}
 
-            DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-            ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-            userData?.CalculateWithRenderers(comments.Contents);
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			userData?.AddInfoForChannel(response.Metadata?.ExternalId);
+			userData?.CalculateWithRenderers(response.Contents);
 
-            return new ApiResponse<InnerTubeContinuationResponse>(comments, userData);
-        }
-        catch (Exception e)
-        {
-            return Error<InnerTubeContinuationResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
-        }
-    }
+			return new ApiResponse<ApiChannel>(response, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<ApiChannel>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
 
-    [Route("locals")]
-    [ApiDisableable]
-    public async Task<IActionResult> Locals()
-    {
-        InnerTubeLocals locals = await _youtube.GetLocalsAsync();
-        return Json(locals);
-    }
+	[Route("comments")]
+	[ApiDisableable]
+	public async Task<ApiResponse<ContinuationResponse>> Comments(string? continuation, string? id,
+		CommentsContext.Types.SortOrder sort = CommentsContext.Types.SortOrder.TopComments)
+	{
+		try
+		{
+			if (id != null && continuation == null)
+				continuation = InnerTube.Utils.PackCommentsContinuation(id, sort);
+			else if (id == null && continuation == null)
+				return Error<ContinuationResponse>(
+					"Invalid request, either 'continuation' or 'id' must be present", 400,
+					HttpStatusCode.BadRequest);
+
+			ContinuationResponse? comments = await innerTube.ContinueVideoCommentsAsync(continuation!);
+
+			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
+			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
+			userData?.CalculateWithRenderers(comments.Results);
+
+			return new ApiResponse<ContinuationResponse>(comments, userData);
+		}
+		catch (Exception e)
+		{
+			return Error<ContinuationResponse>(e.Message, 500, HttpStatusCode.InternalServerError);
+		}
+	}
+
+	[Route("locals")]
+	[ApiDisableable]
+	public async Task<ApiResponse<ApiLocals>> Locals() => new(Utils.GetLocals(),
+		ApiUserData.GetFromDatabaseUser(await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request)));
+    [GeneratedRegex("[a-zA-Z0-9_-]{11}")]
+    private static partial Regex VideoIdRegex();
 }
