@@ -30,6 +30,8 @@ public static class Configuration
 
     public static void InitConfig()
     {
+        /*
+         TODO: removed for now because no one implemented authorization in itv2
         InnerTubeAuthorization = Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_TYPE")?.ToLower() switch
         {
             "cookie" => InnerTubeAuthorization.SapisidAuthorization(
@@ -45,6 +47,7 @@ public static class Configuration
                     "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set.")),
             _ => null
         };
+        */
 
         CustomCssPath = Environment.GetEnvironmentVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
         if (CustomCssPath != null)
