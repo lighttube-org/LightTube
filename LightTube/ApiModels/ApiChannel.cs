@@ -2,6 +2,8 @@ using InnerTube.Models;
 using InnerTube.Protobuf;
 using InnerTube.Renderers;
 using LightTube.Database.Models;
+using LightTube.Localization;
+using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.ApiModels;
 
@@ -40,24 +42,112 @@ public class ApiChannel
 		Contents = renderers.ToArray();
 	}
 
-	public ApiChannel(DatabaseUser channel)
+	public ApiChannel(DatabaseUser channel, LocalizationManager localization)
 	{
-		throw new Exception("empty ctors not implemented yet");
-		/*
-		Id = channel.LTChannelID;
-		Title = channel.UserID;
-		Avatars = [];
-		Banner = [];
-		Badges = [];
-		PrimaryLinks = [];
-		SecondaryLinks = [];
-		SubscriberCountText = "LightTube account";
-		EnabledTabs =
+		Header = new ChannelHeader(new PageHeaderRenderer
+		{
+			PageTitle = channel.UserID,
+			Content = new RendererWrapper
+			{
+				PageHeaderViewModel = new PageHeaderViewModel
+				{
+					Image = new RendererWrapper
+					{
+						DecoratedAvatarViewModel = new DecoratedAvatarViewModel
+						{
+							Avatar = new RendererWrapper
+							{
+								AvatarViewModel = new AvatarViewModel
+								{
+									Image = new Image
+									{
+										Sources = { }
+									}
+								}
+							}
+						},
+						ImageBannerViewModel = new ImageBannerViewModel
+						{
+							Image = new Image
+							{
+								Sources = { }
+							}
+						}
+					},
+					Metadata = new RendererWrapper
+					{
+						ContentMetadataViewModel = new ContentMetadataViewModel
+						{
+							MetadataRows =
+							{
+								new ContentMetadataViewModel.Types.MetadataRow
+								{
+									MetadataParts =
+									{
+										new ContentMetadataViewModel.Types.MetadataRow.Types.
+											AttributedDescriptionWrapper
+											{
+												Text = new AttributedDescription
+												{
+													Content = $"@LT_{channel.UserID}"
+												}
+											}
+									}
+								},
+								new ContentMetadataViewModel.Types.MetadataRow
+								{
+									MetadataParts =
+									{
+										new ContentMetadataViewModel.Types.MetadataRow.Types.
+											AttributedDescriptionWrapper
+											{
+												Text = new AttributedDescription
+												{
+													Content = "LightTube Channel"
+												}
+											},
+										new ContentMetadataViewModel.Types.MetadataRow.Types.
+											AttributedDescriptionWrapper
+											{
+												Text = new AttributedDescription
+												{
+													Content = ""
+												}
+											}
+									}
+								}
+							}
+						}
+					},
+					Description = new RendererWrapper
+					{
+						DescriptionPreviewViewModel = new DescriptionPreviewViewModel
+						{
+							Content = new AttributedDescription
+							{
+								Content = ""
+							}
+						}
+					}
+				}
+			}
+		}, channel.LTChannelID);
+		Tabs =
 		[
-			ChannelTabs.Playlists.ToString()
+			new ChannelTab(new TabRenderer
+			{
+				Endpoint = new Endpoint
+				{
+					BrowseEndpoint = new BrowseEndpoint
+					{
+						Params = "EglwbGF5bGlzdHPyBgQKAkIA"
+					}
+				},
+				Title = "Playlists",
+				Selected = true
+			})
 		];
-		Contents = [channel.PlaylistRenderers()];
-		Continuation = null;
-		*/
+		Metadata = new ChannelMetadataRenderer();
+		Contents = channel.PlaylistRenderers(localization).ToArray();
 	}
 }
