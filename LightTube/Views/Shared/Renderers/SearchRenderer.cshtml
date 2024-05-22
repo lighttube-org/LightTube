@@ -118,66 +118,7 @@
 		break;
 	case "container":
 		ContainerRendererData container = (ContainerRendererData)Model.Renderer.Data;
-		switch (container.Style)
-		{
-			case "shelf;horizontal":
-				<div class="renderer-shelfrenderer__horizontal">
-					<a href="@@container.Destination" class="ml-1 title">
-						@@container.Title
-					</a>
-					<div class="shelf-description">
-						@@container.Subtitle
-					</div>
-					<div class="shelf-contents-horizontal">
-						@foreach (RendererContainer renderer in container.Items)
-						{
-							<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
-						}
-					</div>
-				</div>
-				break;
-			case "shelf;reel":
-				<div class="renderer-reelshelfrenderer">
-					<div class="reelshelf-title">
-						<svg class="bi" width="24" height="24" fill="#f00">
-							<use xlink:href="/svg/bootstrap-icons.svg#file-play-fill"/>
-						</svg>
-						@@container.Title
-					</div>
-					<div class="reelshelf-items">
-						@foreach (RendererContainer reel in container.Items)
-						{
-						<partial name="Renderers/ReelRenderer" model="((VideoRendererData)reel.Data, Model.Localization)"/>
-						}
-					</div>
-				</div>
-				break;
-			case "shelf;vertical":
-				const int collapsedItemsCount = 3;
-				<details class="renderer-shelfrenderer">
-					<summary>
-						<div class="title ml-1">
-							@@container.Title
-						</div>
-						@foreach (RendererContainer renderer in container.Items.Take(collapsedItemsCount))
-						{
-							<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
-						}
-						<div class="shelf-expand-button">
-							+@(container.Items.Length - collapsedItemsCount) More
-						</div>
-					</summary>
-					@foreach (RendererContainer renderer in container.Items.Skip(collapsedItemsCount))
-					{
-						<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
-					}
-				</details>
-				break;
-			default:
-				<h1>Unexpected ContainerRendererData.Style: <code>@container.Style</code></h1>
-				break;
-		}
-
+		<partial name="ContainerRenderer" model="(container, Model.Localization)"/>
 		break;
 	case "unknown":
 		<h1>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></h1>
@@ -185,7 +126,6 @@
 		{
 			<code>@Convert.ToBase64String((Model.Renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
 		}
-
 		break;
 	default:
 		<h1>Unexpected RendererContainer.Type: <code>@Model.Renderer.Type</code></h1>

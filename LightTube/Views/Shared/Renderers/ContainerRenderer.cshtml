@@ -1,0 +1,63 @@
+@using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model (InnerTube.Renderers.ContainerRendererData Renderer, LightTube.Localization.LocalizationManager Localization)
+
+@switch (Model.Renderer.Style)
+{
+	case "shelf;horizontal":
+		<div class="renderer-shelfrenderer__horizontal">
+			<a href="@@Model.Renderer.Destination" class="ml-1 title">
+				@@Model.Renderer.Title
+			</a>
+			<div class="shelf-description">
+				@@Model.Renderer.Subtitle
+			</div>
+			<div class="shelf-contents-horizontal">
+				@foreach (RendererContainer renderer in Model.Renderer.Items)
+				{
+					<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
+				}
+			</div>
+		</div>
+		break;
+	case "shelf;reel":
+		<div class="renderer-reelshelfrenderer">
+			<div class="reelshelf-title">
+				<svg class="bi" width="24" height="24" fill="#f00">
+					<use xlink:href="/svg/bootstrap-icons.svg#file-play-fill"/>
+				</svg>
+				@@Model.Renderer.Title
+			</div>
+			<div class="reelshelf-items">
+				@foreach (RendererContainer reel in Model.Renderer.Items)
+				{
+					<partial name="Renderers/ReelRenderer" model="((VideoRendererData)reel.Data, Model.Localization)"/>
+				}
+			</div>
+		</div>
+		break;
+	case "shelf;vertical":
+		const int collapsedItemsCount = 3;
+		<details class="renderer-shelfrenderer">
+			<summary>
+				<div class="title ml-1">
+					@@Model.Renderer.Title
+				</div>
+				@foreach (RendererContainer renderer in Model.Renderer.Items.Take(collapsedItemsCount))
+				{
+					<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
+				}
+				<div class="shelf-expand-button">
+					+@(Model.Renderer.Items.Length - collapsedItemsCount) More
+				</div>
+			</summary>
+			@foreach (RendererContainer renderer in Model.Renderer.Items.Skip(collapsedItemsCount))
+			{
+				<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
+			}
+		</details>
+		break;
+	default:
+		<h1>Unexpected ContainerRendererData.Style: <code>@Model.Renderer.Style</code></h1>
+		break;
+}
