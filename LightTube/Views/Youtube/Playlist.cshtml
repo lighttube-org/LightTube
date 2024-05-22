@@ -35,7 +35,7 @@
 		}
 	</div>
 	<div class="playlist-page-items">
-		@foreach (IRenderer renderer in Model.Items)
+		@foreach (RendererContainer renderer in Model.Items)
 		{
 			<partial name="Renderer" model="(renderer, Model.Localization)"/>
 		}
@@ -46,7 +46,7 @@
 	<span>•</span>
 	@if (Model.Continuation is not null)
 	{
-		<a href="@Utils.GetSkipUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation.Value)">@Model.Localization.GetString("pagination.next")</a>
+		<a href="@Utils.GetContinuationUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation)">@Model.Localization.GetString("pagination.next")</a>
 	}
 	else
 	{

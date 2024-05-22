@@ -1,4 +1,5 @@
 @using InnerTube
+@using InnerTube.Protobuf.Responses
 @model PlaylistVideoContext<InnerTubePlayer>
 @{
 	Layout = "_ModalLayout";
@@ -55,7 +56,7 @@
 				@f.QualityLabel
 			</div>
 			<div class="ml-2">
-				@f.Fps FPS, @(f.AudioSampleRate)Hz, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
+				@f.Fps FPS, @(f.AudioSampleRate)Hz, @(f.Width)x@(f.Height) (@(f.Mime.Split(";")[0]))
 			</div>
 		</div>
 		<div class="settings-option__option">
@@ -80,19 +81,19 @@
 {
 	<div class="settings-option">
 		<div class="settings-option__info">
-			@if (f.MimeType.StartsWith("video")) {
+			@if (f.Mime.StartsWith("video")) {
 				<div class="ml-1 title">
 					@Model.Localization.GetString("download.format.video") - @f.QualityLabel
 				</div>
 				<div class="ml-2">
-						@f.Fps FPS, @(f.Width)x@(f.Height) (@(f.MimeType.Split(";")[0]))
+						@f.Fps FPS, @(f.Width)x@(f.Height) (@(f.Mime.Split(";")[0]))
 				</div>
 			} else {
 				<div class="ml-1 title">
-					@Model.Localization.GetString("download.format.audio") - @f.AudioQuality.Replace("AUDIO_QUALITY_", "")
+					@Model.Localization.GetString("download.format.audio") - Audio Quality: @f.AudioQuality
 				</div>
 				<div class="ml-2">
-					@f.AudioChannels channels, @(f.AudioSampleRate)Hz (@(f.MimeType.Split(";")[0]))
+					@f.AudioChannels channels, @(f.AudioSampleRate)Hz (@(f.Mime.Split(";")[0]))
 				</div>
 			}
 		</div>

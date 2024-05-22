@@ -1,6 +1,7 @@
-﻿@using InnerTube.Renderers
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using InnerTube
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using InnerTube.Protobuf.Responses
+@using InnerTube.Renderers
+@using Utils = LightTube.Utils
 @model WatchContext
 
 @{
@@ -11,8 +12,7 @@
 
 <div class="watch-page">
 	<input type="checkbox" id="comments-toggle">
-	<div class="player-container" style="color:white;margin-bottom:2rem;aspect-ratio:16/9">
-		<!-- TODO: Parse aspect ratio in InnerTube and put it here                   ^^^^ -->
+	<div class="player-container" style="color:white;margin-bottom:2rem;aspect-ratio:@(Utils.GetAspectRatio(Model))">
 		<partial name="Player" model="Model.Player"/>
 		@if (!Model.Player.Player?.Details.IsLive ?? true)
 		{
@@ -105,13 +105,13 @@
 			     alt="@Model.Video.Channel.Title">
 			<div class="video-channel-info__name">
 				<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
-				<span class="subs">@Model.Video.Channel.Subscribers</span>
+				<span class="subs">@Model.Video.Channel.SubscribersText</span>
 			</div>
 			<partial name="SubscribeButton" model="(Model.Video.Channel.Id, Model.Localization)"/>
 		</div>
 		<details class="description">
 			<summary>
-				@Model.Video.ViewCount • @Model.Video.DateText • @Model.Localization.GetString("watch.description.toggle")
+				@Model.Video.ViewCountText • @Model.Video.DateText • @Model.Localization.GetString("watch.description.toggle")
 			</summary>
 			@Html.Raw(desc)
 		</details>
@@ -125,7 +125,7 @@
 						<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
 						<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
 					</svg>
-					@(Model.Video.CommentCount ?? (Model.Comments.Contents.Count() + (Model.Comments.Continuation != null ? "+" : ""))) @Model.Localization.GetString("watch.comments.count")
+					@(Model.Video.CommentsCountText ?? Model.Comments.Results.Length + (Model.Comments.ContinuationToken != null ? "+" : "")) @Model.Localization.GetString("watch.comments.count")
 					<div class="flex-divider hide-on-desktop"></div>
 					<label for="comments-toggle" class="hide-on-desktop">
 						<svg class="icon" width="32" height="32" fill="currentColor">
@@ -134,7 +134,7 @@
 					</label>
 				</summary>
 				<div class="comments-container__flex">
-					@foreach (IRenderer renderer in Model.Comments.Contents)
+					@foreach (RendererContainer renderer in Model.Comments.Results)
 					{
 						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}
@@ -157,7 +157,7 @@
 					<div class="ml-1">@Model.Playlist.Channel.Title • @(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
 				</summary>
 				<div class="playlist-view__content">
-					@foreach (IRenderer renderer in Model.Playlist.Videos)
+					@foreach (RendererContainer renderer in Model.Playlist.Videos)
 					{
 						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}
@@ -170,7 +170,7 @@
 					@Model.Localization.GetString("watch.recommended")
 				</summary>
 				<div class="recommended-videos">
-					@foreach (IRenderer renderer in Model.Video.Recommended.Where(x => x is not ContinuationItemRenderer))
+					@foreach (RendererContainer renderer in Model.Video.Recommended.Where(x => x.Type != "continuation"))
 					{
 						<partial name="Renderer" model="(renderer, Model.Localization)"/>
 					}

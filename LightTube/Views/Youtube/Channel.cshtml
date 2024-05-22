@@ -1,5 +1,8 @@
 ﻿@using InnerTube
+@using InnerTube.Models
+@using InnerTube.Protobuf
 @using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Utils = LightTube.Utils
 @model ChannelContext
 
@@ -36,7 +39,7 @@
 	</div>
 	<div class="channel-tabs">
 		<div class="channel-tabs__container">
-			@foreach (ChannelTabs tab in Model.Tabs.Where(x => x != ChannelTabs.Search))
+			@foreach (ChannelTab tab in Model.Tabs.Where(x => x.Tab != ChannelTabs.Search))
 			{
 				<partial name="ChannelTabItem" model="@(tab, Model.Id, Model.Localization)"/>
 			}
@@ -44,10 +47,10 @@
 	</div>
 	@switch (Model.CurrentTab)
 	{
-		case ChannelTabs.Videos or ChannelTabs.Live or ChannelTabs.Community:
+		case ChannelTabs.Videos or ChannelTabs.Streams or ChannelTabs.Community:
 		{
 			<div class="channel-content search-container">
-				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				@foreach (RendererContainer renderer in Model.Content.Where(x => x.Type != "continuation"))
 				{
 					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}
@@ -57,7 +60,7 @@
 		case ChannelTabs.Shorts:
 		{
 			<div class="channel-content reel-grid">
-				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				@foreach (RendererContainer renderer in Model.Content.Where(x => x.Type != "continuation"))
 				{
 					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}
@@ -67,7 +70,7 @@
 		default:
 		{
 			<div class="channel-content">
-				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
+				@foreach (RendererContainer renderer in Model.Content.Where(x => x.Type != "continuation"))
 				{
 					<partial name="Renderer" model="(renderer, Model.Localization)"/>
 				}

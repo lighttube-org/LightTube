@@ -1,6 +1,7 @@
 ﻿@using InnerTube
 @using System.Text.Json
 @using InnerTube.Exceptions
+@using InnerTube.Protobuf.Responses
 @using JsonSerializer = System.Text.Json.JsonSerializer
 @model PlayerContext
 
@@ -22,16 +23,16 @@
 					</svg>
 				</div>
 				<div class="player-error-info">
-					@if (e.Code == "LOGIN_REQUIRED")
+					@if (e.Code == PlayabilityStatus.Types.Status.LoginRequired)
 					{
-						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
+						<div class="title" title="[@e.Code] @e.Reason">@e.Reason</div>
 						<p class="ml-1">@Model.Localization.GetString("error.player.agerestricted")</p>
 					}
 					else
 					{
-						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
-						<p class="ml-1">@e.Description</p>
-						@if (e.Code is "CONTENT_CHECK_REQUIRED" or "AGE_CHECK_REQUIRED")
+						<div class="title" title="[@e.Code] @e.Reason">@e.Reason</div>
+						<p class="ml-1">@e.Subreason</p>
+						@if (e.Code is PlayabilityStatus.Types.Status.ContentCheckRequired)
 						{
 							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">@Model.Localization.GetString("error.player.contentcheck")</a>
 						}
@@ -81,14 +82,14 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url"> 
 			}
 		}
 		else
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
 			}
 		}
 
@@ -106,14 +107,14 @@ else if (Model.Player.Formats.Any())
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url"> 
 			}
 		}
 		else
 		{
 			@foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
 			}
 		}
 

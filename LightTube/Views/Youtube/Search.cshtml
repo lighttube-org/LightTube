@@ -1,4 +1,6 @@
-﻿@using InnerTube.Renderers
+﻿@using InnerTube.Protobuf.Params
+@using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model SearchContext
 
 @{
@@ -361,7 +363,7 @@
 	</form>
 	</details>
 }
-@foreach (IRenderer renderer in Model.Results)
+@foreach (RendererContainer renderer in Model.Results)
 {
 	<partial name="Renderer" model="(renderer, Model.Localization)"/>
 }
