@@ -147,7 +147,7 @@
 					<div class="reelshelf-items">
 						@foreach (RendererContainer reel in container.Items)
 						{
-						<partial name="ReelRenderer" model="((VideoRendererData)reel.Data, Model.Localization)"/>
+						<partial name="Renderers/ReelRenderer" model="((VideoRendererData)reel.Data, Model.Localization)"/>
 						}
 					</div>
 				</div>
