@@ -145,7 +145,7 @@ else
 	<script id="video-data">
 	const videoInfo = {
 		author: {
-			icon: "@Model.Video.Channel.Avatar",
+			icon: "@Model.Video.Channel.Avatar?.LastOrDefault()?.Url",
 			title: "@Model.Player!.Details.Author.Title", // .Replace("\"", "\\\"")
 			href: "/channel/@Model.Player!.Details.Author.Id"
 		},
