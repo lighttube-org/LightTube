@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using InnerTube;
 using InnerTube.Exceptions;
+using InnerTube.Protobuf.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Serilog;
@@ -37,15 +38,16 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
         if (!Configuration.ProxyEnabled)
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
+            await Response.Body.WriteAsync("This instance has disabled media proxies."u8.ToArray());
             await Response.StartAsync();
         }
 
         try
         {
-            InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
+            InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             List<Format> formats = [.. player.Formats, .. player.AdaptiveFormats];
-            if (formats.All(x => x.Itag != formatId))
+            if (formats.All(x => x.Itag.ToString() != formatId))
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
                 await Response.Body.WriteAsync(Encoding.UTF8.GetBytes(
@@ -56,8 +58,8 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
 
             Format format = !string.IsNullOrWhiteSpace(audioTrackId)
                 ? formats.First(x => x.AudioTrack?.Id == audioTrackId)
-                : formats.OrderBy(x => !x.AudioTrack?.AudioIsDefault).First(x => x.Itag == formatId);
-            string url = format.Url.ToString();
+                : formats.OrderBy(x => !x.AudioTrack?.AudioIsDefault).First(x => x.Itag.ToString() == formatId);
+            string url = format.Url;
 
             if (!url.StartsWith("http://") && !url.StartsWith("https://"))
                 url = "https://" + url;
@@ -130,13 +132,14 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
 
         try
         {
-            InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, true);
+            InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
             if (player.HlsManifestUrl == null)
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
                 return File(
-                    new MemoryStream(Encoding.UTF8.GetBytes("This video does not have a valid HLS manifest URL")),
+                    new MemoryStream("This video does not have a valid HLS manifest URL"u8.ToArray()),
                     "text/plain");
             }
 
@@ -167,7 +170,8 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
 
         try
         {
-            InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId, true, false);
+            InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
             string manifest =
                 Utils.GetDashManifest(player, useProxy ? $"https://{Request.Host}/proxy" : null, skipCaptions);
@@ -243,7 +247,7 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
         if (!Configuration.ProxyEnabled)
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
+            await Response.Body.WriteAsync("This instance has disabled media proxies."u8.ToArray());
             await Response.StartAsync();
         }
 
@@ -303,7 +307,8 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
     {
         try
         {
-            InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
+            InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             InnerTubePlayer.VideoCaption?
                 subtitle = player.Captions.FirstOrDefault(x => x.VssId == vssId);
 
@@ -354,7 +359,7 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
         if (!Configuration.ProxyEnabled)
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("This instance has disabled media proxies."));
+            await Response.Body.WriteAsync("This instance has disabled media proxies."u8.ToArray());
             await Response.StartAsync();
         }
 
@@ -401,11 +406,12 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
     {
         try
         {
-            InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
+            InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             if (!player.Storyboard.Levels.Any())
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
-                await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("No usable storyboard found."));
+                await Response.Body.WriteAsync("No usable storyboard found."u8.ToArray());
                 await Response.StartAsync();
                 return;
             }
@@ -448,11 +454,12 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
     {
         try
         {
-            InnerTubePlayer player = await _youtube.GetPlayerAsync(videoId);
+            InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             if (!player.Storyboard.Levels.Any())
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
-                return File(new MemoryStream(Encoding.UTF8.GetBytes("No usable storyboard found.")), "text/plain");
+                return File(new MemoryStream("No usable storyboard found."u8.ToArray()), "text/plain");
             }
 
             string url = player.Storyboard.Levels[0].ToString();

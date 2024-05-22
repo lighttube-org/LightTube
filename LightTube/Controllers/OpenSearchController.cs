@@ -1,15 +1,13 @@
 using System.Text;
 using System.Web;
 using System.Xml;
-using InnerTube;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
 
 [Route("/opensearch")]
-public class OpenSearchController(SimpleInnerTubeClient innerTube) : Controller
+public class OpenSearchController : Controller
 {
-    
     [Route("osdd.xml")]
     public IActionResult OpenSearchDescriptionDocument()
     {
@@ -64,10 +62,10 @@ public class OpenSearchController(SimpleInnerTubeClient innerTube) : Controller
     }
 
     [Route("suggestions.json")]
-    public async Task<object[]> Suggestions(string q)
+    public async Task<object[]> Suggestions(string q, string hl = "en", string gl = "us")
     {
         object[] res = [q, new List<string>(), new List<string>(), new List<string>()];
-        InnerTubeSearchAutocomplete autocomplete = await _youtube.GetSearchAutocompleteAsync(q);
+        SearchAutocomplete autocomplete = await SearchAutocomplete.GetAsync(q);
         foreach (string s in autocomplete.Autocomplete)
         {
             (res[1] as List<string>)!.Add(s);

@@ -1,10 +1,12 @@
 using System.Net;
 using InnerTube;
+using InnerTube.Models;
 using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
@@ -43,13 +45,14 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
     [Route("playlists")]
     [HttpGet]
     [ApiAuthorization("playlists.read")]
-    public async Task<ApiResponse<IEnumerable<IRenderer>>> GetPlaylists()
+    public async Task<ApiResponse<IEnumerable<RendererContainer>>> GetPlaylists()
     {
         DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-        if (user is null) return Error<IEnumerable<IRenderer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+        if (user is null) return Error<IEnumerable<RendererContainer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
         ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-        return new ApiResponse<IEnumerable<IRenderer>>(user.PlaylistRenderers(PlaylistVisibility.Private).Items,
+        return new ApiResponse<IEnumerable<RendererContainer>>(
+            user.PlaylistRenderers(LocalizationManager.GetFromHttpContext(HttpContext), PlaylistVisibility.Private),
             userData);
     }
 
@@ -95,7 +98,7 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
         {
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             await DatabaseManager.Playlists.EditPlaylist(
-                Request.Headers.Authorization.ToString()!, id, request.Title,
+                Request.Headers.Authorization.ToString(), id, request.Title,
                 request.Description ?? "", request.Visibility ?? PlaylistVisibility.Private);
             DatabasePlaylist playlist = DatabaseManager.Playlists.GetPlaylist(id)!;
             return new ApiResponse<DatabasePlaylist>(playlist, userData);
@@ -137,7 +140,8 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
 
         try
         {
-            InnerTubePlayer video = await _youtube.GetPlayerAsync(videoId);
+            InnerTubePlayer video = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             await DatabaseManager.Playlists.AddVideoToPlaylist(
                 Request.Headers.Authorization.ToString(),
@@ -251,9 +255,9 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
                     : SubscriptionType.NOTIFICATIONS_OFF
                 : SubscriptionType.NONE;
 
-            InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
+            InnerTubeChannel channel = await innerTube.GetChannelAsync(req.ChannelId);
             (string? channelId, SubscriptionType subscriptionType) = await DatabaseManager.Users.UpdateSubscription(
-                Request.Headers.Authorization.ToString()!, req.ChannelId,
+                Request.Headers.Authorization.ToString(), req.ChannelId,
                 type);
             if (req.Subscribed)
                 await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
@@ -282,9 +286,9 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
 
         try
         {
-            InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id);
+            InnerTubeChannel channel = await innerTube.GetChannelAsync(id);
             (string? channelId, SubscriptionType type) = await DatabaseManager.Users.UpdateSubscription(
-                Request.Headers.Authorization.ToString()!, id,
+                Request.Headers.Authorization.ToString(), id,
                 SubscriptionType.NONE);
             userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
             return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, type), userData);

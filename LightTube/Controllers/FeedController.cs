@@ -1,8 +1,8 @@
-using System.Diagnostics;
 using System.Text;
 using System.Web;
 using System.Xml;
 using InnerTube;
+using InnerTube.Models;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
@@ -20,71 +20,62 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
     public async Task<IActionResult> ChannelFeed(string c)
     {
         ChannelFeed ytchannel = await YoutubeRss.GetChannelFeed(c);
-        try
+        XmlDocument document = new();
+        XmlElement rss = document.CreateElement("rss");
+        rss.SetAttribute("version", "2.0");
+
+        XmlElement channel = document.CreateElement("channel");
+
+        XmlElement title = document.CreateElement("title");
+        title.InnerText = ytchannel.Name;
+        channel.AppendChild(title);
+
+        XmlElement description = document.CreateElement("description");
+        description.InnerText = $"LightTube channel RSS feed for {ytchannel.Name}";
+        channel.AppendChild(description);
+
+        foreach (FeedVideo video in ytchannel.Videos.Take(15))
         {
-            XmlDocument document = new();
-            XmlElement rss = document.CreateElement("rss");
-            rss.SetAttribute("version", "2.0");
+            XmlElement item = document.CreateElement("item");
 
-            XmlElement channel = document.CreateElement("channel");
+            XmlElement id = document.CreateElement("id");
+            id.InnerText = $"id:video:{video.Id}";
+            item.AppendChild(id);
 
-            XmlElement title = document.CreateElement("title");
-            title.InnerText = "LightTube channnel RSS feed for " + ytchannel.Name;
-            channel.AppendChild(title);
+            XmlElement vtitle = document.CreateElement("title");
+            vtitle.InnerText = video.Title;
+            item.AppendChild(vtitle);
 
-            XmlElement description = document.CreateElement("description");
-            description.InnerText = $"LightTube channnel RSS feed for {ytchannel.Name}";
-            channel.AppendChild(description);
+            XmlElement vdescription = document.CreateElement("description");
+            vdescription.InnerText = video.Description;
+            item.AppendChild(vdescription);
 
-            foreach (FeedVideo video in ytchannel.Videos.Take(15))
-            {
-                XmlElement item = document.CreateElement("item");
+            XmlElement link = document.CreateElement("link");
+            link.InnerText = $"https://{Request.Host}/watch?v={video.Id}";
+            item.AppendChild(link);
 
-                XmlElement id = document.CreateElement("id");
-                id.InnerText = $"id:video:{video.Id}";
-                item.AppendChild(id);
+            XmlElement published = document.CreateElement("pubDate");
+            published.InnerText = video.PublishedDate.ToString("R");
+            item.AppendChild(published);
 
-                XmlElement vtitle = document.CreateElement("title");
-                vtitle.InnerText = video.Title;
-                item.AppendChild(vtitle);
+            XmlElement author = document.CreateElement("author");
 
-                XmlElement vdescription = document.CreateElement("description");
-                vdescription.InnerText = video.Description;
-                item.AppendChild(vdescription);
+            XmlElement name = document.CreateElement("name");
+            name.InnerText = video.ChannelName;
+            author.AppendChild(name);
 
-                XmlElement link = document.CreateElement("link");
-                link.InnerText = $"https://{Request.Host}/watch?v={video.Id}";
-                item.AppendChild(link);
+            XmlElement uri = document.CreateElement("uri");
+            uri.InnerText = $"https://{Request.Host}/channel/{video.ChannelId}";
+            author.AppendChild(uri);
 
-                XmlElement published = document.CreateElement("pubDate");
-                published.InnerText = video.PublishedDate.ToString("R");
-                item.AppendChild(published);
-
-                XmlElement author = document.CreateElement("author");
-
-                XmlElement name = document.CreateElement("name");
-                name.InnerText = video.ChannelName;
-                author.AppendChild(name);
-
-                XmlElement uri = document.CreateElement("uri");
-                uri.InnerText = $"https://{Request.Host}/channel/{video.ChannelId}";
-                author.AppendChild(uri);
-
-                item.AppendChild(author);
-                channel.AppendChild(item);
-            }
-
-            rss.AppendChild(channel);
-
-            document.AppendChild(rss);
-            return File(Encoding.UTF8.GetBytes(document.OuterXml), "application/xml");
-
+            item.AppendChild(author);
+            channel.AppendChild(item);
         }
-        catch (Exception)
-        {
 
-            throw;
-        }
+        rss.AppendChild(channel);
+
+        document.AppendChild(rss);
+        return File(Encoding.UTF8.GetBytes(document.OuterXml), "application/xml");
     }
 
     [Route("subscriptions")]
@@ -257,8 +248,9 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
             DatabasePlaylist pl = await DatabaseManager.Playlists.CreatePlaylist(Request.Cookies["token"], title, description, visibility);
             if (firstVideo != null)
             {
-                InnerTubePlayer video = await _youtube.GetPlayerAsync(firstVideo);
-                await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], pl.Id, video);
+                InnerTubePlayer v = await innerTube.GetVideoPlayerAsync(firstVideo, true,
+                    HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+                await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], pl.Id, v);
             }
             return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
@@ -355,8 +347,9 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
     [Route("/addToPlaylist")]
     public async Task<IActionResult> AddToPlaylist(string v)
     {
-        InnerTubeNextResponse intr = await _youtube.GetVideoAsync(v);
-        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new(HttpContext, intr);
+        InnerTubeVideo videoDetails = await innerTube.GetVideoDetailsAsync(v, true, null, null, null,
+            HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+        PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new(HttpContext, videoDetails);
         if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
         pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.Private);
         pvc.Buttons =
@@ -376,7 +369,8 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
         {
             if (playlist == "__NEW") return Redirect("/newPlaylist?v=" + video);
 
-            InnerTubePlayer v = await _youtube.GetPlayerAsync(video);
+            InnerTubePlayer v = await innerTube.GetVideoPlayerAsync(video, true, HttpContext.GetInnerTubeLanguage(),
+                HttpContext.GetInnerTubeRegion());
             await DatabaseManager.Playlists.AddVideoToPlaylist(Request.Cookies["token"], playlist, v);
             return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
         }
