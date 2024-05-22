@@ -1,4 +1,5 @@
-﻿@using InnerTube.Protobuf.Params
+﻿@using InnerTube.Protobuf
+@using InnerTube.Protobuf.Params
 @using InnerTube.Renderers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model SearchContext
@@ -365,7 +366,7 @@
 }
 @foreach (RendererContainer renderer in Model.Results)
 {
-	<partial name="Renderer" model="(renderer, Model.Localization)"/>
+	<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
 }
 </div>
 <div class="next-page">
