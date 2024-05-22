@@ -1,5 +1,6 @@
 ﻿using InnerTube;
 using InnerTube.Models;
+using LightTube.Database;
 using LightTube.Database.Models;
 
 namespace LightTube.Contexts;
@@ -85,7 +86,9 @@ public class WatchContext : BaseContext
         Player = new PlayerContext(context, innerTubePlayer, innerTubeVideo, "embed", compatibility,
             context.Request.Query["q"], sponsors);
         Video = innerTubeVideo;
-        Playlist = playlist?.GetVideoPlaylistInfo(innerTubePlayer.Details.Id);
+        Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id,
+            DatabaseManager.Users.GetUserFromId(playlist.Author).Result!,
+            DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization));
         if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
             if (playlist.Author != User?.UserID)
                 Playlist = null;
@@ -122,7 +125,9 @@ public class WatchContext : BaseContext
     {
         Player = new PlayerContext(context, e);
         Video = innerTubeVideo;
-        Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id);
+        Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id,
+            DatabaseManager.Users.GetUserFromId(playlist.Author).Result!,
+            DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization));
         if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
             if (playlist.Author != User?.UserID)
                 Playlist = null;

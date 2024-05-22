@@ -25,7 +25,7 @@ public class PlaylistManager(
         return unfiltered.ToList().Where(x => x.Visibility >= minVisibility);
     }
 
-    public IEnumerable<RendererContainer> GetPlaylistVideos(string id, bool editable, LocalizationManager localization)
+    public IEnumerable<RendererContainer> GetPlaylistVideoRenderers(string id, bool editable, LocalizationManager localization)
     {
         DatabasePlaylist? pl = GetPlaylist(id);
         if (pl == null) return [];
@@ -77,57 +77,12 @@ public class PlaylistManager(
         return renderers;
     }
 
-    public List<RendererContainer> GetPlaylistPanelVideos(string id, string currentVideoId,
-        LocalizationManager localization)
+    public List<DatabaseVideo> GetPlaylistVideos(string playlistId, LocalizationManager localization)
     {
-        DatabasePlaylist? pl = GetPlaylist(id);
-        if (pl == null) return [];
-
-        List<RendererContainer> renderers = [];
-
-        for (int i = 0; i < pl.VideoIds.Count; i++)
-        {
-            string videoId = pl.VideoIds[i];
-            DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-            RendererContainer container = new()
-            {
-                Type = "video",
-                OriginalType = "playlistPanelVideoRenderer",
-                Data = new PlaylistVideoRendererData
-                {
-                    VideoId = videoId,
-                    Title = video?.Title.Replace("\"", "\\\"") ?? localization.GetRawString("playlist.video.uncached"),
-                    Thumbnails = video?.Thumbnails ??
-                    [
-                        new Thumbnail
-                        {
-                            Url = $"https://i.ytimg.com/vi/{videoId}/hqdefault.jpg",
-                            Width = 480,
-                            Height = 360
-                        }
-                    ],
-                    Author = video?.Channel.Id != null
-                        ? new Channel(
-                            video.Channel.Id,
-                            video?.Channel.Name.Replace("\"", "\\\"") ?? "???",
-                            null,
-                            null,
-                            null,
-                            null
-                        )
-                        : null,
-                    Duration = InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00"),
-                    PublishedText = video?.UploadedAt,
-                    ViewCountText = (video?.Views ?? 0).ToString(),
-                    Badges = [],
-                    Description = null,
-                    VideoIndexText = (i + 1).ToString()
-                }
-            };
-            renderers.Add(container);
-        }
-
-        return renderers;
+        DatabasePlaylist? pl = GetPlaylist(playlistId);
+        return pl == null
+            ? []
+            : pl.VideoIds.Select(id => VideoCacheCollection.FindSync(x => x.Id == id).FirstOrDefault()).ToList();
     }
 
     public string GetPlaylistPanelVideosJson(string id, string currentVideoId)

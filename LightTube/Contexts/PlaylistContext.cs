@@ -87,7 +87,7 @@ public class PlaylistContext : BaseContext
             ViewCountText = Localization.GetRawString("playlist.lighttube.views");
             LastUpdatedText = string.Format(Localization.GetRawString("playlist.lastupdated"), playlist.LastUpdated.ToString("MMM d, yyyy"));
             Editable = User != null && User.UserID == playlist.Author;
-            Items = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Editable, Localization);
+            Items = DatabaseManager.Playlists.GetPlaylistVideoRenderers(playlist.Id, Editable, Localization);
         }
         else
         {

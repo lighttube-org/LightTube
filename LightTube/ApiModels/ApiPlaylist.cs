@@ -42,7 +42,7 @@ public class ApiPlaylist
 	{
 		Id = playlist.Id;
 		Alerts = [];
-		Contents = DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, false, localization).ToArray();
+		Contents = DatabaseManager.Playlists.GetPlaylistVideoRenderers(playlist.Id, false, localization).ToArray();
 		Chips = [];
 		Continuation = null;
 		Sidebar = new PlaylistSidebar(playlist.GetHeaderRenderer(author, localization));
