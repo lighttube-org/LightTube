@@ -189,28 +189,26 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		return new ApiResponse<ApiSearchResults>(result, userData);
 	}
 
-	/* TODO: search suggestions
 	[Route("searchSuggestions")]
 	[ApiDisableable]
-	public async Task<ApiResponse<InnerTubeSearchAutocomplete>> SearchSuggestions(string query)
+	public async Task<ApiResponse<SearchAutocomplete>> SearchSuggestions(string query)
 	{
 	    if (string.IsNullOrWhiteSpace(query))
-	        return Error<InnerTubeSearchAutocomplete>("Missing query (query parameter `query`)", 400,
+	        return Error<SearchAutocomplete>("Missing query (query parameter `query`)", 400,
 	            HttpStatusCode.BadRequest);
 	    try
 	    {
 	        DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 	        ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-	        return new ApiResponse<InnerTubeSearchAutocomplete>(await _youtube.GetSearchAutocompleteAsync(query,
+	        return new ApiResponse<SearchAutocomplete>(await SearchAutocomplete.GetAsync(query,
 	            HttpContext.GetInnerTubeLanguage(),
 	            HttpContext.GetInnerTubeRegion()), userData);
 	    }
 	    catch (Exception e)
 	    {
-	        return Error<InnerTubeSearchAutocomplete>(e.Message, 500, HttpStatusCode.InternalServerError);
+	        return Error<SearchAutocomplete>(e.Message, 500, HttpStatusCode.InternalServerError);
 	    }
 	}
-	*/
 
 	[Route("playlist")]
 	[ApiDisableable]
@@ -245,7 +243,8 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 							HttpStatusCode.InternalServerError);
 				}
 
-				result = new ApiPlaylist(playlist, LocalizationManager.GetFromHttpContext(HttpContext));
+				result = new ApiPlaylist(playlist, (await DatabaseManager.Users.GetUserFromId(playlist.Author))!,
+					LocalizationManager.GetFromHttpContext(HttpContext));
 			}
 			else if (continuation is null)
 			{
@@ -289,7 +288,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 				DatabaseUser? localUser = await DatabaseManager.Users.GetUserFromLTId(id);
 				if (localUser is null)
 					return Error<ApiChannel>("This user does not exist", 404, HttpStatusCode.BadRequest);
-				response = new ApiChannel(localUser);
+				response = new ApiChannel(localUser, LocalizationManager.GetFromHttpContext(HttpContext));
 			}
 			else if (continuation is null && id != null)
 			{
