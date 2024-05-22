@@ -261,6 +261,7 @@ svg {
     align-items: center;
 
     background-color: var(--app-background);
+    z-index: 30;
 }
 
 .guide {
@@ -823,6 +824,7 @@ body.no-guide .app {
     background-color: var(--playlist-background);
     border: 1px solid var(--border-color);
     border-radius: 16px;
+    overflow: hidden;
 }
 
 .playlist-view__header {
