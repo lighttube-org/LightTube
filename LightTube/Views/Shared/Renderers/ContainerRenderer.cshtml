@@ -15,7 +15,7 @@
 			<div class="shelf-contents-horizontal">
 				@foreach (RendererContainer renderer in Model.Renderer.Items)
 				{
-					<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
+					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
 				}
 			</div>
 		</div>
@@ -45,7 +45,7 @@
 				</div>
 				@foreach (RendererContainer renderer in Model.Renderer.Items.Take(collapsedItemsCount))
 				{
-					<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
+					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
 				}
 				<div class="shelf-expand-button">
 					+@(Model.Renderer.Items.Length - collapsedItemsCount) More
@@ -53,7 +53,7 @@
 			</summary>
 			@foreach (RendererContainer renderer in Model.Renderer.Items.Skip(collapsedItemsCount))
 			{
-				<partial name="SearchRenderer" model="(renderer, Model.Localization)"/>
+				<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
 			}
 		</details>
 		break;
