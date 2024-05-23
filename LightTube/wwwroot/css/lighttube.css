@@ -1587,3 +1587,25 @@ code {
     color: var(--text-primary);
     height: 20px;
 }
+
+/* Playlist Alerts */
+.playlist-alert {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: var(--thumbnail-background);
+    border-radius: 8px;
+    margin-left: 16px;
+}
+
+.playlist-alert_text {
+    flex-grow: 1;
+    color: var(--text-primary);
+    font-size: 1.0rem;
+}
+
+.playlist-alert_close {
+    color: var(--text-primary);
+    height: 20px;
+    cursor: pointer;
+}

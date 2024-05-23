@@ -18,6 +18,7 @@ public class PlaylistContext : BaseContext
     public bool Editable;
     public IEnumerable<RendererContainer> Items;
     public string? Continuation;
+    public string[] Alerts;
 
     public PlaylistContext(HttpContext context, InnerTubePlaylist playlist) : base(context)
     {
@@ -32,6 +33,7 @@ public class PlaylistContext : BaseContext
         Editable = false;
         Items = playlist.Contents;
         Continuation = playlist.Continuation;
+        Alerts = playlist.Alerts;
 
         AddMeta("description", playlist.Sidebar.Description);
         AddMeta("author", playlist.Sidebar.Title);
@@ -59,6 +61,7 @@ public class PlaylistContext : BaseContext
         Editable = false;
         Items = continuation.Results;
         Continuation = continuation.ContinuationToken;
+        Alerts = [];
 
         AddMeta("description", playlist.Sidebar.Description);
         AddMeta("author", playlist.Sidebar.Title);
@@ -102,5 +105,7 @@ public class PlaylistContext : BaseContext
             Items = [];
             Editable = false;
         }
+
+        Alerts = [];
     }
 }
