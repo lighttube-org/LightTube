@@ -289,7 +289,7 @@
 						case "playlist":
 							PlaylistRendererData playlist = (PlaylistRendererData)renderer.Data;
 							<div class="renderer-compactplaylistrenderer">
-								<a href="/watch?v=@@playlist.FirstVideoId&list=@playlist.PlaylistId" class="compact-thumbnail">
+								<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.PlaylistId" class="compact-thumbnail">
 									<img loading="lazy" src="@playlist.Thumbnails.LastOrDefault()?.Url">
 									<div class="compact-thumbnail__playlist__overlay">
 										<span>@playlist.VideoCountText.Split(" ")[0]</span>
@@ -299,7 +299,7 @@
 									</div>
 								</a>
 								<div class="info">
-									<a href="/watch?v=@@playlist.FirstVideoId&list=@playlist.PlaylistId" class="ml-2 title" title="@playlist.Title">
+									<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.PlaylistId" class="ml-2 title" title="@playlist.Title">
 										@playlist.Title
 									</a>
 									<div class="info__more">

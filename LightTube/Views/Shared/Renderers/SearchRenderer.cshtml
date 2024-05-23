@@ -83,7 +83,7 @@
 	case "playlist":
 		PlaylistRendererData playlist = (PlaylistRendererData)Model.Renderer.Data;
 		<div class="renderer-playlistrenderer">
-			<a href="/playlist?list=@(playlist.PlaylistId)" class="thumbnail"> <!-- FirstVideoId in InnerTube -->
+			<a href="@(playlist.FirstVideoId is not null ? $"/watch?v=${playlist.FirstVideoId}&list={playlist.PlaylistId}" : $"/playlist?list={playlist.PlaylistId}")" class="thumbnail">
 				<img loading="lazy" src="@playlist.Thumbnails.FirstOrDefault()?.Url" alt="@playlist.Title">
 				<div class="thumbnail__playlist__overlay">
 					<span>@playlist.VideoCountText.Split(" ")[0]</span>
@@ -100,7 +100,6 @@
 					@if (playlist.Author != null)
 					{
 						<div class="info__channel">
-
 							<a href="/channel/@playlist.Author.Id" title="@playlist.Author.Title" class="ml-1">
 								@playlist.Author.Title
 							</a>
@@ -109,7 +108,17 @@
 							</svg>
 						</div>
 					}
-					<!-- TODO child videos -->
+					@if (playlist.ChildVideos is not null)
+					{
+						<div>
+							@foreach (RendererContainer videoRenderer in playlist.ChildVideos)
+							{
+								VideoRendererData childVideo = videoRenderer.Data as VideoRendererData;
+								if (childVideo == null) continue; // im stupid
+								<a href="/watch?v=@(childVideo.VideoId)&list=@(playlist.PlaylistId)" class="renderer-childvideorenderer">@childVideo.Title • @childVideo.Duration.ToDurationString()</a>
+							}
+						</div>
+					}
 					<a href="/playlist?list=@playlist.PlaylistId" class="link-view-full-playlist">
 						View Full Playlist
 					</a>
