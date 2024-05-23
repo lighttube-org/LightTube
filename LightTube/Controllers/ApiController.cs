@@ -311,7 +311,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-			userData?.AddInfoForChannel(response.Metadata?.ExternalId);
+			userData?.AddInfoForChannel(response.Metadata?.Id);
 			userData?.CalculateWithRenderers(response.Contents);
 
 			return new ApiResponse<ApiChannel>(response, userData);

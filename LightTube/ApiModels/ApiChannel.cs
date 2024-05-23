@@ -11,7 +11,7 @@ public class ApiChannel
 {
 	public ChannelHeader? Header { get; }
 	public ChannelTab[] Tabs { get; }
-	public ChannelMetadataRenderer? Metadata { get; }
+	public ChannelMetadata? Metadata { get; }
 	public RendererContainer[] Contents { get; }
 
 	public ApiChannel(InnerTubeChannel channel)
@@ -59,19 +59,13 @@ public class ApiChannel
 							{
 								AvatarViewModel = new AvatarViewModel
 								{
-									Image = new Image
-									{
-										Sources = { }
-									}
+									Image = new Image()
 								}
 							}
 						},
 						ImageBannerViewModel = new ImageBannerViewModel
 						{
-							Image = new Image
-							{
-								Sources = { }
-							}
+							Image = new Image()
 						}
 					},
 					Metadata = new RendererWrapper
@@ -147,7 +141,7 @@ public class ApiChannel
 				Selected = true
 			})
 		];
-		Metadata = new ChannelMetadataRenderer();
+		Metadata = null;
 		Contents = channel.PlaylistRenderers(localization).ToArray();
 	}
 }
