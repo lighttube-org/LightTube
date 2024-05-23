@@ -6,11 +6,11 @@
 {
 	case "shelf;horizontal":
 		<div class="renderer-shelfrenderer__horizontal">
-			<a href="@@Model.Renderer.Destination" class="ml-1 title">
-				@@Model.Renderer.Title
+			<a href="@Model.Renderer.Destination" class="ml-1 title">
+				@Model.Renderer.Title
 			</a>
 			<div class="shelf-description">
-				@@Model.Renderer.Subtitle
+				@Model.Renderer.Subtitle
 			</div>
 			<div class="shelf-contents-horizontal">
 				@foreach (RendererContainer renderer in Model.Renderer.Items)
@@ -26,7 +26,7 @@
 				<svg class="bi" width="24" height="24" fill="#f00">
 					<use xlink:href="/svg/bootstrap-icons.svg#file-play-fill"/>
 				</svg>
-				@@Model.Renderer.Title
+				@Model.Renderer.Title
 			</div>
 			<div class="reelshelf-items">
 				@foreach (RendererContainer reel in Model.Renderer.Items)
@@ -37,21 +37,20 @@
 		</div>
 		break;
 	case "shelf;vertical":
-		const int collapsedItemsCount = 3;
 		<details class="renderer-shelfrenderer">
 			<summary>
 				<div class="title ml-1">
-					@@Model.Renderer.Title
+					@Model.Renderer.Title
 				</div>
-				@foreach (RendererContainer renderer in Model.Renderer.Items.Take(collapsedItemsCount))
+				@foreach (RendererContainer renderer in Model.Renderer.Items.Take(Model.Renderer.ShownItemCount ?? 2))
 				{
 					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
 				}
 				<div class="shelf-expand-button">
-					+@(Model.Renderer.Items.Length - collapsedItemsCount) More
+					+@(Model.Renderer.Items.Length - (Model.Renderer.ShownItemCount ?? 2)) More
 				</div>
 			</summary>
-			@foreach (RendererContainer renderer in Model.Renderer.Items.Skip(collapsedItemsCount))
+			@foreach (RendererContainer renderer in Model.Renderer.Items.Skip(Model.Renderer.ShownItemCount ?? 2))
 			{
 				<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
 			}
