@@ -1,6 +1,6 @@
-﻿@using InnerTube.Protobuf
-@using Microsoft.AspNetCore.Mvc.TagHelpers
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using InnerTube.Protobuf.Responses
+@using InnerTube.Models
 @using InnerTube.Renderers
 @using Microsoft.Extensions.Primitives
 @using Utils = LightTube.Utils
@@ -263,7 +263,7 @@
 												<a class="ml-1" href="/channel/@video.Author.Id" title="@video.Author.Title">
 													@video.Author.Title
 												</a>
-												@foreach (MetadataBadgeRenderer channelBadge in video.Author.Badges ?? [])
+												@foreach (Badge channelBadge in video.Author.Badges ?? [])
 												{
 													<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
 														<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
@@ -275,7 +275,7 @@
 											@video.ViewCountText • @video.PublishedText
 										</div>
 										<div>
-											@foreach (MetadataBadgeRenderer badge in video.Badges)
+											@foreach (Badge badge in video.Badges)
 											{
 												<span class="badge" title="@badge.Tooltip">
 													@badge.Label
@@ -309,7 +309,7 @@
 												<a href="/channel/@playlist.Author.Id" title="@playlist.Author.Title" class="ml-1">
 													@playlist.Author.Title
 												</a>
-												@foreach (MetadataBadgeRenderer channelBadge in playlist.Author.Badges ?? [])
+												@foreach (Badge channelBadge in playlist.Author.Badges ?? [])
 												{
 													<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
 														<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>

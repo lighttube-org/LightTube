@@ -26,6 +26,6 @@ public class UpdateSubscriptionResponse
         }
 
         ChannelName = channel.Metadata.Title;
-        ChannelAvatar = channel.Metadata.Avatar.Thumbnails_.First().Url;
+        ChannelAvatar = channel.Metadata.AvatarUrl;
     }
 }

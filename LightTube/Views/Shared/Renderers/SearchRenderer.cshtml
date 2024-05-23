@@ -1,3 +1,4 @@
+@using InnerTube.Models
 @using InnerTube.Protobuf
 @using InnerTube.Renderers
 @model (InnerTube.Renderers.RendererContainer Renderer, LightTube.Localization.LocalizationManager Localization)
@@ -31,7 +32,7 @@
 							<a href="/channel/@video.Author.Id" title="@video.Author.Title" class="ml-1">
 								@video.Author.Title
 							</a>
-							@foreach (MetadataBadgeRenderer channelBadge in video.Author.Badges ?? [])
+							@foreach (Badge channelBadge in video.Author.Badges ?? [])
 							{
 								<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
 									<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
@@ -43,7 +44,7 @@
 						@Html.Raw(video.Description)
 					</div>
 					<div>
-						@foreach (MetadataBadgeRenderer videoBadge in video.Badges)
+						@foreach (Badge videoBadge in video.Badges)
 						{
 							<span class="badge" title="@videoBadge.Tooltip">
 								@videoBadge.Label
