@@ -24,7 +24,7 @@ public class DatabaseVideo
     {
         Id = player.Details.Id;
         Title = player.Details.Title;
-        Thumbnails = player.Details.Thumbnails.Thumbnails_.ToArray();
+        Thumbnails = player.Details.Thumbnails.ToArray();
         UploadedAt = "";
         Views = 0;
         Channel = new()
