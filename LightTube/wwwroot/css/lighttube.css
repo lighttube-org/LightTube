@@ -746,10 +746,15 @@ body.no-guide .app {
 }
 
 .player-container {
-    background-color: #000;
     max-width: var(--video-player-width-max);
     grid-area: player;
     max-height: var(--video-player-height-max);
+}
+
+.player-wrapper {
+    background-color: #000;
+    height: 100%;
+    margin: auto;
 }
 
 .player {

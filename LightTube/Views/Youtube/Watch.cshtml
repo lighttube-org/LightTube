@@ -14,8 +14,10 @@
 
 <div class="watch-page">
 <input type="checkbox" id="comments-toggle">
-<div class="player-container" style="color:white;margin-bottom:2rem;aspect-ratio:@(Utils.GetAspectRatio(Model))">
-	<partial name="Player" model="Model.Player"/>
+<div class="player-container" style="color:white;margin-bottom:2rem">
+	<div class="player-wrapper" style="aspect-ratio:@(Utils.GetAspectRatio(Model))">
+		<partial name="Player" model="Model.Player"/>
+	</div>
 	@if (!Model.Player.Player?.Details.IsLive ?? true)
 	{
 		<noscript>
