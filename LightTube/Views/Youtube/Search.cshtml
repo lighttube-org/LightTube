@@ -9,27 +9,29 @@
 }
 
 <div class="search-container">
-	<div class="search-top-bar">
-		<div class="search-chips-container">
-			@for (int i = 0; i < (Model.Search?.Chips ?? []).Length; i++)
-			{
-				RendererContainer chipContainer = (Model.Search?.Chips ?? [])[i];
-				ChipRendererData chip = (ChipRendererData)chipContainer.Data;
-				<a class="search-chip @(i == 0 ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.Params)">
-					@chip.Title
-				</a>
-			}
-		</div>
-		<vr></vr>
+	<div>
 		@if (Model.Filter != null)
 		{
 			<details>
-				<summary class="btn filters-button" style="width:min-content;">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
-					</svg>
-					<div class="text">
-						@Model.Localization.GetString("search.filters.title")
+				<summary class="search-top-bar">
+					<div class="search-chips-container">
+						@for (int i = 0; i < (Model.Search?.Chips ?? []).Length; i++)
+						{
+						RendererContainer chipContainer = (Model.Search?.Chips ?? [])[i];
+						ChipRendererData chip = (ChipRendererData)chipContainer.Data;
+						<a class="search-chip @(i == 0 ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.Params)">
+							@chip.Title
+						</a>
+						}
+					</div>
+					<vr></vr>
+					<div class="btn filters-button">
+						<svg class="icon" width="20" height="20" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
+						</svg>
+						<div class="text">
+							@Model.Localization.GetString("search.filters.title")
+						</div>
 					</div>
 				</summary>
 				<form class="search-filters__form">
