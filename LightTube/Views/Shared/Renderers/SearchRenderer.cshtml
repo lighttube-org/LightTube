@@ -72,7 +72,7 @@
 					}
 				</a>
 				<div class="info__more">
-					@channel.Handle • @channel.SubscriberCountText
+					@channel.SubscriberCountText • @channel.VideoCountText
 				</div>
 			</div>
 			<div class="subscribe-container">
@@ -113,7 +113,7 @@
 						<div>
 							@foreach (RendererContainer videoRenderer in playlist.ChildVideos)
 							{
-								VideoRendererData childVideo = videoRenderer.Data as VideoRendererData;
+								VideoRendererData? childVideo = videoRenderer.Data as VideoRendererData;
 								if (childVideo == null) continue; // im stupid
 								<a href="/watch?v=@(childVideo.VideoId)&list=@(playlist.PlaylistId)" class="renderer-childvideorenderer">@childVideo.Title • @childVideo.Duration.ToDurationString()</a>
 							}
