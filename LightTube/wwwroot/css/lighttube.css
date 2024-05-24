@@ -31,6 +31,7 @@ html:root, html.theme-light:root {
     --chip-background: rgb(0, 0, 0, 0.05);
     --chip-background-hover: rgb(0, 0, 0, 0.10);
     --chip-background-active: rgb(0, 0, 0, 0.15);
+    --search-chip-background-active: #000;
 
     --subscribe-button: #c00;
     --subscribe-button-hover: #c00;
@@ -80,6 +81,7 @@ html.theme-dark:root {
     --chip-background: #272727;
     --chip-background-hover: #3f3f3f;
     --chip-background-active: #535353;
+    --search-chip-background-active: #fff;
 
     --subscribe-button: #c00;
     --subscribe-button-hover: #c00;
@@ -128,6 +130,7 @@ html.theme-dark:root {
         --chip-background: rgb(0, 0, 0, 0.05);
         --chip-background-hover: rgb(0, 0, 0, 0.10);
         --chip-background-active: rgb(0, 0, 0, 0.15);
+        --search-chip-background-active: #000;
 
         --subscribe-button: #c00;
         --subscribe-button-hover: #c00;
@@ -179,6 +182,7 @@ html.theme-dark:root {
         --chip-background: #272727;
         --chip-background-hover: #3f3f3f;
         --chip-background-active: #535353;
+        --search-chip-background-active: #fff;
 
         --subscribe-button: #c00;
         --subscribe-button-hover: #c00;
@@ -237,7 +241,6 @@ svg {
 .vr, vr {
     margin-left: 8px;
     margin-right: 8px;
-    height: 100%;
     width: 0;
     border: 1px solid var(--border-color);
 }
@@ -1613,4 +1616,34 @@ code {
     color: var(--text-primary);
     height: 20px;
     cursor: pointer;
+}
+
+.search-top-bar {
+    display: flex;
+    flex-direction: row;
+}
+
+.search-chips-container {
+    flex-grow: 1;
+    overflow-x: scroll;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.search-chip {
+    display: block;
+    background-color: var(--chip-background);
+    padding: 8px 12px;
+    vertical-align: center;
+    text-decoration: none;
+    color: var(--text-primary);
+    border-radius: 8px;
+    font-size: 1.1rem;
+}
+
+.search-chip.active {
+    background-color: var(--search-chip-background-active);
+    color: #000;
 }
