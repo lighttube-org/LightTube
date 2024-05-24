@@ -1088,3 +1088,76 @@
 	font-weight: bold;
 	color: var(--text-primary);
 }
+
+
+.renderer-postrenderer {
+	box-sizing: border-box;
+	width: 436px;
+	background-color: var(--thumbnail-background);
+	border: 1px solid var(--chip-background-active);
+	border-radius: 8px;
+	padding: 12px 24px 0;
+	height: 210px;
+}
+
+.postrenderer-author {
+	display: flex;
+	flex-direction: row;
+	gap: 4px;
+	align-items: center;
+}
+
+.postrenderer-author__avatar {
+	width: 24px;
+	height: 24px;
+	object-fit: cover;
+	border-radius: 12px;
+	margin-right: 8px;
+}
+
+.postrenderer-content {
+	display: flex;
+	gap: 16px;
+	margin-top: 12px;
+}
+
+.postrenderer-content__text {
+	font-size: 1rem;
+	color: var(--text-primary);
+	height: 100px;
+	min-width: 254px;
+	max-width: 370px;
+	overflow: hidden;
+	/* no matter what i did, this shit does NOT want to ellipsize */
+	/* soo,,, */
+	overflow-y: scroll;
+}
+
+.postrenderer-content__attachment {
+	flex-shrink: 0;
+	width: 100px;
+	height: 100px;
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+.postrenderer-content__attachment > img {
+	width: 100%;
+	height: 100%;
+}
+
+.postrenderer-actions {
+	margin-top: 12px;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+}
+
+.postrenderer-actions__commentsCount, .postrenderer-actions__likeCount {
+	margin: 0 8px;
+	color: var(--text-primary, #000);
+}
+
+.postrenderer-actions__commentsCount {
+	margin-right: 24px;
+}
