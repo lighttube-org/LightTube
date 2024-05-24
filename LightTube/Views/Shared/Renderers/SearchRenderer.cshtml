@@ -131,13 +131,19 @@
 		<partial name="Renderers/ContainerRenderer" model="(container, Model.Localization)"/>
 		break;
 	case "unknown":
-		<h1>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></h1>
-		if (Model.Renderer.OriginalType == "UnknownProtobufRenderer")
-		{
-			<code>@Convert.ToBase64String((Model.Renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
-		}
+		<div>
+			<div>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></div>
+			if (Model.Renderer.OriginalType == "UnknownProtobufRenderer")
+			{
+				<code>@Convert.ToBase64String((Model.Renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+			}
+			else
+			{
+				<code>@((Model.Renderer.Data as UnknownRendererData)?.Json)</code>
+			}
+		</div>
 		break;
 	default:
-		<h1>Unexpected RendererContainer.Type: <code>@Model.Renderer.Type</code></h1>
+		<div class="renderer-null">Unexpected RendererContainer.Type: <code>@Model.Renderer.Type</code></div>
 		break;
 }
