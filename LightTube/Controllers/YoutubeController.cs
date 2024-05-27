@@ -2,11 +2,13 @@
 using InnerTube;
 using InnerTube.Models;
 using InnerTube.Protobuf.Params;
+using InnerTube.Protobuf.Responses;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
 using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.Controllers;
 
@@ -156,22 +158,25 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 			return View(new SearchContext(HttpContext, search_query, null, search));
 		}
 	}
-/*
-	TODO: resolve_url
+
 	[Route("/c/{vanity}")]
 	public async Task<IActionResult> ChannelFromVanity(string vanity)
 	{
-		string? id = await innerTube.GetChannelIdFromVanity(vanity);
-		return Redirect(id is null ? "/" : $"/channel/{id}");
+		ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/c/" + vanity);
+		return Redirect(endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint
+			? $"/channel/{endpoint.Endpoint.BrowseEndpoint.BrowseId}"
+			: "/");
 	}
 
-	[Route("/@{vanity}")]
-	public async Task<IActionResult> ChannelFromHandle(string vanity)
+	[Route("/@{handle}")]
+	public async Task<IActionResult> ChannelFromHandle(string handle)
 	{
-		string? id = await innerTube.GetChannelIdFromVanity("@" + vanity);
-		return Redirect(id is null ? "/" : $"/channel/{id}");
+			ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/@" + handle);
+		return Redirect(endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint
+			? $"/channel/{endpoint.Endpoint.BrowseEndpoint.BrowseId}"
+			: "/");
 	}
-*/
+
 	[Route("/channel/{id}")]
 	public async Task<IActionResult> Channel(string id, string? continuation = null) =>
 		await Channel(id, ChannelTabs.Featured, continuation);

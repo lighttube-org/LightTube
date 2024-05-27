@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using InnerTube;
 using InnerTube.Models;
 using InnerTube.Protobuf.Params;
+using InnerTube.Protobuf.Responses;
 using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
@@ -10,6 +11,7 @@ using LightTube.Database;
 using LightTube.Database.Models;
 using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.Controllers;
 
@@ -279,6 +281,19 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
 			return Error<ApiChannel>($"Invalid request: missing both `id` and `continuation`", 400,
 				HttpStatusCode.BadRequest);
+
+		if (id.StartsWith("@"))
+		{
+			ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/@" + id);
+			if (endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint)
+				id = endpoint.Endpoint.BrowseEndpoint.BrowseId;
+		}
+		else if (!id.StartsWith("UC"))
+		{
+			ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/c/" + id);
+			if (endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint)
+				id = endpoint.Endpoint.BrowseEndpoint.BrowseId;
+		}
 
 		try
 		{
