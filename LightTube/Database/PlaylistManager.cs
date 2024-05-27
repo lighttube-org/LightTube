@@ -54,7 +54,7 @@ public class PlaylistManager(
                         }
                     ],
                     Author = video?.Channel.Id != null
-                        ? new Channel(
+                        ? new Channel("en",
                             video.Channel.Id,
                             video?.Channel.Name.Replace("\"", "\\\"") ?? "???",
                             null,

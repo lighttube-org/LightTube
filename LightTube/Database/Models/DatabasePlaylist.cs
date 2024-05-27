@@ -97,7 +97,7 @@ public class DatabasePlaylist
 				}
 			}
 		}));
-		return new VideoPlaylistInfo(pl);
+		return new VideoPlaylistInfo(pl, "en");
 	}
 
 	public PlaylistHeaderRenderer GetHeaderRenderer(DatabaseUser author, LocalizationManager localization) =>

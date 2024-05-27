@@ -125,7 +125,7 @@ public class ApiChannel
 					}
 				}
 			}
-		}, channel.LTChannelID);
+		}, channel.LTChannelID, "en");
 		Tabs =
 		[
 			new ChannelTab(new TabRenderer

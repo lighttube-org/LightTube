@@ -45,6 +45,6 @@ public class ApiPlaylist
 		Contents = DatabaseManager.Playlists.GetPlaylistVideoRenderers(playlist.Id, false, localization).ToArray();
 		Chips = [];
 		Continuation = null;
-		Sidebar = new PlaylistSidebar(playlist.GetHeaderRenderer(author, localization));
+		Sidebar = new PlaylistSidebar(playlist.GetHeaderRenderer(author, localization), "en");
 	}
 }
