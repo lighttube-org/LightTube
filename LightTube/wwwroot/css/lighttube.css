@@ -213,6 +213,10 @@ svg {
     color: var(--text-primary);
 }
 
+a {
+    color: var(--text-link);
+}
+
 /* Utils */
 
 .flex-divider {
@@ -1217,6 +1221,11 @@ input#comments-toggle {
 .channel-info__name {
     font-size: 2rem;
     font-weight: bold;
+}
+
+.channel-info__tagline {
+    text-decoration: underline;
+    color: var(--text-secondary);
 }
 
 .channel-info__buttons {
