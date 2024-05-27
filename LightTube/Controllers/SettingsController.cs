@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using InnerTube;
+using InnerTube.Models;
 using LightTube.ApiModels;
 using LightTube.Contexts;
 using LightTube.Database;

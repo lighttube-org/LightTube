@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using InnerTube;
 using InnerTube.Exceptions;
+using InnerTube.Models;
 using InnerTube.Protobuf.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;

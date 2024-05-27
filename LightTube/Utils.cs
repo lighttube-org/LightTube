@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Xml;
-using InnerTube;
+using InnerTube.Models;
 using InnerTube.Protobuf.Params;
 using InnerTube.Protobuf.Responses;
 using LightTube.ApiModels;
