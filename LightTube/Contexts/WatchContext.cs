@@ -1,5 +1,4 @@
-﻿using InnerTube;
-using InnerTube.Models;
+﻿using InnerTube.Models;
 using LightTube.Database;
 using LightTube.Database.Models;
 
@@ -12,7 +11,7 @@ public class WatchContext : BaseContext
 	public VideoPlaylistInfo? Playlist;
 	public ContinuationResponse? Comments;
 	public int Dislikes;
-	public int Likes;
+	public long Likes;
 	public SponsorBlockSegment[] Sponsors;
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo innerTubeVideo,
@@ -25,7 +24,7 @@ public class WatchContext : BaseContext
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
-		Likes = -1; // todo: value parsers
+		Likes = innerTubeVideo.LikeCount;
 		Sponsors = sponsors;
 		GuideHidden = true;
 
@@ -59,7 +58,7 @@ public class WatchContext : BaseContext
 		Playlist = Video.Playlist;
 		Comments = comments;
 		Dislikes = dislikes;
-		Likes = -1; // todo: value parsers
+		Likes = innerTubeVideo.LikeCount;
 		Sponsors = [];
 		GuideHidden = true;
 
@@ -94,7 +93,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
-		Likes = -1; // todo: value parsers
+		Likes = innerTubeVideo.LikeCount;
 		Sponsors = sponsors;
 		GuideHidden = true;
 
@@ -133,7 +132,7 @@ public class WatchContext : BaseContext
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
-		Likes = -1; // todo: value parsers
+		Likes = innerTubeVideo.LikeCount;
 		Sponsors = [];
 		GuideHidden = true;
 
