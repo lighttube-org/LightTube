@@ -342,7 +342,7 @@ public static class Utils
 		return doc.OuterXml;
 	}
 
-	public static string ToKMB(this int num) =>
+	public static string ToKMB(this long num) =>
 		num switch
 		{
 			> 999999999 or < -999999999 => num.ToString("0,,,.###B", CultureInfo.InvariantCulture),

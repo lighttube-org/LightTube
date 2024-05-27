@@ -10,7 +10,7 @@ public class WatchContext : BaseContext
 	public InnerTubeVideo Video;
 	public VideoPlaylistInfo? Playlist;
 	public ContinuationResponse? Comments;
-	public int Dislikes;
+	public long Dislikes;
 	public long Likes;
 	public SponsorBlockSegment[] Sponsors;
 
