@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using InnerTube;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace LightTube;
 
@@ -30,24 +31,23 @@ public static class Configuration
 
     public static void InitConfig()
     {
-        /*
-         TODO: removed for now because no one implemented authorization in itv2
-        InnerTubeAuthorization = Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_TYPE")?.ToLower() switch
+        InnerTubeAuthorization = null;
+        string? authType = Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_TYPE");
+        if (authType == "cookie")
         {
-            "cookie" => InnerTubeAuthorization.SapisidAuthorization(
-                Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_SAPISID") ??
-                throw new ArgumentNullException("LIGHTTUBE_AUTH_SAPISID",
-                    "Authentication type set to 'cookie' but the 'LIGHTTUBE_AUTH_SAPISID' environment variable is not set."),
-                Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_PSID") ??
-                throw new ArgumentNullException("LIGHTTUBE_AUTH_PSID",
-                    "Authentication type set to 'cookie' but the 'LIGHTTUBE_AUTH_PSID' environment variable is not set.")),
-            "oauth2" => InnerTubeAuthorization.RefreshTokenAuthorization(
+            Log.Error("Cookie authentication has been removed in LightTube v3 as it does not work with youtubei.googleapis.com");
+        }
+        else if (authType == "oauth2")
+        {
+            InnerTubeAuthorization = InnerTubeAuthorization.RefreshTokenAuthorization(
                 Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ??
                 throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN",
-                    "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set.")),
-            _ => null
-        };
-        */
+                    "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set."));
+        }
+        else
+        {
+            Log.Warning("Unknown auth type: '{AuthType}'", authType);
+        }
 
         CustomCssPath = Environment.GetEnvironmentVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
         if (CustomCssPath != null)
