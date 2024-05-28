@@ -1275,6 +1275,7 @@ input#comments-toggle {
 .channel-content {
     max-width: 1200px;
     margin: auto;
+    padding: 8px 0;
 }
 
 .reel-grid {
@@ -1284,7 +1285,6 @@ input#comments-toggle {
     column-gap: 4px;
     justify-content: center;
     gap: 8px;
-    padding: 8px 0;
 }
 
 /* Playlist Page */

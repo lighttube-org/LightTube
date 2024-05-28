@@ -109,8 +109,14 @@
 		}
 		default:
 		{
-			// TODO: impl this
-			<div>@Model.CurrentTab</div>
+			// There can be containers inside containers,,
+			IEnumerable<RendererContainer> items = Model.Content
+				.SelectMany(x => x.Data is ContainerRendererData container ? container.Items : [x])
+				.SelectMany(x => x.Data is ContainerRendererData container ? container.Items : [x])
+				.Where(x => x.Type != "continuation");
+			<div class="channel-content grid-items">
+				<partial name="Renderers/Channel/ChannelGrid" model="(items, Model.Localization)"/>
+			</div>
 			break;
 		}
 	}
