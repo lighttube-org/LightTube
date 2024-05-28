@@ -34,6 +34,6 @@ public class DatabaseVideo
             Name = player.Details.Author.Title,
             Avatars = player.Details.Author.Avatar!
         };
-        Duration = player.Details.Length.ToDurationString();
+        Duration = player.Details.Length!.Value.ToDurationString();
     }
 }

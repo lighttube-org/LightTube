@@ -177,7 +177,7 @@ public class PlaylistManager(
                     }
                 ]
             },
-            Duration = video.Details.Length.ToDurationString()
+            Duration = video.Details.Length!.Value.ToDurationString()
         });
     }
 

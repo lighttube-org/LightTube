@@ -145,7 +145,7 @@ else
 	<script id="video-data">
 	const videoInfo = {
 		author: {
-			icon: "@Model.Video.Channel.Avatar?.LastOrDefault()?.Url",
+			icon: "@Model.Player!.Details.Author.Avatar?.LastOrDefault()?.Url",
 			title: "@Model.Player!.Details.Author.Title", // .Replace("\"", "\\\"")
 			href: "/channel/@Model.Player!.Details.Author.Id"
 		},
@@ -168,7 +168,7 @@ else
 		loading: "<img style='width:15%;height:15%;' src='/svg/loading.svg'>",
 		rememberVolume: true,
 		chapters: @Html.Raw(Model.GetChaptersJson()),
-		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds, Model.Localization)) ?? Array.Empty<string>()))],
+		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length!.Value.TotalSeconds, Model.Localization)) ?? Array.Empty<string>()))],
 		endscreen: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
 		           {
 			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase

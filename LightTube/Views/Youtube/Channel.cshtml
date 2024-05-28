@@ -52,6 +52,11 @@
 	</div>
 	@switch (Model.CurrentTab)
 	{
+		case ChannelTabs.Featured:
+			<div class="channel-content search-container" style="gap:0">
+				<partial name="Renderers/Channel/ChannelHome" model="(Model.Content, Model.Localization)"/>
+			</div>
+			break;
 		case ChannelTabs.Videos or ChannelTabs.Streams or ChannelTabs.Community:
 		{
 			<div class="channel-content search-container">
@@ -74,12 +79,8 @@
 		}
 		default:
 		{
-			<div class="channel-content">
-				@foreach (RendererContainer renderer in Model.Content.Where(x => x.Type != "continuation"))
-				{
-					<partial name="Renderer" model="(renderer, Model.Localization)"/>
-				}
-			</div>
+			// TODO: impl this
+			<div>@Model.CurrentTab</div>
 			break;
 		}
 	}

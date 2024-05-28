@@ -31,7 +31,7 @@ public class ChannelContext : BaseContext
 	public ChannelContext(HttpContext context, ChannelTabs tab, InnerTubeChannel channel, string id) : base(context)
 	{
 		Id = id;
-		CurrentTab = tab;
+		CurrentTab = channel.Tabs.FirstOrDefault(x => x.Selected)?.Tab ?? tab;
 		BannerUrl = channel.Header?.Banner.LastOrDefault()?.Url;
 		AvatarUrl = channel.Header?.Avatars.LastOrDefault()?.Url ?? "";
 		ChannelTitle = channel.Header?.Title ?? "";
@@ -59,8 +59,9 @@ public class ChannelContext : BaseContext
 		AddMeta("twitter:card", channel.Header?.Avatars.Last().Url ?? "");
 		AddRSSUrl($"{context.Request.Scheme}://{context.Request.Host}/channel/{Id}.xml");
 
-		// TODO: most likely broken
-		if (channel.Contents.Any(x => x.OriginalType == "channelVideoPlayerRenderer"))
+		if (channel.Contents
+		    .Select(x => x.OriginalType == "itemSectionRenderer" ? (x.Data as ContainerRendererData)!.Items.First() : x)
+		    .Any(x => x.OriginalType == "channelVideoPlayerRenderer"))
 		{
 			AddStylesheet("/lib/ltplayer.css");
 			AddScript("/lib/ltplayer.js");
@@ -72,7 +73,7 @@ public class ChannelContext : BaseContext
 		ContinuationResponse continuation, string id) : base(context)
 	{
 		Id = id;
-		CurrentTab = tab;
+		CurrentTab = channel.Tabs.FirstOrDefault(x => x.Selected)?.Tab ?? tab;
 		BannerUrl = channel.Header?.Banner.LastOrDefault()?.Url;
 		AvatarUrl = channel.Header?.Avatars.Last().Url ?? "";
 		ChannelTitle = channel.Header?.Title ?? "";
@@ -97,6 +98,15 @@ public class ChannelContext : BaseContext
 		AddMeta("og:image", channel.Header?.Avatars.Last().Url ?? "");
 		AddMeta("twitter:card", channel.Header?.Avatars.Last().Url ?? "");
 		AddRSSUrl(context.Request.Scheme + "://" + context.Request.Host + "/feed/" + Id + "/rss.xml");
+	
+		if (channel.Contents
+		    .Select(x => x.OriginalType == "itemSectionRenderer" ? (x.Data as ContainerRendererData)!.Items.First() : x)
+		    .Any(x => x.OriginalType == "channelVideoPlayerRenderer"))
+		{
+			AddStylesheet("/lib/ltplayer.css");
+			AddScript("/lib/ltplayer.js");
+			AddScript("/js/player.js");
+		}
 	}
 
 	public ChannelContext(HttpContext context, DatabaseUser channel, string id) : base(context)

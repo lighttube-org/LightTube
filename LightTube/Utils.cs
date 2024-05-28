@@ -193,13 +193,13 @@ public static class Utils
 		mpdRoot.SetAttribute("type", "static");
 		mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
 		StringBuilder duration = new("PT");
-		if (player.Details.Length.TotalHours > 0)
-			duration.Append($"{player.Details.Length.Hours}H");
-		if (player.Details.Length.Minutes > 0)
-			duration.Append($"{player.Details.Length.Minutes}M");
-		if (player.Details.Length.Seconds > 0)
-			duration.Append(player.Details.Length.Seconds);
-		mpdRoot.SetAttribute("mediaPresentationDuration", $"{duration}.{player.Details.Length.Milliseconds}S");
+		if (player.Details.Length!.Value.TotalHours > 0)
+			duration.Append($"{player.Details.Length!.Value.Hours}H");
+		if (player.Details.Length!.Value.Minutes > 0)
+			duration.Append($"{player.Details.Length!.Value.Minutes}M");
+		if (player.Details.Length!.Value.Seconds > 0)
+			duration.Append(player.Details.Length!.Value.Seconds);
+		mpdRoot.SetAttribute("mediaPresentationDuration", $"{duration}.{player.Details.Length!.Value.Milliseconds}S");
 		doc.AppendChild(mpdRoot);
 
 		XmlElement period = doc.CreateElement("Period");

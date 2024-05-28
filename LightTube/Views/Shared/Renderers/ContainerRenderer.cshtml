@@ -1,3 +1,4 @@
+@using InnerTube.Models
 @using InnerTube.Renderers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model (InnerTube.Renderers.ContainerRendererData Renderer, LightTube.Localization.LocalizationManager Localization)
@@ -7,15 +8,123 @@
 	case "shelf;horizontal":
 		<div class="renderer-shelfrenderer__horizontal">
 			<a href="@Model.Renderer.Destination" class="ml-1 title">
-				@Model.Renderer.Title
+				@Html.Raw(Model.Renderer.Title)
 			</a>
 			<div class="shelf-description">
-				@Model.Renderer.Subtitle
+				@Html.Raw(Model.Renderer.Subtitle)
 			</div>
 			<div class="shelf-contents-horizontal">
 				@foreach (RendererContainer renderer in Model.Renderer.Items)
 				{
-					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+					switch (renderer.Type)
+					{
+						case "video":
+							VideoRendererData video = (VideoRendererData)renderer.Data;
+							<div class="renderer-gridvideorenderer">
+								<a href="/watch?v=@video.VideoId"  class="grid-thumbnail">
+									<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
+									<div class="compact-thumbnail__duration__container">
+										<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+									</div>
+								</a>
+								<div class="info">
+									<a href="/watch?v=@video.VideoId" class="ml-2 title" title="@video.Title">
+										@video.Title
+									</a>
+									@if (!string.IsNullOrWhiteSpace(video.Author?.Id))
+									{
+										<div class="info__channel">
+											<a href="/channel/@video.Author.Id" title="@video.Author.Title" class="ml-1">
+												@video.Author.Title
+											</a>
+											@foreach (Badge channelBadge in video.Author.Badges ?? [])
+											{
+												<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+													<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+												</svg>
+											}
+										</div>
+									}
+									<div>
+										@video.ViewCountText • @video.PublishedText
+									</div>
+								</div>
+							</div>
+							break;
+						case "playlist":
+							PlaylistRendererData playlist = (PlaylistRendererData)renderer.Data;
+							<div class="renderer-gridplaylistrenderer">
+								<a href="/playlist?list=@playlist.PlaylistId" class="grid-thumbnail">
+									<img loading="lazy" src="@playlist.Thumbnails.LastOrDefault()?.Url" alt="@playlist.Title">
+									<div class="grid-thumbnail__playlist__overlay">
+										<span>@playlist.VideoCount</span>
+										<svg class="bi" width="20" height="20" fill="currentColor">
+											<use xlink:href="/svg/bootstrap-icons.svg#list"/>
+										</svg>
+									</div>
+								</a>
+								<div class="info">
+									<a href="/playlist?list=@playlist.PlaylistId" class="ml-2 title" title="@playlist.Title">
+										@playlist.Title
+									</a>
+									<div class="info__more">
+										@if (!string.IsNullOrWhiteSpace(playlist.Author?.Id))
+										{
+											<div class="info__channel">
+												<a href="/channel/@playlist.Author.Id" title="@playlist.Author.Title" class="ml-1">
+													@playlist.Author.Title
+												</a>
+												@foreach (Badge channelBadge in playlist.Author.Badges ?? [])
+												{
+													<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+														<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+													</svg>
+												}
+											</div>
+										}
+										<div>
+											<a class="playlist-view-all" href="/playlist?list=@playlist.PlaylistId">View full playlist</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							break;
+						case "channel":
+							ChannelRendererData channel = (ChannelRendererData)renderer.Data;
+							<div class="renderer-gridchannelrenderer">
+								<a href="/channel/@channel.ChannelId" class="grid-avatar">
+									<img loading="lazy" src="@channel.Avatar.LastOrDefault()?.Url" alt="@channel.Title">
+								</a>
+								<div class="info">
+									<a href="/channel/@channel.ChannelId" class="title ml-1" alt="@channel.Title">
+										@channel.Title
+									</a>
+									<div>
+										@channel.SubscriberCountText
+									</div>
+									<div>
+										<partial name="SubscribeButton" model="channel.ChannelId"/>
+									</div>
+								</div>
+							</div>
+							break;
+						case "unknown":
+							<div>
+								<div>Unknown RendererContainer.OriginalType: <code>@renderer.OriginalType</code></div>
+								if (renderer.OriginalType == "UnknownProtobufRenderer")
+								{
+								<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+								}
+								else
+								{
+								<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
+								}
+							</div>
+							break;
+						default:
+							<div class="renderer-null">Unexpected RendererContainer.Type: <code>@renderer.Type/@renderer.OriginalType</code></div>
+							break;
+					}
 				}
 			</div>
 		</div>
@@ -46,9 +155,12 @@
 				{
 					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
 				}
-				<div class="shelf-expand-button">
-					+@(Model.Renderer.Items.Length - (Model.Renderer.ShownItemCount ?? 2)) More
-				</div>
+				@if (Model.Renderer.Items.Length - (Model.Renderer.ShownItemCount ?? 2) > 0)
+				{
+					<div class="shelf-expand-button">
+						+@(Model.Renderer.Items.Length - (Model.Renderer.ShownItemCount ?? 2)) More
+					</div>
+				}
 			</summary>
 			@foreach (RendererContainer renderer in Model.Renderer.Items.Skip(Model.Renderer.ShownItemCount ?? 2))
 			{

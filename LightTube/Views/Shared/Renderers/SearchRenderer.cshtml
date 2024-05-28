@@ -173,6 +173,11 @@
 			</div>
 		</div>
 		break;
+	case "message":
+		<div class="renderer-null">
+			@((Model.Renderer.Data as MessageRendererData)?.Message)
+		</div>
+		break;
 	case "unknown":
 		<div>
 			<div>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></div>

@@ -464,7 +464,7 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
             }
 
             string url = player.Storyboard.Levels[0].ToString();
-            TimeSpan duration = player.Details.Length;
+            TimeSpan duration = player.Details.Length!.Value;
             StringBuilder manifest = new();
             double timeBetween = duration.TotalMilliseconds / 100;
 

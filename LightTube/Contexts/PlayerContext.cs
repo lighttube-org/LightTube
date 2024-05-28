@@ -10,7 +10,7 @@ namespace LightTube.Contexts;
 public class PlayerContext : BaseContext
 {
     public InnerTubePlayer? Player;
-    public InnerTubeVideo Video;
+    public InnerTubeVideo? Video;
     public Exception? Exception;
     public bool UseHls;
     public bool UseDash;
@@ -21,7 +21,7 @@ public class PlayerContext : BaseContext
     public string? ClassName;
     public SponsorBlockSegment[] Sponsors;
 
-    public PlayerContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo video, string className,
+    public PlayerContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo? video, string className,
         bool compatibility, string? preferredItag, SponsorBlockSegment[] sponsors) : base(context)
     {
         Player = innerTubePlayer;
@@ -41,7 +41,7 @@ public class PlayerContext : BaseContext
 
     public string GetChaptersJson()
     {
-        if (Video.Chapters is null) return "[]";
+        if (Video?.Chapters is null) return "[]";
         VideoChapter[] c = Video.Chapters.ToArray();
         List<LtVideoChapter> ltChapters = [];
         for (int i = 0; i < c.Length; i++)
@@ -51,11 +51,11 @@ public class PlayerContext : BaseContext
             if (i + 1 < c.Length)
             {
                 VideoChapter next = c[i + 1];
-                to = (next.StartSeconds * 1000) / (float)Player!.Details.Length.TotalMilliseconds * 100;
+                to = (next.StartSeconds * 1000) / (float)Player!.Details.Length!.Value.TotalMilliseconds * 100;
             }
             ltChapters.Add(new LtVideoChapter
             {
-                From = (chapter.StartSeconds * 1000) / (float)Player!.Details.Length.TotalMilliseconds * 100,
+                From = (chapter.StartSeconds * 1000) / (float)Player!.Details.Length!.Value.TotalMilliseconds * 100,
                 To = to,
                 Name = chapter.Title
             });
