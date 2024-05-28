@@ -178,25 +178,26 @@ else
 			@:storyboard:{type:"yt_l1",src:"@Html.Raw(Model.Player.Storyboard.Levels[0].ToString())"}
 		}
 	};
-	videoInfo.endscreen.onClickHandler = item => {
-		switch (item.style) {
-			case "VIDEO":
-				window.location = "/watch?v=" + item.target;
-				break;
-			case "PLAYLIST":
-				window.location = "/playlist?list=" + item.target;
-				break;
-			  case "CHANNEL":
-				window.location = "/channel/" + item.target;
-				break;
-			  case "WEBSITE":
-				window.open(item.href, "_blank");
-				break;
-			default:
-				alert("Unknown endscreen item type: " + item.style)
-				break;
-		}
-	};
+	if (videoInfo.endscreen != null)
+		videoInfo.endscreen.onClickHandler = item => {
+			switch (item.style) {
+				case "VIDEO":
+					window.location = "/watch?v=" + item.target;
+					break;
+				case "PLAYLIST":
+					window.location = "/playlist?list=" + item.target;
+					break;
+				  case "CHANNEL":
+					window.location = "/channel/" + item.target;
+					break;
+				  case "WEBSITE":
+					window.open(item.href, "_blank");
+					break;
+				default:
+					alert("Unknown endscreen item type: " + item.style)
+					break;
+			}
+		};
 	const videoId =  "@(Model.Player!.Details.Id)";
 	const playerId = "player";
 	const playtype = @Html.Raw(Model.UseHls ? "\"hls.js\"" : "undefined");
