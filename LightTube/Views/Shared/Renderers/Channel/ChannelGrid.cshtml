@@ -1,0 +1,58 @@
+@using InnerTube
+@using InnerTube.Models
+@using InnerTube.Protobuf
+@using InnerTube.Renderers
+@model (IEnumerable<RendererContainer> Renderers, LightTube.Localization.LocalizationManager Localization)
+
+@foreach (RendererContainer renderer in Model.Renderers.Select(x => x.OriginalType == "itemSectionRenderer" ? (x.Data as ContainerRendererData)!.Items.First() : x))
+{
+	@switch (renderer.Type)
+	{
+		case "video":
+			VideoRendererData video = (VideoRendererData)renderer.Data;
+			<div class="renderer-channelvideoplayerrenderer">
+				<div class="promotedvideo-player">
+					@{
+						// for anyone reading this part
+						// im sorry
+						InnerTubePlayer player = Context.RequestServices.GetService<SimpleInnerTubeClient>()
+							!.GetVideoPlayerAsync(video.VideoId, false).Result;
+						PlayerContext playerContext = new(Context, player, null, "channel-promoted-video", false, "18", []);
+					}
+					<partial name="Player" model="playerContext"/>
+				</div>
+				<div class="promotedvideo-info">
+					<a href="/watch?v=@video.VideoId" class="title ml-1" title="@video.Title">
+						@video.Title
+					</a>
+					<div>
+						@video.ViewCountText • @video.PublishedText
+					</div>
+					<div class="promotedvideo-description">
+						@Html.Raw(video.Description)
+					</div>
+				</div>
+			</div>
+			break;
+		case "container":
+			ContainerRendererData container = (ContainerRendererData)renderer.Data;
+			<partial name="Renderers/ContainerRenderer" model="(container, Model.Localization)"/>
+			break;
+		case "unknown":
+			<div>
+				<div>Unknown RendererContainer.OriginalType: <code>@renderer.OriginalType</code></div>
+				if (renderer.OriginalType == "UnknownProtobufRenderer")
+				{
+				<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+				}
+				else
+				{
+				<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
+				}
+			</div>
+			break;
+		default:
+			<div class="renderer-null">Unexpected RendererContainer.Type: <code>@renderer.Type/@renderer.OriginalType</code></div>
+			break;
+	}
+}

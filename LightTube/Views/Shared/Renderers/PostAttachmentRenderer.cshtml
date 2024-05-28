@@ -1,0 +1,89 @@
+@using InnerTube.Models
+@using InnerTube.Protobuf
+@using InnerTube.Renderers
+@model (RendererContainer Renderer, LightTube.Localization.LocalizationManager Localization)
+
+@switch (Model.Renderer.Type)
+{
+	case "communityPostImage":
+		CommunityPostImageRendererData image = (CommunityPostImageRendererData)Model.Renderer.Data;
+		if (image.Images.Length == 1)
+		{
+			<div class="renderer-backstageimagerenderer">
+				<img loading="lazy" src="@image.Images[0].LastOrDefault()?.Url">
+			</div>
+		}
+		else
+		{
+			<div class="renderer-postmultiimagerenderer">
+				@foreach (Thumbnail[] img in image.Images)
+				{
+					<img loading="lazy" src="@img.LastOrDefault()?.Url">
+				}
+			</div>
+		}
+		break;
+	case "video":
+		VideoRendererData video = (VideoRendererData)Model.Renderer.Data;
+		<div class="renderer-videorenderer" style="margin: 16px 0">
+			<a class="thumbnail" href="/watch?v=@video.VideoId">
+				<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
+				<div class="thumbnail__duration__container">
+					<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+				</div>
+			</a>
+			<div class="info">
+				<a href="/watch?v=@video.VideoId" class="ml-2 title" title="@video.Title">
+					@video.Title
+				</a>
+				<div class="info__more">
+					<div>
+						@video.ViewCountText • @video.PublishedText
+					</div>
+					@if (video.Author != null)
+					{
+						<div class="info__channel">
+							<img loading="lazy" src="@video.Author.Avatar?.LastOrDefault()?.Url" alt="@video.Author.Title">
+							<a href="/channel/@video.Author.Id" title="@video.Author.Title" class="ml-1">
+								@video.Author.Title
+							</a>
+							@foreach (Badge channelBadge in video.Author.Badges ?? [])
+							{
+								<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+									<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+								</svg>
+							}
+						</div>
+					}
+					<div>
+						@Html.Raw(video.Description)
+					</div>
+					<div>
+						@foreach (Badge videoBadge in video.Badges)
+						{
+							<span class="badge" title="@videoBadge.Tooltip">
+								@videoBadge.Label
+							</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
+	case "unknown":
+		<div>
+			<div>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></div>
+			if (Model.Renderer.OriginalType == "UnknownProtobufRenderer")
+			{
+			<code>@Convert.ToBase64String((Model.Renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+			}
+			else
+			{
+			<code>@((Model.Renderer.Data as UnknownRendererData)?.Json)</code>
+			}
+		</div>
+		break;
+	default:
+		<div class="renderer-null">Unexpected RendererContainer.Type: <code>@Model.Renderer.Type</code></div>
+		break;
+}
