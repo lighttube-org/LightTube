@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Globalization;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
@@ -63,7 +64,7 @@ public static class Utils
 			DateTime buildTime = DateTime.Today;
 			version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
 #else
-			_version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[2..];
+			version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[2..];
 #endif
 		}
 
