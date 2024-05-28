@@ -24,8 +24,7 @@ public class HomeController(ILogger<HomeController> logger) : Controller
 
         if (fileName == null) return NotFound();
 
-        using FileStream fs = System.IO.File.OpenRead(fileName);
-        return File(fs, "text/css");
+        return File(System.IO.File.ReadAllBytes(fileName), "text/css");
     }
 
     [Route("/lib/{name}")]
