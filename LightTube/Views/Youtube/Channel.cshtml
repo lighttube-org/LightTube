@@ -72,7 +72,7 @@
 			<div class="channel-content reel-grid">
 				@foreach (RendererContainer renderer in Model.Content.Where(x => x.Type != "continuation"))
 				{
-					<partial name="Renderer" model="(renderer, Model.Localization)"/>
+					<partial name="Renderers/ReelRenderer" model="((VideoRendererData)renderer.Data, Model.Localization)"/>
 				}
 			</div>
 			break;
