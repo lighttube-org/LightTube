@@ -62,7 +62,8 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 			player = await innerTube.GetVideoPlayerAsync(v, contentCheckOk, HttpContext.GetInnerTubeLanguage(),
 				HttpContext.GetInnerTubeRegion());
 			e = null;
-			if (player.Details.Id != v)
+			// Trailers have different Video IDs than the one requested
+			if (player.Details.Id != v && !player.Details.IsFallback)
 			{
 				e = new Exception(
 					$"YouTube returned a different video than the requested one ({v} != {player.Details.Id})");
