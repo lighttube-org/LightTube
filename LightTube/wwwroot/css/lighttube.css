@@ -1014,6 +1014,10 @@ input#comments-toggle {
         overflow-y: scroll;
     }
 
+    input#comments-toggle:checked ~ .second-column {
+        display: none;
+    }
+
     .comments-container {
         position: absolute;
         left: 0;
