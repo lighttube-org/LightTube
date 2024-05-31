@@ -205,7 +205,14 @@
 				<a href="/playlist?list=@Model.Playlist.PlaylistId" class="ml-1 title" title="@Model.Playlist.Title">
 					@Model.Playlist.Title
 				</a>
-				<div class="ml-1">@Model.Playlist.Channel.Title • @(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
+				@if (Model.Playlist.Channel != null)
+				{
+					<div class="ml-1">@Model.Playlist.Channel.Title • @(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
+				}
+				else
+				{
+					<div class="ml-1">@(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
+				}
 			</summary>
 			<div class="playlist-view__content">
 				@foreach (RendererContainer renderer in Model.Playlist.Videos)
