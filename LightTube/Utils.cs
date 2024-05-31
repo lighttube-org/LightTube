@@ -705,6 +705,8 @@ public static class Utils
 	public static string GetAspectRatio(WatchContext context)
 	{
 		Format? format = context.Player.Player?.AdaptiveFormats.LastOrDefault(x => x.Mime.StartsWith("video"));
-		return format != null ? format.Width + "/" + format.Height : "16/9";
+		return format != null
+			? Math.Max(1f, Math.Min((float)format.Width / (float)format.Height, 3)).ToString(CultureInfo.InvariantCulture)
+			: "16/9";
 	}
 }
