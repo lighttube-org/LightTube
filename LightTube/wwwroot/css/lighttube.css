@@ -759,7 +759,7 @@ body.no-guide .app {
 
 .player-wrapper {
     background-color: #000;
-    height: 100%;
+    width: 100%;
     margin: auto;
 }
 
