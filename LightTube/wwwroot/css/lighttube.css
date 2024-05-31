@@ -1011,6 +1011,7 @@ input#comments-toggle {
 
     input#comments-toggle:checked ~ .comments-container {
         display: block;
+        overflow-y: scroll;
     }
 
     .comments-container {
