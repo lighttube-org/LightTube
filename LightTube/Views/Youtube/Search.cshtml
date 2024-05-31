@@ -19,7 +19,7 @@
 						{
 						RendererContainer chipContainer = (Model.Search?.Chips ?? [])[i];
 						ChipRendererData chip = (ChipRendererData)chipContainer.Data;
-						<a class="search-chip @(i == 0 ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.Params)">
+						<a class="search-chip @(i == 0 ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.ContinuationToken)">
 							@chip.Title
 						</a>
 						}
