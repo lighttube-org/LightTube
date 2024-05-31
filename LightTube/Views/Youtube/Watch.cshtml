@@ -26,12 +26,19 @@
 				<b>
 					@Model.Player.GetPreferredFormat()?.QualityLabel
 				</b>
-				@Model.Localization.GetString("watch.noscript.resolution.switch")
-				@foreach (Format f in Model.Player.Player?.Formats.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
+				@if (Model.Player.Player?.Formats.Length > 1)
 				{
-					<b>
-						<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
-					</b>
+					@:@Model.Localization.GetString("watch.noscript.resolution.switch");
+					foreach (Format f in Model.Player.Player?.Formats.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
+					{
+						<b>
+							<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
+						</b>
+					}
+				}
+				else
+				{
+					@:@Model.Localization.GetString("watch.noscript.resolution.switch.unavailable")
 				}
 			</div>
 		</noscript>

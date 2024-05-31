@@ -234,6 +234,7 @@
 
   "watch.noscript.resolution": "Current video resolution:",
   "watch.noscript.resolution.switch": "Switch to",
+  "watch.noscript.resolution.switch.unavailable": "No other resolutions are available",
   "watch.like.unavailable": "Like",
   "watch.dislike.unavailable": "Dislike",
   "watch.comments": "Comments",
