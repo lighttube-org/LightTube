@@ -52,4 +52,10 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         });
         return Redirect(redirectUrl);
     }
+
+    [Route("/{videoId:regex([[a-zA-Z0-9-_]]{{11}})}")]
+    public IActionResult VideoRedirect(string videoId)
+    {
+        return Redirect($"/watch?v={videoId}");
+    }
 }
