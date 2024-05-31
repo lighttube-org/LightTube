@@ -736,7 +736,6 @@ body.no-guide .app {
     }
 
     .player-container {
-        aspect-ratio: 16 / 9;
         width: 100vw;
         margin-left: -8px;
         height: auto !important;
