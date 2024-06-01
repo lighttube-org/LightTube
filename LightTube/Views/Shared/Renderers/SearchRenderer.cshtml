@@ -148,7 +148,7 @@
 				@if (post.Attachment?.Data is CommunityPostImageRendererData image)
 				{
 					<div class="postrenderer-content__attachment">
-						<img src="@image.Images.First().LastOrDefault().Url"/>
+						<img src="@image.Images.First().LastOrDefault()?.Url"/>
 					</div>
 				}
 			</div>
