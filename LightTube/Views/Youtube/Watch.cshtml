@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+﻿@using Humanizer
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using InnerTube.Protobuf.Responses
 @using InnerTube.Models
 @using InnerTube.Renderers
@@ -346,11 +347,11 @@
 								<div>Unknown RendererContainer.OriginalType: <code>@renderer.OriginalType</code></div>
 								if (renderer.OriginalType == "UnknownProtobufRenderer")
 								{
-									<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+								<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
 								}
 								else
 								{
-									<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
+								<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
 								}
 							</div>
 							break;
@@ -363,6 +364,14 @@
 		</details>
 	</div>
 </div>
+@if (Model.Player.Player?.Details.IsFallback == true) {
+	<div class="trailer">
+		<div class="trailer-box">
+			<h1>Trailer</h1>
+			<p>Livestream will begin in @@Model.Player.Player.Details.LiveStreamStartDate</p>
+		</div>
+	</div>
+}
 </div>
 <script>
 	const playerContainerElement = document.querySelector(".player-container");

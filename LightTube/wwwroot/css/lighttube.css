@@ -1663,3 +1663,24 @@ code {
     background-color: var(--search-chip-background-active);
     color: #000;
 }
+
+.trailer {
+    grid-area: player;
+    z-index: 25;
+}
+
+.trailer-box {
+    width: 50%;
+    float: right;
+    height: 100%;
+    padding: 16px;
+    display: flex;
+    box-sizing: border-box;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #000a;
+}
+
+.trailer-box > * {
+    color: #fff;
+}
