@@ -14,6 +14,7 @@ public static class Configuration
     public static bool RegistrationEnabled { get; private set; }
     public static bool ProxyEnabled { get; private set; }
     public static bool ThirdPartyProxyEnabled { get; private set; }
+    public static bool IsNightly { get; private set; }
     public static int CacheSize { get; private set; }
     public static string ConnectionString { get; private set; }
     public static string Database { get; private set; }
@@ -74,6 +75,7 @@ public static class Configuration
         DefaultContentLanguage = GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en")!;
         DefaultContentRegion = GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US")!;
         DefaultTheme = GetVariable("LIGHTTUBE_DEFAULT_THEME", "auto")!;
+        IsNightly = GetVariable("LIGHTTUBE_IS_NIGHTLY", "false")?.ToLower() == "true";
 
         try
         {
