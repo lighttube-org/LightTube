@@ -136,7 +136,7 @@ public class ProxyController(SimpleInnerTubeClient innerTube) : Controller
             InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(videoId, true,
                 HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 
-            if (player.HlsManifestUrl == null)
+            if (string.IsNullOrEmpty(player.HlsManifestUrl))
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
                 return File(
