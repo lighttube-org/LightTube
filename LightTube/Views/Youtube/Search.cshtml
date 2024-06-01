@@ -10,20 +10,19 @@
 
 <div class="search-container">
 	<div>
-		@if (Model.Filter != null)
-		{
-			<details>
-				<summary class="search-top-bar">
-					<div class="search-chips-container">
-						@for (int i = 0; i < (Model.Search?.Chips ?? []).Length; i++)
-						{
-						RendererContainer chipContainer = (Model.Search?.Chips ?? [])[i];
+		<details>
+			<summary class="search-top-bar">
+				<div class="search-chips-container">
+					@foreach (RendererContainer chipContainer in Model.Chips)
+					{
 						ChipRendererData chip = (ChipRendererData)chipContainer.Data;
-						<a class="search-chip @(i == 0 ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.ContinuationToken)">
+						<a class="search-chip @(chip.IsSelected ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.ContinuationToken)">
 							@chip.Title
 						</a>
-						}
-					</div>
+					}
+				</div>
+				@if (Model.Filter != null)
+				{
 					<vr></vr>
 					<div class="btn filters-button">
 						<svg class="icon" width="20" height="20" fill="currentColor">
@@ -33,7 +32,10 @@
 							@Model.Localization.GetString("search.filters.title")
 						</div>
 					</div>
-				</summary>
+				}
+			</summary>
+			@if (Model.Filter != null)
+			{
 				<form class="search-filters__form">
 					<input style="display:none" value="@Model.GetSearchBoxInput()" name="search_query"/>
 					<div class="search-filters">
@@ -409,8 +411,8 @@
 						</div>
 					</button>
 				</form>
-			</details>
-		}
+			}
+		</details>
 	</div>
 	@foreach (RendererContainer renderer in Model.Results)
 	{

@@ -11,6 +11,7 @@ public class SearchContext : BaseContext
     public SearchParams? Filter;
     public InnerTubeSearchResults? Search;
     public IEnumerable<RendererContainer> Results;
+    public IEnumerable<RendererContainer> Chips;
     public string? Continuation;
 
     public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeSearchResults search) : base(context)
@@ -20,14 +21,16 @@ public class SearchContext : BaseContext
         Search = search;
         Results = Search.Results;
         Continuation = Search.Continuation;
+        Chips = Search.Chips;
     }
 
-    public SearchContext(HttpContext context, string query, SearchParams? filter, ContinuationResponse search) : base(context)
+    public SearchContext(HttpContext context, string query, SearchParams? filter, SearchContinuationResponse search) : base(context)
     {
         Query = query;
         Filter = filter;
         Search = null;
         Results = search.Results;
         Continuation = search.ContinuationToken;
+        Chips = search.Chips ?? [];
     }
 }

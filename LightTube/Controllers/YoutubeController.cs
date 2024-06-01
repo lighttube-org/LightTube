@@ -152,7 +152,7 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 		}
 		else
 		{
-			ContinuationResponse search =
+			SearchContinuationResponse search =
 				await innerTube.ContinueSearchAsync(continuation, HttpContext.GetInnerTubeLanguage(),
 					HttpContext.GetInnerTubeRegion());
 			return View(new SearchContext(HttpContext, search_query, null, search));
