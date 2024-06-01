@@ -181,7 +181,7 @@
 	case "unknown":
 		<div>
 			<div>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></div>
-			if (Model.Renderer.OriginalType == "UnknownProtobufRenderer")
+			@if (Model.Renderer.OriginalType == "UnknownProtobufRenderer")
 			{
 				<code>@Convert.ToBase64String((Model.Renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
 			}
