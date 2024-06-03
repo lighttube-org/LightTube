@@ -762,6 +762,7 @@ body.no-guide .app {
     background-color: #000;
     width: 100%;
     margin: auto;
+    max-height: 100%;
 }
 
 .player {
