@@ -414,9 +414,24 @@
 			}
 		</details>
 	</div>
-	@foreach (RendererContainer renderer in Model.Results)
+	@if (Model.Sidebar != null)
 	{
-		<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+		<div class="search-results-container">
+			<partial name="Renderers/SearchSidebar" model="(Model.Sidebar, Model.Localization)"/>
+			<div class="search-results">
+				@foreach (RendererContainer renderer in Model.Results)
+				{
+					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+				}
+			</div>
+		</div>
+	}
+	else
+	{
+		foreach (RendererContainer renderer in Model.Results)
+		{
+			<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+		}
 	}
 </div>
 <div class="next-page">
