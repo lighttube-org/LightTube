@@ -709,4 +709,27 @@ public static class Utils
 			? Math.Max(1f, Math.Min((float)format.Width / (float)format.Height, 3)).ToString(CultureInfo.InvariantCulture)
 			: "16/9";
 	}
+
+	public static string ToRelativePublishedDate(DateTimeOffset date)
+	{
+		TimeSpan diff = DateTimeOffset.Now - date;
+		int totalDays = (int)Math.Floor(diff.TotalDays);
+		switch (totalDays)
+		{
+			case > 365:
+				return $"-{Math.Floor(diff.TotalDays / 365f)}Y";
+			case > 30:
+				return $"-{Math.Floor(diff.TotalDays / 30f)}M";
+			case > 7:
+				return $"-{Math.Floor(diff.TotalDays / 7f)}W";
+			case > 0:
+				return $"-{Math.Floor(diff.TotalDays)}D";
+		}
+
+		if (diff.Hours >= 1)
+			return $"-{diff.Hours}h";
+		if (diff.Minutes >= 1)
+			return $"-{diff.Minutes}m";
+		return $"-{diff.Seconds}m";
+	}
 }

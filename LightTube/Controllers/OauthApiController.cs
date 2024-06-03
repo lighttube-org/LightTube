@@ -1,6 +1,7 @@
 using System.Net;
 using InnerTube;
 using InnerTube.Models;
+using InnerTube.Protobuf;
 using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
@@ -217,22 +218,75 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
     [Route("feed")]
     [HttpGet]
     [ApiAuthorization("subscriptions.read")]
-    public async Task<ApiResponse<FeedVideo[]>> GetSubscriptionFeed(
+    public async Task<ApiResponse<IEnumerable<RendererContainer>>> GetSubscriptionFeed(
         bool includeNonNotification = true, int limit = 10, int skip = 0)
     {
         DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
         if (user is null)
-            return Error<FeedVideo[]>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+            return Error<IEnumerable<RendererContainer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+        Dictionary<string, string> avatars = [];
+        foreach (string id in user.Subscriptions.Keys)
+        {
+            DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(id);
+            if (channel is null) continue;
+            avatars.Add(id, channel.IconUrl);
+        }
 
         FeedVideo[] feed = includeNonNotification
             ? await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Keys)
             : await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Where(x =>
-                x.Value == SubscriptionType.NOTIFICATIONS_OFF).Select(x => x.Key));
+                x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key));
 
         feed = feed.Skip(skip).Take(limit).ToArray();
 
+        IEnumerable<RendererContainer> renderers = feed.Select(x => new RendererContainer
+        {
+            Type = "video",
+            OriginalType = "lightTubeFeedVideo",
+            Data = new VideoRendererData
+            {
+                VideoId = x.Id,
+                Title = x.Title,
+                Thumbnails =
+                [
+                    new Thumbnail
+                    {
+                        Url = x.Thumbnail,
+                        Width = 0,
+                        Height = 0
+                    }
+                ],
+                Author = new Channel("en",
+                    x.ChannelId,
+                    x.ChannelName,
+                    null,
+                    avatars.TryGetValue(x.ChannelId, out string? avatarUrl)
+                        ? [
+                            new Thumbnail
+                            {
+                                Url = avatarUrl,
+                                Width = 0,
+                                Height = 0
+                            }
+                        ]
+                        : null,
+                    null,
+                    null),
+                Duration = TimeSpan.Zero,
+                PublishedText = x.PublishedDate.ToString("D"),
+                RelativePublishedDate = Utils.ToRelativePublishedDate(x.PublishedDate),
+                ViewCountText =
+                    string.Format(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("channel.about.views"), x.ViewCount.ToString("N0")),
+                ViewCount = x.ViewCount,
+                Badges = [],
+                Description = x.Description,
+                PremiereStartTime = null
+            }
+        });
+
         ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-        return new ApiResponse<FeedVideo[]>(feed, userData);
+        return new ApiResponse<IEnumerable<RendererContainer>>(renderers, userData);
     }
 
     [Route("subscriptions")]
