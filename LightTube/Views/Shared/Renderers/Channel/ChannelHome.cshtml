@@ -50,6 +50,12 @@
 				}
 			</div>
 			break;
+		case "exception":
+			ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+			<div class="renderer-null">
+				<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+			</div>
+			break;
 		default:
 			<div class="renderer-null">Unexpected RendererContainer.Type: <code>@renderer.Type/@renderer.OriginalType</code></div>
 			break;

@@ -148,43 +148,54 @@
 			<div class="comments-container__flex">
 				@foreach (RendererContainer renderer in Model.Comments.Results)
 				{
-					CommentRendererData comment = (CommentRendererData)renderer.Data;
-					<div class="renderer-commentthreadrenderer">
-						<a class="comment__author-avatar" href="/channel/@comment.Owner.Id">
-							<img loading="lazy" src="@comment.Owner.Avatar?.LastOrDefault()?.Url" alt="@comment.Owner.Title">
-						</a>
-						<div class="comment">
-							<div class="header ml-1">
-								@if (comment.Pinned)
-								{
-									<svg class="bi" width="12" height="12" fill="currentColor" title="Pinned">
-										<use xlink:href="/svg/bootstrap-icons.svg#pin-angle-fill"/>
-									</svg>
-								}
-								<a href="/channel/@comment.Owner.Id" class="comment__author ml-1 title" title="@comment.Owner.Title">
-									@comment.Owner.Title
+					switch (renderer.Type)
+					{
+						case "comment":
+							CommentRendererData comment = (CommentRendererData)renderer.Data;
+							<div class="renderer-commentthreadrenderer">
+								<a class="comment__author-avatar" href="/channel/@comment.Owner.Id">
+									<img loading="lazy" src="@comment.Owner.Avatar?.LastOrDefault()?.Url" alt="@comment.Owner.Title">
 								</a>
-								<span class="comment__posted ml-1">
-									@comment.PublishedTimeText
-								</span>
+								<div class="comment">
+									<div class="header ml-1">
+										@if (comment.Pinned)
+										{
+											<svg class="bi" width="12" height="12" fill="currentColor" title="Pinned">
+												<use xlink:href="/svg/bootstrap-icons.svg#pin-angle-fill"/>
+											</svg>
+										}
+										<a href="/channel/@comment.Owner.Id" class="comment__author ml-1 title" title="@comment.Owner.Title">
+											@comment.Owner.Title
+										</a>
+										<span class="comment__posted ml-1">
+											@comment.PublishedTimeText
+										</span>
+									</div>
+									<div class="comment__content">
+										@Html.Raw(comment.Content)
+									</div>
+									<div class="comment__buttons">
+										<svg class="bi" width="20" height="20" fill="currentColor">
+											<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
+										</svg>
+										@comment.LikeCountText
+										@if (Context.Request.Query.TryGetValue("v", out StringValues v))
+										{
+											<a href="https://youtube.com/watch?v=@v&lc=@comment.Id">
+												Open on YouTube
+											</a>
+										}
+									</div>
+								</div>
 							</div>
-							<div class="comment__content">
-								@Html.Raw(comment.Content)
+							break;
+						case "exception":
+							ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+							<div class="renderer-null">
+								<code>@e.Message</code> while converting <code>@e.RendererCase</code>
 							</div>
-							<div class="comment__buttons">
-								<svg class="bi" width="20" height="20" fill="currentColor">
-									<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
-								</svg>
-								@comment.LikeCountText
-								@if (Context.Request.Query.TryGetValue("v", out StringValues v))
-								{
-									<a href="https://youtube.com/watch?v=@v&lc=@comment.Id">
-										Open on YouTube
-									</a>
-								}
-							</div>
-						</div>
-					</div>
+							break;
+					}
 				}
 			</div>
 		</details>
@@ -353,6 +364,12 @@
 								{
 								<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
 								}
+							</div>
+							break;
+						case "exception":
+							ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+							<div class="renderer-null">
+								<code>@e.Message</code> while converting <code>@e.RendererCase</code>
 							</div>
 							break;
 						default:

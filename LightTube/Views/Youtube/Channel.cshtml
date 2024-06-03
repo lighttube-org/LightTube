@@ -117,37 +117,48 @@
 				<div class="channel-content search-container">
 					@foreach (RendererContainer renderer in Model.Content.SelectMany(x => x.Type == "container" ? ((ContainerRendererData)x.Data).Items : [x]).Where(x => x.Type != "continuation"))
 					{
-						CommunityPostRendererData post = (CommunityPostRendererData)renderer.Data;
-						<div class="renderer-backstagepostthreadrenderer">
-							<div class="post-avatar">
-								<img loading="lazy" src="@post.Author.Avatar?.LastOrDefault()?.Url" alt="@post.Author.Title">
-							</div>
-							<div class="post-info">
-								<a href="/channel/@post.Author.Id" class="post-author">@post.Author.Title</a>
-								<span>
-									@post.PublishedText
-								</span>
-							</div>
-							<div class="post-content">
-								<div>
-									@Html.Raw(post.Content)
+						switch (renderer.Type)
+						{
+							case "communityPost":
+								CommunityPostRendererData post = (CommunityPostRendererData)renderer.Data;
+								<div class="renderer-backstagepostthreadrenderer">
+									<div class="post-avatar">
+										<img loading="lazy" src="@post.Author.Avatar?.LastOrDefault()?.Url" alt="@post.Author.Title">
+									</div>
+									<div class="post-info">
+										<a href="/channel/@post.Author.Id" class="post-author">@post.Author.Title</a>
+										<span>
+											@post.PublishedText
+										</span>
+									</div>
+									<div class="post-content">
+										<div>
+											@Html.Raw(post.Content)
+										</div>
+										@if (post.Attachment is not null)
+										{
+											<partial name="Renderers/PostAttachmentRenderer" model="(post.Attachment, Model.Localization)"/>
+										}
+										<div class="post-buttons">
+											<svg class="bi" width="20" height="20" fill="currentColor">
+												<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
+											</svg>
+											@post.LikeCount
+											&nbsp;&nbsp;
+											<a href="https://youtube.com/post/@post.PostId">
+												@Model.Localization.GetString("post.view.youtube")
+											</a>
+										</div>
+									</div>
 								</div>
-								@if (post.Attachment is not null)
-								{
-									<partial name="Renderers/PostAttachmentRenderer" model="(post.Attachment, Model.Localization)"/>
-								}
-								<div class="post-buttons">
-									<svg class="bi" width="20" height="20" fill="currentColor">
-										<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
-									</svg>
-									@post.LikeCount
-									&nbsp;&nbsp;
-									<a href="https://youtube.com/post/@post.PostId">
-										@Model.Localization.GetString("post.view.youtube")
-									</a>
+								break;
+							case "exception":
+								ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+								<div class="renderer-null">
+									<code>@e.Message</code> while converting <code>@e.RendererCase</code>
 								</div>
-							</div>
-						</div>
+								break;
+						}
 					}
 				</div>
 				break;
@@ -155,9 +166,20 @@
 			case ChannelTabs.Shorts:
 			{
 				<div class="channel-content reel-grid">
-					@foreach (RendererContainer renderer in Model.Content.Where(x => x.Type != "continuation"))
+					@foreach (RendererContainer renderer in Model.Content)
 					{
-						<partial name="Renderers/ReelRenderer" model="((VideoRendererData)renderer.Data, Model.Localization)"/>
+						switch (renderer.Type)
+						{
+							case "video":
+								<partial name="Renderers/ReelRenderer" model="((VideoRendererData)renderer.Data, Model.Localization)"/>
+								break;
+							case "exception":
+								ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+								<div class="renderer-null">
+									<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+								</div>
+								break;
+						}
 					}
 				</div>
 				break;

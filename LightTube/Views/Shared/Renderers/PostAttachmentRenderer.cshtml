@@ -70,6 +70,12 @@
 			</div>
 		</div>
 		break;
+	case "exception":
+		ExceptionRendererData e = (ExceptionRendererData)Model.Renderer.Data;
+		<div class="renderer-null">
+			<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+		</div>
+		break;
 	case "unknown":
 		<div>
 			<div>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></div>
