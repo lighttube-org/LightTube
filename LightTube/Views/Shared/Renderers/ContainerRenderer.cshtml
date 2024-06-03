@@ -108,10 +108,53 @@
 								</div>
 							</div>
 							break;
+						case "communityPost":
+							CommunityPostRendererData post = (CommunityPostRendererData)renderer.Data;
+							<div class="renderer-postrenderer">
+								<div class="postrenderer-author">
+									<img class="postrenderer-author__avatar" src="@post.Author.Avatar?.LastOrDefault()?.Url">
+									<div>
+										<span class="postrenderer-author__name">@post.Author.Title</span>
+										•
+										<span class="postrenderer-author__date">@post.PublishedText</span>
+									</div>
+								</div>
+								<div class="postrenderer-content">
+									<div class="postrenderer-content__text">
+										@Html.Raw(post.Content)
+									</div>
+									@if (post.Attachment?.Data is CommunityPostImageRendererData image)
+									{
+										<div class="postrenderer-content__attachment">
+											<img src="@image.Images.First().LastOrDefault()?.Url"/>
+										</div>
+									}
+								</div>
+								<div class="postrenderer-actions">
+									<svg class="icon" width="20" height="20">
+										<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up" fill="currentColor"/>
+									</svg>
+									<span class="postrenderer-actions__likeCount">@post.LikeCountText</span>
+									<svg class="icon" width="20" height="20">
+										<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-down" fill="currentColor"/>
+									</svg>
+									<div class="flex-divider"></div>
+									<svg class="icon" width="20" height="20">
+										<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text" fill="currentColor"/>
+									</svg>
+									<span class="postrenderer-actions__commentsCount">@post.CommentsCountText</span>
+									<a href="https://www.youtube.com/channel/@post.Author.Id/community?lb=@post.PostId" title="@Model.Localization.GetString("post.view.youtube")" style="height:20px">
+										<svg class="icon" width="20" height="20" fill="currentColor">
+											<use xlink:href="/svg/bootstrap-icons.svg#youtube"/>
+										</svg>
+									</a>
+								</div>
+							</div>
+							break;
 						case "unknown":
 							<div>
 								<div>Unknown RendererContainer.OriginalType: <code>@renderer.OriginalType</code></div>
-								if (renderer.OriginalType == "UnknownProtobufRenderer")
+								@if (renderer.OriginalType == "UnknownProtobufRenderer")
 								{
 								<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
 								}
