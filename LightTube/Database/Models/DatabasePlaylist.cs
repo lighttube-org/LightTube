@@ -25,7 +25,8 @@ public class DatabasePlaylist
 		return playlistId;
 	}
 
-	public VideoPlaylistInfo? GetVideoPlaylistInfo(string detailsId, DatabaseUser author, List<DatabaseVideo> videos)
+	public VideoPlaylistInfo? GetVideoPlaylistInfo(string detailsId, DatabaseUser author, List<DatabaseVideo> videos,
+		LocalizationManager localization)
 	{
 		Playlist pl = new()
 		{
@@ -56,46 +57,82 @@ public class DatabasePlaylist
 			IsInfinite = false
 		};
 		int i = 0;
-		pl.Contents.AddRange(videos.Select(x => new RendererWrapper
+		// todo: add null checks for uncached videos
+		pl.Contents.AddRange(videos.Select(x =>
 		{
-			PlaylistPanelVideoRenderer = new PlaylistPanelVideoRenderer
+			if (x is null)
 			{
-				VideoId = x.Id,
-				Title = new Text
+				return new RendererWrapper
 				{
-					SimpleText = x.Title
-				},
-				Thumbnail = new Thumbnails
-				{
-					Thumbnails_ = { x.Thumbnails }
-				},
-				ShortBylineText = new Text
-				{
-					Runs =
+					PlaylistPanelVideoRenderer = new PlaylistPanelVideoRenderer
 					{
-						new Text.Types.Run
+						VideoId = "",
+						Title = new Text
 						{
-							NavigationEndpoint = new Endpoint
-							{
-								BrowseEndpoint = new BrowseEndpoint
+							SimpleText = localization.GetRawString("playlist.video.uncached")
+						},
+						Thumbnail = new Thumbnails
+						{
+							Thumbnails_ = { new Thumbnail
 								{
-									BrowseId = x.Channel.Id,
-									CanonicalBaseUrl = $"/channel/{x.Channel.Id}"
+									Url = "https://i.ytimg.com/vi/___________/hqdefault.jpg",
+									Width = 120,
+									Height = 90
 								}
-							},
-							Text = x.Channel.Name
+							}
+						},
+						LengthText = new Text
+						{
+							SimpleText = "00:00"
+						},
+						IndexText = new Text
+						{
+							SimpleText = (++i).ToString()
 						}
 					}
-				},
-				LengthText = new Text
-				{
-					SimpleText = x.Duration
-				},
-				IndexText = new Text
-				{
-					SimpleText = (++i).ToString()
-				}
+				};
 			}
+			return new RendererWrapper
+			{
+				PlaylistPanelVideoRenderer = new PlaylistPanelVideoRenderer
+				{
+					VideoId = x.Id,
+					Title = new Text
+					{
+						SimpleText = x.Title
+					},
+					Thumbnail = new Thumbnails
+					{
+						Thumbnails_ = { x.Thumbnails }
+					},
+					ShortBylineText = new Text
+					{
+						Runs =
+						{
+							new Text.Types.Run
+							{
+								NavigationEndpoint = new Endpoint
+								{
+									BrowseEndpoint = new BrowseEndpoint
+									{
+										BrowseId = x.Channel.Id,
+										CanonicalBaseUrl = $"/channel/{x.Channel.Id}"
+									}
+								},
+								Text = x.Channel.Name
+							}
+						}
+					},
+					LengthText = new Text
+					{
+						SimpleText = x.Duration
+					},
+					IndexText = new Text
+					{
+						SimpleText = (++i).ToString()
+					}
+				}
+			};
 		}));
 		return new VideoPlaylistInfo(pl, "en");
 	}

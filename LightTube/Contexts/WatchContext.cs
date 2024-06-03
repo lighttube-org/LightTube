@@ -87,7 +87,8 @@ public class WatchContext : BaseContext
 		Video = innerTubeVideo;
 		Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id,
 			DatabaseManager.Users.GetUserFromId(playlist.Author).Result!,
-			DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization));
+			DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization),
+			Localization);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
 			if (playlist.Author != User?.UserID)
 				Playlist = null;
@@ -126,7 +127,8 @@ public class WatchContext : BaseContext
 		Video = innerTubeVideo;
 		Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id,
 			DatabaseManager.Users.GetUserFromId(playlist.Author).Result!,
-			DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization));
+			DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization),
+			Localization);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
 			if (playlist.Author != User?.UserID)
 				Playlist = null;
