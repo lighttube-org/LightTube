@@ -225,7 +225,7 @@ a {
     min-width: 40px;
 }
 
-*[class^="ml-"] {
+*[class*="ml-"] {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
