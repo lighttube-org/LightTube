@@ -1,5 +1,7 @@
 ﻿using LightTube.Chores;
 using LightTube.Database.Models;
+using LightTube.Database.Serialization;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace LightTube.Database;
@@ -33,6 +35,8 @@ public static class DatabaseManager
         Cache = new CacheManager(ChannelCacheCollection, VideoCacheCollection);
         Oauth2 = new Oauth2Manager(Oauth2TokensCollection);
         Playlists = new PlaylistManager(PlaylistCollection, VideoCacheCollection);
+        
+        BsonSerializer.RegisterSerializationProvider(new LightTubeBsonSerializationProvider());
 
         ChoreManager.QueueChore("DatabaseCleanup");
     }
