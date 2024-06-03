@@ -27,8 +27,9 @@ public class ChannelContext : BaseContext
 	public string Id;
 	public string? Continuation;
 	public ReadOnlyCollection<ChannelTab> Tabs;
+	public InnerTubeAboutChannel? About;
 
-	public ChannelContext(HttpContext context, ChannelTabs tab, InnerTubeChannel channel, string id) : base(context)
+	public ChannelContext(HttpContext context, ChannelTabs tab, InnerTubeChannel channel, string id, InnerTubeAboutChannel? about = null) : base(context)
 	{
 		Id = id;
 		CurrentTab = channel.Tabs.FirstOrDefault(x => x.Selected)?.Tab ?? tab;
@@ -48,6 +49,7 @@ public class ChannelContext : BaseContext
 			(channel.Contents.FirstOrDefault(x => x.Type == "continuation")?.Data as ContinuationRendererData)
 			?.ContinuationToken;
 		Tabs = channel.Tabs;
+		About = about;
 
 		AddMeta("description", channel.Metadata.Description);
 		AddMeta("author", channel.Metadata.Title);

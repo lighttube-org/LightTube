@@ -681,12 +681,13 @@
 	display: grid;
 	grid-auto-columns: auto;
 	grid-auto-rows: auto;
+	padding: 0 16px;
 }
 
 @media screen and (min-width: 700px) {
 	.renderer-channelaboutfullmetadatarenderer {
 		column-gap: 96px;
-		grid-template-areas: "description stats" "links .";
+		grid-template-areas: "description stats" "links stats";
 	}
 }
 
@@ -724,7 +725,18 @@
 	border-bottom: 1px solid var(--border-color);
 }
 
-.channel-about-links > a {
+.channel-about-link {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+}
+
+.channel-about-link > img {
+	width: 24px;
+	height: 24px;
+}
+
+.channel-about-link > a {
 	text-decoration: none;
 	color: var(--text-link);
 }

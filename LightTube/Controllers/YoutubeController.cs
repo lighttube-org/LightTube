@@ -8,6 +8,7 @@ using LightTube.Database;
 using LightTube.Database.Models;
 using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.Controllers;
@@ -210,6 +211,36 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 				HttpContext.GetInnerTubeRegion());
 		await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
 		return Ok(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("modal.close"));
+	}
+
+	[Route("/channel/{id}/about")]
+	public async Task<IActionResult> Channel(string id)
+	{
+		if (id.StartsWith("LT"))
+		{
+			// nuh uh
+			return Redirect($"/channel/{id}");
+		}
+
+		InnerTubeChannel channel = await innerTube.GetChannelAsync(id, ChannelTabs.Featured,
+			HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
+		InnerTubeAboutChannel? about = await innerTube.GetAboutChannelAsync(id, HttpContext.GetInnerTubeLanguage(),
+			HttpContext.GetInnerTubeRegion());
+		if (about == null)
+		{
+			return Redirect($"/channel/{id}");
+		}
+
+		try
+		{
+			await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel), true);
+		}
+		catch (Exception)
+		{
+			// ignored
+		}
+
+		return View(new ChannelContext(HttpContext, ChannelTabs.About, channel, id, about));
 	}
 
 	[Route("/channel/{id}/{tab}")]

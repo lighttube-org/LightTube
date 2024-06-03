@@ -24,6 +24,11 @@
   "account.register.disabled": "This instance doesn't allow account registrations",
   "account.register.disabled.home": "Go to home",
 
+  "channel.about.description": "Description",
+  "channel.about.artistbio": "Artist Biography",
+  "channel.about.views": "{0} views",
+  "channel.about.joined": "Joined {0}",
+  "channel.about.links": "Links",
   "channel.banner": "Channel Banner",
   "channel.supporter.avatar": "User Avatar",
   "channel.accountsettings": "Account Settings",

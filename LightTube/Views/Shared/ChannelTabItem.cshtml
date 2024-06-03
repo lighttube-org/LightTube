@@ -1,9 +1,10 @@
-﻿@using ChannelTab = InnerTube.Models.ChannelTab
-@model (ChannelTab Tab, string Id, LightTube.Localization.LocalizationManager Localization)
+﻿@using InnerTube
+@using ChannelTab = InnerTube.Models.ChannelTab
+@model (ChannelTab Tab, string Id, bool HasAbout, LightTube.Localization.LocalizationManager Localization)
 @{
 	string className = "channel-tabs__item";
 	
-	if (Model.Tab.Selected)
+	if (Model.Tab.Selected && !Model.HasAbout)
 	{
 		className += " active";
 	}
