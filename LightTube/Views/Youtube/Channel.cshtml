@@ -23,7 +23,7 @@
 			<div class="channel-info__info">
 				<span class="channel-info__name ml-1 title">@Model.ChannelTitle</span>
 				<span class="channel-info__subs">@Model.Handle • @Model.Localization.FormatString("channel.header.subscribers", Model.SubscriberCount.ToKMB()) • @Model.Localization.FormatString("channel.header.videos", Model.VideoCount)</span>
-				<a class="channel-info__tagline" href="@(Model.LightTubeAccount ? "" : $"/channel/{Model.Id}/about")">@Model.Tagline</a>
+				<span class="channel-info__tagline ml-1">@Model.Tagline</span>
 				<span class="channel-info__links">
 					@Html.Raw(Model.PrimaryLink) @Html.Raw(Model.SecondaryLink)
 				</span>
