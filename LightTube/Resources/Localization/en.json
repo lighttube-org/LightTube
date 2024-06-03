@@ -125,6 +125,8 @@
   "playlist.visibility.1": "Unlisted",
   "playlist.visibility.2": "Public",
 
+  "post.view.youtube": "View on YouTube",
+
   "rss.title": "RSS",
   "rss.explain.title": "Use an RSS feed reader with LightTube",
   "rss.explain.description": "To get a customized RSS feed that contains all the videos of the channels you're subscribed to, just enter the following parameters in your RSS reader:",
