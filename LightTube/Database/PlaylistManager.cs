@@ -156,26 +156,13 @@ public class PlaylistManager(
         {
             Id = video.Details.Id,
             Title = video.Details.Title,
-            Thumbnails = [
-                new Thumbnail
-                {
-                    Url = $"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg",
-                    Width = 480,
-                    Height = 360
-                }
-            ],
+            Thumbnails = video.Details.Thumbnails,
             Views = 0,
             Channel = new DatabaseVideoAuthor
             {
                 Id = video.Details.Author.Id!,
                 Name = video.Details.Author.Title,
-                Avatars =
-                [
-                    new Thumbnail
-                    {
-                        Url = video.Details.Author.Avatar!.First().Url
-                    }
-                ]
+                Avatars = []
             },
             Duration = video.Details.Length!.Value.ToDurationString()
         });
