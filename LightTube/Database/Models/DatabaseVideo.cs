@@ -11,7 +11,7 @@ public class DatabaseVideo
     public string Id;
     public string Title;
     public Thumbnail[] Thumbnails;
-    public string UploadedAt;
+    public string? UploadedAt;
     public long Views;
     [BsonIgnore] public string ViewsCount => $"{Views:N0} views";
     public DatabaseVideoAuthor Channel;
@@ -31,8 +31,7 @@ public class DatabaseVideo
         Channel = new()
         {
             Id = player.Details.Author.Id,
-            Name = player.Details.Author.Title,
-            Avatars = player.Details.Author.Avatar!
+            Name = player.Details.Author.Title
         };
         Duration = player.Details.Length!.Value.ToDurationString();
     }

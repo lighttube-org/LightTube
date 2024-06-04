@@ -6,6 +6,7 @@ public class LightTubeBsonSerializationProvider : IBsonSerializationProvider
 {
 	public IBsonSerializer? GetSerializer(Type type)
 	{
-		return type == typeof(int) ? new BsonNullableIntSerializer() : null;
+		return type == typeof(int) ? new BsonNullableIntSerializer() :
+			type == typeof(string) ? new BsonNullableStringSerializer() : null;
 	}
 }

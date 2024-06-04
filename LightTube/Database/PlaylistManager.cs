@@ -161,8 +161,7 @@ public class PlaylistManager(
             Channel = new DatabaseVideoAuthor
             {
                 Id = video.Details.Author.Id!,
-                Name = video.Details.Author.Title,
-                Avatars = []
+                Name = video.Details.Author.Title
             },
             Duration = video.Details.Length!.Value.ToDurationString()
         });

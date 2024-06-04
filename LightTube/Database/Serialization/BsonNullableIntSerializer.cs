@@ -17,7 +17,12 @@ public class BsonNullableIntSerializer : SerializerBase<int>
 			case BsonType.Int32:
 				return context.Reader.ReadInt32();
 			default:
-				return 0;
+				throw new NotSupportedException($"Cannot convert a {type} to a Int32.");
 		}
+	}
+
+	public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, int value)
+	{
+		context.Writer.WriteInt32(value);
 	}
 }
