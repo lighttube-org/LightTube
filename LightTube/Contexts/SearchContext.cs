@@ -14,9 +14,10 @@ public class SearchContext : BaseContext
     public RendererContainer? Sidebar;
     public IEnumerable<RendererContainer> Chips;
     public string? Continuation;
+    public int? CurrentPage;
 
-    public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeSearchResults search,
-        RendererContainer? sidebar) : base(context)
+    public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeSearchResults search, 
+        int currentPage, RendererContainer? sidebar) : base(context)
     {
         Query = query;
         Filter = filter;
@@ -24,10 +25,12 @@ public class SearchContext : BaseContext
         Results = Search.Results;
         Continuation = Search.Continuation;
         Chips = Search.Chips;
+        CurrentPage = currentPage;
         Sidebar = sidebar;
     }
 
-    public SearchContext(HttpContext context, string query, SearchParams? filter, SearchContinuationResponse search) : base(context)
+    public SearchContext(HttpContext context, string query, SearchParams? filter, SearchContinuationResponse search) :
+        base(context)
     {
         Query = query;
         Filter = filter;
@@ -35,6 +38,7 @@ public class SearchContext : BaseContext
         Results = search.Results;
         Continuation = search.ContinuationToken;
         Chips = search.Chips ?? [];
+        CurrentPage = null;
         Sidebar = null;
     }
 }

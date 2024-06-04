@@ -473,6 +473,42 @@ public static class Utils
 		return searchParams;
 	}
 
+	public static string BuildSearchQueryString(string query, SearchParams? filters, int? page)
+	{
+		StringBuilder sb = new();
+
+		sb.Append("search_query=" + HttpUtility.UrlEncode(query));
+		if (page != null)
+			sb.Append("&page=" + page);
+
+		if (filters != null)
+		{
+			if (filters.Filters.UploadedIn != SearchFilters.Types.UploadDate.UnsetDate) 
+				sb.AppendLine("&uploadDate=" + (int)filters.SortBy);
+			if (filters.Filters.Type != SearchFilters.Types.ItemType.UnsetType) 
+				sb.AppendLine("&type=" + (int)filters.SortBy);
+			if (filters.Filters.Duration != SearchFilters.Types.VideoDuration.UnsetDuration) 
+				sb.AppendLine("&duration=" + (int)filters.SortBy);
+			if (filters.SortBy != SearchParams.Types.SortField.Relevance) 
+				sb.AppendLine("&sortField=" + (int)filters.SortBy);
+			
+			if (filters.Filters?.Live == true) sb.AppendLine("&live=on");
+			if (filters.Filters?.Resolution4K == true) sb.AppendLine("&_4k=on");
+			if (filters.Filters?.Hd == true) sb.AppendLine("&hd=on");
+			if (filters.Filters?.Subtitles == true) sb.AppendLine("&subs=on");
+			if (filters.Filters?.CreativeCommons == true) sb.AppendLine("&cc=on");
+			if (filters.Filters?.Vr360 == true) sb.AppendLine("&vr360=on");
+			if (filters.Filters?.Vr180 == true) sb.AppendLine("&vr180=on");
+			if (filters.Filters?.Resolution3D == true) sb.AppendLine("&_3d=on");
+			if (filters.Filters?.Hdr == true) sb.AppendLine("&hdr=on");
+			if (filters.Filters?.Location == true) sb.AppendLine("&location=on");
+			if (filters.Filters?.Purchased == true) sb.AppendLine("&purchased=on");
+			if (filters.QueryFlags?.ExactSearch == true) sb.AppendLine("&exact=on");
+		}
+
+		return sb.ToString();
+	}
+
 	public static bool ShouldShowAlert(HttpRequest request)
 	{
 		if (Configuration.AlertHash == null) return false;

@@ -159,7 +159,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 
 	[Route("search")]
 	[ApiDisableable]
-	public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null)
+	public async Task<ApiResponse<ApiSearchResults>> Search(string query, string? continuation = null, int? index = null)
 	{
 		if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(continuation))
 		{
@@ -173,6 +173,8 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		if (continuation is null)
 		{
 			SearchParams searchParams = Request.GetSearchParams();
+			if (index != null)
+				searchParams.Index = index.Value;
 			InnerTubeSearchResults results = await innerTube.SearchAsync(query, searchParams,
 				HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
 			result = new ApiSearchResults(results, searchParams);

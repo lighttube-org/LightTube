@@ -138,18 +138,20 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 	}
 
 	[Route("/results")]
-	public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null)
+	public async Task<IActionResult> Search(string search_query, string? filter = null, string? continuation = null, int? page = null)
 	{
 		if (!string.IsNullOrWhiteSpace(search_query))
 			Response.Cookies.Append("lastSearch", search_query);
 		if (continuation is null)
 		{
 			SearchParams searchParams = Request.GetSearchParams();
-
+			if (page != null && page > 0)
+				searchParams.Index = (page.Value - 1) * 20;
 			InnerTubeSearchResults search =
 				await innerTube.SearchAsync(search_query, searchParams, HttpContext.GetInnerTubeLanguage(),
 					HttpContext.GetInnerTubeRegion());
-			return View(new SearchContext(HttpContext, search_query, searchParams, search, search.Sidebar));
+			return View(new SearchContext(HttpContext, search_query, searchParams, search, page ?? 1,
+				search.Sidebar));
 		}
 		else
 		{
