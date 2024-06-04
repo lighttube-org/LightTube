@@ -93,7 +93,7 @@
 				</div>
 			</a>
 			<div class="info">
-				<a href="#" class="ml-2 title" title="@playlist.Title">
+				<a href="@(playlist.FirstVideoId is not null ? $"/watch?v=${playlist.FirstVideoId}&list={playlist.PlaylistId}" : $"/playlist?list={playlist.PlaylistId}")" class="ml-2 title" title="@playlist.Title">
 					@playlist.Title
 				</a>
 				<div class="info__more">
