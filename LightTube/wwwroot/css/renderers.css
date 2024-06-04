@@ -688,6 +688,7 @@
 	.renderer-channelaboutfullmetadatarenderer {
 		column-gap: 96px;
 		grid-template-areas: "description stats" "links stats";
+		grid-template-columns: auto 300px;
 	}
 }
 
