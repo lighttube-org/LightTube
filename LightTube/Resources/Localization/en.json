@@ -238,6 +238,8 @@
   "video.subtitle": "{0} views • {1}",
   "video.movie": "Movie",
   "video.unavailable": "Unavailable",
+  "video.trailer.title": "Trailer",
+  "video.trailer.body": "Livestream will begin in {0}",
 
   "watch.noscript.resolution": "Current video resolution:",
   "watch.noscript.resolution.switch": "Switch to",

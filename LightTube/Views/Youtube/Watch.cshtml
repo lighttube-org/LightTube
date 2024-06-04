@@ -384,8 +384,10 @@
 @if (Model.Player.Player?.Details.IsFallback == true) {
 	<div class="trailer">
 		<div class="trailer-box">
-			<h1>Trailer</h1>
-			<p>Livestream will begin in @@Model.Player.Player.Details.LiveStreamStartDate</p>
+			<h1>@Model.Localization.GetString("video.trailer.title")</h1>
+			@if (Model.Player.Player.Details.LiveStreamStartDate != null) {
+				<p>@Model.Localization.FormatString("video.trailer.body", Model.Player.Player.Details.LiveStreamStartDate!.Value.Humanize(DateTimeOffset.UtcNow, Model.Localization.GetCulture()))</p>
+			}
 		</div>
 	</div>
 }
