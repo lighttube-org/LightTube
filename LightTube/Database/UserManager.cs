@@ -17,10 +17,10 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
 
     public async Task<DatabaseUser?> GetUserFromUsernamePassword(string userId, string password)
     {
-        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
+        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserId == userId);
         if (!await users.AnyAsync())
             throw new UnauthorizedAccessException("Invalid credentials");
-        DatabaseUser user = (await UserCollection.FindAsync(x => x.UserID == userId)).First();
+        DatabaseUser user = (await UserCollection.FindAsync(x => x.UserId == userId)).First();
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials");
         return user;
@@ -36,7 +36,7 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
             DatabaseOauthToken login = await loginCursor.FirstOrDefaultAsync();
             if (login is null) return null;
 
-            IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == login.UserId);
+            IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserId == login.UserId);
             return await userCursor.FirstOrDefaultAsync();
         }
         else
@@ -50,30 +50,30 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
                 Builders<DatabaseLogin>.Filter.Eq(x => x.Id, login.Id),
                 Builders<DatabaseLogin>.Update.Set(x => x.LastSeen, DateTimeOffset.UtcNow));
 
-            IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == login.UserID);
+            IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserId == login.UserID);
             return await userCursor.FirstOrDefaultAsync();
         }
     }
 
     public async Task<DatabaseUser?> GetUserFromId(string id)
     {
-        IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserID == id);
+        IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.UserId == id);
         return await userCursor.FirstOrDefaultAsync();
     }
 
     public async Task<DatabaseUser?> GetUserFromLTId(string id)
     {
-        IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.LTChannelID == id);
+        IAsyncCursor<DatabaseUser> userCursor = await UserCollection.FindAsync(x => x.LTChannelId == id);
         return await userCursor.FirstOrDefaultAsync();
     }
 
     public async Task<DatabaseLogin> CreateToken(string userId, string password, string userAgent,
         IEnumerable<string> scopes)
     {
-        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
+        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserId == userId);
         if (!await users.AnyAsync())
             throw new UnauthorizedAccessException("error.login.invalid");
-        DatabaseUser user = (await UserCollection.FindAsync(x => x.UserID == userId)).First();
+        DatabaseUser user = (await UserCollection.FindAsync(x => x.UserId == userId)).First();
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             throw new UnauthorizedAccessException("error.login.invalid");
 
@@ -136,7 +136,7 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
         else if (type != SubscriptionType.NONE)
             user.Subscriptions.Add(channelId, type);
 
-        await UserCollection.ReplaceOneAsync(x => x.UserID == user.UserID, user);
+        await UserCollection.ReplaceOneAsync(x => x.UserId == user.UserId, user);
 
         return user.Subscriptions.TryGetValue(channelId, out SubscriptionType value) ? (channelId, value)
             : (channelId, SubscriptionType.NONE);
@@ -144,14 +144,14 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
 
     public async Task DeleteUser(string userId, string password)
     {
-        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
+        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserId == userId);
         if (!await users.AnyAsync())
             throw new KeyNotFoundException("Invalid credentials");
-        DatabaseUser user = (await UserCollection.FindAsync(x => x.UserID == userId)).First();
+        DatabaseUser user = (await UserCollection.FindAsync(x => x.UserId == userId)).First();
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials");
 
-        await UserCollection.DeleteOneAsync(x => x.UserID == userId);
+        await UserCollection.DeleteOneAsync(x => x.UserId == userId);
         await TokensCollection.DeleteManyAsync(x => x.UserID == userId);
         // TODO: delete user playlists
         //foreach (DatabasePlaylist pl in await DatabaseManager.Playlists.GetUserPlaylists(userId))
@@ -160,7 +160,7 @@ public class UserManager(IMongoCollection<DatabaseUser> userCollection,
 
     public async Task CreateUser(string userId, string password)
     {
-        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserID == userId);
+        IAsyncCursor<DatabaseUser> users = await UserCollection.FindAsync(x => x.UserId == userId);
         if (await users.AnyAsync())
             throw new DuplicateNameException("A user with that User ID already exists");
 

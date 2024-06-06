@@ -45,11 +45,11 @@ public class DatabasePlaylist
 						{
 							BrowseEndpoint = new BrowseEndpoint
 							{
-								BrowseId = author.LTChannelID,
-								CanonicalBaseUrl = $"/@LT_{author.UserID}"
+								BrowseId = author.LTChannelId,
+								CanonicalBaseUrl = $"/@LT_{author.UserId}"
 							}
 						},
-						Text = author.UserID
+						Text = author.UserId
 					}
 				}
 			},
@@ -180,11 +180,11 @@ public class DatabasePlaylist
 						{
 							BrowseEndpoint = new BrowseEndpoint
 							{
-								BrowseId = author.LTChannelID,
-								CanonicalBaseUrl = $"/@LT_{author.UserID}"
+								BrowseId = author.LTChannelId,
+								CanonicalBaseUrl = $"/@LT_{author.UserId}"
 							}
 						},
-						Text = author.UserID
+						Text = author.UserId
 					}
 				}
 			},

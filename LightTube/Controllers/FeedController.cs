@@ -113,11 +113,11 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
             XmlElement channel = document.CreateElement("channel");
 
             XmlElement title = document.CreateElement("title");
-            title.InnerText = "LightTube subscriptions RSS feed for " + user.UserID;
+            title.InnerText = "LightTube subscriptions RSS feed for " + user.UserId;
             channel.AppendChild(title);
 
             XmlElement description = document.CreateElement("description");
-            description.InnerText = $"LightTube subscriptions RSS feed for {user.UserID} with {user.Subscriptions.Count} channels";
+            description.InnerText = $"LightTube subscriptions RSS feed for {user.UserId} with {user.Subscriptions.Count} channels";
             channel.AppendChild(description);
 
             foreach (FeedVideo video in feedVideos.Take(15))
@@ -270,7 +270,7 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
         DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
         if (playlist is null) return Redirect("/");
 
-        if (playlist.Author != ctx.User.UserID) return Redirect("/");
+        if (playlist.Author != ctx.User.UserId) return Redirect("/");
 
         ctx.ItemId = playlist.Id;
         ctx.ItemTitle = playlist.Name;
@@ -312,7 +312,7 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
         DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
         if (playlist is null) return Redirect("/");
 
-        if (playlist.Author != ctx.User.UserID) return Redirect("/");
+        if (playlist.Author != ctx.User.UserId) return Redirect("/");
 
         ctx.ItemId = playlist.Id;
         ctx.ItemTitle = playlist.Name;
@@ -351,7 +351,7 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
             HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
         PlaylistVideoContext<IEnumerable<DatabasePlaylist>> pvc = new(HttpContext, videoDetails);
         if (pvc.User is null) return Redirect("/account/login?redirectUrl=" + HttpUtility.UrlEncode(Request.Path + Request.Query));
-        pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserID, PlaylistVisibility.Private);
+        pvc.Extra = DatabaseManager.Playlists.GetUserPlaylists(pvc.User.UserId, PlaylistVisibility.Private);
         pvc.Buttons =
         [
             new ModalButton("", "|", ""),
@@ -392,7 +392,7 @@ public class FeedController(SimpleInnerTubeClient innerTube) : Controller
         DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(list);
         if (playlist is null) return Redirect("/");
 
-        if (playlist.Author != pvc.User.UserID) return Redirect("/");
+        if (playlist.Author != pvc.User.UserId) return Redirect("/");
 
         pvc.Buttons =
         [

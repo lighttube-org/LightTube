@@ -117,7 +117,7 @@ public class ChannelContext : BaseContext
 		CurrentTab = ChannelTabs.Playlists;
 		BannerUrl = null;
 		AvatarUrl = "";
-		ChannelTitle = channel.UserID;
+		ChannelTitle = channel.UserId;
 		Handle = "@LT_" + id;
 		SubscriberCount = 0;
 		VideoCount = 0;
@@ -125,7 +125,7 @@ public class ChannelContext : BaseContext
 		PrimaryLink = null;
 		SecondaryLink = null;
 		LightTubeAccount = true;
-		Editable = channel.UserID == User?.UserID;
+		Editable = channel.UserId == User?.UserId;
 		Tabs = new ReadOnlyCollection<ChannelTab>([
 			new ChannelTab(new TabRenderer
 			{

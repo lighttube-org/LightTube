@@ -90,7 +90,7 @@ public class WatchContext : BaseContext
 			DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization),
 			Localization);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
-			if (playlist.Author != User?.UserID)
+			if (playlist.Author != User?.UserId)
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;
@@ -130,7 +130,7 @@ public class WatchContext : BaseContext
 			DatabaseManager.Playlists.GetPlaylistVideos(playlist.Id, Localization),
 			Localization);
 		if (playlist != null && playlist.Visibility == PlaylistVisibility.Private)
-			if (playlist.Author != User?.UserID)
+			if (playlist.Author != User?.UserId)
 				Playlist = null;
 		Comments = comments;
 		Dislikes = dislikes;

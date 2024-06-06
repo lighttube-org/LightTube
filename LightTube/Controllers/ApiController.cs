@@ -242,7 +242,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 
 				if (playlist.Visibility == PlaylistVisibility.Private)
 				{
-					if (playlist.Author != user?.UserID)
+					if (playlist.Author != user?.UserId)
 						return Error<ApiPlaylist>("The playlist does not exist.", 404,
 							HttpStatusCode.InternalServerError);
 				}

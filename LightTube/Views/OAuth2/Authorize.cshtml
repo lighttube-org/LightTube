@@ -9,7 +9,7 @@
 @if (Model.Error is null)
 {
 	<p style="text-align:center;color:#555;font-style:italic">
-		@Model.Localization.FormatString("oauth2.user", Model.User!.UserID)
+		@Model.Localization.FormatString("oauth2.user", Model.User!.UserId)
 	</p>
 	<p>
 		@Model.Localization.FormatString("oauth2.user", Model.Name)
