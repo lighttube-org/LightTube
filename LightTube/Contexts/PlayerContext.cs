@@ -29,7 +29,7 @@ public class PlayerContext : BaseContext
         ClassName = className;
         PreferredItag = int.TryParse(preferredItag ?? "18", out int itag) ? itag : 18;
         Sponsors = sponsors;
-        UseHls = !compatibility; // Prefer HLS
+        UseHls = !compatibility && !string.IsNullOrWhiteSpace(innerTubePlayer.HlsManifestUrl); // Prefer HLS
         UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;
         // Formats
         if (!Configuration.ProxyEnabled)
