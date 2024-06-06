@@ -29,7 +29,7 @@ public class PlaylistContext : BaseContext
         AuthorName = playlist.Sidebar.Channel?.Title ?? "????";
         AuthorId = playlist.Sidebar.Channel?.Id ?? "UC";
         ViewCountText = playlist.Sidebar.ViewCountText;
-        LastUpdatedText = playlist.Sidebar.LastUpdated;
+        LastUpdatedText = playlist.Sidebar.LastUpdatedText;
         Editable = false;
         Items = playlist.Contents;
         Continuation = playlist.Continuation;
@@ -57,7 +57,7 @@ public class PlaylistContext : BaseContext
         AuthorName = playlist.Sidebar.Channel?.Title ?? "????";
         AuthorId = playlist.Sidebar.Channel?.Id ?? "UC";
         ViewCountText = playlist.Sidebar.ViewCountText;
-        LastUpdatedText = playlist.Sidebar.LastUpdated;
+        LastUpdatedText = playlist.Sidebar.LastUpdatedText;
         Editable = false;
         Items = continuation.Results;
         Continuation = continuation.ContinuationToken;
