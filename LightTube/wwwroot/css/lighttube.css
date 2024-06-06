@@ -230,6 +230,7 @@ a {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
+    flex-shrink: 0;
 }
 
 .ml-1 {
