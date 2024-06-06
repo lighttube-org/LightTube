@@ -392,6 +392,12 @@
 	gap: 4px;
 }
 
+.comment .header {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+
 .comment__buttons {
 	display: flex;
 	align-items: center;
