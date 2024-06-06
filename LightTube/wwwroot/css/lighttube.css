@@ -1705,6 +1705,10 @@ code {
     z-index: 25;
 }
 
+.trailer, .trailer * {
+    pointer-events: none;
+}
+
 .trailer-box {
     width: 50%;
     float: right;
