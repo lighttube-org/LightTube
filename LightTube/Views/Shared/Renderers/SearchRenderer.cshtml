@@ -23,7 +23,10 @@
 				</a>
 				<div class="info__more">
 					<div>
-						@video.ViewCountText • @video.PublishedText
+					@if (Model.Renderer.OriginalType != "movieRenderer")
+					{
+						@:@(video.ViewCountText + " • " + video.PublishedText)
+					}
 					</div>
 					@if (video.Author != null)
 					{
