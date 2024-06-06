@@ -414,7 +414,7 @@
 			}
 		</details>
 	</div>
-	@if (Model.Sidebar != null)
+	@if (Model.Sidebar is { Data: SearchSidebarRendererData })
 	{
 		<div class="search-results-container">
 			<partial name="Renderers/SearchSidebar" model="(Model.Sidebar, Model.Localization)"/>
