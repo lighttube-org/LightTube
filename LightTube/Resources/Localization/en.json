@@ -34,6 +34,8 @@
   "channel.accountsettings": "Account Settings",
   "channel.header.subscribers": "{0} subscribers",
   "channel.header.videos": "{0} videos",
+  "channel.recognition.title": "Our members",
+  "channel.recognition.subtitle": "Thank you, channel members!",
   "channel.tab.featured": "Home",
   "channel.tab.videos": "Videos",
   "channel.tab.shorts": "Shorts",

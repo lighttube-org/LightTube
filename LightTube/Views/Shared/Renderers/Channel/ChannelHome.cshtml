@@ -1,6 +1,8 @@
 @using InnerTube
 @using InnerTube.Models
+@using InnerTube.Protobuf
 @using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model (IEnumerable<RendererContainer> Renderers, LightTube.Localization.LocalizationManager Localization)
 
 @foreach (RendererContainer renderer in Model.Renderers.Select(x => x.OriginalType == "itemSectionRenderer" ? (x.Data as ContainerRendererData)!.Items.First() : x))
@@ -36,6 +38,22 @@
 		case "container":
 			ContainerRendererData container = (ContainerRendererData)renderer.Data;
 			<partial name="Renderers/ContainerRenderer" model="(container, Model.Localization)"/>
+			break;
+		case "recognitionShelf":
+			RecognitionShelfRendererData recognition = (RecognitionShelfRendererData)renderer.Data;
+			<div class="renderer-recognitionshelfrenderer">
+				<div class="recognition-shelf-text">
+					<div class="ml-1 title">@Model.Localization.GetString("channel.recognition.title")</div>
+					<div class="ml-1">@Model.Localization.GetString("channel.recognition.subtitle")</div>
+				</div>
+				<div class="flex-divider"></div>
+				<div class="recognition-shelf-items">
+					@foreach (string avatar in recognition.Avatars.Take(7))
+					{
+						<img loading="lazy" src="@avatar" alt="User Avatar">
+					}
+				</div>
+			</div>
 			break;
 		case "unknown":
 			<div>
