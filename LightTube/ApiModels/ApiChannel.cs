@@ -46,7 +46,7 @@ public class ApiChannel
 	{
 		Header = new ChannelHeader(new PageHeaderRenderer
 		{
-			PageTitle = channel.UserId,
+			PageTitle = channel.UserID,
 			Content = new RendererWrapper
 			{
 				PageHeaderViewModel = new PageHeaderViewModel
@@ -83,7 +83,7 @@ public class ApiChannel
 											{
 												Text = new AttributedDescription
 												{
-													Content = $"@LT_{channel.UserId}"
+													Content = $"@LT_{channel.UserID}"
 												}
 											}
 									}
@@ -125,7 +125,7 @@ public class ApiChannel
 					}
 				}
 			}
-		}, channel.LTChannelId, "en");
+		}, channel.LTChannelID, "en");
 		Tabs =
 		[
 			new ChannelTab(new TabRenderer

@@ -24,7 +24,7 @@
 			</th>
 			<td>
 				@if (Model.User is not null) {
-					<code>@Model.User.UserId</code>
+					<code>@Model.User.UserID</code>
 				}
 				else
 				{
@@ -46,7 +46,7 @@
 <p>@Model.Localization.GetString("rss.explain.authentication")</p>
 
 @if (Model.User is not null) {
-	<code>https://@Model.User.UserId:&lt;@Model.Localization.GetString("rss.explain.password.url")&gt;@@@Context.Request.Host/feed/rss.xml</code>
+	<code>https://@Model.User.UserID:&lt;@Model.Localization.GetString("rss.explain.password.url")&gt;@@@Context.Request.Host/feed/rss.xml</code>
 }
 else
 {

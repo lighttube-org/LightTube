@@ -100,7 +100,7 @@ public class PlaylistManager(
             Description = description,
             Visibility = visibility,
             VideoIds = [],
-            Author = u.UserId,
+            Author = u.UserID,
             LastUpdated = DateTimeOffset.UtcNow
         };
 
@@ -119,7 +119,7 @@ public class PlaylistManager(
         if (playlist is null)
             throw new KeyNotFoundException("Playlist not found");
 
-        if (u.UserId != playlist.Author)
+        if (u.UserID != playlist.Author)
             throw new UnauthorizedAccessException("Unauthorized");
 
         if (!playlist.VideoIds.Contains(video.Details.Id))
@@ -153,7 +153,7 @@ public class PlaylistManager(
         if (playlist is null)
             throw new KeyNotFoundException("Playlist not found");
 
-        if (u.UserId != playlist.Author)
+        if (u.UserID != playlist.Author)
             throw new UnauthorizedAccessException("Unauthorized");
 
         playlist.VideoIds.Remove(videoId);
@@ -173,7 +173,7 @@ public class PlaylistManager(
         if (playlist is null)
             throw new KeyNotFoundException("Playlist not found");
 
-        if (u.UserId != playlist.Author)
+        if (u.UserID != playlist.Author)
             throw new UnauthorizedAccessException("Unauthorized");
 
         playlist.Name = title;
@@ -195,7 +195,7 @@ public class PlaylistManager(
         if (playlist is null)
             throw new KeyNotFoundException("Playlist not found");
 
-        if (u.UserId != playlist.Author)
+        if (u.UserID != playlist.Author)
             throw new UnauthorizedAccessException("Unauthorized");
 
         await PlaylistCollection.DeleteOneAsync(x => x.Id == id);

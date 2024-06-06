@@ -21,7 +21,7 @@ public class ExportController : Controller
             Type = $"LightTube/{Utils.GetVersion()}",
             Host = Request.Host.ToString(),
             Subscriptions = [.. context.User.Subscriptions.Keys],
-            Playlists = DatabaseManager.Playlists.GetUserPlaylists(context.User.UserId, PlaylistVisibility.Private)
+            Playlists = DatabaseManager.Playlists.GetUserPlaylists(context.User.UserID, PlaylistVisibility.Private)
                 .Select(x => new ImportedData.Playlist
                 {
                     Title = x.Name,
@@ -33,6 +33,6 @@ public class ExportController : Controller
                 }).ToArray()
         };
         return File(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(export)), "application/json",
-            $"LightTubeExport_{context.User.UserId}.json");
+            $"LightTubeExport_{context.User.UserID}.json");
     }
 }

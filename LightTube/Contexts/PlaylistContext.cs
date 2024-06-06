@@ -77,7 +77,7 @@ public class PlaylistContext : BaseContext
 
     public PlaylistContext(HttpContext context, DatabasePlaylist? playlist) : base(context)
     {
-        bool visible = playlist?.Visibility != PlaylistVisibility.Private || User != null && User.UserId == playlist.Author;
+        bool visible = playlist?.Visibility != PlaylistVisibility.Private || User != null && User.UserID == playlist.Author;
 
         if (visible && playlist != null)
         {
@@ -86,10 +86,10 @@ public class PlaylistContext : BaseContext
             PlaylistTitle = playlist.Name;
             PlaylistDescription = playlist.Description;
             AuthorName = playlist.Author;
-            AuthorId = DatabaseManager.Users.GetUserFromId(playlist.Author).Result?.LTChannelId ?? "";
+            AuthorId = DatabaseManager.Users.GetUserFromId(playlist.Author).Result?.LTChannelID ?? "";
             ViewCountText = Localization.GetRawString("playlist.lighttube.views");
             LastUpdatedText = string.Format(Localization.GetRawString("playlist.lastupdated"), playlist.LastUpdated.ToString("MMM d, yyyy"));
-            Editable = User != null && User.UserId == playlist.Author;
+            Editable = User != null && User.UserID == playlist.Author;
             Items = DatabaseManager.Playlists.GetPlaylistVideoRenderers(playlist.Id, Editable, Localization);
         }
         else

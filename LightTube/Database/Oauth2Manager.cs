@@ -14,7 +14,7 @@ public class Oauth2Manager(IMongoCollection<DatabaseOauthToken> oauthTokensColle
         string refreshToken = Utils.GenerateToken(512);
         await OauthTokensCollection.InsertOneAsync(new DatabaseOauthToken
         {
-            UserId = user.UserId,
+            UserId = user.UserID,
             ClientId = clientId,
             RefreshToken = refreshToken,
             CurrentAuthToken = null,

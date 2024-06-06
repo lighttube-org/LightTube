@@ -23,10 +23,10 @@ public class DatabaseCleanupChore : IChore
         while (await allUsers.MoveNextAsync())
             foreach (DatabaseUser user in allUsers.Current)
             {
-                if (users.Contains(user.UserId))
-                    updateStatus("Duplicate UserID: " + user.UserId);
+                if (users.Contains(user.UserID))
+                    updateStatus("Duplicate UserID: " + user.UserID);
                 else
-                    users.Add(user.UserId);
+                    users.Add(user.UserID);
                 foreach (string channel in user.Subscriptions?.Keys.ToArray() ?? [])
                     if (!channels.Contains(channel))
                         channels.Add(channel);

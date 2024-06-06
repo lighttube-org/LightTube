@@ -10,7 +10,7 @@ public class LibraryContext : BaseContext
     public LibraryContext(HttpContext context) : base(context)
     {
         Playlists = User != null
-            ? DatabaseManager.Playlists.GetUserPlaylists(User.UserId, PlaylistVisibility.Private)
+            ? DatabaseManager.Playlists.GetUserPlaylists(User.UserID, PlaylistVisibility.Private)
             : [];
     }
 }
