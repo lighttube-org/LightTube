@@ -248,7 +248,7 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 				}
 
 				result = new ApiPlaylist(playlist, (await DatabaseManager.Users.GetUserFromId(playlist.Author))!,
-					LocalizationManager.GetFromHttpContext(HttpContext));
+					LocalizationManager.GetFromHttpContext(HttpContext), user);
 			}
 			else if (continuation is null)
 			{

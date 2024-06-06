@@ -17,6 +17,7 @@ public class ApiPlaylist
 	public RendererContainer[] Chips { get; }
 	public string? Continuation { get; }
 	public PlaylistSidebar? Sidebar { get; }
+	public bool Editable { get; }
 
 	public ApiPlaylist(InnerTubePlaylist playlist)
 	{
@@ -26,6 +27,7 @@ public class ApiPlaylist
 		Chips = playlist.Chips;
 		Continuation = playlist.Continuation;
 		Sidebar = playlist.Sidebar;
+		Editable = false;
 	}
 
 	public ApiPlaylist(ContinuationResponse playlist)
@@ -36,15 +38,17 @@ public class ApiPlaylist
 		Chips = [];
 		Continuation = playlist.ContinuationToken;
 		Sidebar = null;
+		Editable = false;
 	}
 
-	public ApiPlaylist(DatabasePlaylist playlist, DatabaseUser author, LocalizationManager localization)
+	public ApiPlaylist(DatabasePlaylist playlist, DatabaseUser author, LocalizationManager localization, DatabaseUser? user)
 	{
 		Id = playlist.Id;
 		Alerts = [];
-		Contents = DatabaseManager.Playlists.GetPlaylistVideoRenderers(playlist.Id, false, localization).ToArray();
+		Contents = DatabaseManager.Playlists.GetPlaylistVideoRenderers(playlist.Id, playlist.Author == user?.UserID, localization).ToArray();
 		Chips = [];
 		Continuation = null;
 		Sidebar = new PlaylistSidebar(playlist.GetHeaderRenderer(author, localization), "en");
+		Editable = playlist.Author == user?.UserID;
 	}
 }
