@@ -1257,7 +1257,6 @@ input#comments-toggle {
 }
 
 .channel-info__tagline {
-    text-decoration: underline;
     color: var(--text-secondary);
 }
 
