@@ -10,15 +10,19 @@
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<meta property="theme-color" content="#AA0000"/>
-	<meta property="author" content="@Model.Video.Channel.Title"/>
-	<meta property="og:site_name" content="lighttube"/>
-	<meta property="og:type" content="website"/>
-	<meta property="og:title" content="@Model.Video.Title"/>
-	<meta property="og:url" content="@($"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}{Url.ActionContext.HttpContext.Request.Path}{Url.ActionContext.HttpContext.Request.QueryString}")"/>
-	<meta property="og:image" content="@($"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/thumbnail/{Model.Video.Id}/0")"/>
-	<meta property="og:description" content="@Model.Video.Description"/>
-	<meta property="twitter:card" content="@($"{Url.ActionContext.HttpContext.Request.Scheme}://{Url.ActionContext.HttpContext.Request.Host}/proxy/thumbnail/{Model.Video.Id}/-1")"/>
+	<meta description="@(Model.Video.Description)"/>
+	<meta author="@(Model.Video.Channel.Title)"/>
+	<meta og:title="@(Model.Video.Title)"/>
+	<meta og:description="@(Model.Video.Description)"/>
+	<meta og:url="@($"{Context.Request.Scheme}://{Context.Request.Host}/{Context.Request.Path}{Context.Request.QueryString}")"/>
+	<meta og:image="@($"{Context.Request.Scheme}://{Context.Request.Host}/proxy/thumbnail/{Model.Video.Id}/-1")"/>
+	<meta og:video:url="@($"https://{Context.Request.Host}/proxy/media/{Model.Video.Id}/18.mp4")"/>
+	<meta og:video:width="640"/>
+	<meta og:video:height="360"/>
+	<meta og:type="video.other"/>
+	<meta twitter:card="@($"{Context.Request.Scheme}://{Context.Request.Host}/proxy/thumbnail/{Model.Video.Id}/-1")"/>
+	<meta twitter:player="@($"https://{Context.Request.Host}/embed/{Model.Video.Id}")"/>
+	<meta twitter:player:stream="@($"https://{Context.Request.Host}/proxy/media/{Model.Video.Id}/18.mp4")"/>
 	<link rel="stylesheet" href="/lib/ltplayer.css">
 	<title>@Model.Player.Player?.Details.Title - LightTube</title>
 	<style>

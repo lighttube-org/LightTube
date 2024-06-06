@@ -24,8 +24,7 @@ public class HomeController(ILogger<HomeController> logger) : Controller
 
         if (fileName == null) return NotFound();
 
-        using FileStream fs = System.IO.File.OpenRead(fileName);
-        return File(fs, "text/css");
+        return File(System.IO.File.ReadAllBytes(fileName), "text/css");
     }
 
     [Route("/lib/{name}")]
@@ -52,5 +51,11 @@ public class HomeController(ILogger<HomeController> logger) : Controller
             Expires = DateTimeOffset.UtcNow.AddDays(15)
         });
         return Redirect(redirectUrl);
+    }
+
+    [Route("/{videoId:regex([[a-zA-Z0-9-_]]{{11}})}")]
+    public IActionResult VideoRedirect(string videoId)
+    {
+        return Redirect($"/watch?v={videoId}");
     }
 }

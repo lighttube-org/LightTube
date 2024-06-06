@@ -1,4 +1,4 @@
-using InnerTube;
+using InnerTube.Models;
 using LightTube.ApiModels;
 using LightTube.Database.Models;
 
@@ -11,7 +11,7 @@ public class UpdateSubscriptionResponse
     public bool Subscribed { get; }
     public bool Notifications { get; }
 
-    public UpdateSubscriptionResponse(InnerTubeChannelResponse channel, SubscriptionType subscription)
+    public UpdateSubscriptionResponse(InnerTubeChannel channel, SubscriptionType subscription)
     {
         try
         {
@@ -26,6 +26,6 @@ public class UpdateSubscriptionResponse
         }
 
         ChannelName = channel.Metadata.Title;
-        ChannelAvatar = channel.Metadata.Avatar.Last().Url.ToString();
+        ChannelAvatar = channel.Metadata.AvatarUrl;
     }
 }

@@ -27,7 +27,7 @@ public class DatabaseCleanupChore : IChore
                     updateStatus("Duplicate UserID: " + user.UserID);
                 else
                     users.Add(user.UserID);
-                foreach (string channel in user.Subscriptions?.Keys.ToArray() ?? user.SubscribedChannels)
+                foreach (string channel in user.Subscriptions?.Keys.ToArray() ?? [])
                     if (!channels.Contains(channel))
                         channels.Add(channel);
             }

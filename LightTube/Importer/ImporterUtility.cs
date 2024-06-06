@@ -108,10 +108,10 @@ public static class ImporterUtility
             item.TimeUpdated = DateTimeOffset.Parse(infoParts[3]);
             item.Visibility = infoParts[6] switch
             {
-                "Public" => PlaylistVisibility.VISIBLE,
-                "Unlisted" => PlaylistVisibility.UNLISTED,
-                "Private" => PlaylistVisibility.PRIVATE,
-                _ => PlaylistVisibility.PRIVATE
+                "Public" => PlaylistVisibility.Visible,
+                "Unlisted" => PlaylistVisibility.Unlisted,
+                "Private" => PlaylistVisibility.Private,
+                _ => PlaylistVisibility.Private
             };
             item.VideoIds = videosPart.Select(x => x.Split(',')[0]).ToArray();
             importedData.Playlists.Add(item);
@@ -174,10 +174,10 @@ public static class ImporterUtility
                 TimeUpdated = null,
                 Visibility = playlist["privacy"]!.ToObject<string>()! switch
                 {
-                    "Public" => PlaylistVisibility.VISIBLE,
-                    "Unlisted" => PlaylistVisibility.UNLISTED,
-                    "Private" => PlaylistVisibility.PRIVATE,
-                    _ => PlaylistVisibility.PRIVATE
+                    "Public" => PlaylistVisibility.Visible,
+                    "Unlisted" => PlaylistVisibility.Unlisted,
+                    "Private" => PlaylistVisibility.Private,
+                    _ => PlaylistVisibility.Private
                 },
                 VideoIds = playlist["videos"]!.ToObject<string[]>()!
             });
@@ -228,7 +228,7 @@ public static class ImporterUtility
                 // Piped doesn't seem to have playlist privacy, and
                 // from my testing, I could just access a playlist I
                 // created without logging in (which makes it not private)
-                Visibility = PlaylistVisibility.UNLISTED,
+                Visibility = PlaylistVisibility.Unlisted,
                 VideoIds = playlist["videos"]!.ToObject<string[]>()!.Select(x => x.Split("?v=")[1]).ToArray()
             });
         }

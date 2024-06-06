@@ -1,0 +1,100 @@
+@using InnerTube.Renderers;
+@model (RendererContainer Renderer, LightTube.Localization.LocalizationManager Localization)
+@{
+	SearchSidebarRendererData renderer = (SearchSidebarRendererData)Model.Renderer.Data;
+}
+
+<div class="search-sidebar">
+	<div class="sidebar-header">
+		<div class="sidebar-header-info">
+			<div class="sidebar-header-info__avatar">
+				<img src="@renderer.Avatar.LastOrDefault()?.Url"/>
+			</div>
+			<div class="sidebar-header-info__info">
+				<div class="title ml-1">@renderer.Title</div>
+				<div class="ml-1">@renderer.Subtitle</div>
+			</div>
+		</div>
+		@if (renderer.CallToAction?.Data is WatchCardHeroVideoRendererData hero)
+		{
+			<div class="sidebar-collage">
+				<img class="sidebar-collage__left" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+				<img class="sidebar-collage__topright" src="@hero.HeroImages[1].LastOrDefault()?.Url"/>
+				<img class="sidebar-collage__bottomright" src="@hero.HeroImages[2].LastOrDefault()?.Url"/>
+				<div class="sidebar-collage__button">
+					<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+				</div>
+			</div>
+		}
+	</div>
+	@foreach (RendererContainer section in renderer.Sections)
+	{
+		switch (section.Type)
+		{
+			case "container":
+				ContainerRendererData container = (ContainerRendererData)section.Data;
+				switch (container.Style)
+				{
+					case "searchSidebar;vertical":
+						<div class="sidebar-video-list">
+							@foreach (RendererContainer item in container.Items)
+							{
+								switch (item.Type)
+								{
+									case "video":
+										VideoRendererData video = (VideoRendererData)item.Data;
+										<a class="searchsidebar-video" href="/watch?v=@video.VideoId">
+											<div class="searchsidebar-video__info">
+												<div class="ml-1 title">@video.Title</div>
+												<div class="ml-1">@video.ViewCountText • @video.PublishedText</div>
+											</div>
+											<div class="searchsidebar-video__length">
+												<div class="ml-1">@video.Duration.ToDurationString()</div>
+											</div>
+										</a>
+										break;
+									default:
+										<h3>Unexpected item.Type: <code>@item.Type</code></h3>
+										break;
+								}
+							}
+						</div>
+						break;
+					case "searchSidebar;cards":
+						<div class="sidebar-album-list">
+							<div class="ml-1 title">
+								@container.Title
+							</div>
+							<div class="sidebar-album-list__items">
+								@foreach (RendererContainer item in container.Items)
+								{
+									switch (item.Type)
+									{
+										case "searchRefinementCard":
+											SearchRefinementCardRendererData card = (SearchRefinementCardRendererData)item.Data;
+											<a href="/playlist?list=@card.PlaylistId" class="searchsidebar-album">
+												<img src="@card.Thumbnail"/>
+												<div class="ml-2 title">@card.Title</div>
+											</a>
+											break;
+										default:
+											<h3>Unexpected item.Type: <code>@item.Type</code></h3>
+											break;
+									}
+								}
+							</div>
+						</div>
+						break;
+					default:
+						<h1>Unknown container.Style: <code>@container.Style</code></h1>
+						break;
+				}
+				break;
+			default:
+				<h1>Unknown section.Type: <code>@(section.Type)/@(section.OriginalType)</code></h1>
+				break;
+		}
+	}
+	<div class="sidebar-items">
+	</div>
+</div>

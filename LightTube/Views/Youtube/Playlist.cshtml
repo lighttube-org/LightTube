@@ -1,5 +1,7 @@
 ﻿@using InnerTube.Renderers
+@using LightTube.CustomRendererDatas
 @using Microsoft.AspNetCore.Http.Extensions
+@using Microsoft.Extensions.Primitives
 @model PlaylistContext
 
 @{
@@ -16,7 +18,7 @@
 		<div class="playlist-page-info-data">
 			@Model.ViewCountText&nbsp;&nbsp;@Model.LastUpdatedText
 			<br><br>
-			@Model.PlaylistDescription
+			@Html.Raw(Model.PlaylistDescription)
 		</div>
 		@if (Model.Editable)
 		{
@@ -35,9 +37,67 @@
 		}
 	</div>
 	<div class="playlist-page-items">
-		@foreach (IRenderer renderer in Model.Items)
+		@foreach (string alert in Model.Alerts)
 		{
-			<partial name="Renderer" model="(renderer, Model.Localization)"/>
+			<div class="playlist-alert">
+				<div class="playlist-alert_text">
+					@alert
+				</div>
+				<a class="playlist-alert_close" title="dismiss" onclick="this.parentElement.remove()">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#x-lg"></use>
+					</svg>
+				</a>
+			</div>
+		}
+		@foreach (RendererContainer renderer in Model.Items)
+		{
+			switch (renderer.Type)
+			{
+				case "video":
+					PlaylistVideoRendererData video = (PlaylistVideoRendererData)renderer.Data;
+					<div class="renderer-playlistvideorenderer">
+						<div class="playlist-item-index">
+							@video.VideoIndexText
+						</div>
+						@{
+							Context.Request.Query.TryGetValue("list", out StringValues l);
+						}
+						<a href="/watch?v=@video.VideoId&list=@l" class="compact-thumbnail">
+							<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title"/>
+							<div class="compact-thumbnail__duration__container">
+								<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+							</div>
+						</a>
+						<div class="info">
+							<a href="/watch?v=@video.VideoId[..11]&list=@l" title="@video.Title" class="ml-2 title">@video.Title</a>
+							@if (video.Author != null)
+							{
+								<div class="ml-2">
+									<a href="/channel/@video.Author.Id" title="@video.Author.Title">@video.Author.Title</a>
+								</div>
+							}
+						</div>
+						<div class="flex-divider"></div>
+						<div class="icon-button-container">
+							@if (video is EditablePlaylistVideoRendererData { Editable: true })
+							{
+								<a href="/removeFromPlaylist?v=@video.VideoId&list=@l" class="icon-button" target="_blank">
+									<svg class="icon" width="20" height="20" fill="currentColor">
+										<use xlink:href="/svg/bootstrap-icons.svg#trash"/>
+									</svg>
+								</a>
+							}
+						</div>
+					</div>
+					break;
+				case "exception":
+					ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+					<div class="renderer-null">
+						<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+					</div>
+					break;
+			}
 		}
 	</div>
 </div>
@@ -46,7 +106,7 @@
 	<span>•</span>
 	@if (Model.Continuation is not null)
 	{
-		<a href="@Utils.GetSkipUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation.Value)">@Model.Localization.GetString("pagination.next")</a>
+		<a href="@Utils.GetContinuationUrl(Context.Request.GetEncodedPathAndQuery(), Model.Continuation)">@Model.Localization.GetString("pagination.next")</a>
 	}
 	else
 	{

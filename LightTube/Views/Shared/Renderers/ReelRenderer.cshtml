@@ -1,0 +1,11 @@
+@model (InnerTube.Renderers.VideoRendererData Video, LightTube.Localization.LocalizationManager Localization)
+
+<a href="/shorts/@Model.Video.VideoId" class="renderer-reelitemrenderer">
+	<div class="reel-thumbnail">
+		<img loading="lazy" src="@Model.Video.Thumbnails.LastOrDefault()?.Url" alt="@Model.Video.Title">
+	</div>
+	<div class="reel-info">
+		<div class="ml-2 title" title="@Model.Video.Title">@Model.Video.Title</div>
+		<div>@Model.Video.ViewCountText</div>
+	</div>
+</a>

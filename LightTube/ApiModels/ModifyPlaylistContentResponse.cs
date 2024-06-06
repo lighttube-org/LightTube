@@ -1,4 +1,5 @@
 using InnerTube;
+using InnerTube.Models;
 
 namespace LightTube.Controllers;
 

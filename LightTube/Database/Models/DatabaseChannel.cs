@@ -1,4 +1,5 @@
 ﻿using InnerTube;
+using InnerTube.Models;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace LightTube.Database.Models;
@@ -16,11 +17,11 @@ public class DatabaseChannel
 
     }
 
-    public DatabaseChannel(InnerTubeChannelResponse channel)
+    public DatabaseChannel(InnerTubeChannel channel)
     {
         ChannelId = channel.Header!.Id;
         Name = channel.Header!.Title;
         Subscribers = channel.Header!.SubscriberCountText;
-        IconUrl = channel.Header!.Avatars.Last().Url.ToString();
+        IconUrl = channel.Header!.Avatars.Last().Url;
     }
 }
