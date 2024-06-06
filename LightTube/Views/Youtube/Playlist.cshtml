@@ -1,4 +1,5 @@
 ﻿@using InnerTube.Renderers
+@using LightTube.CustomRendererDatas
 @using Microsoft.AspNetCore.Http.Extensions
 @using Microsoft.Extensions.Primitives
 @model PlaylistContext
@@ -62,7 +63,7 @@
 						@{
 							Context.Request.Query.TryGetValue("list", out StringValues l);
 						}
-						<a href="/watch?v=@video.VideoId[..11]&list=@l" class="compact-thumbnail">
+						<a href="/watch?v=@video.VideoId&list=@l" class="compact-thumbnail">
 							<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title"/>
 							<div class="compact-thumbnail__duration__container">
 								<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
@@ -79,7 +80,7 @@
 						</div>
 						<div class="flex-divider"></div>
 						<div class="icon-button-container">
-							@if (video.VideoId.Length > 11)
+							@if (video is EditablePlaylistVideoRendererData { Editable: true })
 							{
 								<a href="/removeFromPlaylist?v=@video.VideoId&list=@l" class="icon-button" target="_blank">
 									<svg class="icon" width="20" height="20" fill="currentColor">

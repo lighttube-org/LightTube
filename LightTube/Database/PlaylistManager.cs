@@ -2,6 +2,7 @@ using InnerTube;
 using InnerTube.Models;
 using InnerTube.Protobuf;
 using InnerTube.Renderers;
+using LightTube.CustomRendererDatas;
 using LightTube.Database.Models;
 using LightTube.Localization;
 using MongoDB.Driver;
@@ -13,7 +14,6 @@ public class PlaylistManager(
     IMongoCollection<DatabasePlaylist> playlistCollection,
     IMongoCollection<DatabaseVideo> videoCacheCollection)
 {
-    private const string INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE = "{\"title\":{\"simpleText\":\"%%TITLE%%\"},\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"indexText\":{\"simpleText\":\"%%INDEX%%\"},\"selected\":%%SELECTED%%,\"navigationEndpoint\":{\"watchEndpoint\":{\"params\":\"OAE%3D\"}},\"videoId\":\"%%ID%%\",\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]}}";
     public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; } = playlistCollection;
     public IMongoCollection<DatabaseVideo> VideoCacheCollection { get; } = videoCacheCollection;
 
@@ -40,9 +40,9 @@ public class PlaylistManager(
             {
                 Type = "video",
                 OriginalType = "playlistVideoContainer",
-                Data = new PlaylistVideoRendererData
+                Data = new EditablePlaylistVideoRendererData
                 {
-                    VideoId = editable ? videoId + "!" : videoId,
+                    VideoId = videoId,
                     Title = video?.Title.Replace("\"", "\\\"") ?? localization.GetRawString("playlist.video.uncached"),
                     Thumbnails =
                     [
@@ -68,7 +68,8 @@ public class PlaylistManager(
                     ViewCountText = (video?.Views ?? 0).ToString(),
                     Badges = [],
                     Description = null,
-                    VideoIndexText = (i + 1).ToString()
+                    VideoIndexText = (i + 1).ToString(),
+                    Editable = editable
                 }
             };
             renderers.Add(container);
@@ -83,32 +84,6 @@ public class PlaylistManager(
         return pl == null
             ? []
             : pl.VideoIds.Select(id => VideoCacheCollection.FindSync(x => x.Id == id).FirstOrDefault()).ToList();
-    }
-
-    public string GetPlaylistPanelVideosJson(string id, string currentVideoId)
-    {
-        DatabasePlaylist? pl = GetPlaylist(id);
-        if (pl == null) return "";
-
-        List<string> renderers = [];
-
-        for (int i = 0; i < pl.VideoIds.Count; i++)
-        {
-            string videoId = pl.VideoIds[i];
-            DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-            string json = $"{{\"playlistPanelVideoRenderer\":{INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE}}}"
-                .Replace("%%ID%%", videoId)
-                .Replace("%%SELECTED%%", (currentVideoId == videoId).ToString().ToLower())
-                .Replace("%%INDEX%%", currentVideoId == videoId ? "▶" : (i + 1).ToString())
-                .Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
-                .Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
-                .Replace("%%DURATION%%", video?.Duration ?? "00:00")
-                .Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
-                .Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???");
-            renderers.Add(json);
-        }
-
-        return string.Join(",", renderers);
     }
 
     public async Task<DatabasePlaylist> CreatePlaylist(string token, string title, string description, PlaylistVisibility visibility)
