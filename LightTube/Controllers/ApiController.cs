@@ -216,15 +216,9 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 
 	[Route("playlist")]
 	[ApiDisableable]
-	public async Task<ApiResponse<ApiPlaylist>> Playlist(string id, PlaylistFilter filter = PlaylistFilter.All,
+	public async Task<ApiResponse<ApiPlaylist>> Playlist(string? id, PlaylistFilter filter = PlaylistFilter.All,
 		string? continuation = null)
 	{
-		if (id.StartsWith("LT-PL"))
-		{
-			if (id.Length != 24)
-				return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
-		}
-
 		if (string.IsNullOrWhiteSpace(id) && continuation is null)
 			return Error<ApiPlaylist>($"Invalid ID: {id}", 400, HttpStatusCode.BadRequest);
 
@@ -232,8 +226,11 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		{
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 			ApiPlaylist result;
-			if (id.StartsWith("LT-PL"))
+			if (id?.StartsWith("LT-PL") == true)
 			{
+				if (id.Length != 24)
+					return Error<ApiPlaylist>($"Invalid playlist ID: {id}", 400, HttpStatusCode.BadRequest);
+
 				DatabasePlaylist? playlist = DatabaseManager.Playlists.GetPlaylist(id);
 
 				if (playlist is null)
