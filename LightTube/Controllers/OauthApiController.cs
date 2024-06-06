@@ -5,6 +5,7 @@ using InnerTube.Protobuf;
 using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
+using LightTube.CustomRendererDatas;
 using LightTube.Database;
 using LightTube.Database.Models;
 using LightTube.Localization;
@@ -244,7 +245,7 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
         {
             Type = "video",
             OriginalType = "lightTubeFeedVideo",
-            Data = new VideoRendererData
+            Data = new SubscriptionFeedVideoRendererData
             {
                 VideoId = x.Id,
                 Title = x.Title,
@@ -281,7 +282,8 @@ public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
                 ViewCount = x.ViewCount,
                 Badges = [],
                 Description = x.Description,
-                PremiereStartTime = null
+                PremiereStartTime = null,
+                ExactPublishDate = x.PublishedDate
             }
         });
 
