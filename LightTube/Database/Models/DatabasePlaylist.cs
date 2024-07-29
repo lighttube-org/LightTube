@@ -137,8 +137,9 @@ public class DatabasePlaylist
 		return new VideoPlaylistInfo(pl, "en");
 	}
 
-	public PlaylistHeaderRenderer GetHeaderRenderer(DatabaseUser author, LocalizationManager localization) =>
-		new()
+	public PlaylistHeaderRenderer GetHeaderRenderer(DatabaseUser author, LocalizationManager localization)
+	{
+		PlaylistHeaderRenderer? renderer = new()
 		{
 			Title = new Text
 			{
@@ -165,10 +166,6 @@ public class DatabasePlaylist
 						}
 					}
 				}
-			},
-			DescriptionText = new Text
-			{
-				SimpleText = Description
 			},
 			OwnerText = new Text
 			{
@@ -210,6 +207,13 @@ public class DatabasePlaylist
 				}
 			}
 		};
+		if (!string.IsNullOrEmpty(Description))
+			renderer.DescriptionText = new Text
+			{
+				SimpleText = Description
+			};
+		return renderer;
+	}
 }
 
 public enum PlaylistVisibility
