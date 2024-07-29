@@ -1,6 +1,7 @@
 @using InnerTube
+@using InnerTube.Exceptions
 @using InnerTube.Models
-@using InnerTube.Protobuf
+@using InnerTube.Protobuf.Responses
 @using InnerTube.Renderers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model (IEnumerable<RendererContainer> Renderers, LightTube.Localization.LocalizationManager Localization)
@@ -13,14 +14,59 @@
 			VideoRendererData video = (VideoRendererData)renderer.Data;
 			<div class="renderer-channelvideoplayerrenderer">
 				<div class="promotedvideo-player">
-					@{
+					@try
+					{
 						// for anyone reading this part
 						// im sorry
 						InnerTubePlayer player = Context.RequestServices.GetService<SimpleInnerTubeClient>()
 							!.GetVideoPlayerAsync(video.VideoId, false).Result;
 						PlayerContext playerContext = new(Context, player, null, "channel-promoted-video", false, "18", []);
+						@:<partial name="Player" model="playerContext"/>
 					}
-					<partial name="Player" model="playerContext"/>
+					catch (Exception ex)
+					{
+						ex = ex.InnerException ?? ex;
+						@if (ex is PlayerException playerException)
+						{
+							<div class="player-error-container">
+								<div class="player-error-icon">
+									<svg class="icon" fill="currentColor" style="color: white;" width="64" height="64">
+										<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+									</svg>
+								</div>
+								<div class="player-error-info">
+									@if (playerException.Code == PlayabilityStatus.Types.Status.LoginRequired)
+									{
+										<div class="title" title="[@playerException.Code] @playerException.Reason">@playerException.Reason</div>
+										<p class="ml-1">@Model.Localization.GetString("error.player.agerestricted")</p>
+									}
+									else
+									{
+										<div class="title" title="[@playerException.Code] @playerException.Reason">@playerException.Reason</div>
+										<p class="ml-1">@playerException.Subreason</p>
+										@if (playerException.Code is PlayabilityStatus.Types.Status.ContentCheckRequired)
+										{
+											<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">@Model.Localization.GetString("error.player.contentcheck")</a>
+										}
+									}
+								</div>
+							</div>
+						}
+						else
+						{
+							<div class="player-error-container">
+								<div class="player-error-icon">
+									<svg class="icon" fill="currentColor" style="color: white;" width="64" height="64">
+										<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+									</svg>
+								</div>
+								<div class="player-error-info">
+									<div class="title">@Model.Localization.GetString("error.player.exception") @(ex.GetType() == typeof(Exception) ? "" : $"({ex.GetType().Name})")</div>
+									<p class="ml-1">@ex.Message</p>
+								</div>
+							</div>
+						}
+					}
 				</div>
 				<div class="promotedvideo-info">
 					<a href="/watch?v=@video.VideoId" class="title ml-1" title="@video.Title">
