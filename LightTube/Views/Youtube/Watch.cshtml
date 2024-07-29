@@ -229,31 +229,46 @@
 			<div class="playlist-view__content">
 				@foreach (RendererContainer renderer in Model.Playlist.Videos)
 				{
-					PlaylistVideoRendererData video = (PlaylistVideoRendererData)renderer.Data;
-					<div class="renderer-playlistpanelvideorenderer @(video.VideoId == Model.Video.Id ? "active" : "")">
-						<div class="playlistvideo__index">
-							@video.VideoIndexText
-						</div>
-						<a href="/watch?v=@video.VideoId&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.FirstOrDefault() : "")" class="playlistvideo__thumbnail">
-							<div class="playlistvideo__thumbnail">
-								<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
-								<div class="playlistvideo__thumbnail__duration__container">
-									<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+					switch (renderer.Type)
+					{
+						case "video":
+							PlaylistVideoRendererData video = (PlaylistVideoRendererData)renderer.Data;
+							<div class="renderer-playlistpanelvideorenderer @(video.VideoId == Model.Video.Id ? "active" : "")">
+								<div class="playlistvideo__index">
+									@video.VideoIndexText
+								</div>
+								<a href="/watch?v=@video.VideoId&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.FirstOrDefault() : "")" class="playlistvideo__thumbnail">
+									<div class="playlistvideo__thumbnail">
+										<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
+										<div class="playlistvideo__thumbnail__duration__container">
+											<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+										</div>
+									</div>
+								</a>
+								<div class="playlistvideo__info">
+									<a href="/watch?v=@video.VideoId&list=@(Context.Request.Query.TryGetValue("list", out StringValues l2) ? l2.FirstOrDefault() : "")" class="title ml-2" title="@video.Title">
+										@video.Title
+									</a>
+									@if (video.Author != null)
+									{
+										<a href="/channel/@video.Author.Id" class="ml-1" title="@video.Author.Title">
+											@video.Author.Title
+										</a>
+									}
 								</div>
 							</div>
-						</a>
-						<div class="playlistvideo__info">
-							<a href="/watch?v=@video.VideoId&list=@(Context.Request.Query.TryGetValue("list", out StringValues l2) ? l2.FirstOrDefault() : "")" class="title ml-2" title="@video.Title">
-								@video.Title
-							</a>
-							@if (video.Author != null)
-							{
-								<a href="/channel/@video.Author.Id" class="ml-1" title="@video.Author.Title">
-									@video.Author.Title
-								</a>
-							}
-						</div>
-					</div>
+							break;
+						case "message":
+							<div class="renderer-null">
+								@((renderer.Data as MessageRendererData).Message)
+							</div>
+							break;
+						default:
+							<div class="renderer-null">
+								Unexpected renderer: @renderer.Type (@renderer.OriginalType)
+							</div>
+							break;
+					}
 				}
 			</div>
 		</details>
