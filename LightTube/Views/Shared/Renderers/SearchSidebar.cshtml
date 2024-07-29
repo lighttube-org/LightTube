@@ -1,3 +1,4 @@
+@using InnerTube
 @using InnerTube.Renderers;
 @model (RendererContainer Renderer, LightTube.Localization.LocalizationManager Localization)
 @{
@@ -7,9 +8,12 @@
 <div class="search-sidebar">
 	<div class="sidebar-header">
 		<div class="sidebar-header-info">
-			<div class="sidebar-header-info__avatar">
-				<img src="@renderer.Avatar.LastOrDefault()?.Url"/>
-			</div>
+			@if (renderer.Avatar != null)
+			{
+				<div class="sidebar-header-info__avatar">
+					<img src="@renderer.Avatar.LastOrDefault()?.Url"/>
+				</div>
+			}
 			<div class="sidebar-header-info__info">
 				<div class="title ml-1">@renderer.Title</div>
 				<div class="ml-1">@renderer.Subtitle</div>
@@ -17,14 +21,66 @@
 		</div>
 		@if (renderer.CallToAction?.Data is WatchCardHeroVideoRendererData hero)
 		{
-			<div class="sidebar-collage">
-				<img class="sidebar-collage__left" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
-				<img class="sidebar-collage__topright" src="@hero.HeroImages[1].LastOrDefault()?.Url"/>
-				<img class="sidebar-collage__bottomright" src="@hero.HeroImages[2].LastOrDefault()?.Url"/>
-				<div class="sidebar-collage__button">
-					<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
-				</div>
-			</div>
+			@switch (renderer.Type)
+			{
+				case SearchSidebarType.Unknown:
+					@if (hero.HeroImages.Length > 0)
+					{
+						<div class="sidebar-collage">
+							<img class="sidebar-collage__full" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+							@if (hero.VideoId != null)
+							{
+								<div class="sidebar-collage__button">
+									<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+								</div>
+							}
+						</div>
+					}
+					break;
+				case SearchSidebarType.Artist:
+					<div class="sidebar-collage">
+						<img class="sidebar-collage__left" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+						<img class="sidebar-collage__topright" src="@hero.HeroImages[1].LastOrDefault()?.Url"/>
+						<img class="sidebar-collage__bottomright" src="@hero.HeroImages[2].LastOrDefault()?.Url"/>
+						@if (hero.VideoId != null)
+						{
+							<div class="sidebar-collage__button">
+								<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+							</div>
+						}
+					</div>
+					break;
+				case SearchSidebarType.Album:
+					<div class="sidebar-collage sidebar-collage__square">
+						<img class="sidebar-collage__full" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+						@if (hero.VideoId != null)
+						{
+							<div class="sidebar-collage__button">
+								<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+							</div>
+						}
+					</div>
+					break;
+				case SearchSidebarType.TvShow:
+					<div class="sidebar-collage">
+						<img class="sidebar-collage__full" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+						@if (hero.VideoId != null)
+						{
+							<div class="sidebar-collage__button">
+								<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+							</div>
+						}
+					</div>
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			@if (hero.HeroImages.Length > 1)
+			{
+			}
+			else
+			{
+			}
 		}
 	</div>
 	@foreach (RendererContainer section in renderer.Sections)
@@ -52,6 +108,35 @@
 												<div class="ml-1">@video.Duration.ToDurationString()</div>
 											</div>
 										</a>
+										break;
+									case "container":
+										ContainerRendererData data = (item.Data as ContainerRendererData)!;
+										<details>
+											<summary class="sidebar-show__header__summary">
+												<div class="sidebar-show__header">
+													<span class="sidebar-show__header__title">
+														@data.Title
+													</span>
+													<span class="sidebar-show__header__subtitle">
+														@data.Subtitle
+													</span>
+												</div>
+											</summary>
+											<div class="sidebar-video-list">
+												@foreach (VideoRendererData v in data.Items.Where(x => x.Type == "video").Select(x => x.Data as VideoRendererData))
+												{
+													<a class="searchsidebar-video" href="/watch?v=@v.VideoId">
+														<div class="searchsidebar-video__info">
+															<div class="ml-1 title">@v.Title</div>
+															<div class="ml-1">@v.ViewCountText • @v.PublishedText</div>
+														</div>
+														<div class="searchsidebar-video__length">
+															<div class="ml-1">@v.Duration.ToDurationString()</div>
+														</div>
+													</a>
+												}
+											</div>
+										</details>
 										break;
 									default:
 										<h3>Unexpected item.Type: <code>@item.Type</code></h3>
