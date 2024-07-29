@@ -39,7 +39,7 @@ public class PlaylistManager(
             RendererContainer container = new()
             {
                 Type = "video",
-                OriginalType = "playlistVideoContainer",
+                OriginalType = "playlistVideoRenderer",
                 Data = new EditablePlaylistVideoRendererData
                 {
                     VideoId = videoId,
