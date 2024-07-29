@@ -178,6 +178,9 @@
   "search.filters.sort.date": "Upload date",
   "search.filters.sort.views": "View count",
   "search.filters.sort.rating": "Rating",
+  "search.showingresultsfor": "Showing results for <a href=\"{1}\">{0}</a>",
+  "search.searchinsteadfor": "Search instead for <a href=\"{1}\">{0}</a>",
+  "search.didyoumean": "Did you mean: <a href=\"{1}\">{0}</a>",
 
   "settings.account.htmltitle": "Account",
   "settings.account.title": "Account Settings",

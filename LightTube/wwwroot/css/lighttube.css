@@ -1889,3 +1889,19 @@ code {
 .sidebar-video-list details {
     margin-bottom: 8px;
 }
+
+.querycorrecter {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+}
+
+.querycorrecter__searchinsteadfor {
+    font-style: italic;
+}
+
+.querycorrecter__showingresultsfor,
+.querycorrecter__didyoumean{
+    font-size: larger;
+    color: var(--text-primary);
+}

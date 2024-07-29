@@ -1,4 +1,5 @@
 ﻿@using System.Web
+@using InnerTube.Models
 @using InnerTube.Protobuf.Params
 @using InnerTube.Renderers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
@@ -414,6 +415,27 @@
 			}
 		</details>
 	</div>
+	@if (Model.QueryCorrecter != null)
+	{
+		<div class="querycorrecter">
+			@switch (Model.QueryCorrecter.CorrectionType)
+			{
+				case ShowingResultsFor.Type.ShowingResultsFor:
+					<span class="querycorrecter__showingresultsfor">
+						@Model.Localization.FormatString("search.showingresultsfor", Model.QueryCorrecter.CorrectedQuery, $"/results?search_query={HttpUtility.UrlEncode(Model.QueryCorrecter.CorrectedQuery)}&exact=true")
+					</span>
+					<span class="querycorrecter__searchinsteadfor">
+						@Model.Localization.FormatString("search.searchinsteadfor", Model.QueryCorrecter.OriginalQuery ?? "", $"/results?search_query={HttpUtility.UrlEncode(Model.QueryCorrecter.OriginalQuery)}&exact=true")
+					</span>
+					break;
+				case ShowingResultsFor.Type.DidYouMean:
+					<span class="querycorrecter__didyoumean">
+						@Model.Localization.FormatString("search.didyoumean", Model.QueryCorrecter.CorrectedQuery, $"/results?search_query={HttpUtility.UrlEncode(Model.QueryCorrecter.CorrectedQuery)}&exact=true")
+					</span>
+					break;
+			}
+		</div>
+	}
 	@if (Model.Sidebar is { Data: SearchSidebarRendererData })
 	{
 		<div class="search-results-container">

@@ -15,6 +15,7 @@ public class SearchContext : BaseContext
     public IEnumerable<RendererContainer> Chips;
     public string? Continuation;
     public int? CurrentPage;
+    public ShowingResultsFor? QueryCorrecter;
 
     public SearchContext(HttpContext context, string query, SearchParams? filter, InnerTubeSearchResults search, 
         int currentPage, RendererContainer? sidebar) : base(context)
@@ -25,6 +26,7 @@ public class SearchContext : BaseContext
         Results = Search.Results;
         Continuation = Search.Continuation;
         Chips = Search.Chips;
+        QueryCorrecter = search.QueryCorrecter;
         CurrentPage = currentPage;
         Sidebar = sidebar;
     }
@@ -38,6 +40,7 @@ public class SearchContext : BaseContext
         Results = search.Results;
         Continuation = search.ContinuationToken;
         Chips = search.Chips ?? [];
+        QueryCorrecter = null;
         CurrentPage = null;
         Sidebar = null;
     }
