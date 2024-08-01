@@ -67,6 +67,7 @@ public class DatabaseUser
                 ],
                 Title = x.Name,
                 VideoCountText = string.Format(localization.GetRawString("playlist.videos.count"), x.VideoIds.Count),
+                VideoCount = x.VideoIds.Count,
                 SidebarThumbnails = [],
                 Author = null
             }

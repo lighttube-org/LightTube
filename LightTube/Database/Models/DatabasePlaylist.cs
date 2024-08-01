@@ -147,11 +147,11 @@ public class DatabasePlaylist
 			},
 			NumVideosText = new Text
 			{
-				SimpleText = string.Format(localization.GetRawString("videos.count"), VideoIds.Count)
+				SimpleText = string.Format(localization.GetRawString("playlist.videos.count"), VideoIds.Count)
 			},
 			ViewCountText = new Text
 			{
-				SimpleText = localization.GetRawString("lighttube.views")
+				SimpleText = localization.GetRawString("playlist.lighttube.views")
 			},
 			Byline = new RendererWrapper
 			{
@@ -161,8 +161,8 @@ public class DatabasePlaylist
 					{
 						new Text
 						{
-							SimpleText = string.Format(localization.GetRawString("lastupdated"),
-								LastUpdated.ToString("MMMM dd, yyyy"))
+							SimpleText = string.Format(localization.GetRawString("playlist.lastupdated"),
+								LastUpdated.ToString("MMM dd, yyyy"))
 						}
 					}
 				}
