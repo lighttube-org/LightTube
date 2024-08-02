@@ -274,20 +274,20 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 
 	[Route("channel")]
 	[ApiDisableable]
-	public async Task<ApiResponse<ApiChannel>> Channel(string id, ChannelTabs tab = ChannelTabs.Featured,
+	public async Task<ApiResponse<ApiChannel>> Channel(string? id, ChannelTabs tab = ChannelTabs.Featured,
 		string? continuation = null)
 	{
 		if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(continuation))
 			return Error<ApiChannel>($"Invalid request: missing both `id` and `continuation`", 400,
 				HttpStatusCode.BadRequest);
 
-		if (id.StartsWith("@"))
+		if (id?[0] == '@')
 		{
 			ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/@" + id);
 			if (endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint)
 				id = endpoint.Endpoint.BrowseEndpoint.BrowseId;
 		}
-		else if (!id.StartsWith("UC"))
+		else if (id?.StartsWith("UC") == false)
 		{
 			ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/c/" + id);
 			if (endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint)
