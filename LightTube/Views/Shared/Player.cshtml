@@ -173,7 +173,7 @@ else
 		           {
 			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		           })),
-		@if (Model.Player.Storyboard.Levels.ContainsKey(0))
+		@if (Model.Player.Storyboard?.Levels.ContainsKey(0) == true)
 		{
 			@:storyboard:{type:"yt_l1",src:"@Html.Raw(Model.Player.Storyboard.Levels[0].ToString())"}
 		}
