@@ -799,17 +799,6 @@ body.no-guide .app {
     font-size: 1.3rem;
 }
 
-.noscript-quality-switcher {
-    background-color: var(--nojs-color-switcher, #f5d562);
-    color: var(--text-primary, #000);
-    padding: 8px;
-    font-size: 1.1rem;
-    z-index: 20;
-    position: relative;
-    top: 0;
-    bottom: 2rem;
-}
-
 .playlist-view-container {
     grid-area: playlist;
 }
