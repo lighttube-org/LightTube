@@ -207,7 +207,7 @@ public static class Utils
 
 		period.AppendChild(doc.CreateComment("Audio Adaptation Sets"));
 		List<Format> audios = player.AdaptiveFormats
-			.Where(x => x.AudioChannels != null)
+			.Where(x => x.Fps == 0)
 			.ToList();
 		IEnumerable<IGrouping<string?, Format>> grouped = audios.GroupBy(x => x.AudioTrack?.Id);
 		foreach (IGrouping<string?, Format> formatGroup in grouped.OrderBy(x => x.First().AudioTrack?.AudioIsDefault))
@@ -269,12 +269,10 @@ public static class Utils
 
 		period.AppendChild(doc.CreateComment("Video Adaptation Set"));
 
-		List<Format> videos = player.AdaptiveFormats.Where(x => x.AudioChannels == null).ToList();
+		List<Format> videos = player.AdaptiveFormats.Where(x => x.Fps > 0).ToList();
 
 		XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
-		videoAdaptationSet.SetAttribute("mimeType",
-			HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Split('?')[0] ?? "mime=video/mp4")
-				.Get("mime"));
+		videoAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Split('?')[1] ?? "mime=video/mp4").Get("mime"));
 		videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 		videoAdaptationSet.SetAttribute("contentType", "video");
 
@@ -331,7 +329,7 @@ public static class Utils
 				url = url.Replace("fmt=srv3", "fmt=vtt");
 				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
 					? url
-					: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.LanguageCode}";
+					: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.VssId}";
 
 				representation.AppendChild(baseUrl);
 				adaptationSet.AppendChild(representation);
