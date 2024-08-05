@@ -638,6 +638,17 @@
 	padding: 8px;
 }
 
+.renderer-shelfrenderer__expanded {
+	border-top: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color);
+	padding: 16px 0;
+}
+
+.renderer-shelfrenderer__expanded > .header {
+	font-size: 1.3rem;
+	margin-bottom: 8px;
+}
+
 .shelf-expand-button {
 	display: block;
 	margin: auto;

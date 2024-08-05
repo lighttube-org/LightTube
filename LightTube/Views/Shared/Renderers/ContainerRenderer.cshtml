@@ -217,6 +217,22 @@
 			}
 		</details>
 		break;
+	case "shelf;expanded":
+		<div class="renderer-shelfrenderer__expanded">
+			<div class="header">
+				<div class="title ml-1">
+					@Model.Renderer.Title
+				</div>
+				<div class="shelf-description">
+					@Html.Raw(Model.Renderer.Subtitle)
+				</div>
+			</div>
+			@foreach (RendererContainer renderer in Model.Renderer.Items.Take(Model.Renderer.ShownItemCount ?? 2))
+			{
+				<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+			}
+		</div>
+		break;
 	default:
 		<h1>Unexpected ContainerRendererData.Style: <code>@Model.Renderer.Style</code></h1>
 		break;
