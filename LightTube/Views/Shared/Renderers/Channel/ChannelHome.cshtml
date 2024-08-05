@@ -21,7 +21,7 @@
 						InnerTubePlayer player = Context.RequestServices.GetService<SimpleInnerTubeClient>()
 							!.GetVideoPlayerAsync(video.VideoId, false).Result;
 						PlayerContext playerContext = new(Context, player, null, "channel-promoted-video", false, "18", []);
-						@:<partial name="Player" model="playerContext"/>
+						<partial name="Player" model="playerContext"/>
 					}
 					catch (Exception ex)
 					{
