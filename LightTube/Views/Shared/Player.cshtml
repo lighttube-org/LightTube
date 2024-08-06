@@ -32,7 +32,7 @@
 					{
 						<div class="title" title="[@e.Code] @e.Reason">@e.Reason</div>
 						<p class="ml-1">@e.Subreason</p>
-						@if (e.Code is PlayabilityStatus.Types.Status.ContentCheckRequired)
+						@if (e.Code is PlayabilityStatus.Types.Status.ContentCheckRequired or (PlayabilityStatus.Types.Status)5/*PlayabilityStatus.Types.Status.AgeCheckRequired todo: forgot to recompile protobufs, uncomment this*/)
 						{
 							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">@Model.Localization.GetString("error.player.contentcheck")</a>
 						}
