@@ -8,9 +8,8 @@ public static class JsCache
     private static Dictionary<string, Uri> LibraryUrls = new()
     {
         ["hls.js"] = new Uri("https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"),
-        // TODO: Move this to lighttube-org
-        ["ltplayer.js"] = new Uri("https://raw.githubusercontent.com/kuylar/LTPlayer/fix/few-fixes/dist/player.min.js"),
-        ["ltplayer.css"] = new Uri("https://raw.githubusercontent.com/kuylar/LTPlayer/fix/few-fixes/dist/player.min.css"),
+        ["ltplayer.js"] = new Uri("https://raw.githubusercontent.com/lighttube-org/LTPlayer/fix/few-fixes/dist/player.min.js"),
+        ["ltplayer.css"] = new Uri("https://raw.githubusercontent.com/lighttube-org/LTPlayer/fix/few-fixes/dist/player.min.css"),
     };
     private static Dictionary<string, string> Hashes = [];
     public static DateTimeOffset CacheUpdateTime = DateTimeOffset.MinValue;
