@@ -1,14 +1,14 @@
-﻿using InnerTube;
+﻿using InnerTube.Models;
 using LightTube.Database.Models;
 
 namespace LightTube.Contexts;
 
 public class SubscriptionContext : ModalContext
 {
-    public InnerTubeChannelResponse Channel;
+    public InnerTubeChannel Channel;
     public SubscriptionType CurrentType = SubscriptionType.NONE;
 
-    public SubscriptionContext(HttpContext context, InnerTubeChannelResponse channel, SubscriptionType? subscriptionType = null) :
+    public SubscriptionContext(HttpContext context, InnerTubeChannel channel, SubscriptionType? subscriptionType = null) :
         base(context)
     {
         Channel = channel;

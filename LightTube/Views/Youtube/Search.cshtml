@@ -1,4 +1,8 @@
-﻿@using InnerTube.Renderers
+﻿@using System.Web
+@using InnerTube.Models
+@using InnerTube.Protobuf.Params
+@using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model SearchContext
 
 @{
@@ -6,365 +10,451 @@
 }
 
 <div class="search-container">
-@if (Model.Filter != null)
-{
-	<details>
-	<summary class="btn filters-button" style="width:min-content;">
-		<svg class="icon" width="20" height="20" fill="currentColor">
-			<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
-		</svg>
-		<div class="text">
-			@Model.Localization.GetString("search.filters.title")
-		</div>
-	</summary>
-	<form class="search-filters__form">
-	<input style="display:none" value="@Model.GetSearchBoxInput()" name="search_query"/>
-	<div class="search-filters">
-	<div class="search-filter">
-		<div class="search-filter__category">
-			@Model.Localization.GetString("search.filters.uploaddate.title")
-		</div>
-		<hr>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasUploadedIn)
+	<div>
+		<details>
+			<summary class="search-top-bar">
+				<div class="search-chips-container">
+					@foreach (RendererContainer chipContainer in Model.Chips)
+					{
+						ChipRendererData chip = (ChipRendererData)chipContainer.Data;
+						<a class="search-chip @(chip.IsSelected ? "active" : "")" href="/results?search_query=@HttpUtility.UrlEncode(Model.Query)&continuation=@HttpUtility.UrlEncode(chip.ContinuationToken)">
+							@chip.Title
+						</a>
+					}
+				</div>
+				@if (Model.Filter != null)
+				{
+					<vr></vr>
+					<div class="btn filters-button">
+						<svg class="icon" width="20" height="20" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#sliders2"/>
+						</svg>
+						<div class="text">
+							@Model.Localization.GetString("search.filters.title")
+						</div>
+					</div>
+				}
+			</summary>
+			@if (Model.Filter != null)
 			{
-				<input type="radio" name="uploadDate" value="null">
-			}
-			else
-			{
-				<input type="radio" name="uploadDate" value="null" checked>
-			}
-			@Model.Localization.GetString("search.filters.uploaddate.clear")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.LastHour)
-			{
-				<input type="radio" name="uploadDate" value="1" checked>
-			}
-			else
-			{
-				<input type="radio" name="uploadDate" value="1">
-			}
-			@Model.Localization.GetString("search.filters.uploaddate.hour")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.Today)
-			{
-				<input type="radio" name="uploadDate" value="2" checked>
-			}
-			else
-			{
-				<input type="radio" name="uploadDate" value="2">
-			}
-			@Model.Localization.GetString("search.filters.uploaddate.day")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisWeek)
-			{
-				<input type="radio" name="uploadDate" value="3" checked>
-			}
-			else
-			{
-				<input type="radio" name="uploadDate" value="3">
-			}
-			@Model.Localization.GetString("search.filters.uploaddate.week")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisMonth)
-			{
-				<input type="radio" name="uploadDate" value="4" checked>
-			}
-			else
-			{
-				<input type="radio" name="uploadDate" value="4">
-			}
-			@Model.Localization.GetString("search.filters.uploaddate.month")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisYear)
-			{
-				<input type="radio" name="uploadDate" value="5" checked>
-			}
-			else
-			{
-				<input type="radio" name="uploadDate" value="5">
-			}
-			@Model.Localization.GetString("search.filters.uploaddate.year")
-		</label>
-	</div>
+				<form class="search-filters__form">
+					<input style="display:none" value="@Model.GetSearchBoxInput()" name="search_query"/>
+					<div class="search-filters">
+						<div class="search-filter">
+							<div class="search-filter__category">
+								@Model.Localization.GetString("search.filters.uploaddate.title")
+							</div>
+							<hr>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasUploadedIn)
+								{
+									<input type="radio" name="uploadDate" value="null">
+								}
+								else
+								{
+									<input type="radio" name="uploadDate" value="null" checked>
+								}
+								@Model.Localization.GetString("search.filters.uploaddate.clear")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.LastHour)
+								{
+									<input type="radio" name="uploadDate" value="1" checked>
+								}
+								else
+								{
+									<input type="radio" name="uploadDate" value="1">
+								}
+								@Model.Localization.GetString("search.filters.uploaddate.hour")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.Today)
+								{
+									<input type="radio" name="uploadDate" value="2" checked>
+								}
+								else
+								{
+									<input type="radio" name="uploadDate" value="2">
+								}
+								@Model.Localization.GetString("search.filters.uploaddate.day")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisWeek)
+								{
+									<input type="radio" name="uploadDate" value="3" checked>
+								}
+								else
+								{
+									<input type="radio" name="uploadDate" value="3">
+								}
+								@Model.Localization.GetString("search.filters.uploaddate.week")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisMonth)
+								{
+									<input type="radio" name="uploadDate" value="4" checked>
+								}
+								else
+								{
+									<input type="radio" name="uploadDate" value="4">
+								}
+								@Model.Localization.GetString("search.filters.uploaddate.month")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasUploadedIn && Model.Filter.Filters.UploadedIn == SearchFilters.Types.UploadDate.ThisYear)
+								{
+									<input type="radio" name="uploadDate" value="5" checked>
+								}
+								else
+								{
+									<input type="radio" name="uploadDate" value="5">
+								}
+								@Model.Localization.GetString("search.filters.uploaddate.year")
+							</label>
+						</div>
 
-	<div class="search-filter">
-		<div class="search-filter__category">
-			@Model.Localization.GetString("search.filters.category.title")
-		</div>
-		<hr>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasType)
-			{
-				<input type="radio" name="type" value="null">
-			}
-			else
-			{
-				<input type="radio" name="type" value="null" checked>
-			}
-			@Model.Localization.GetString("search.filters.category.clear")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Video)
-			{
-				<input type="radio" name="type" value="1" checked>
-			}
-			else
-			{
-				<input type="radio" name="type" value="1">
-			}
-			@Model.Localization.GetString("search.filters.category.video")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Channel)
-			{
-				<input type="radio" name="type" value="2" checked>
-			}
-			else
-			{
-				<input type="radio" name="type" value="2">
-			}
-			@Model.Localization.GetString("search.filters.category.channel")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Playlist)
-			{
-				<input type="radio" name="type" value="3" checked>
-			}
-			else
-			{
-				<input type="radio" name="type" value="3">
-			}
-			@Model.Localization.GetString("search.filters.category.playlist")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Movie)
-			{
-				<input type="radio" name="type" value="4" checked>
-			}
-			else
-			{
-				<input type="radio" name="type" value="4">
-			}
-			@Model.Localization.GetString("search.filters.category.movie")
-		</label>
-	</div>
+						<div class="search-filter">
+							<div class="search-filter__category">
+								@Model.Localization.GetString("search.filters.category.title")
+							</div>
+							<hr>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasType)
+								{
+									<input type="radio" name="type" value="null">
+								}
+								else
+								{
+									<input type="radio" name="type" value="null" checked>
+								}
+								@Model.Localization.GetString("search.filters.category.clear")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Video)
+								{
+									<input type="radio" name="type" value="1" checked>
+								}
+								else
+								{
+									<input type="radio" name="type" value="1">
+								}
+								@Model.Localization.GetString("search.filters.category.video")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Channel)
+								{
+									<input type="radio" name="type" value="2" checked>
+								}
+								else
+								{
+									<input type="radio" name="type" value="2">
+								}
+								@Model.Localization.GetString("search.filters.category.channel")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Playlist)
+								{
+									<input type="radio" name="type" value="3" checked>
+								}
+								else
+								{
+									<input type="radio" name="type" value="3">
+								}
+								@Model.Localization.GetString("search.filters.category.playlist")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasType && Model.Filter.Filters.Type == SearchFilters.Types.ItemType.Movie)
+								{
+									<input type="radio" name="type" value="4" checked>
+								}
+								else
+								{
+									<input type="radio" name="type" value="4">
+								}
+								@Model.Localization.GetString("search.filters.category.movie")
+							</label>
+						</div>
 
-	<div class="search-filter">
-		<div class="search-filter__category">
-			@Model.Localization.GetString("search.filters.duration.title")
-		</div>
-		<hr>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasDuration)
-			{
-				<input type="radio" name="duration" value="null">
-			}
-			else
-			{
-				<input type="radio" name="duration" value="null" checked>
-			}
-			@Model.Localization.GetString("search.filters.duration.clear")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Short)
-			{
-				<input type="radio" name="duration" value="1" checked>
-			}
-			else
-			{
-				<input type="radio" name="duration" value="1">
-			}
-			@Model.Localization.GetString("search.filters.duration.short")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Medium)
-			{
-				<input type="radio" name="duration" value="3" checked>
-			}
-			else
-			{
-				<input type="radio" name="duration" value="3">
-			}
-			@Model.Localization.GetString("search.filters.duration.medium")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Long)
-			{
-				<input type="radio" name="duration" value="2" checked>
-			}
-			else
-			{
-				<input type="radio" name="duration" value="2">
-			}
-			@Model.Localization.GetString("search.filters.duration.long")
-		</label>
-	</div>
+						<div class="search-filter">
+							<div class="search-filter__category">
+								@Model.Localization.GetString("search.filters.duration.title")
+							</div>
+							<hr>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasDuration)
+								{
+									<input type="radio" name="duration" value="null">
+								}
+								else
+								{
+									<input type="radio" name="duration" value="null" checked>
+								}
+								@Model.Localization.GetString("search.filters.duration.clear")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Short)
+								{
+									<input type="radio" name="duration" value="1" checked>
+								}
+								else
+								{
+									<input type="radio" name="duration" value="1">
+								}
+								@Model.Localization.GetString("search.filters.duration.short")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Medium)
+								{
+									<input type="radio" name="duration" value="3" checked>
+								}
+								else
+								{
+									<input type="radio" name="duration" value="3">
+								}
+								@Model.Localization.GetString("search.filters.duration.medium")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasDuration && Model.Filter.Filters.Duration == SearchFilters.Types.VideoDuration.Long)
+								{
+									<input type="radio" name="duration" value="2" checked>
+								}
+								else
+								{
+									<input type="radio" name="duration" value="2">
+								}
+								@Model.Localization.GetString("search.filters.duration.long")
+							</label>
+						</div>
 
-	<div class="search-filter">
-		<div class="search-filter__category">
-			Features
-		</div>
-		<hr>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasLive) {
-				<input type="checkbox" name="live" checked>
-			} else {
-				<input type="checkbox" name="live">
-			}
-			@Model.Localization.GetString("search.filters.features.live")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasResolution4K) {
-				<input type="checkbox" name="4k" checked>
-			} else {
-				<input type="checkbox" name="4k">
-			}
-			@Model.Localization.GetString("search.filters.features.4k")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasHd) {
-				<input type="checkbox" name="hd" checked>
-			} else {
-				<input type="checkbox" name="hd">
-			}
-			@Model.Localization.GetString("search.filters.features.hd")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasSubtitles) {
-				<input type="checkbox" name="subs" checked>
-			} else {
-				<input type="checkbox" name="subs">
-			}
-			@Model.Localization.GetString("search.filters.features.subs")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasCreativeCommons) {
-				<input type="checkbox" name="cc" checked>
-			} else {
-				<input type="checkbox" name="cc">
-			}
-			@Model.Localization.GetString("search.filters.features.cc")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasVr360) {
-				<input type="checkbox" name="vr360" checked>
-			} else {
-				<input type="checkbox" name="vr360">
-			}
-			@Model.Localization.GetString("search.filters.features.360")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasVr180) {
-				<input type="checkbox" name="vr180" checked>
-			} else {
-				<input type="checkbox" name="vr180">
-			}
-			@Model.Localization.GetString("search.filters.features.vr180")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasResolution3D) {
-				<input type="checkbox" name="3d" checked>
-			} else {
-				<input type="checkbox" name="3d">
-			}
-			@Model.Localization.GetString("search.filters.features.3d")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasHdr) {
-				<input type="checkbox" name="hdr" checked>
-			} else {
-				<input type="checkbox" name="hdr">
-			}
-			@Model.Localization.GetString("search.filters.features.hdr")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasLocation) {
-				<input type="checkbox" name="location" checked>
-			} else {
-				<input type="checkbox" name="location">
-			}
-			@Model.Localization.GetString("search.filters.features.location")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.Filters.HasPurchased) {
-				<input type="checkbox" name="purchased" checked>
-			} else {
-				<input type="checkbox" name="purchased">
-			}
-			@Model.Localization.GetString("search.filters.features.purchased")
-		</label>
-	</div>
+						<div class="search-filter">
+							<div class="search-filter__category">
+								Features
+							</div>
+							<hr>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasLive)
+								{
+									<input type="checkbox" name="live" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="live">
+								}
+								@Model.Localization.GetString("search.filters.features.live")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasResolution4K)
+								{
+									<input type="checkbox" name="4k" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="4k">
+								}
+								@Model.Localization.GetString("search.filters.features.4k")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasHd)
+								{
+									<input type="checkbox" name="hd" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="hd">
+								}
+								@Model.Localization.GetString("search.filters.features.hd")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasSubtitles)
+								{
+									<input type="checkbox" name="subs" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="subs">
+								}
+								@Model.Localization.GetString("search.filters.features.subs")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasCreativeCommons)
+								{
+									<input type="checkbox" name="cc" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="cc">
+								}
+								@Model.Localization.GetString("search.filters.features.cc")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasVr360)
+								{
+									<input type="checkbox" name="vr360" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="vr360">
+								}
+								@Model.Localization.GetString("search.filters.features.360")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasVr180)
+								{
+									<input type="checkbox" name="vr180" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="vr180">
+								}
+								@Model.Localization.GetString("search.filters.features.vr180")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasResolution3D)
+								{
+									<input type="checkbox" name="3d" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="3d">
+								}
+								@Model.Localization.GetString("search.filters.features.3d")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasHdr)
+								{
+									<input type="checkbox" name="hdr" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="hdr">
+								}
+								@Model.Localization.GetString("search.filters.features.hdr")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasLocation)
+								{
+									<input type="checkbox" name="location" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="location">
+								}
+								@Model.Localization.GetString("search.filters.features.location")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.Filters.HasPurchased)
+								{
+									<input type="checkbox" name="purchased" checked>
+								}
+								else
+								{
+									<input type="checkbox" name="purchased">
+								}
+								@Model.Localization.GetString("search.filters.features.purchased")
+							</label>
+						</div>
 
-	<div class="search-filter">
-		<div class="search-filter__category">
-			Sort By
-		</div>
-		<hr>
-		<label class="search-filter__item">
-			@if (Model.Filter.SortBy == SearchParams.Types.SortField.Relevance)
-			{
-				<input type="radio" name="sortField" value="0" checked>
-			}
-			else
-			{
-				<input type="radio" name="sortField" value="0">
-			}
-			@Model.Localization.GetString("search.filters.sort.relevance")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.UploadDate)
-			{
-				<input type="radio" name="sortField" value="2" checked>
-			}
-			else
-			{
-				<input type="radio" name="sortField" value="2">
-			}
-			@Model.Localization.GetString("search.filters.sort.date")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.ViewCount)
-			{
-				<input type="radio" name="sortField" value="3" checked>
-			}
-			else
-			{
-				<input type="radio" name="sortField" value="3">
-			}
-			@Model.Localization.GetString("search.filters.sort.views")
-		</label>
-		<label class="search-filter__item">
-			@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.Rating)
-			{
-				<input type="radio" name="sortField" value="1" checked>
-			}
-			else
-			{
-				<input type="radio" name="sortField" value="1">
-			}
-			@Model.Localization.GetString("search.filters.sort.rating")
-		</label>
-	</div>
-	</div>
+						<div class="search-filter">
+							<div class="search-filter__category">
+								Sort By
+							</div>
+							<hr>
+							<label class="search-filter__item">
+								@if (Model.Filter.SortBy == SearchParams.Types.SortField.Relevance)
+								{
+									<input type="radio" name="sortField" value="0" checked>
+								}
+								else
+								{
+									<input type="radio" name="sortField" value="0">
+								}
+								@Model.Localization.GetString("search.filters.sort.relevance")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.UploadDate)
+								{
+									<input type="radio" name="sortField" value="2" checked>
+								}
+								else
+								{
+									<input type="radio" name="sortField" value="2">
+								}
+								@Model.Localization.GetString("search.filters.sort.date")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.ViewCount)
+								{
+									<input type="radio" name="sortField" value="3" checked>
+								}
+								else
+								{
+									<input type="radio" name="sortField" value="3">
+								}
+								@Model.Localization.GetString("search.filters.sort.views")
+							</label>
+							<label class="search-filter__item">
+								@if (Model.Filter.HasSortBy && Model.Filter.SortBy == SearchParams.Types.SortField.Rating)
+								{
+									<input type="radio" name="sortField" value="1" checked>
+								}
+								else
+								{
+									<input type="radio" name="sortField" value="1">
+								}
+								@Model.Localization.GetString("search.filters.sort.rating")
+							</label>
+						</div>
+					</div>
 
-	<button type="submit" class="btn filters-button">
-		<div class="text">
-			@Model.Localization.GetString("search.filters.apply")
+					<button type="submit" class="btn filters-button">
+						<div class="text">
+							@Model.Localization.GetString("search.filters.apply")
+						</div>
+					</button>
+				</form>
+			}
+		</details>
+	</div>
+	@if (Model.QueryCorrecter != null)
+	{
+		<div class="querycorrecter">
+			@switch (Model.QueryCorrecter.CorrectionType)
+			{
+				case ShowingResultsFor.Type.ShowingResultsFor:
+					<span class="querycorrecter__showingresultsfor">
+						@Model.Localization.FormatString("search.showingresultsfor", Model.QueryCorrecter.CorrectedQuery, $"/results?search_query={HttpUtility.UrlEncode(Model.QueryCorrecter.CorrectedQuery)}&exact=true")
+					</span>
+					<span class="querycorrecter__searchinsteadfor">
+						@Model.Localization.FormatString("search.searchinsteadfor", Model.QueryCorrecter.OriginalQuery ?? "", $"/results?search_query={HttpUtility.UrlEncode(Model.QueryCorrecter.OriginalQuery)}&exact=true")
+					</span>
+					break;
+				case ShowingResultsFor.Type.DidYouMean:
+					<span class="querycorrecter__didyoumean">
+						@Model.Localization.FormatString("search.didyoumean", Model.QueryCorrecter.CorrectedQuery, $"/results?search_query={HttpUtility.UrlEncode(Model.QueryCorrecter.CorrectedQuery)}&exact=true")
+					</span>
+					break;
+			}
 		</div>
-	</button>
-	</form>
-	</details>
-}
-@foreach (IRenderer renderer in Model.Results)
-{
-	<partial name="Renderer" model="(renderer, Model.Localization)"/>
-}
+	}
+	@if (Model.Sidebar is { Data: SearchSidebarRendererData })
+	{
+		<div class="search-results-container">
+			<partial name="Renderers/SearchSidebar" model="(Model.Sidebar, Model.Localization)"/>
+			<div class="search-results">
+				@foreach (RendererContainer renderer in Model.Results)
+				{
+					<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+				}
+			</div>
+		</div>
+	}
+	else
+	{
+		foreach (RendererContainer renderer in Model.Results)
+		{
+			<partial name="Renderers/SearchRenderer" model="(renderer, Model.Localization)"/>
+		}
+	}
 </div>
 <div class="next-page">
 	@if (Context.Request.Query.ContainsKey("continuation"))

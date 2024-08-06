@@ -1,4 +1,4 @@
-using InnerTube;
+using InnerTube.Models;
 using LightTube.Database.Models;
 
 namespace LightTube.Contexts;
@@ -15,7 +15,7 @@ public class PlaylistVideoContext<T> : ModalContext
     {
     }
 
-    public PlaylistVideoContext(HttpContext context, InnerTubeNextResponse video) : base(context)
+    public PlaylistVideoContext(HttpContext context, InnerTubeVideo video) : base(context)
     {
         ItemId = video.Id;
         ItemTitle = video.Title;

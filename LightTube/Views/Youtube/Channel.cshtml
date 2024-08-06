@@ -1,5 +1,8 @@
 ﻿@using InnerTube
+@using InnerTube.Models
+@using InnerTube.Protobuf
 @using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Utils = LightTube.Utils
 @model ChannelContext
 
@@ -19,11 +22,16 @@
 			<img loading="lazy" class="channel-info__avatar" src="@Model.AvatarUrl" alt="@Model.ChannelTitle">
 			<div class="channel-info__info">
 				<span class="channel-info__name ml-1 title">@Model.ChannelTitle</span>
-				<!-- TODO follow format @@handle • @Model.SubscriberCountText • @@Model.VideoCountText  -->
-				<span class="channel-info__subs">@Model.SubscriberCountText</span>
+				<span class="channel-info__subs">@Model.Handle • @Model.Localization.FormatString("channel.header.subscribers", Model.SubscriberCount.ToKMB()) • @Model.Localization.FormatString("channel.header.videos", Model.VideoCount)</span>
+				<span class="channel-info__tagline ml-1">@Model.Tagline</span>
+				<span class="channel-info__links">
+					@Html.Raw(Model.PrimaryLink) @Html.Raw(Model.SecondaryLink)
+				</span>
 				@if (!Model.LightTubeAccount)
 				{
-					<partial name="SubscribeButton" model="(Model.Id, Model.Localization)"/>
+					<div style="display: flex">
+						<partial name="SubscribeButton" model="(Model.Id, Model.Localization)"/>
+					</div>
 				}
 				else if (Model.Editable)
 				{
@@ -36,43 +44,158 @@
 	</div>
 	<div class="channel-tabs">
 		<div class="channel-tabs__container">
-			@foreach (ChannelTabs tab in Model.Tabs.Where(x => x != ChannelTabs.Search))
+			@foreach (ChannelTab tab in Model.Tabs.Where(x => x.Tab != ChannelTabs.Search))
 			{
-				<partial name="ChannelTabItem" model="@(tab, Model.Id, Model.Localization)"/>
+				<partial name="ChannelTabItem" model="@(tab, Model.Id, Model.About != null, Model.Localization)"/>
 			}
+			<a href="/channel/@Model.Id/about" class="channel-tabs__item @(Model.About != null ? "active" : "")">
+				@Model.Localization.GetString("channel.tab.about")
+			</a>
 		</div>
 	</div>
-	@switch (Model.CurrentTab)
+	@if (Model.About != null)
 	{
-		case ChannelTabs.Videos or ChannelTabs.Live or ChannelTabs.Community:
-		{
-			<div class="channel-content search-container">
-				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
-				{
-					<partial name="Renderer" model="(renderer, Model.Localization)"/>
-				}
+		<div class="channel-content search-container" style="gap:0">
+			<div class="renderer-channelaboutfullmetadatarenderer">
+				<div class="channel-about-description">
+					@if (!string.IsNullOrEmpty(Model.About.Description))
+					{
+						<h2 class="ml-1 title">@Model.Localization.GetString("channel.about.description")</h2>
+						<p>
+							@Html.Raw(Model.About.Description)
+						</p>
+					} else if (!string.IsNullOrEmpty(Model.About.ArtistBio))
+					{
+						<h2 class="ml-1 title">@Model.Localization.GetString("channel.about.artistbio")</h2>
+						<p>
+							@Html.Raw(Model.About.ArtistBio)
+						</p>
+					}
+				</div>
+				<div class="channel-about-stats">
+					<h2 class="ml-1 title">Stats</h2>
+					<div class="channel-about-stats__item">
+						@Model.Localization.FormatString("channel.header.subscribers", Model.About.SubscriberCount.ToKMB())
+					</div>
+					<div class="channel-about-stats__item">
+						@Model.Localization.FormatString("channel.header.videos", Model.About.VideoCount)
+					</div>
+					<div class="channel-about-stats__item">
+						@Model.Localization.FormatString("channel.about.views", Model.About.ViewCount.ToString("N0"))
+					</div>
+					<div class="channel-about-stats__item">
+						@Model.Localization.FormatString("channel.about.joined", Model.About.JoinedDate.ToString("dd MMMM yyyy", Model.Localization.GetCulture()))
+					</div>
+					<div class="channel-about-stats__item">
+						@Model.About.Country
+					</div>
+				</div>
+				<div class="channel-about-links">
+					<h2 class="ml-1 title">@Model.Localization.GetString("channel.about.links")</h2>
+					@foreach (InnerTubeAboutChannel.Link link in Model.About.ChannelLinks)
+					{
+						<div class="channel-about-link">
+							<img src="@link.Favicon.LastOrDefault()?.Url">
+							<a href="@link.Url">@link.Title</a>
+						</div>
+					}
+				</div>
 			</div>
-			break;
-		}
-		case ChannelTabs.Shorts:
+		</div>
+	}
+	else
+	{
+		switch (Model.CurrentTab)
 		{
-			<div class="channel-content reel-grid">
-				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
-				{
-					<partial name="Renderer" model="(renderer, Model.Localization)"/>
-				}
-			</div>
-			break;
-		}
-		default:
-		{
-			<div class="channel-content">
-				@foreach (IRenderer renderer in Model.Content.Where(x => x is not ContinuationItemRenderer))
-				{
-					<partial name="Renderer" model="(renderer, Model.Localization)"/>
-				}
-			</div>
-			break;
+			case ChannelTabs.Featured:
+				<div class="channel-content search-container" style="gap:0">
+					<partial name="Renderers/Channel/ChannelHome" model="(Model.Content, Model.Localization)"/>
+				</div>
+				break;
+			case ChannelTabs.Community:
+			{
+				<div class="channel-content search-container">
+					@foreach (RendererContainer renderer in Model.Content.SelectMany(x => x.Type == "container" ? ((ContainerRendererData)x.Data).Items : [x]).Where(x => x.Type != "continuation"))
+					{
+						switch (renderer.Type)
+						{
+							case "communityPost":
+								CommunityPostRendererData post = (CommunityPostRendererData)renderer.Data;
+								<div class="renderer-backstagepostthreadrenderer">
+									<div class="post-avatar">
+										<img loading="lazy" src="@post.Author.Avatar?.LastOrDefault()?.Url" alt="@post.Author.Title">
+									</div>
+									<div class="post-info">
+										<a href="/channel/@post.Author.Id" class="post-author">@post.Author.Title</a>
+										<span>
+											@post.PublishedText
+										</span>
+									</div>
+									<div class="post-content">
+										<div>
+											@Html.Raw(post.Content)
+										</div>
+										@if (post.Attachment is not null)
+										{
+											<partial name="Renderers/PostAttachmentRenderer" model="(post.Attachment, Model.Localization)"/>
+										}
+										<div class="post-buttons">
+											<svg class="bi" width="20" height="20" fill="currentColor">
+												<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
+											</svg>
+											@post.LikeCount
+											&nbsp;&nbsp;
+											<a href="https://youtube.com/post/@post.PostId">
+												@Model.Localization.GetString("post.view.youtube")
+											</a>
+										</div>
+									</div>
+								</div>
+								break;
+							case "exception":
+								ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+								<div class="renderer-null">
+									<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+								</div>
+								break;
+						}
+					}
+				</div>
+				break;
+			}
+			case ChannelTabs.Shorts:
+			{
+				<div class="channel-content reel-grid">
+					@foreach (RendererContainer renderer in Model.Content)
+					{
+						switch (renderer.Type)
+						{
+							case "video":
+								<partial name="Renderers/ReelRenderer" model="((VideoRendererData)renderer.Data, Model.Localization)"/>
+								break;
+							case "exception":
+								ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+								<div class="renderer-null">
+									<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+								</div>
+								break;
+						}
+					}
+				</div>
+				break;
+			}
+			default:
+			{
+				// There can be containers inside containers,,
+				IEnumerable<RendererContainer> items = Model.Content
+					.SelectMany(x => x.Data is ContainerRendererData container ? container.Items : [x])
+					.SelectMany(x => x.Data is ContainerRendererData container ? container.Items : [x])
+					.Where(x => x.Type != "continuation");
+				<div class="channel-content grid-items">
+					<partial name="Renderers/Channel/ChannelGrid" model="(items, Model.Localization)"/>
+				</div>
+				break;
+			}
 		}
 	}
 </div>

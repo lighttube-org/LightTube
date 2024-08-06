@@ -1,53 +1,224 @@
-﻿using InnerTube;
-using Newtonsoft.Json.Linq;
+﻿using InnerTube.Models;
+using InnerTube.Protobuf;
+using LightTube.Localization;
+using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.Database.Models;
 
 public class DatabasePlaylist
 {
-    private const string INNERTUBE_PLAYLIST_INFO_TEMPLATE = "{\"playlistId\":\"%%PLAYLIST_ID%%\",\"title\":\"%%TITLE%%\",\"totalVideos\":%%VIDEO_COUNT%%,\"currentIndex\":%%CURRENT_INDEX%%,\"localCurrentIndex\":%%CURRENT_INDEX%%,\"longBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]},\"isInfinite\":false,\"isCourse\":false,\"ownerBadges\":[],\"contents\":[%%CONTENTS%%]}";
-    private const string INNERTUBE_GRID_PLAYLIST_RENDERER_TEMPLATE = "{\"gridPlaylistRenderer\":{\"playlistId\":\"%%ID%%\",\"title\":{\"simpleText\":\"%%TITLE%%\"},\"videoCountShortText\":{\"simpleText\":\"%%VIDEOCOUNT%%\"},\"thumbnailRenderer\":{\"playlistVideoThumbnailRenderer\":{\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]}}}}}";
-    private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    public string Id;
-    public string Name;
-    public string Description;
-    public PlaylistVisibility Visibility;
-    public List<string> VideoIds;
-    public string Author;
-    public DateTimeOffset LastUpdated;
+	private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+	public string Id;
+	public string Name;
+	public string Description;
+	public PlaylistVisibility Visibility;
+	public List<string> VideoIds;
+	public string Author;
+	public DateTimeOffset LastUpdated;
 
-    public InnerTubePlaylistInfo? GetInnerTubePlaylistInfo(string currentVideoId)
-    {
-        string json = INNERTUBE_PLAYLIST_INFO_TEMPLATE
-            .Replace("%%PLAYLIST_ID%%", Id)
-            .Replace("%%TITLE%%", Name.Replace("\"", "\\\""))
-            .Replace("%%VIDEO_COUNT%%", VideoIds.Count.ToString())
-            .Replace("%%CURRENT_INDEX%%", VideoIds.IndexOf(currentVideoId).ToString())
-            .Replace("%%CHANNEL_TITLE%%", Author.Replace("\"", "\\\""))
-            .Replace("%%CHANNEL_ID%%", DatabaseManager.Users.GetUserFromId(Author).Result?.LTChannelID)
-            .Replace("%%CONTENTS%%", DatabaseManager.Playlists.GetPlaylistPanelVideosJson(Id, currentVideoId));
-        return new InnerTubePlaylistInfo(JObject.Parse(json));
-    }
+	public static string GenerateId()
+	{
+		Random rng = new();
+		string playlistId = "LT-PL";
+		while (playlistId.Length < 24)
+			playlistId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
+		return playlistId;
+	}
 
-    public string GetInnerTubeGridPlaylistJson() => INNERTUBE_GRID_PLAYLIST_RENDERER_TEMPLATE
-        .Replace("%%ID%%", Id)
-        .Replace("%%TITLE%%", Name)
-        .Replace("%%VIDEOCOUNT%%", VideoIds.Count.ToString())
-        .Replace("%%THUMBNAIL%%", $"https://i.ytimg.com/vi/{VideoIds.FirstOrDefault()}/hqdefault.jpg");
+	public VideoPlaylistInfo? GetVideoPlaylistInfo(string detailsId, DatabaseUser author, List<DatabaseVideo> videos,
+		LocalizationManager localization)
+	{
+		Playlist pl = new()
+		{
+			PlaylistId = Id,
+			Title = Name,
+			TotalVideos = VideoIds.Count,
+			CurrentIndex = VideoIds.IndexOf(detailsId),
+			LocalCurrentIndex = VideoIds.IndexOf(detailsId),
+			LongBylineText = new Text
+			{
+				Runs =
+				{
+					new Text.Types.Run
+					{
+						NavigationEndpoint = new Endpoint
+						{
+							BrowseEndpoint = new BrowseEndpoint
+							{
+								BrowseId = author.LTChannelID,
+								CanonicalBaseUrl = $"/@LT_{author.UserID}"
+							}
+						},
+						Text = author.UserID
+					}
+				}
+			},
+			IsCourse = false,
+			IsInfinite = false
+		};
+		int i = 0;
+		// todo: add null checks for uncached videos
+		pl.Contents.AddRange(videos.Select(x =>
+		{
+			if (x is null)
+			{
+				return new RendererWrapper
+				{
+					PlaylistPanelVideoRenderer = new PlaylistPanelVideoRenderer
+					{
+						VideoId = "",
+						Title = new Text
+						{
+							SimpleText = localization.GetRawString("playlist.video.uncached")
+						},
+						Thumbnail = new Thumbnails
+						{
+							Thumbnails_ = { new Thumbnail
+								{
+									Url = "https://i.ytimg.com/vi/___________/hqdefault.jpg",
+									Width = 120,
+									Height = 90
+								}
+							}
+						},
+						LengthText = new Text
+						{
+							SimpleText = "00:00"
+						},
+						IndexText = new Text
+						{
+							SimpleText = (++i).ToString()
+						}
+					}
+				};
+			}
+			return new RendererWrapper
+			{
+				PlaylistPanelVideoRenderer = new PlaylistPanelVideoRenderer
+				{
+					VideoId = x.Id,
+					Title = new Text
+					{
+						SimpleText = x.Title
+					},
+					Thumbnail = new Thumbnails
+					{
+						Thumbnails_ = { x.Thumbnails }
+					},
+					ShortBylineText = new Text
+					{
+						Runs =
+						{
+							new Text.Types.Run
+							{
+								NavigationEndpoint = new Endpoint
+								{
+									BrowseEndpoint = new BrowseEndpoint
+									{
+										BrowseId = x.Channel.Id,
+										CanonicalBaseUrl = $"/channel/{x.Channel.Id}"
+									}
+								},
+								Text = x.Channel.Name
+							}
+						}
+					},
+					LengthText = new Text
+					{
+						SimpleText = x.Duration
+					},
+					IndexText = new Text
+					{
+						SimpleText = (++i).ToString()
+					}
+				}
+			};
+		}));
+		return new VideoPlaylistInfo(pl, "en");
+	}
 
-    public static string GenerateId()
-    {
-        Random rng = new();
-        string playlistId = "LT-PL";
-        while (playlistId.Length < 24)
-            playlistId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
-        return playlistId;
-    }
+	public PlaylistHeaderRenderer GetHeaderRenderer(DatabaseUser author, LocalizationManager localization)
+	{
+		PlaylistHeaderRenderer? renderer = new()
+		{
+			Title = new Text
+			{
+				SimpleText = Name
+			},
+			NumVideosText = new Text
+			{
+				SimpleText = string.Format(localization.GetRawString("playlist.videos.count"), VideoIds.Count)
+			},
+			ViewCountText = new Text
+			{
+				SimpleText = localization.GetRawString("playlist.lighttube.views")
+			},
+			Byline = new RendererWrapper
+			{
+				PlaylistBylineRenderer = new PlaylistBylineRenderer
+				{
+					Text =
+					{
+						new Text
+						{
+							SimpleText = string.Format(localization.GetRawString("playlist.lastupdated"),
+								LastUpdated.ToString("MMM dd, yyyy"))
+						}
+					}
+				}
+			},
+			OwnerText = new Text
+			{
+				Runs =
+				{
+					new Text.Types.Run
+					{
+						NavigationEndpoint = new Endpoint
+						{
+							BrowseEndpoint = new BrowseEndpoint
+							{
+								BrowseId = author.LTChannelID,
+								CanonicalBaseUrl = $"/@LT_{author.UserID}"
+							}
+						},
+						Text = author.UserID
+					}
+				}
+			},
+			CinematicContainer = new RendererWrapper
+			{
+				CinematicContainerRenderer = new CinematicContainerRenderer
+				{
+					BackgroundImageConfig = new CinematicContainerRenderer.Types.BackgroundConfig
+					{
+						Thumbnails = new Thumbnails
+						{
+							Thumbnails_ =
+							{
+								new Thumbnail
+								{
+									Url = $"https://i.ytimg.com/vi/{VideoIds.FirstOrDefault()}/hqdefault.jpg",
+									Width = 480,
+									Height = 360
+								}
+							}
+						}
+					}
+				}
+			}
+		};
+		if (!string.IsNullOrEmpty(Description))
+			renderer.DescriptionText = new Text
+			{
+				SimpleText = Description
+			};
+		return renderer;
+	}
 }
 
 public enum PlaylistVisibility
 {
-    PRIVATE,
-    UNLISTED,
-    VISIBLE
+	Private,
+	Unlisted,
+	Visible
 }

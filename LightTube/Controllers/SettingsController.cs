@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using InnerTube;
+using InnerTube.Models;
+using LightTube.ApiModels;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
@@ -10,21 +12,19 @@ using Serilog;
 namespace LightTube.Controllers;
 
 [Route("/settings")]
-public class SettingsController(InnerTube.InnerTube youtube) : Controller
+public class SettingsController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private readonly InnerTube.InnerTube _youtube = youtube;
-
     [Route("/settings")]
     public IActionResult Settings() => RedirectPermanent("/settings/appearance");
 
     [Route("content")]
-    public async Task<IActionResult> Content() => RedirectPermanent("/settings/appearance");
+    public IActionResult Content() => RedirectPermanent("/settings/appearance");
 
     [Route("appearance")]
     [HttpGet]
-    public async Task<IActionResult> Appearance()
+    public IActionResult Appearance()
     {
-        InnerTubeLocals locals = await _youtube.GetLocalsAsync();
+        ApiLocals locals = Utils.GetLocals();
         AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.CustomThemeDefs, LocalizationManager.GetAllLanguages());
         return View(ctx);
     }
@@ -148,7 +148,7 @@ public class SettingsController(InnerTube.InnerTube youtube) : Controller
                         {
                             try
                             {
-                                InnerTubePlayer video = await _youtube.GetPlayerAsync(id, true);
+                                InnerTubePlayer video = await innerTube.GetVideoPlayerAsync(id, true);
                                 videoNexts.Add(id, video);
                             }
                             catch (Exception e)
@@ -180,16 +180,15 @@ public class SettingsController(InnerTube.InnerTube youtube) : Controller
                         playlist.Description, playlist.Visibility);
                     foreach (string video in playlist.VideoIds)
                     {
-                        if (!videoNexts.ContainsKey(video)) continue;
+                        if (!videoNexts.TryGetValue(video, out InnerTubePlayer? next)) continue;
                         await DatabaseManager.Playlists.AddVideoToPlaylist(token, pl.Id,
-                            videoNexts[video]);
+                            next);
                     }
                 }
             });
 
             return View(new ImportContext(HttpContext,
-                $"Import process started. It might take a few minutes for all the content to appear on your account\n{channelIds.Length} channels, {playlists.Length} playlists, {videos.Length} videos",
-                false));
+                $"Import process started. It might take a few minutes for all the content to appear on your account\n{channelIds.Length} channels, {playlists.Length} playlists, {videos.Length} videos"));
         }
         catch (Exception e)
         {

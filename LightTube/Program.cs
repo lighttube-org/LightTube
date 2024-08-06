@@ -4,6 +4,8 @@ using LightTube;
 using LightTube.Chores;
 using LightTube.Database;
 using LightTube.Localization;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 using Serilog.Events;
 
@@ -27,10 +29,15 @@ try
         .WriteTo.Console());
 
     // Add services to the container.
-    builder.Services.AddControllersWithViews().AddNewtonsoftJson();
+    builder.Services
+        .AddControllersWithViews()
+        .AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.Converters.Add(new StringEnumConverter(new DefaultNamingStrategy(), false));
+        });
 
     InnerTubeAuthorization? auth = Configuration.InnerTubeAuthorization;
-    builder.Services.AddSingleton(new InnerTube.InnerTube(new InnerTubeConfiguration
+    builder.Services.AddSingleton(new SimpleInnerTubeClient(new InnerTubeConfiguration
     {
         Authorization = auth,
         CacheSize = Configuration.CacheSize,

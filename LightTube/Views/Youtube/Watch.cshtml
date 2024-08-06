@@ -1,6 +1,10 @@
-﻿@using InnerTube.Renderers
+﻿@using Humanizer
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@using InnerTube
+@using InnerTube.Protobuf.Responses
+@using InnerTube.Models
+@using InnerTube.Renderers
+@using Microsoft.Extensions.Primitives
+@using Utils = LightTube.Utils
 @model WatchContext
 
 @{
@@ -10,174 +14,373 @@
 }
 
 <div class="watch-page">
-	<input type="checkbox" id="comments-toggle">
-	<div class="player-container" style="color:white;margin-bottom:2rem;aspect-ratio:16/9">
-		<!-- TODO: Parse aspect ratio in InnerTube and put it here                   ^^^^ -->
+<input type="checkbox" id="comments-toggle">
+<div class="player-container" style="color:white;margin-bottom:2rem">
+	<div class="player-wrapper" style="aspect-ratio:@(Utils.GetAspectRatio(Model))">
 		<partial name="Player" model="Model.Player"/>
-		@if (!Model.Player.Player?.Details.IsLive ?? true)
-		{
-			<noscript>
-				<div class="noscript-quality-switcher">
-					@Model.Localization.GetString("watch.noscript.resolution")
-					<b>
-						@Model.Player.GetPreferredFormat()?.QualityLabel
-					</b>
-					@Model.Localization.GetString("watch.noscript.resolution.switch")
-					@foreach (Format f in Model.Player.Player?.Formats.Where(x => x.Itag != Model.Player.GetFirstItag()) ?? Array.Empty<Format>())
-					{
-						<b>
-							<a href="/watch?v=@Model.Player.Player?.Details.Id&q=@f.Itag">@f.QualityLabel</a>
-						</b>
-					}
-				</div>
-			</noscript>
-		}
 	</div>
-	<div class="info-container">
-		<div class="ml-2 title">
-			@Model.Video.Title
-		</div>
-		<div class="buttons">
-			<div class="interaction-buttons">
-				<div class="interaction-button">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up"/>
-					</svg>
-					<div class="interaction-button__text">
-						@(Model.Likes == -1 ? Model.Localization.GetString("watch.like.unavailable") : Model.Likes.ToKMB())
-					</div>
-				</div>
-				<vr></vr>
-				<div class="interaction-button">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-down"/>
-					</svg>
-					<div class="interaction-button__text">
-						@(Model.Dislikes == -1 ? Model.Localization.GetString("watch.dislike.unavailable") : Model.Dislikes.ToKMB())
-					</div>
-				</div>
-			</div>
-			@if (Model.Comments is not null)
-			{
-				<div class="interaction-buttons hide-on-desktop">
-					<label class="interaction-button" for="comments-toggle">
-						<svg class="icon" width="20" height="20" fill="currentColor">
-							<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
-						</svg>
-						<div class="interaction-button__text">
-							@Model.Localization.GetString("watch.comments")
-						</div>
-					</label>
-				</div>
-			}
-			<div class="interaction-buttons">
-				<a class="interaction-button" href="/addToPlaylist?v=@Model.Video.Id" target="_blank">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
-					</svg>
-					<div class="interaction-button__text">
-						@Model.Localization.GetString("watch.save")
-					</div>
-				</a>
-			</div>
-			<div class="interaction-buttons">
-				<a class="interaction-button" href="/download/@Model.Video.Id">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#download"/>
-					</svg>
-					<div class="interaction-button__text">
-						@Model.Localization.GetString("watch.download")
-					</div>
-				</a>
-			</div>
-			<div class="interaction-buttons">
-				<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)" title="@Model.Localization.GetString("watch.youtube")">
-					<svg class="icon" width="20" height="20" fill="currentColor">
-						<use xlink:href="/svg/bootstrap-icons.svg#youtube"/>
-					</svg>
-				</a>
-			</div>
-		</div>
-		<div class="video-channel-info">
-			<img loading="lazy"
-			     class="avatar"
-			     src="@Model.Video.Channel.Avatar"
-			     alt="@Model.Video.Channel.Title">
-			<div class="video-channel-info__name">
-				<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
-				<span class="subs">@Model.Video.Channel.Subscribers</span>
-			</div>
-			<partial name="SubscribeButton" model="(Model.Video.Channel.Id, Model.Localization)"/>
-		</div>
-		<details class="description">
-			<summary>
-				@Model.Video.ViewCount • @Model.Video.DateText • @Model.Localization.GetString("watch.description.toggle")
-			</summary>
-			@Html.Raw(desc)
-		</details>
+</div>
+<div class="info-container">
+	<div class="ml-2 title">
+		@Html.Raw(Model.Video.Title)
 	</div>
-	<div class="comments-container">
+	<div class="buttons">
+		<div class="interaction-buttons">
+			<div class="interaction-button">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up"/>
+				</svg>
+				<div class="interaction-button__text">
+					@(Model.Likes == -1 ? Model.Localization.GetString("watch.like.unavailable") : Model.Likes.ToKMB())
+				</div>
+			</div>
+			<vr></vr>
+			<div class="interaction-button">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-down"/>
+				</svg>
+				<div class="interaction-button__text">
+					@(Model.Dislikes == -1 ? Model.Localization.GetString("watch.dislike.unavailable") : Model.Dislikes.ToKMB())
+				</div>
+			</div>
+		</div>
 		@if (Model.Comments is not null)
 		{
-			<details>
-				<summary>
-					<svg class="icon hide-on-desktop" width="32" height="32" fill="currentColor">
-						<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
-						<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
+			<div class="interaction-buttons hide-on-desktop">
+				<label class="interaction-button" for="comments-toggle">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
 					</svg>
-					@(Model.Video.CommentCount ?? (Model.Comments.Contents.Count() + (Model.Comments.Continuation != null ? "+" : ""))) @Model.Localization.GetString("watch.comments.count")
-					<div class="flex-divider hide-on-desktop"></div>
-					<label for="comments-toggle" class="hide-on-desktop">
-						<svg class="icon" width="32" height="32" fill="currentColor">
-							<use xlink:href="/svg/bootstrap-icons.svg#x"></use>
-						</svg>
-					</label>
-				</summary>
-				<div class="comments-container__flex">
-					@foreach (IRenderer renderer in Model.Comments.Contents)
-					{
-						<partial name="Renderer" model="(renderer, Model.Localization)"/>
-					}
-				</div>
-			</details>
+					<div class="interaction-button__text">
+						@Model.Localization.GetString("watch.comments")
+					</div>
+				</label>
+			</div>
 		}
-		else
-		{
-			@Model.Localization.GetString("watch.comments.disabled")
-		}
-	</div>
-	<div class="second-column">
-		@if (Model.Playlist is not null)
-		{
-			<details class="playlist-view-container" open>
-				<summary class="playlist-view__header">
-					<a href="/playlist?list=@Model.Playlist.PlaylistId" class="ml-1 title" title="@Model.Playlist.Title">
-						@Model.Playlist.Title
-					</a>
-					<div class="ml-1">@Model.Playlist.Channel.Title • @(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
-				</summary>
-				<div class="playlist-view__content">
-					@foreach (IRenderer renderer in Model.Playlist.Videos)
-					{
-						<partial name="Renderer" model="(renderer, Model.Localization)"/>
-					}
+		<div class="interaction-buttons">
+			<a class="interaction-button" href="/addToPlaylist?v=@Model.Video.Id" target="_blank">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
+				</svg>
+				<div class="interaction-button__text">
+					@Model.Localization.GetString("watch.save")
 				</div>
-			</details>
-		}
-		<div class="recommendations-container compact-renderer-list">
-			<details @(Context.GetDefaultRecommendationsVisibility() ? "open" : "")>
-				<summary>
-					@Model.Localization.GetString("watch.recommended")
-				</summary>
-				<div class="recommended-videos">
-					@foreach (IRenderer renderer in Model.Video.Recommended.Where(x => x is not ContinuationItemRenderer))
-					{
-						<partial name="Renderer" model="(renderer, Model.Localization)"/>
-					}
+			</a>
+		</div>
+		<div class="interaction-buttons">
+			<a class="interaction-button" href="/download/@Model.Video.Id">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+				</svg>
+				<div class="interaction-button__text">
+					@Model.Localization.GetString("watch.download")
 				</div>
-			</details>
+			</a>
+		</div>
+		<div class="interaction-buttons">
+			<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)" title="@Model.Localization.GetString("watch.youtube")">
+				<svg class="icon" width="20" height="20" fill="currentColor">
+					<use xlink:href="/svg/bootstrap-icons.svg#youtube"/>
+				</svg>
+			</a>
 		</div>
 	</div>
+	<div class="video-channel-info">
+		<img loading="lazy"
+		     class="avatar"
+		     src="@Model.Video.Channel.Avatar?.LastOrDefault()?.Url"
+		     alt="@Model.Video.Channel.Title">
+		<div class="video-channel-info__name">
+			<a class="ml-1 title" href="/channel/@Model.Video.Channel.Id">@Model.Video.Channel.Title</a>
+			<span class="subs">@Model.Video.Channel.SubscribersText</span>
+		</div>
+		<partial name="SubscribeButton" model="(Model.Video.Channel.Id, Model.Localization)"/>
+	</div>
+	<details class="description">
+		<summary>
+			@Model.Video.ViewCountText • @Model.Video.DateText • @Model.Localization.GetString("watch.description.toggle")
+		</summary>
+		@Html.Raw(desc)
+	</details>
+</div>
+<div class="comments-container">
+	@if (Model.Comments is not null)
+	{
+		<details>
+			<summary>
+				<svg class="icon hide-on-desktop" width="32" height="32" fill="currentColor">
+					<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
+					<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
+				</svg>
+				@(Model.Video.CommentsCountText ?? Model.Comments.Results.Length + (Model.Comments.ContinuationToken != null ? "+" : "")) @Model.Localization.GetString("watch.comments.count")
+				<div class="flex-divider hide-on-desktop"></div>
+				<label for="comments-toggle" class="hide-on-desktop">
+					<svg class="icon" width="32" height="32" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#x"></use>
+					</svg>
+				</label>
+			</summary>
+			<div class="comments-container__flex">
+				@foreach (RendererContainer renderer in Model.Comments.Results)
+				{
+					switch (renderer.Type)
+					{
+						case "comment":
+							CommentRendererData comment = (CommentRendererData)renderer.Data;
+							<div class="renderer-commentthreadrenderer">
+								<a class="comment__author-avatar" href="/channel/@comment.Owner.Id">
+									<img loading="lazy" src="@comment.Owner.Avatar?.LastOrDefault()?.Url" alt="@comment.Owner.Title">
+								</a>
+								<div class="comment">
+									<div class="header ml-1">
+										@if (comment.Pinned)
+										{
+											<svg class="bi" width="12" height="12" fill="currentColor" title="Pinned">
+												<use xlink:href="/svg/bootstrap-icons.svg#pin-angle-fill"/>
+											</svg>
+										}
+										<a href="/channel/@comment.Owner.Id" class="comment__author ml-1 title" title="@comment.Owner.Title">
+											@comment.Owner.Title
+										</a>
+										<span class="comment__posted ml-1">
+											@comment.PublishedTimeText
+										</span>
+									</div>
+									<div class="comment__content">
+										@Html.Raw(comment.Content)
+									</div>
+									<div class="comment__buttons">
+										<svg class="bi" width="20" height="20" fill="currentColor">
+											<use xlink:href="/svg/bootstrap-icons.svg#hand-thumbs-up-fill"/>
+										</svg>
+										@comment.LikeCountText
+										@if (Context.Request.Query.TryGetValue("v", out StringValues v))
+										{
+											<a href="https://youtube.com/watch?v=@v&lc=@comment.Id">
+												Open on YouTube
+											</a>
+										}
+									</div>
+								</div>
+							</div>
+							break;
+						case "exception":
+							ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+							<div class="renderer-null">
+								<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+							</div>
+							break;
+					}
+				}
+			</div>
+		</details>
+	}
+	else if (Model.Video.CommentsErrorMessage is not null)
+	{
+		@Model.Video.CommentsErrorMessage
+	}
+	else
+	{
+		@Model.Localization.GetString("watch.comments.disabled")
+	}
+</div>
+<div class="second-column">
+	@if (Model.Playlist is not null)
+	{
+		<details class="playlist-view-container" open>
+			<summary class="playlist-view__header">
+				<a href="/playlist?list=@Model.Playlist.PlaylistId" class="ml-1 title" title="@Model.Playlist.Title">
+					@Model.Playlist.Title
+				</a>
+				@if (Model.Playlist.Channel != null)
+				{
+					<div class="ml-1">@Model.Playlist.Channel.Title • @(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
+				}
+				else
+				{
+					<div class="ml-1">@(Model.Playlist.CurrentIndex + 1) / @Model.Playlist.TotalVideos</div>
+				}
+			</summary>
+			<div class="playlist-view__content">
+				@foreach (RendererContainer renderer in Model.Playlist.Videos)
+				{
+					switch (renderer.Type)
+					{
+						case "video":
+							PlaylistVideoRendererData video = (PlaylistVideoRendererData)renderer.Data;
+							<div class="renderer-playlistpanelvideorenderer @(video.VideoId == Model.Video.Id ? "active" : "")">
+								<div class="playlistvideo__index">
+									@video.VideoIndexText
+								</div>
+								<a href="/watch?v=@video.VideoId&list=@(Context.Request.Query.TryGetValue("list", out StringValues l1) ? l1.FirstOrDefault() : "")" class="playlistvideo__thumbnail">
+									<div class="playlistvideo__thumbnail">
+										<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
+										<div class="playlistvideo__thumbnail__duration__container">
+											<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+										</div>
+									</div>
+								</a>
+								<div class="playlistvideo__info">
+									<a href="/watch?v=@video.VideoId&list=@(Context.Request.Query.TryGetValue("list", out StringValues l2) ? l2.FirstOrDefault() : "")" class="title ml-2" title="@video.Title">
+										@video.Title
+									</a>
+									@if (video.Author != null)
+									{
+										<a href="/channel/@video.Author.Id" class="ml-1" title="@video.Author.Title">
+											@video.Author.Title
+										</a>
+									}
+								</div>
+							</div>
+							break;
+						case "message":
+							<div class="renderer-null">
+								@((renderer.Data as MessageRendererData).Message)
+							</div>
+							break;
+						default:
+							<div class="renderer-null">
+								Unexpected renderer: @renderer.Type (@renderer.OriginalType)
+							</div>
+							break;
+					}
+				}
+			</div>
+		</details>
+	}
+	<div class="recommendations-container compact-renderer-list">
+		<details @(Context.GetDefaultRecommendationsVisibility() ? "open" : "")>
+			<summary>
+				@Model.Localization.GetString("watch.recommended")
+			</summary>
+			<div class="recommended-videos">
+				@foreach (RendererContainer renderer in Model.Video.Recommended.Where(x => x.Type != "continuation"))
+				{
+					@switch (renderer.Type)
+					{
+						case "ad":
+							<!-- Blocked an ad~ -->
+							break;
+						case "video":
+							VideoRendererData video = (VideoRendererData)renderer.Data;
+							<div class="renderer-compactvideorenderer">
+								<a class="compact-thumbnail" href="/watch?v=@video.VideoId">
+									<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
+									<div class="compact-thumbnail__duration__container">
+										<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
+									</div>
+								</a>
+								<div class="info">
+									<a class="ml-2 title" href="/watch?v=@video.VideoId" title="@video.Title">
+										@video.Title
+									</a>
+									<div class="info__more">
+										@if (video.Author != null)
+										{
+											<div class="info__channel">
+												<a class="ml-1" href="/channel/@video.Author.Id" title="@video.Author.Title">
+													@video.Author.Title
+												</a>
+												@foreach (Badge channelBadge in video.Author.Badges ?? [])
+												{
+													<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+														<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+													</svg>
+												}
+											</div>
+										}
+										<div>
+											@video.ViewCountText • @video.PublishedText
+										</div>
+										<div>
+											@foreach (Badge badge in video.Badges)
+											{
+												<span class="badge" title="@badge.Tooltip">
+													@badge.Label
+												</span>
+											}
+										</div>
+									</div>
+								</div>
+							</div>
+							break;
+						case "playlist":
+							PlaylistRendererData playlist = (PlaylistRendererData)renderer.Data;
+							<div class="renderer-compactplaylistrenderer">
+								<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.PlaylistId" class="compact-thumbnail">
+									<img loading="lazy" src="@playlist.Thumbnails.LastOrDefault()?.Url">
+									<div class="compact-thumbnail__playlist__overlay">
+										<span>@playlist.VideoCountText.Split(" ")[0]</span>
+										<svg class="bi" width="20" height="20" fill="currentColor">
+											<use xlink:href="/svg/bootstrap-icons.svg#list"/>
+										</svg>
+									</div>
+								</a>
+								<div class="info">
+									<a href="/watch?v=@playlist.FirstVideoId&list=@playlist.PlaylistId" class="ml-2 title" title="@playlist.Title">
+										@playlist.Title
+									</a>
+									<div class="info__more">
+										@if (playlist.Author != null)
+										{
+											<div class="info__channel">
+												<a href="/channel/@playlist.Author.Id" title="@playlist.Author.Title" class="ml-1">
+													@playlist.Author.Title
+												</a>
+												@foreach (Badge channelBadge in playlist.Author.Badges ?? [])
+												{
+													<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+														<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+													</svg>
+												}
+											</div>
+										}
+									</div>
+								</div>
+							</div>
+							break;
+						case "container":
+							ContainerRendererData container = (ContainerRendererData)renderer.Data;
+							<partial name="Renderers/ContainerRenderer" model="(container, Model.Localization)"/>
+							break;
+						case "unknown":
+							<div>
+								<div>Unknown RendererContainer.OriginalType: <code>@renderer.OriginalType</code></div>
+								if (renderer.OriginalType == "UnknownProtobufRenderer")
+								{
+								<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+								}
+								else
+								{
+								<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
+								}
+							</div>
+							break;
+						case "exception":
+							ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+							<div class="renderer-null">
+								<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+							</div>
+							break;
+						default:
+							<div class="renderer-null">Unexpected RendererContainer.Type: <code>@renderer.Type</code></div>
+							break;
+					}
+				}
+			</div>
+		</details>
+	</div>
+</div>
+@if (Model.Player.Player?.Details.IsFallback == true) {
+	<div class="trailer">
+		<div class="trailer-box">
+			<h1>@Model.Localization.GetString("video.trailer.title")</h1>
+			@if (Model.Player.Player.Details.LiveStreamStartDate != null) {
+				<p>@Model.Localization.FormatString("video.trailer.body", Model.Player.Player.Details.LiveStreamStartDate!.Value.Humanize(DateTimeOffset.UtcNow, Model.Localization.GetCulture()))</p>
+			}
+		</div>
+	</div>
+}
 </div>
 <script>
 	const playerContainerElement = document.querySelector(".player-container");

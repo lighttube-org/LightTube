@@ -1,20 +1,23 @@
 using System.Net;
 using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf;
 using InnerTube.Renderers;
 using LightTube.ApiModels;
 using LightTube.Attributes;
+using LightTube.CustomRendererDatas;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LightTube.Controllers;
 
 [Route("/api")]
 [ApiDisableable]
-public class OauthApiController(InnerTube.InnerTube youtube) : Controller
+public class OauthApiController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private readonly InnerTube.InnerTube _youtube = youtube;
-
+    
     private ApiResponse<T> Error<T>(string message, int code,
         HttpStatusCode statusCode)
     {
@@ -44,13 +47,14 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
     [Route("playlists")]
     [HttpGet]
     [ApiAuthorization("playlists.read")]
-    public async Task<ApiResponse<IEnumerable<IRenderer>>> GetPlaylists()
+    public async Task<ApiResponse<IEnumerable<RendererContainer>>> GetPlaylists()
     {
         DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
-        if (user is null) return Error<IEnumerable<IRenderer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+        if (user is null) return Error<IEnumerable<RendererContainer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
 
         ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-        return new ApiResponse<IEnumerable<IRenderer>>(user.PlaylistRenderers(PlaylistVisibility.PRIVATE).Items,
+        return new ApiResponse<IEnumerable<RendererContainer>>(
+            user.PlaylistRenderers(LocalizationManager.GetFromHttpContext(HttpContext), PlaylistVisibility.Private),
             userData);
     }
 
@@ -71,7 +75,7 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             DatabasePlaylist playlist = await DatabaseManager.Playlists.CreatePlaylist(
                 Request.Headers.Authorization.ToString(), request.Title,
-                request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
+                request.Description ?? "", request.Visibility ?? PlaylistVisibility.Private);
             return new ApiResponse<DatabasePlaylist>(playlist, userData);
         }
         catch (Exception e)
@@ -96,8 +100,8 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
         {
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             await DatabaseManager.Playlists.EditPlaylist(
-                Request.Headers.Authorization.ToString()!, id, request.Title,
-                request.Description ?? "", request.Visibility ?? PlaylistVisibility.PRIVATE);
+                Request.Headers.Authorization.ToString(), id, request.Title,
+                request.Description ?? "", request.Visibility ?? PlaylistVisibility.Private);
             DatabasePlaylist playlist = DatabaseManager.Playlists.GetPlaylist(id)!;
             return new ApiResponse<DatabasePlaylist>(playlist, userData);
         }
@@ -138,7 +142,8 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 
         try
         {
-            InnerTubePlayer video = await _youtube.GetPlayerAsync(videoId);
+            InnerTubePlayer video = await innerTube.GetVideoPlayerAsync(videoId, true,
+                HttpContext.GetInnerTubeLanguage(), HttpContext.GetInnerTubeRegion());
             ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
             await DatabaseManager.Playlists.AddVideoToPlaylist(
                 Request.Headers.Authorization.ToString(),
@@ -214,22 +219,76 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
     [Route("feed")]
     [HttpGet]
     [ApiAuthorization("subscriptions.read")]
-    public async Task<ApiResponse<FeedVideo[]>> GetSubscriptionFeed(
+    public async Task<ApiResponse<IEnumerable<RendererContainer>>> GetSubscriptionFeed(
         bool includeNonNotification = true, int limit = 10, int skip = 0)
     {
         DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
         if (user is null)
-            return Error<FeedVideo[]>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+            return Error<IEnumerable<RendererContainer>>("Unauthorized", 401, HttpStatusCode.Unauthorized);
+
+        Dictionary<string, string> avatars = [];
+        foreach (string id in user.Subscriptions.Keys)
+        {
+            DatabaseChannel? channel = DatabaseManager.Cache.GetChannel(id);
+            if (channel is null) continue;
+            avatars.Add(id, channel.IconUrl);
+        }
 
         FeedVideo[] feed = includeNonNotification
-            ? await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Keys)
-            : await YoutubeRSS.GetMultipleFeeds(user.Subscriptions.Where(x =>
-                x.Value == SubscriptionType.NOTIFICATIONS_OFF).Select(x => x.Key));
+            ? await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Keys)
+            : await YoutubeRss.GetMultipleFeeds(user.Subscriptions.Where(x =>
+                x.Value == SubscriptionType.NOTIFICATIONS_ON).Select(x => x.Key));
 
         feed = feed.Skip(skip).Take(limit).ToArray();
 
+        IEnumerable<RendererContainer> renderers = feed.Select(x => new RendererContainer
+        {
+            Type = "video",
+            OriginalType = "lightTubeFeedVideo",
+            Data = new SubscriptionFeedVideoRendererData
+            {
+                VideoId = x.Id,
+                Title = x.Title,
+                Thumbnails =
+                [
+                    new Thumbnail
+                    {
+                        Url = x.Thumbnail,
+                        Width = 0,
+                        Height = 0
+                    }
+                ],
+                Author = new Channel("en",
+                    x.ChannelId,
+                    x.ChannelName,
+                    null,
+                    avatars.TryGetValue(x.ChannelId, out string? avatarUrl)
+                        ? [
+                            new Thumbnail
+                            {
+                                Url = avatarUrl,
+                                Width = 0,
+                                Height = 0
+                            }
+                        ]
+                        : null,
+                    null,
+                    null),
+                Duration = TimeSpan.Zero,
+                PublishedText = x.PublishedDate.ToString("D"),
+                RelativePublishedDate = Utils.ToRelativePublishedDate(x.PublishedDate),
+                ViewCountText =
+                    string.Format(LocalizationManager.GetFromHttpContext(HttpContext).GetRawString("channel.about.views"), x.ViewCount.ToString("N0")),
+                ViewCount = x.ViewCount,
+                Badges = [],
+                Description = x.Description,
+                PremiereStartTime = null,
+                ExactPublishDate = x.PublishedDate
+            }
+        });
+
         ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
-        return new ApiResponse<FeedVideo[]>(feed, userData);
+        return new ApiResponse<IEnumerable<RendererContainer>>(renderers, userData);
     }
 
     [Route("subscriptions")]
@@ -252,9 +311,9 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
                     : SubscriptionType.NOTIFICATIONS_OFF
                 : SubscriptionType.NONE;
 
-            InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(req.ChannelId);
+            InnerTubeChannel channel = await innerTube.GetChannelAsync(req.ChannelId);
             (string? channelId, SubscriptionType subscriptionType) = await DatabaseManager.Users.UpdateSubscription(
-                Request.Headers.Authorization.ToString()!, req.ChannelId,
+                Request.Headers.Authorization.ToString(), req.ChannelId,
                 type);
             if (req.Subscribed)
                 await DatabaseManager.Cache.AddChannel(new DatabaseChannel(channel));
@@ -283,9 +342,9 @@ public class OauthApiController(InnerTube.InnerTube youtube) : Controller
 
         try
         {
-            InnerTubeChannelResponse channel = await _youtube.GetChannelAsync(id);
+            InnerTubeChannel channel = await innerTube.GetChannelAsync(id);
             (string? channelId, SubscriptionType type) = await DatabaseManager.Users.UpdateSubscription(
-                Request.Headers.Authorization.ToString()!, id,
+                Request.Headers.Authorization.ToString(), id,
                 SubscriptionType.NONE);
             userData?.Channels.Add(channelId, new ApiSubscriptionInfo(type));
             return new ApiResponse<UpdateSubscriptionResponse>(new UpdateSubscriptionResponse(channel, type), userData);
