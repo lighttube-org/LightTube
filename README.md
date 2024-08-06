@@ -1,4 +1,12 @@
-# lighttube - A lightweight, privacy respecting alternative frontend for YouTube
+<center>
+
+# LightTube
+
+**A lightweight, privacy respecting alternative frontend for YouTube**
+
+[Documentation](https://github.com/lighttube-org/LightTube/wiki) • [Used libraries](https://github.com/lighttube-org/LightTube/blob/master/OTHERLIBS.md) • [Public instances](https://lighttube.org/instances)
+
+</center>
 
 ## Features
 
@@ -27,7 +35,3 @@
 |:-------|:-------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|
 | Search | ![image](https://github.com/lighttube-org/LightTube/blob/master/screenshots/mobile/light/search.png?raw=true) | ![image](https://github.com/lighttube-org/LightTube/blob/master/screenshots/mobile/dark/search.png?raw=true) |
 | Video  | ![image](https://github.com/lighttube-org/LightTube/blob/master/screenshots/mobile/light/video.png?raw=true)  | ![image](https://github.com/lighttube-org/LightTube/blob/master/screenshots/mobile/dark/video.png?raw=true)  |
-
----
-
-[Documentation](https://github.com/lighttube-org/LightTube/wiki) - [Used libraries](https://github.com/lighttube-org/LightTube/blob/master/OTHERLIBS.md)  - [Public instances](https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md) 
