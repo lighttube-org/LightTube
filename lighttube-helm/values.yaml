@@ -77,21 +77,11 @@ env:
   #   value: 
   # (Optional) Authentication for age-gated videos
   # Follow the following wiki page to get the required values
-  # https://github.com/kuylar/InnerTube/wiki/Authorization
-  # Only use one of the following (OAuth2 is recommended):
-  # OAuth2 based auth ========
+  # https://github.com/lighttube-org/InnerTube/wiki/Authorization
   # - name: LIGHTTUBE_AUTH_TYPE:
   #   value: oauth2
   # - name: LIGHTTUBE_AUTH_REFRESH_TOKEN:
   #   value:
-  # Cookie based auth ========
-  # - name: LIGHTTUBE_AUTH_TYPE:
-  #   value: cookie
-  # - name: LIGHTTUBE_AUTH_SAPISID:
-  #   value:
-  # - name: LIGHTTUBE_AUTH_PSID:
-  #   value:
-  # ==========================
 
 podAnnotations: {}
 podLabels: {}

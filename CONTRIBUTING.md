@@ -8,7 +8,7 @@ Make sure that your pull request is based off of the latest `master` branch.
 
 ## PR titles / content
 
-Please make sure to follow the default PR template (available in [.github/pull_request_template.md](https://github.com/kuylar/lighttube/blob/master/.github/pull_request_template.md)).
+Please make sure to follow the default PR template (available in [.github/pull_request_template.md](https://github.com/lighttube-org/lighttube/blob/master/.github/pull_request_template.md)).
 
 Also, make sure that your PR titles describe what it does in a brief but understandable way.
 

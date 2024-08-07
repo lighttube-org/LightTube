@@ -5,28 +5,28 @@
     "accounts": true
   },
   {
-    "host": "https://tube.dsezer.dev",
-    "api": true,
-    "accounts": true
+    "host": "https://1.youre-either-using-the-old-instance-list.kuylar.dev",
+    "api": false,
+    "accounts": false
   },
   {
-    "host": "https://tube.inftord.tech",
-    "api": true,
-    "accounts": true
+    "host": "https://2.or-an-outdated-client.kuylar.dev",
+    "api": false,
+    "accounts": false
   },
   {
-    "host": "https://tube.instellate.xyz",
-    "api": true,
-    "accounts": true
+    "host": "https://3.please-switch-to-the-new-list-at.kuylar.dev",
+    "api": false,
+    "accounts": false
   },
   {
-    "host": "https://lighttube.plerx.de",
-    "api": true,
-    "accounts": true
+    "host": "https://lighttube.org/instances",
+    "api": false,
+    "accounts": false
   },
   {
-    "host": "https://youtube.forsaken-borders.net",
-    "api": true,
-    "accounts": true
+    "host": "https://5.or-update-your-client.kuylar.dev",
+    "api": false,
+    "accounts": false
   }
 ]
