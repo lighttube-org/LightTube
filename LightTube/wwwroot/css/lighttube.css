@@ -32,6 +32,7 @@ html:root, html.theme-light:root {
     --chip-background-hover: rgb(0, 0, 0, 0.10);
     --chip-background-active: rgb(0, 0, 0, 0.15);
     --search-chip-background-active: #000;
+    --search-chip-color-active: #fff;
 
     --subscribe-button: #c00;
     --subscribe-button-hover: #c00;
@@ -82,6 +83,7 @@ html.theme-dark:root {
     --chip-background-hover: #3f3f3f;
     --chip-background-active: #535353;
     --search-chip-background-active: #fff;
+    --search-chip-color-active: #000;
 
     --subscribe-button: #c00;
     --subscribe-button-hover: #c00;
@@ -131,6 +133,7 @@ html.theme-dark:root {
         --chip-background-hover: rgb(0, 0, 0, 0.10);
         --chip-background-active: rgb(0, 0, 0, 0.15);
         --search-chip-background-active: #000;
+        --search-chip-color-active: #fff;
 
         --subscribe-button: #c00;
         --subscribe-button-hover: #c00;
@@ -183,6 +186,7 @@ html.theme-dark:root {
         --chip-background-hover: #3f3f3f;
         --chip-background-active: #535353;
         --search-chip-background-active: #fff;
+        --search-chip-color-active: #000;
 
         --subscribe-button: #c00;
         --subscribe-button-hover: #c00;
@@ -1686,7 +1690,7 @@ code {
 
 .search-chip.active {
     background-color: var(--search-chip-background-active);
-    color: #000;
+    color: var(--search-chip-color-active);
 }
 
 .trailer {
