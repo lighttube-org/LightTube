@@ -1,12 +1,12 @@
 ﻿@using InnerTube
-@model (ChannelTabs Tab, string Id)
+@using ChannelTab = InnerTube.Models.ChannelTab
+@model (ChannelTab Tab, string Id, bool HasAbout, LightTube.Localization.LocalizationManager Localization)
 @{
 	string className = "channel-tabs__item";
-	string lastPathPart = Context.Request.Path.Value.Split("/").Last().Split("?").First();
 	
-	if (lastPathPart == Model.Tab.ToString().ToLower() || (lastPathPart == Model.Id && Model.Tab == ChannelTabs.Home))
+	if (Model.Tab.Selected && !Model.HasAbout)
 	{
 		className += " active";
 	}
 }
-<a href="/channel/@Model.Id/@Model.Tab.ToString().ToLower()" class="@className">@Model.Tab.ToString()</a>
+<a href="/channel/@Model.Id/@Model.Tab.Tab.ToString().ToLower()" class="@className">@Model.Localization.GetString("channel.tab." + Model.Tab.Tab.ToString().ToLower())</a>

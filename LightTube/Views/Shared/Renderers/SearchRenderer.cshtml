@@ -1,0 +1,163 @@
+@using InnerTube.Models
+@using InnerTube.Protobuf
+@using InnerTube.Renderers
+@model (InnerTube.Renderers.RendererContainer Renderer, LightTube.Localization.LocalizationManager Localization)
+
+@switch (Model.Renderer.Type)
+{
+	case "ad":
+		<!-- Blocked an ad~ -->
+		break;
+	case "video":
+		VideoRendererData video = (VideoRendererData)Model.Renderer.Data;
+		<div class="renderer-videorenderer">
+			<a class="thumbnail" href="/watch?v=@video.VideoId">
+				<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
+				<div class="thumbnail__duration__container">
+					<span class="thumbnail__duration">@video.Duration.ToDurationString()</span>
+				</div>
+			</a>
+			<div class="info">
+				<a href="/watch?v=@video.VideoId" class="ml-2 title" title="@video.Title">
+					@video.Title
+				</a>
+				<div class="info__more">
+					<div>
+					@if (Model.Renderer.OriginalType != "movieRenderer")
+					{
+						@:@(video.ViewCountText + " • " + video.PublishedText)
+					}
+					</div>
+					@if (video.Author != null)
+					{
+						<div class="info__channel">
+							<img loading="lazy" src="@video.Author.Avatar?.LastOrDefault()?.Url" alt="@video.Author.Title">
+							<a href="/channel/@video.Author.Id" title="@video.Author.Title" class="ml-1">
+								@video.Author.Title
+							</a>
+							@foreach (Badge channelBadge in video.Author.Badges ?? [])
+							{
+								<svg class="bi" width="12" height="12" fill="currentColor" title="@channelBadge.Tooltip">
+									<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+								</svg>
+							}
+						</div>
+					}
+					<div>
+						@Html.Raw(video.Description)
+					</div>
+					<div>
+						@foreach (Badge videoBadge in video.Badges)
+						{
+							<span class="badge" title="@videoBadge.Tooltip">
+								@videoBadge.Label
+							</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		break;
+	case "channel":
+		ChannelRendererData channel = (ChannelRendererData)Model.Renderer.Data;
+		<div class="renderer-channelrenderer">
+			<a href="/channel/@channel.ChannelId" class="channel-avatar">
+				<img loading="lazy" src="@channel.Avatar.LastOrDefault()?.Url" alt="@channel.Title">
+			</a>
+			<div class="info">
+				<a href="/channel/@channel.ChannelId" class="title ml-2" title="@channel.Title">
+					@channel.Title
+					@foreach (MetadataBadgeRenderer _ in (MetadataBadgeRenderer[])[])
+					{
+						<svg class="bi" width="12" height="12" fill="currentColor">
+							<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+						</svg>
+					}
+				</a>
+				<div class="info__more">
+					@channel.SubscriberCountText • @channel.VideoCountText
+				</div>
+			</div>
+			<div class="subscribe-container">
+				<partial name="SubscribeButton" model="(channel.ChannelId, Model.Localization)"/>
+			</div>
+		</div>
+		break;
+	case "playlist":
+		PlaylistRendererData playlist = (PlaylistRendererData)Model.Renderer.Data;
+		<div class="renderer-playlistrenderer">
+			<a href="@(playlist.FirstVideoId is not null ? $"/watch?v=${playlist.FirstVideoId}&list={playlist.PlaylistId}" : $"/playlist?list={playlist.PlaylistId}")" class="thumbnail">
+				<img loading="lazy" src="@playlist.Thumbnails.FirstOrDefault()?.Url" alt="@playlist.Title">
+				<div class="thumbnail__playlist__overlay">
+					<span>@playlist.VideoCountText.Split(" ")[0]</span>
+					<svg class="bi" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#list"/>
+					</svg>
+				</div>
+			</a>
+			<div class="info">
+				<a href="@(playlist.FirstVideoId is not null ? $"/watch?v=${playlist.FirstVideoId}&list={playlist.PlaylistId}" : $"/playlist?list={playlist.PlaylistId}")" class="ml-2 title" title="@playlist.Title">
+					@playlist.Title
+				</a>
+				<div class="info__more">
+					@if (playlist.Author != null)
+					{
+						<div class="info__channel">
+							<a href="/channel/@playlist.Author.Id" title="@playlist.Author.Title" class="ml-1">
+								@playlist.Author.Title
+							</a>
+							<svg class="bi" width="12" height="12" fill="currentColor">
+								<use xlink:href="/svg/bootstrap-icons.svg#check-circle-fill"/>
+							</svg>
+						</div>
+					}
+					@if (playlist.ChildVideos is not null)
+					{
+						<div>
+							@foreach (RendererContainer videoRenderer in playlist.ChildVideos)
+							{
+								VideoRendererData? childVideo = videoRenderer.Data as VideoRendererData;
+								if (childVideo == null) continue; // im stupid
+								<a href="/watch?v=@(childVideo.VideoId)&list=@(playlist.PlaylistId)" class="renderer-childvideorenderer">@childVideo.Title • @childVideo.Duration.ToDurationString()</a>
+							}
+						</div>
+					}
+					<a href="/playlist?list=@playlist.PlaylistId" class="link-view-full-playlist">
+						View Full Playlist
+					</a>
+				</div>
+			</div>
+		</div>
+		break;
+	case "container":
+		ContainerRendererData container = (ContainerRendererData)Model.Renderer.Data;
+		<partial name="Renderers/ContainerRenderer" model="(container, Model.Localization)"/>
+		break;
+	case "message":
+		<div class="renderer-null">
+			@((Model.Renderer.Data as MessageRendererData)?.Message)
+		</div>
+		break;
+	case "exception":
+		ExceptionRendererData e = (ExceptionRendererData)Model.Renderer.Data;
+		<div class="renderer-null">
+			<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+		</div>
+		break;
+	case "unknown":
+		<div>
+			<div>Unknown RendererContainer.OriginalType: <code>@Model.Renderer.OriginalType</code></div>
+			@if (Model.Renderer.OriginalType == "UnknownProtobufRenderer")
+			{
+				<code>@Convert.ToBase64String((Model.Renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+			}
+			else
+			{
+				<code>@((Model.Renderer.Data as UnknownRendererData)?.Json)</code>
+			}
+		</div>
+		break;
+	default:
+		<div class="renderer-null">Unexpected RendererContainer.Type: <code>@Model.Renderer.Type</code></div>
+		break;
+}

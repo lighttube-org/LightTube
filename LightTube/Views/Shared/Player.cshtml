@@ -1,6 +1,7 @@
-﻿@using InnerTube
-@using System.Text.Json
+﻿@using System.Text.Json
 @using InnerTube.Exceptions
+@using InnerTube.Models
+@using InnerTube.Protobuf.Responses
 @using JsonSerializer = System.Text.Json.JsonSerializer
 @model PlayerContext
 
@@ -22,18 +23,18 @@
 					</svg>
 				</div>
 				<div class="player-error-info">
-					@if (e.Code == "LOGIN_REQUIRED")
+					@if (e.Code == PlayabilityStatus.Types.Status.LoginRequired)
 					{
-						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
-						<p class="ml-1">Please contact the instance administrator to include InnerTube login details</p>
+						<div class="title" title="[@e.Code] @e.Reason">@e.Reason</div>
+						<p class="ml-1">@Model.Localization.GetString("error.player.agerestricted")</p>
 					}
 					else
 					{
-						<div class="title" title="[@e.Code] @e.Error">@e.Error</div>
-						<p class="ml-1">@e.Description</p>
-						@if (e.Code is "CONTENT_CHECK_REQUIRED" or "AGE_CHECK_REQUIRED")
+						<div class="title" title="[@e.Code] @e.Reason">@e.Reason</div>
+						<p class="ml-1">@e.Subreason</p>
+						@if (e.Code is PlayabilityStatus.Types.Status.ContentCheckRequired or (PlayabilityStatus.Types.Status)5/*PlayabilityStatus.Types.Status.AgeCheckRequired todo: forgot to recompile protobufs, uncomment this*/)
 						{
-							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">I understand and wish to proceed</a>
+							<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">@Model.Localization.GetString("error.player.contentcheck")</a>
 						}
 					}
 				</div>
@@ -48,10 +49,10 @@
 					</svg>
 				</div>
 				<div class="player-error-info">
-					<div class="title">An error has occurred @(Model.Exception.GetType() == typeof(Exception) ? "" : $"({Model.Exception.GetType().Name})")</div>
+					<div class="title">@Model.Localization.GetString("error.player.exception") @(Model.Exception.GetType() == typeof(Exception) ? "" : $"({Model.Exception.GetType().Name})")</div>
 					<p class="ml-1">@Model.Exception.Message</p>
 					<p>
-						This error might not occur in other instances. Find them <a href="https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md">here</a>
+						@Model.Localization.GetString("error.player.useother")
 					</p>
 				</div>
 			</div>
@@ -66,9 +67,9 @@
 				</svg>
 			</div>
 			<div class="player-error-info">
-				<div class="title">Failed to load the player</div>
+				<div class="title">@Model.Localization.GetString("error.player.fail")</div>
 				<p>
-					This might not occur in other instances. Find them <a href="https://github.com/lighttube-org/LightTube/blob/master/INSTANCES.md">here</a>
+					@Model.Localization.GetString("error.player.useother")
 				</p>
 			</div>
 		</div>
@@ -77,18 +78,18 @@
 else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 {
 	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		@if (Configuration.ProxyEnabled)
 		{
-			@foreach (Format format in Model.GetFormatsInPreferredOrder())
+			foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">
 			}
 		}
 		else
 		{
-			@foreach (Format format in Model.GetFormatsInPreferredOrder())
+			foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url">
 			}
 		}
 
@@ -97,23 +98,23 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.VssId" label="@subtitle.Label" kind="subtitles">
 		}
 	</video>
-	<noscript style="z-index:999;color:white;position:relative;">This video requires JavaScript to play correctly</noscript>
+	<noscript style="z-index:999;color:white;position:relative;">@Model.Localization.GetString("error.player.javascript")</noscript>
 }
 else if (Model.Player.Formats.Any())
 {
 	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@if (Configuration.GetVariable("LIGHTTUBE_DISABLE_PROXY", "false") != "false")
+		@if (Configuration.ProxyEnabled)
 		{
-			@foreach (Format format in Model.GetFormatsInPreferredOrder())
+			foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="@format.Url"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">
 			}
 		}
 		else
 		{
-			@foreach (Format format in Model.GetFormatsInPreferredOrder())
+			foreach (Format format in Model.GetFormatsInPreferredOrder())
 			{
-				@:<source label="@format.QualityLabel" type="@format.MimeType" src="/proxy/media/@Model.Player.Details.Id/@format.Itag"> 
+				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url">
 			}
 		}
 
@@ -133,8 +134,8 @@ else
 			</svg>
 		</div>
 		<div class="player-error-info">
-			<div class="title">An error has occurred</div>
-			<p>No muxed formats were returned from YouTube</p>
+			<div class="title">@Model.Localization.GetString("error.player.exception")</div>
+			<p>@Model.Localization.GetString("error.player.nomuxed")</p>
 		</div>
 	</div>
 }
@@ -144,7 +145,7 @@ else
 	<script id="video-data">
 	const videoInfo = {
 		author: {
-			icon: "@Model.Video.Channel.Avatar",
+			icon: "@(Model.Video?.Channel.Avatar?.LastOrDefault()?.Url)",
 			title: "@Model.Player!.Details.Author.Title", // .Replace("\"", "\\\"")
 			href: "/channel/@Model.Player!.Details.Author.Id"
 		},
@@ -167,35 +168,36 @@ else
 		loading: "<img style='width:15%;height:15%;' src='/svg/loading.svg'>",
 		rememberVolume: true,
 		chapters: @Html.Raw(Model.GetChaptersJson()),
-		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length.TotalSeconds)) ?? Array.Empty<string>()))],
+		segments: [@Html.Raw(string.Join(',', Model.Sponsors?.Select(x => x.ToLTPlayerJson(Model.Player.Details.Length!.Value.TotalSeconds, Model.Localization)) ?? Array.Empty<string>()))],
 		endscreen: @Html.Raw(JsonSerializer.Serialize(Model.Player.Endscreen, new JsonSerializerOptions()
 		           {
 			           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		           })),
-		@if (Model.Player.Storyboard.Levels.ContainsKey(0))
+		@if (Model.Player.Storyboard?.Levels.ContainsKey(0) == true)
 		{
 			@:storyboard:{type:"yt_l1",src:"@Html.Raw(Model.Player.Storyboard.Levels[0].ToString())"}
 		}
 	};
-	videoInfo.endscreen.onClickHandler = item => {
-		switch (item.style) {
-			case "VIDEO":
-				window.location = "/watch?v=" + item.target;
-				break;
-			case "PLAYLIST":
-				window.location = "/playlist?list=" + item.target;
-				break;
-			  case "CHANNEL":
-				window.location = "/channel/" + item.target;
-				break;
-			  case "WEBSITE":
-				window.open(item.href, "_blank");
-				break;
-			default:
-				alert("Unknown endscreen item type: " + item.style)
-				break;
-		}
-	};
+	if (videoInfo.endscreen != null)
+		videoInfo.endscreen.onClickHandler = item => {
+			switch (item.style) {
+				case "VIDEO":
+					window.location = "/watch?v=" + item.target;
+					break;
+				case "PLAYLIST":
+					window.location = "/playlist?list=" + item.target;
+					break;
+				  case "CHANNEL":
+					window.location = "/channel/" + item.target;
+					break;
+				  case "WEBSITE":
+					window.open(item.href, "_blank");
+					break;
+				default:
+					alert("Unknown endscreen item type: " + item.style)
+					break;
+			}
+		};
 	const videoId =  "@(Model.Player!.Details.Id)";
 	const playerId = "player";
 	const playtype = @Html.Raw(Model.UseHls ? "\"hls.js\"" : "undefined");

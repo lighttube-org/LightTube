@@ -1,17 +1,11 @@
 using InnerTube;
+using InnerTube.Models;
 
 namespace LightTube.Controllers;
 
-public class ModifyPlaylistContentResponse
+public class ModifyPlaylistContentResponse(InnerTubePlayer video)
 {
-	public string Title;
-	public string Author;
-	public string Thumbnail;
-
-	public ModifyPlaylistContentResponse(InnerTubePlayer video)
-	{
-		Title = video.Details.Title;
-		Author = video.Details.Author.Title;
-		Thumbnail = $"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg";
-	}
+    public string Title = video.Details.Title;
+    public string Author = video.Details.Author.Title;
+    public string Thumbnail = $"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg";
 }

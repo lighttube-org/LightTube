@@ -2,11 +2,11 @@
 @model ChannelsContext
 
 @{
-	Model.Title = "All subscriptions";
+	Model.Title = Model.Localization.GetRawString("feed.subscriptions.title");
 }
 
 <form class="search-container" method="post">
-	<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Apply Changes">
+	<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="@Model.Localization.GetString("feed.subscriptions.apply")">
 
 	@foreach (DatabaseChannel? channel in Model.Channels)
 	{
@@ -28,19 +28,19 @@
 						@switch (Model.User!.Subscriptions.TryGetValue(channel.ChannelId, out SubscriptionType t) ? t : SubscriptionType.NONE)
 						{
 							case SubscriptionType.NONE:
-								<option value="0" selected>Unsubscribe</option>
-								<option value="1">Subscribe with notifications off</option>
-								<option value="2">Subscribe with notifications on</option>
+								<option value="0" selected>@Model.Localization.GetString("subscription.state.0")</option>
+								<option value="1">@Model.Localization.GetString("subscription.state.1")</option>
+								<option value="2">@Model.Localization.GetString("subscription.state.2")</option>
 								break;
 							case SubscriptionType.NOTIFICATIONS_OFF:
-								<option value="0">Unsubscribe</option>
-								<option value="1" selected>Subscribe with notifications off</option>
-								<option value="2">Subscribe with notifications on</option>
+								<option value="0">@Model.Localization.GetString("subscription.state.0")</option>
+								<option value="1" selected>@Model.Localization.GetString("subscription.state.1")</option>
+								<option value="2">@Model.Localization.GetString("subscription.state.2")</option>
 								break;
 							case SubscriptionType.NOTIFICATIONS_ON:
-								<option value="0">Unsubscribe</option>
-								<option value="1">Subscribe with notifications off</option>
-								<option value="2" selected>Subscribe with notifications on</option>
+								<option value="0">@Model.Localization.GetString("subscription.state.0")</option>
+								<option value="1">@Model.Localization.GetString("subscription.state.1")</option>
+								<option value="2" selected>@Model.Localization.GetString("subscription.state.2")</option>
 								break;
 						}
 					</select>

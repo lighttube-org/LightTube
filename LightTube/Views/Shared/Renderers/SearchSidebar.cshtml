@@ -1,0 +1,185 @@
+@using InnerTube
+@using InnerTube.Renderers;
+@model (RendererContainer Renderer, LightTube.Localization.LocalizationManager Localization)
+@{
+	SearchSidebarRendererData renderer = (SearchSidebarRendererData)Model.Renderer.Data;
+}
+
+<div class="search-sidebar">
+	<div class="sidebar-header">
+		<div class="sidebar-header-info">
+			@if (renderer.Avatar != null)
+			{
+				<div class="sidebar-header-info__avatar">
+					<img src="@renderer.Avatar.LastOrDefault()?.Url"/>
+				</div>
+			}
+			<div class="sidebar-header-info__info">
+				<div class="title ml-1">@renderer.Title</div>
+				<div class="ml-1">@renderer.Subtitle</div>
+			</div>
+		</div>
+		@if (renderer.CallToAction?.Data is WatchCardHeroVideoRendererData hero)
+		{
+			@switch (renderer.Type)
+			{
+				case SearchSidebarType.Unknown:
+					@if (hero.HeroImages.Length > 0)
+					{
+						<div class="sidebar-collage">
+							<img class="sidebar-collage__full" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+							@if (hero.VideoId != null)
+							{
+								<div class="sidebar-collage__button">
+									<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+								</div>
+							}
+						</div>
+					}
+					break;
+				case SearchSidebarType.Artist:
+					<div class="sidebar-collage">
+						<img class="sidebar-collage__left" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+						<img class="sidebar-collage__topright" src="@hero.HeroImages[1].LastOrDefault()?.Url"/>
+						<img class="sidebar-collage__bottomright" src="@hero.HeroImages[2].LastOrDefault()?.Url"/>
+						@if (hero.VideoId != null)
+						{
+							<div class="sidebar-collage__button">
+								<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+							</div>
+						}
+					</div>
+					break;
+				case SearchSidebarType.Album:
+					<div class="sidebar-collage sidebar-collage__square">
+						<img class="sidebar-collage__full" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+						@if (hero.VideoId != null)
+						{
+							<div class="sidebar-collage__button">
+								<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+							</div>
+						}
+					</div>
+					break;
+				case SearchSidebarType.TvShow:
+					<div class="sidebar-collage">
+						<img class="sidebar-collage__full" src="@hero.HeroImages[0].LastOrDefault()?.Url"/>
+						@if (hero.VideoId != null)
+						{
+							<div class="sidebar-collage__button">
+								<a class="btn-white" href="/watch?v=@hero.VideoId">▶ &nbsp;@hero.Title</a>
+							</div>
+						}
+					</div>
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			@if (hero.HeroImages.Length > 1)
+			{
+			}
+			else
+			{
+			}
+		}
+	</div>
+	@foreach (RendererContainer section in renderer.Sections)
+	{
+		switch (section.Type)
+		{
+			case "container":
+				ContainerRendererData container = (ContainerRendererData)section.Data;
+				switch (container.Style)
+				{
+					case "searchSidebar;vertical":
+						<div class="sidebar-video-list">
+							@foreach (RendererContainer item in container.Items)
+							{
+								switch (item.Type)
+								{
+									case "video":
+										VideoRendererData video = (VideoRendererData)item.Data;
+										<a class="searchsidebar-video" href="/watch?v=@video.VideoId">
+											<div class="searchsidebar-video__info">
+												<div class="ml-1 title">@video.Title</div>
+												<div class="ml-1">@video.ViewCountText • @video.PublishedText</div>
+											</div>
+											<div class="searchsidebar-video__length">
+												<div class="ml-1">@video.Duration.ToDurationString()</div>
+											</div>
+										</a>
+										break;
+									case "container":
+										ContainerRendererData data = (item.Data as ContainerRendererData)!;
+										<details>
+											<summary class="sidebar-show__header__summary">
+												<div class="sidebar-show__header">
+													<span class="sidebar-show__header__title">
+														@data.Title
+													</span>
+													<span class="sidebar-show__header__subtitle">
+														@data.Subtitle
+													</span>
+												</div>
+											</summary>
+											<div class="sidebar-video-list">
+												@foreach (VideoRendererData v in data.Items.Where(x => x.Type == "video").Select(x => x.Data as VideoRendererData))
+												{
+													<a class="searchsidebar-video" href="/watch?v=@v.VideoId">
+														<div class="searchsidebar-video__info">
+															<div class="ml-1 title">@v.Title</div>
+															<div class="ml-1">@v.ViewCountText • @v.PublishedText</div>
+														</div>
+														<div class="searchsidebar-video__length">
+															<div class="ml-1">@v.Duration.ToDurationString()</div>
+														</div>
+													</a>
+												}
+											</div>
+										</details>
+										break;
+									default:
+										<h3>Unexpected item.Type: <code>@item.Type</code></h3>
+										break;
+								}
+							}
+						</div>
+						break;
+					case "searchSidebar;cards":
+						<div class="sidebar-album-list">
+							<div class="ml-1 title">
+								@container.Title
+							</div>
+							<div class="sidebar-album-list__items">
+								@foreach (RendererContainer item in container.Items)
+								{
+									switch (item.Type)
+									{
+										case "searchRefinementCard":
+											SearchRefinementCardRendererData card = (SearchRefinementCardRendererData)item.Data;
+											<a href="/playlist?list=@card.PlaylistId" class="searchsidebar-album">
+												<img src="@card.Thumbnail"/>
+												<div class="ml-2 title">@card.Title</div>
+											</a>
+											break;
+										default:
+											<h3>Unexpected item.Type: <code>@item.Type</code></h3>
+											break;
+									}
+								}
+							</div>
+						</div>
+						break;
+					default:
+						<h1>Unknown container.Style: <code>@container.Style</code></h1>
+						break;
+				}
+				break;
+			default:
+				<h1>Unknown section.Type: <code>@(section.Type)/@(section.OriginalType)</code></h1>
+				break;
+		}
+	}
+	<div class="sidebar-items">
+	</div>
+</div>

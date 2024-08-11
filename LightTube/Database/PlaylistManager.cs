@@ -1,237 +1,203 @@
 using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf;
 using InnerTube.Renderers;
+using LightTube.CustomRendererDatas;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 
 namespace LightTube.Database;
 
-public class PlaylistManager
+public class PlaylistManager(
+    IMongoCollection<DatabasePlaylist> playlistCollection,
+    IMongoCollection<DatabaseVideo> videoCacheCollection)
 {
-	private const string INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE = "{\"videoId\":\"%%ID%%\",\"isPlayable\":true,\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"title\":{\"runs\":[{\"text\":\"%%TITLE%%\"}]},\"index\":{\"simpleText\":\"%%INDEX%%\"},\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"navigationEndpoint\":{\"watchEndpoint\":{\"videoId\":\"%%ID%%\"}},\"lengthSeconds\":\"%%DURATION_SECONDS%%\",\"isPlayable\":true,\"thumbnailOverlays\":[{\"thumbnailOverlayTimeStatusRenderer\":{\"text\":{\"simpleText\":\"%%DURATION%%\"}}}],\"videoInfo\":{\"runs\":[{\"text\":\"%%VIEWS%%\"},{\"text\":\" • \"},{\"text\":\"%%UPLOADED_AT%%\"}]}}";
-	private const string INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE = "{\"title\":{\"simpleText\":\"%%TITLE%%\"},\"thumbnail\":{\"thumbnails\":[{\"url\":\"%%THUMBNAIL%%\",\"width\":0,\"height\":0}]},\"lengthText\":{\"simpleText\":\"%%DURATION%%\"},\"indexText\":{\"simpleText\":\"%%INDEX%%\"},\"selected\":%%SELECTED%%,\"navigationEndpoint\":{\"watchEndpoint\":{\"params\":\"OAE%3D\"}},\"videoId\":\"%%ID%%\",\"shortBylineText\":{\"runs\":[{\"text\":\"%%CHANNEL_TITLE%%\",\"navigationEndpoint\":{\"browseEndpoint\":{\"browseId\":\"%%CHANNEL_ID%%\"}}}]}}";
-	public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; }
-	public IMongoCollection<DatabaseVideo> VideoCacheCollection { get; }
+    public IMongoCollection<DatabasePlaylist> PlaylistCollection { get; } = playlistCollection;
+    public IMongoCollection<DatabaseVideo> VideoCacheCollection { get; } = videoCacheCollection;
 
-	public PlaylistManager(
-		IMongoCollection<DatabasePlaylist> playlistCollection,
-		IMongoCollection<DatabaseVideo> videoCacheCollection)
-	{
-		PlaylistCollection = playlistCollection;
-		VideoCacheCollection = videoCacheCollection;
-	}
+    public DatabasePlaylist? GetPlaylist(string id) => PlaylistCollection.FindSync(x => x.Id == id).FirstOrDefault();
 
-	public DatabasePlaylist? GetPlaylist(string id) => PlaylistCollection.FindSync(x => x.Id == id).FirstOrDefault();
+    public IEnumerable<DatabasePlaylist> GetUserPlaylists(string userId, PlaylistVisibility minVisibility)
+    {
+        IAsyncCursor<DatabasePlaylist> unfiltered = PlaylistCollection.FindSync(x => x.Author == userId);
+        return unfiltered.ToList().Where(x => x.Visibility >= minVisibility);
+    }
 
-	public IEnumerable<DatabasePlaylist> GetUserPlaylists(string userId, PlaylistVisibility minVisibility)
-	{
-		IAsyncCursor<DatabasePlaylist> unfiltered = PlaylistCollection.FindSync(x => x.Author == userId);
-		return unfiltered.ToList().Where(x => x.Visibility >= minVisibility);
-	}
+    public IEnumerable<RendererContainer> GetPlaylistVideoRenderers(string id, bool editable, LocalizationManager localization)
+    {
+        DatabasePlaylist? pl = GetPlaylist(id);
+        if (pl == null) return [];
 
-	public IEnumerable<PlaylistVideoRenderer> GetPlaylistVideos(string id, bool editable)
-	{
-		DatabasePlaylist? pl = GetPlaylist(id);
-		if (pl == null) return Array.Empty<PlaylistVideoRenderer>();
+        List<RendererContainer> renderers = [];
 
-		List<PlaylistVideoRenderer> renderers = new();
+        for (int i = 0; i < pl.VideoIds.Count; i++)
+        {
+            string videoId = pl.VideoIds[i];
+            DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
+            RendererContainer container = new()
+            {
+                Type = "video",
+                OriginalType = "playlistVideoRenderer",
+                Data = new EditablePlaylistVideoRendererData
+                {
+                    VideoId = videoId,
+                    Title = video?.Title.Replace("\"", "\\\"") ?? localization.GetRawString("playlist.video.uncached"),
+                    Thumbnails =
+                    [
+                        new Thumbnail
+                        {
+                            Url = video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg",
+                            Width = 480,
+                            Height = 360
+                        }
+                    ],
+                    Author = video?.Channel.Id != null
+                        ? new Channel("en",
+                            video.Channel.Id,
+                            video?.Channel.Name.Replace("\"", "\\\"") ?? "???",
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        : null,
+                    Duration = InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00"),
+                    PublishedText = video?.UploadedAt,
+                    ViewCountText = (video?.Views ?? 0).ToString(),
+                    Badges = [],
+                    Description = null,
+                    VideoIndexText = (i + 1).ToString(),
+                    Editable = editable
+                }
+            };
+            renderers.Add(container);
+        }
 
-		for (int i = 0; i < pl.VideoIds.Count; i++)
-		{
-			string videoId = pl.VideoIds[i];
-			DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-			string json = INNERTUBE_PLAYLIST_VIDEO_RENDERER_TEMPLATE
-				.Replace("%%ID%%", editable ? videoId + "!": videoId)
-				.Replace("%%INDEX%%", (i + 1).ToString())
-				.Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
-				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
-				.Replace("%%DURATION%%", video?.Duration ?? "00:00")
-				.Replace("%%DURATION_SECONDS%%", InnerTube.Utils.ParseDuration(video?.Duration ?? "00:00").TotalSeconds.ToString())
-				.Replace("%%UPLADED_AT%%", video?.UploadedAt ?? "???")
-				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
-				.Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???")
-				.Replace("%%VIEWS%%", (video?.Views ?? 0).ToString());
-			renderers.Add(new PlaylistVideoRenderer(JObject.Parse(json)));
-		}
+        return renderers;
+    }
 
-		return renderers;
-	}
+    public List<DatabaseVideo> GetPlaylistVideos(string playlistId, LocalizationManager localization)
+    {
+        DatabasePlaylist? pl = GetPlaylist(playlistId);
+        return pl == null
+            ? []
+            : pl.VideoIds.Select(id => VideoCacheCollection.FindSync(x => x.Id == id).FirstOrDefault()).ToList();
+    }
 
-	public IEnumerable<PlaylistPanelVideoRenderer> GetPlaylistPanelVideos(string id, string currentVideoId)
-	{
-		DatabasePlaylist? pl = GetPlaylist(id);
-		if (pl == null) return Array.Empty<PlaylistPanelVideoRenderer>();
+    public async Task<DatabasePlaylist> CreatePlaylist(string token, string title, string description, PlaylistVisibility visibility)
+    {
+        DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
 
-		List<PlaylistPanelVideoRenderer> renderers = new();
+        if (u is null)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-		for (int i = 0; i < pl.VideoIds.Count; i++)
-		{
-			string videoId = pl.VideoIds[i];
-			DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-			string json = INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE
-				.Replace("%%ID%%", videoId)
-				.Replace("%%SELECTED%%", (currentVideoId == videoId).ToString().ToLower())
-				.Replace("%%INDEX%%", currentVideoId == videoId ? ">" : (i + 1).ToString())
-				.Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
-				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
-				.Replace("%%DURATION%%", video?.Duration ?? "00:00")
-				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
-				.Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???");
-			renderers.Add(new PlaylistPanelVideoRenderer(JObject.Parse(json)));
-		}
+        DatabasePlaylist pl = new()
+        {
+            Id = DatabasePlaylist.GenerateId(),
+            Name = title,
+            Description = description,
+            Visibility = visibility,
+            VideoIds = [],
+            Author = u.UserID,
+            LastUpdated = DateTimeOffset.UtcNow
+        };
 
-		return renderers;
-	}
+        await PlaylistCollection.InsertOneAsync(pl);
+        return pl;
+    }
 
-	public string GetPlaylistPanelVideosJson(string id, string currentVideoId)
-	{
-		DatabasePlaylist? pl = GetPlaylist(id);
-		if (pl == null) return "";
+    public async Task AddVideoToPlaylist(string token, string playlistId, InnerTubePlayer video)
+    {
+        DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+        DatabasePlaylist? playlist = GetPlaylist(playlistId);
 
-		List<string> renderers = new();
+        if (u is null)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-		for (int i = 0; i < pl.VideoIds.Count; i++)
-		{
-			string videoId = pl.VideoIds[i];
-			DatabaseVideo? video = VideoCacheCollection.FindSync(x => x.Id == videoId).FirstOrDefault();
-			string json = $"{{\"playlistPanelVideoRenderer\":{INNERTUBE_PLAYLIST_PANEL_VIDEO_RENDERER_TEMPLATE}}}"
-				.Replace("%%ID%%", videoId)
-				.Replace("%%SELECTED%%", (currentVideoId == videoId).ToString().ToLower())
-				.Replace("%%INDEX%%", currentVideoId == videoId ? "▶" : (i + 1).ToString())
-				.Replace("%%TITLE%%", video?.Title.Replace("\"", "\\\"") ?? "Uncached video. Click to fix")
-				.Replace("%%THUMBNAIL%%", video?.Thumbnails.LastOrDefault()?.Url.ToString() ?? "https://i.ytimg.com/vi//hqdefault.jpg")
-				.Replace("%%DURATION%%", video?.Duration ?? "00:00")
-				.Replace("%%CHANNEL_TITLE%%", video?.Channel.Name.Replace("\"", "\\\"") ?? "???")
-				.Replace("%%CHANNEL_ID%%", video?.Channel.Id ?? "???");
-			renderers.Add(json);
-		}
+        if (playlist is null)
+            throw new KeyNotFoundException("Playlist not found");
 
-		return string.Join(",", renderers);
-	}
+        if (u.UserID != playlist.Author)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-	public async Task<DatabasePlaylist> CreatePlaylist(string token, string title, string description, PlaylistVisibility visibility)
-	{
-		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+        if (!playlist.VideoIds.Contains(video.Details.Id))
+            playlist.VideoIds.Add(video.Details.Id);
+        playlist.LastUpdated = DateTimeOffset.UtcNow;
 
-		if (u is null)
-			throw new UnauthorizedAccessException("Unauthorized");
+        await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
+        await DatabaseManager.Cache.AddVideo(new DatabaseVideo
+        {
+            Id = video.Details.Id,
+            Title = video.Details.Title,
+            Thumbnails = video.Details.Thumbnails,
+            Views = 0,
+            Channel = new DatabaseVideoAuthor
+            {
+                Id = video.Details.Author.Id!,
+                Name = video.Details.Author.Title
+            },
+            Duration = video.Details.Length!.Value.ToDurationString()
+        });
+    }
 
-		DatabasePlaylist pl = new DatabasePlaylist()
-		{
-			Id = DatabasePlaylist.GenerateId(),
-			Name = title,
-			Description = description,
-			Visibility = visibility,
-			VideoIds = new(),
-			Author = u.UserID,
-			LastUpdated = DateTimeOffset.UtcNow
-		};
+    public async Task RemoveVideoFromPlaylist(string token, string playlistId, string videoId)
+    {
+        DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+        DatabasePlaylist? playlist = GetPlaylist(playlistId);
 
-		await PlaylistCollection.InsertOneAsync(pl);
-		return pl;
-	}
+        if (u is null)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-	public async Task AddVideoToPlaylist(string token, string playlistId, InnerTubePlayer video)
-	{
-		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
-		DatabasePlaylist? playlist = GetPlaylist(playlistId);
+        if (playlist is null)
+            throw new KeyNotFoundException("Playlist not found");
 
-		if (u is null)
-			throw new UnauthorizedAccessException("Unauthorized");
+        if (u.UserID != playlist.Author)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-		if (playlist is null)
-			throw new KeyNotFoundException("Playlist not found");
+        playlist.VideoIds.Remove(videoId);
+        playlist.LastUpdated = DateTimeOffset.UtcNow;
 
-		if (u.UserID != playlist.Author)
-			throw new UnauthorizedAccessException("Unauthorized");
+        await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
+    }
 
-		if (!playlist.VideoIds.Contains(video.Details.Id))
-			playlist.VideoIds.Add(video.Details.Id);
-		playlist.LastUpdated = DateTimeOffset.UtcNow;
+    public async Task EditPlaylist(string token, string id, string title, string description, PlaylistVisibility visibility)
+    {
+        DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+        DatabasePlaylist? playlist = GetPlaylist(id);
 
-		await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
-		await DatabaseManager.Cache.AddVideo(new DatabaseVideo()
-		{
-			Id = video.Details.Id,
-			Title = video.Details.Title,
-			Thumbnails = new Thumbnail[] {
-				new()
-				{
-					Url = new Uri($"https://i.ytimg.com/vi/{video.Details.Id}/hqdefault.jpg")
-				}
-			},
-			Views = 0,
-			Channel = new()
-			{
-				Id = video.Details.Author.Id!,
-				Name = video.Details.Author.Title,
-				Avatars = new Thumbnail[] {
-				new()
-				{
-					Url = video.Details.Author.Avatar!
-				}
-			}
-			},
-			Duration = video.Details.Length.ToDurationString()
-		});
-	}
+        if (u is null)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-	public async Task RemoveVideoFromPlaylist(string token, string playlistId, string videoId)
-	{
-		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
-		DatabasePlaylist? playlist = GetPlaylist(playlistId);
+        if (playlist is null)
+            throw new KeyNotFoundException("Playlist not found");
 
-		if (u is null)
-			throw new UnauthorizedAccessException("Unauthorized");
+        if (u.UserID != playlist.Author)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-		if (playlist is null)
-			throw new KeyNotFoundException("Playlist not found");
+        playlist.Name = title;
+        playlist.Description = description;
+        playlist.Visibility = visibility;
+        playlist.LastUpdated = DateTimeOffset.UtcNow;
 
-		if (u.UserID != playlist.Author)
-			throw new UnauthorizedAccessException("Unauthorized");
+        await PlaylistCollection.ReplaceOneAsync(x => x.Id == id, playlist);
+    }
 
-		playlist.VideoIds.Remove(videoId);
-		playlist.LastUpdated = DateTimeOffset.UtcNow;
+    public async Task DeletePlaylist(string token, string id)
+    {
+        DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
+        DatabasePlaylist? playlist = GetPlaylist(id);
 
-		await PlaylistCollection.ReplaceOneAsync(x => x.Id == playlistId, playlist);
-	}
+        if (u is null)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-	public async Task EditPlaylist(string token, string id, string title, string description, PlaylistVisibility visibility)
-	{
-		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
-		DatabasePlaylist? playlist = GetPlaylist(id);
+        if (playlist is null)
+            throw new KeyNotFoundException("Playlist not found");
 
-		if (u is null)
-			throw new UnauthorizedAccessException("Unauthorized");
+        if (u.UserID != playlist.Author)
+            throw new UnauthorizedAccessException("Unauthorized");
 
-		if (playlist is null)
-			throw new KeyNotFoundException("Playlist not found");
-
-		if (u.UserID != playlist.Author)
-			throw new UnauthorizedAccessException("Unauthorized");
-
-		playlist.Name = title;
-		playlist.Description = description;
-		playlist.Visibility = visibility;
-		playlist.LastUpdated = DateTimeOffset.UtcNow;
-
-		await PlaylistCollection.ReplaceOneAsync(x => x.Id == id, playlist);
-	}
-
-	public async Task DeletePlaylist(string token, string id)
-	{
-		DatabaseUser? u = await DatabaseManager.Users.GetUserFromToken(token);
-		DatabasePlaylist? playlist = GetPlaylist(id);
-
-		if (u is null)
-			throw new UnauthorizedAccessException("Unauthorized");
-
-		if (playlist is null)
-			throw new KeyNotFoundException("Playlist not found");
-
-		if (u.UserID != playlist.Author)
-			throw new UnauthorizedAccessException("Unauthorized");
-
-		await PlaylistCollection.DeleteOneAsync(x => x.Id == id);
-	}
+        await PlaylistCollection.DeleteOneAsync(x => x.Id == id);
+    }
 }

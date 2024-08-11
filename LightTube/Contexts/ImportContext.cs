@@ -1,13 +1,7 @@
 namespace LightTube.Contexts;
 
-public class ImportContext : BaseContext
+public class ImportContext(HttpContext context, string? message = null, bool isError = false) : BaseContext(context)
 {
-	public string? Message { get; }
-	public bool IsError { get; }
-
-	public ImportContext(HttpContext context, string? message = null, bool isError = false) : base(context)
-	{
-		Message = message;
-		IsError = isError;
-	}
+    public string? Message { get; } = message;
+    public bool IsError { get; } = isError;
 }

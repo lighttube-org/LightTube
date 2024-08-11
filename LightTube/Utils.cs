@@ -1,76 +1,81 @@
 ﻿using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Xml;
-using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf.Params;
+using InnerTube.Protobuf.Responses;
+using LightTube.ApiModels;
+using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Localization;
 using Microsoft.Extensions.Primitives;
 
 namespace LightTube;
 
 public static class Utils
 {
-	private static string? _version;
-	private static string? _itVersion;
+	private static string? version;
+	private static string? itVersion;
 	public static string UserIdAlphabet => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 	public static string[] OauthScopes =
-	{
+	[
 		"playlists.read",
 		"playlists.write",
 		"subscriptions.read",
 		"subscriptions.write"
-	};
+	];
 
-	public static string GetRegion(this HttpContext context) =>
+	public static string GetInnerTubeRegion(this HttpContext context) =>
 		context.Request.Headers.TryGetValue("X-Content-Region", out StringValues h)
 			? h.ToString()
-			: context.Request.Cookies.TryGetValue("gl", out string region)
+			: context.Request.Cookies.TryGetValue("gl", out string? region)
 				? region
-				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_REGION", "US");
+				: Configuration.DefaultContentRegion;
 
-	public static string GetLanguage(this HttpContext context) =>
+	public static string GetInnerTubeLanguage(this HttpContext context) =>
 		context.Request.Headers.TryGetValue("X-Content-Language", out StringValues h)
 			? h.ToString()
-			: context.Request.Cookies.TryGetValue("hl", out string language)
+			: context.Request.Cookies.TryGetValue("hl", out string? language) && language != "localized"
 				? language
-				: Configuration.GetVariable("LIGHTTUBE_DEFAULT_CONTENT_LANGUAGE", "en");
+				: LocalizationManager.GetFromHttpContext(context).GetRawString("language.innertube");
+
+	public static bool IsInnerTubeLanguageLocalized(this HttpContext context) =>
+		!context.Request.Cookies.TryGetValue("hl", out string? language) || language == "localized";
 
 	public static bool GetDefaultRecommendationsVisibility(this HttpContext context) =>
-		context.Request.Cookies.TryGetValue("recommendations", out string recommendations)
-			? recommendations == "visible"
-			: true;
+		!context.Request.Cookies.TryGetValue("recommendations", out string? recommendations) ||
+		recommendations == "visible";
 
 	public static bool GetDefaultCompatibility(this HttpContext context) =>
-		context.Request.Cookies.TryGetValue("compatibility", out string compatibility)
-			? compatibility == "true"
-			: false;
+		context.Request.Cookies.TryGetValue("compatibility", out string? compatibility) && compatibility == "true";
 
 	public static string GetVersion()
 	{
-		if (_version is null)
+		if (version is null)
 		{
 #if DEBUG
 			DateTime buildTime = DateTime.Today;
-			_version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
+			version = $"{buildTime.Year}.{buildTime.Month}.{buildTime.Day} (dev)";
 #else
-			_version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[2..];
+			version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[2..];
 #endif
 		}
 
-		return _version;
+		return version;
 	}
 
 	public static string GetInnerTubeVersion()
 	{
-		_itVersion ??= typeof(InnerTube.InnerTube).Assembly.GetName().Version!.ToString();
+		itVersion ??= typeof(InnerTube.InnerTube).Assembly.GetName().Version!.ToString();
 
-		return _itVersion;
+		return itVersion;
 	}
 
 	public static string GetCodecFromMimeType(string mime)
@@ -101,7 +106,7 @@ public static class Utils
 		string manifest = await reader.ReadToEndAsync();
 		StringBuilder proxyManifest = new();
 
-		List<string> types = new();
+		List<string> types = [];
 
 		if (proxyRoot is not null)
 			foreach (string s in manifest.Split("\n"))
@@ -189,20 +194,20 @@ public static class Utils
 		mpdRoot.SetAttribute("type", "static");
 		mpdRoot.SetAttribute("minBufferTime", "PT1.500S");
 		StringBuilder duration = new("PT");
-		if (player.Details.Length.TotalHours > 0)
-			duration.Append($"{player.Details.Length.Hours}H");
-		if (player.Details.Length.Minutes > 0)
-			duration.Append($"{player.Details.Length.Minutes}M");
-		if (player.Details.Length.Seconds > 0)
-			duration.Append(player.Details.Length.Seconds);
-		mpdRoot.SetAttribute("mediaPresentationDuration", $"{duration}.{player.Details.Length.Milliseconds}S");
+		if (player.Details.Length!.Value.TotalHours > 0)
+			duration.Append($"{player.Details.Length!.Value.Hours}H");
+		if (player.Details.Length!.Value.Minutes > 0)
+			duration.Append($"{player.Details.Length!.Value.Minutes}M");
+		if (player.Details.Length!.Value.Seconds > 0)
+			duration.Append(player.Details.Length!.Value.Seconds);
+		mpdRoot.SetAttribute("mediaPresentationDuration", $"{duration}.{player.Details.Length!.Value.Milliseconds}S");
 		doc.AppendChild(mpdRoot);
 
 		XmlElement period = doc.CreateElement("Period");
 
 		period.AppendChild(doc.CreateComment("Audio Adaptation Sets"));
 		List<Format> audios = player.AdaptiveFormats
-			.Where(x => x.AudioChannels.HasValue)
+			.Where(x => x.Fps == 0)
 			.ToList();
 		IEnumerable<IGrouping<string?, Format>> grouped = audios.GroupBy(x => x.AudioTrack?.Id);
 		foreach (IGrouping<string?, Format> formatGroup in grouped.OrderBy(x => x.First().AudioTrack?.AudioIsDefault))
@@ -210,7 +215,7 @@ public static class Utils
 			XmlElement audioAdaptationSet = doc.CreateElement("AdaptationSet");
 
 			audioAdaptationSet.SetAttribute("mimeType",
-				HttpUtility.ParseQueryString(audios.First().Url.Query).Get("mime"));
+				HttpUtility.ParseQueryString(audios.First().Url.Split('?')[1]).Get("mime"));
 			audioAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 			audioAdaptationSet.SetAttribute("contentType", "audio");
 			audioAdaptationSet.SetAttribute("lang", formatGroup.Key);
@@ -218,27 +223,27 @@ public static class Utils
 			if (formatGroup.First().AudioTrack != null)
 			{
 				XmlElement label = doc.CreateElement("Label");
-				label.InnerText = formatGroup.First().AudioTrack?.DisplayName;
+				label.InnerText = formatGroup.First().AudioTrack.DisplayName;
 				audioAdaptationSet.AppendChild(label);
 			}
 
 			foreach (Format format in formatGroup)
 			{
 				XmlElement representation = doc.CreateElement("Representation");
-				representation.SetAttribute("id", format.Itag);
-				representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+				representation.SetAttribute("id", format.Itag.ToString());
+				representation.SetAttribute("codecs", GetCodecFromMimeType(format.Mime));
 				representation.SetAttribute("startWithSAP", "1");
 				representation.SetAttribute("bandwidth", format.Bitrate.ToString());
 
 				XmlElement audioChannelConfiguration = doc.CreateElement("AudioChannelConfiguration");
 				audioChannelConfiguration.SetAttribute("schemeIdUri",
 					"urn:mpeg:dash:23003:3:audio_channel_configuration:2011");
-				audioChannelConfiguration.SetAttribute("value", format.AudioChannels?.ToString());
+				audioChannelConfiguration.SetAttribute("value", format.AudioChannels.ToString());
 				representation.AppendChild(audioChannelConfiguration);
 
 				XmlElement baseUrl = doc.CreateElement("BaseURL");
 				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-					? format.Url.ToString()
+					? format.Url
 					: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}?audioTrackId={format.AudioTrack?.Id}";
 				representation.AppendChild(baseUrl);
 
@@ -264,20 +269,18 @@ public static class Utils
 
 		period.AppendChild(doc.CreateComment("Video Adaptation Set"));
 
-		List<Format> videos = player.AdaptiveFormats.Where(x => !x.AudioChannels.HasValue).ToList();
+		List<Format> videos = player.AdaptiveFormats.Where(x => x.Fps > 0).ToList();
 
 		XmlElement videoAdaptationSet = doc.CreateElement("AdaptationSet");
-		videoAdaptationSet.SetAttribute("mimeType",
-			HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Query ?? "mime=video/mp4")
-				.Get("mime"));
+		videoAdaptationSet.SetAttribute("mimeType", HttpUtility.ParseQueryString(videos.FirstOrDefault()?.Url.Split('?')[1] ?? "mime=video/mp4").Get("mime"));
 		videoAdaptationSet.SetAttribute("subsegmentAlignment", "true");
 		videoAdaptationSet.SetAttribute("contentType", "video");
 
 		foreach (Format format in videos)
 		{
 			XmlElement representation = doc.CreateElement("Representation");
-			representation.SetAttribute("id", format.Itag);
-			representation.SetAttribute("codecs", GetCodecFromMimeType(format.MimeType));
+			representation.SetAttribute("id", format.Itag.ToString());
+			representation.SetAttribute("codecs", GetCodecFromMimeType(format.Mime));
 			representation.SetAttribute("startWithSAP", "1");
 			representation.SetAttribute("width", format.Width.ToString());
 			representation.SetAttribute("height", format.Height.ToString());
@@ -285,7 +288,7 @@ public static class Utils
 
 			XmlElement baseUrl = doc.CreateElement("BaseURL");
 			baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
-				? format.Url.ToString()
+				? format.Url
 				: $"{proxyUrl}/media/{player.Details.Id}/{format.Itag}";
 			representation.AppendChild(baseUrl);
 
@@ -326,7 +329,7 @@ public static class Utils
 				url = url.Replace("fmt=srv3", "fmt=vtt");
 				baseUrl.InnerText = string.IsNullOrWhiteSpace(proxyUrl)
 					? url
-					: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.LanguageCode}";
+					: $"{proxyUrl}/caption/{player.Details.Id}/{subtitle.VssId}";
 
 				representation.AppendChild(baseUrl);
 				adaptationSet.AppendChild(representation);
@@ -338,7 +341,7 @@ public static class Utils
 		return doc.OuterXml;
 	}
 
-	public static string ToKMB(this int num) =>
+	public static string ToKMB(this long num) =>
 		num switch
 		{
 			> 999999999 or < -999999999 => num.ToString("0,,,.###B", CultureInfo.InvariantCulture),
@@ -358,18 +361,8 @@ public static class Utils
 		string[] parts = currentPath.Split("?");
 		NameValueCollection query = parts.Length > 1
 			? HttpUtility.ParseQueryString(parts[1])
-			: new NameValueCollection();
+			: [];
 		query.Set("continuation", contToken);
-		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
-	}
-
-	public static string GetSkipUrl(string currentPath, int skipAmount)
-	{
-		string[] parts = currentPath.Split("?");
-		NameValueCollection query = parts.Length > 1
-			? HttpUtility.ParseQueryString(parts[1])
-			: new NameValueCollection();
-		query.Set("skip", skipAmount.ToString());
 		return $"{parts[0]}?{query.AllKeys.Select(x => x + "=" + query.Get(x)).Aggregate((a, b) => $"{a}&{b}")}";
 	}
 
@@ -383,17 +376,14 @@ public static class Utils
 
 	public static string GetExtension(this Format format)
 	{
-		if (format.MimeType.StartsWith("video"))
-			format.MimeType
+		if (format.Mime.StartsWith("video"))
+			return format.Mime
 				.Split("/").Last()
 				.Split(";").First();
-		else
-		{
-			if (format.MimeType.Contains("opus"))
-				return "opus";
-			if (format.MimeType.Contains("mp4a"))
-				return "mp3";
-		}
+		if (format.Mime.Contains("opus"))
+			return "opus";
+		if (format.Mime.Contains("mp4a"))
+			return "mp3";
 
 		return "mp4";
 	}
@@ -401,33 +391,33 @@ public static class Utils
 	public static string[] FindInvalidScopes(string[] scopes) =>
 		scopes.Where(x => !OauthScopes.Contains(x)).ToArray();
 
-	public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes)
+	public static IEnumerable<string> GetScopeDescriptions(string[] modelScopes, LocalizationManager localization)
 	{
-		List<string> descriptions = new();
+		List<string> descriptions = [];
 
 		// dangerous ones are at the top
 		if (modelScopes.Contains("logins.read"))
-			descriptions.Add("!See your other logins");
+			descriptions.Add("!" + localization.GetRawString("oauth2.scope.logins.read"));
 		if (modelScopes.Contains("logins.delete"))
-			descriptions.Add("!Log out from another place");
+			descriptions.Add("!" + localization.GetRawString("oauth2.scope.logins.write"));
 
 		descriptions.Add("Access YouTube data");
 
 		if (modelScopes.Contains("playlists.read") && modelScopes.Contains("playlists.write"))
-			descriptions.Add("Access and modify your playlists");
+			descriptions.Add(localization.GetRawString("oauth2.scope.playlists.rw"));
 		else if (modelScopes.Contains("playlists.read"))
-			descriptions.Add("Access your playlists");
+			descriptions.Add(localization.GetRawString("oauth2.scope.playlists.read"));
 		else if (modelScopes.Contains("playlists.write"))
-			descriptions.Add("Modify your playlists");
+			descriptions.Add(localization.GetRawString("oauth2.scope.playlists.write"));
 
 		if (modelScopes.Contains("subscriptions.read"))
 		{
-			descriptions.Add("Get a list of your subscribed channels");
-			descriptions.Add("Get your subscription feed");
+			descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.read"));
+			descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.feed"));
 		}
 
 		if (modelScopes.Contains("subscriptions.write"))
-			descriptions.Add("Subscribe & unsubscribe from channels");
+			descriptions.Add(localization.GetRawString("oauth2.scope.subscriptions.write"));
 
 		return descriptions;
 	}
@@ -479,5 +469,301 @@ public static class Utils
 		if (request.Query.TryGetValue("exact", out StringValues _)) searchParams.QueryFlags.ExactSearch = true;
 
 		return searchParams;
+	}
+
+	public static string BuildSearchQueryString(string query, SearchParams? filters, int? page)
+	{
+		StringBuilder sb = new();
+
+		sb.Append("search_query=" + HttpUtility.UrlEncode(query));
+		if (page != null)
+			sb.Append("&page=" + page);
+
+		if (filters != null)
+		{
+			if (filters.Filters.UploadedIn != SearchFilters.Types.UploadDate.UnsetDate) 
+				sb.AppendLine("&uploadDate=" + (int)filters.SortBy);
+			if (filters.Filters.Type != SearchFilters.Types.ItemType.UnsetType) 
+				sb.AppendLine("&type=" + (int)filters.SortBy);
+			if (filters.Filters.Duration != SearchFilters.Types.VideoDuration.UnsetDuration) 
+				sb.AppendLine("&duration=" + (int)filters.SortBy);
+			if (filters.SortBy != SearchParams.Types.SortField.Relevance) 
+				sb.AppendLine("&sortField=" + (int)filters.SortBy);
+			
+			if (filters.Filters?.Live == true) sb.AppendLine("&live=on");
+			if (filters.Filters?.Resolution4K == true) sb.AppendLine("&_4k=on");
+			if (filters.Filters?.Hd == true) sb.AppendLine("&hd=on");
+			if (filters.Filters?.Subtitles == true) sb.AppendLine("&subs=on");
+			if (filters.Filters?.CreativeCommons == true) sb.AppendLine("&cc=on");
+			if (filters.Filters?.Vr360 == true) sb.AppendLine("&vr360=on");
+			if (filters.Filters?.Vr180 == true) sb.AppendLine("&vr180=on");
+			if (filters.Filters?.Resolution3D == true) sb.AppendLine("&_3d=on");
+			if (filters.Filters?.Hdr == true) sb.AppendLine("&hdr=on");
+			if (filters.Filters?.Location == true) sb.AppendLine("&location=on");
+			if (filters.Filters?.Purchased == true) sb.AppendLine("&purchased=on");
+			if (filters.QueryFlags?.ExactSearch == true) sb.AppendLine("&exact=on");
+		}
+
+		return sb.ToString();
+	}
+
+	public static bool ShouldShowAlert(HttpRequest request)
+	{
+		if (Configuration.AlertHash == null) return false;
+
+		if (request.Cookies.TryGetValue("dismissedAlert", out string? cookieVal))
+			return cookieVal != Configuration.AlertHash;
+
+		return true;
+	}
+
+	public static string Md5Sum(string input)
+	{
+		using MD5 md5 = MD5.Create();
+		byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+		byte[] hashBytes = md5.ComputeHash(inputBytes);
+		return Convert.ToHexString(hashBytes);
+	}
+
+	public static float ExtractHeaderQualityValue(string s)
+	{
+		// https://developer.mozilla.org/en-US/docs/Glossary/Quality_values
+		string[] parts = s.Split("q=");
+		return parts.Length > 1 && float.TryParse(parts[1], out float val) ? val : 1;
+	}
+
+	public static ApiLocals GetLocals() =>
+		new()
+		{
+			Languages = new Dictionary<string, string>
+			{
+				["af"] = "Afrikaans",
+				["az"] = "Azərbaycan",
+				["id"] = "Bahasa Indonesia",
+				["ms"] = "Bahasa Malaysia",
+				["bs"] = "Bosanski",
+				["ca"] = "Català",
+				["cs"] = "Čeština",
+				["da"] = "Dansk",
+				["de"] = "Deutsch",
+				["et"] = "Eesti",
+				["en-IN"] = "English (India)",
+				["en-GB"] = "English (UK)",
+				["en"] = "English (US)",
+				["es"] = "Español (España)",
+				["es-419"] = "Español (Latinoamérica)",
+				["es-US"] = "Español (US)",
+				["eu"] = "Euskara",
+				["fil"] = "Filipino",
+				["fr"] = "Français",
+				["fr-CA"] = "Français (Canada)",
+				["gl"] = "Galego",
+				["hr"] = "Hrvatski",
+				["zu"] = "IsiZulu",
+				["is"] = "Íslenska",
+				["it"] = "Italiano",
+				["sw"] = "Kiswahili",
+				["lv"] = "Latviešu valoda",
+				["lt"] = "Lietuvių",
+				["hu"] = "Magyar",
+				["nl"] = "Nederlands",
+				["no"] = "Norsk",
+				["uz"] = "O‘zbek",
+				["pl"] = "Polski",
+				["pt-PT"] = "Português",
+				["pt"] = "Português (Brasil)",
+				["ro"] = "Română",
+				["sq"] = "Shqip",
+				["sk"] = "Slovenčina",
+				["sl"] = "Slovenščina",
+				["sr-Latn"] = "Srpski",
+				["fi"] = "Suomi",
+				["sv"] = "Svenska",
+				["vi"] = "Tiếng Việt",
+				["tr"] = "Türkçe",
+				["be"] = "Беларуская",
+				["bg"] = "Български",
+				["ky"] = "Кыргызча",
+				["kk"] = "Қазақ Тілі",
+				["mk"] = "Македонски",
+				["mn"] = "Монгол",
+				["ru"] = "Русский",
+				["sr"] = "Српски",
+				["uk"] = "Українська",
+				["el"] = "Ελληνικά",
+				["hy"] = "Հայերեն",
+				["iw"] = "עברית",
+				["ur"] = "اردو",
+				["ar"] = "العربية",
+				["fa"] = "فارسی",
+				["ne"] = "नेपाली",
+				["mr"] = "मराठी",
+				["hi"] = "हिन्दी",
+				["as"] = "অসমীয়া",
+				["bn"] = "বাংলা",
+				["pa"] = "ਪੰਜਾਬੀ",
+				["gu"] = "ગુજરાતી",
+				["or"] = "ଓଡ଼ିଆ",
+				["ta"] = "தமிழ்",
+				["te"] = "తెలుగు",
+				["kn"] = "ಕನ್ನಡ",
+				["ml"] = "മലയാളം",
+				["si"] = "සිංහල",
+				["th"] = "ภาษาไทย",
+				["lo"] = "ລາວ",
+				["my"] = "ဗမာ",
+				["ka"] = "ქართული",
+				["am"] = "አማርኛ",
+				["km"] = "ខ្មែរ",
+				["zh-CN"] = "中文 (简体)",
+				["zh-TW"] = "中文 (繁體)",
+				["zh-HK"] = "中文 (香港)",
+				["ja"] = "日本語",
+				["ko"] = "한국어"
+			},
+			Regions = new Dictionary<string, string>
+			{
+				["DZ"] = "Algeria",
+				["AR"] = "Argentina",
+				["AU"] = "Australia",
+				["AT"] = "Austria",
+				["AZ"] = "Azerbaijan",
+				["BH"] = "Bahrain",
+				["BD"] = "Bangladesh",
+				["BY"] = "Belarus",
+				["BE"] = "Belgium",
+				["BO"] = "Bolivia",
+				["BA"] = "Bosnia and Herzegovina",
+				["BR"] = "Brazil",
+				["BG"] = "Bulgaria",
+				["KH"] = "Cambodia",
+				["CA"] = "Canada",
+				["CL"] = "Chile",
+				["CO"] = "Colombia",
+				["CR"] = "Costa Rica",
+				["HR"] = "Croatia",
+				["CY"] = "Cyprus",
+				["CZ"] = "Czechia",
+				["DK"] = "Denmark",
+				["DO"] = "Dominican Republic",
+				["EC"] = "Ecuador",
+				["EG"] = "Egypt",
+				["SV"] = "El Salvador",
+				["EE"] = "Estonia",
+				["FI"] = "Finland",
+				["FR"] = "France",
+				["GE"] = "Georgia",
+				["DE"] = "Germany",
+				["GH"] = "Ghana",
+				["GR"] = "Greece",
+				["GT"] = "Guatemala",
+				["HN"] = "Honduras",
+				["HK"] = "Hong Kong",
+				["HU"] = "Hungary",
+				["IS"] = "Iceland",
+				["IN"] = "India",
+				["ID"] = "Indonesia",
+				["IQ"] = "Iraq",
+				["IE"] = "Ireland",
+				["IL"] = "Israel",
+				["IT"] = "Italy",
+				["JM"] = "Jamaica",
+				["JP"] = "Japan",
+				["JO"] = "Jordan",
+				["KZ"] = "Kazakhstan",
+				["KE"] = "Kenya",
+				["KW"] = "Kuwait",
+				["LA"] = "Laos",
+				["LV"] = "Latvia",
+				["LB"] = "Lebanon",
+				["LY"] = "Libya",
+				["LI"] = "Liechtenstein",
+				["LT"] = "Lithuania",
+				["LU"] = "Luxembourg",
+				["MY"] = "Malaysia",
+				["MT"] = "Malta",
+				["MX"] = "Mexico",
+				["MD"] = "Moldova",
+				["ME"] = "Montenegro",
+				["MA"] = "Morocco",
+				["NP"] = "Nepal",
+				["NL"] = "Netherlands",
+				["NZ"] = "New Zealand",
+				["NI"] = "Nicaragua",
+				["NG"] = "Nigeria",
+				["MK"] = "North Macedonia",
+				["NO"] = "Norway",
+				["OM"] = "Oman",
+				["PK"] = "Pakistan",
+				["PA"] = "Panama",
+				["PG"] = "Papua New Guinea",
+				["PY"] = "Paraguay",
+				["PE"] = "Peru",
+				["PH"] = "Philippines",
+				["PL"] = "Poland",
+				["PT"] = "Portugal",
+				["PR"] = "Puerto Rico",
+				["QA"] = "Qatar",
+				["RO"] = "Romania",
+				["RU"] = "Russia",
+				["SA"] = "Saudi Arabia",
+				["SN"] = "Senegal",
+				["RS"] = "Serbia",
+				["SG"] = "Singapore",
+				["SK"] = "Slovakia",
+				["SI"] = "Slovenia",
+				["ZA"] = "South Africa",
+				["KR"] = "South Korea",
+				["ES"] = "Spain",
+				["LK"] = "Sri Lanka",
+				["SE"] = "Sweden",
+				["CH"] = "Switzerland",
+				["TW"] = "Taiwan",
+				["TZ"] = "Tanzania",
+				["TH"] = "Thailand",
+				["TN"] = "Tunisia",
+				["TR"] = "Turkey",
+				["UG"] = "Uganda",
+				["UA"] = "Ukraine",
+				["AE"] = "United Arab Emirates",
+				["GB"] = "United Kingdom",
+				["US"] = "United States",
+				["UY"] = "Uruguay",
+				["VE"] = "Venezuela",
+				["VN"] = "Vietnam",
+				["YE"] = "Yemen",
+				["ZW"] = "Zimbabwe"
+			}
+		};
+
+	public static string GetAspectRatio(WatchContext context)
+	{
+		Format? format = context.Player.Player?.AdaptiveFormats.LastOrDefault(x => x.Mime.StartsWith("video"));
+		return format != null
+			? Math.Max(1f, Math.Min((float)format.Width / (float)format.Height, 3)).ToString(CultureInfo.InvariantCulture)
+			: "16/9";
+	}
+
+	public static string ToRelativePublishedDate(DateTimeOffset date)
+	{
+		TimeSpan diff = DateTimeOffset.Now - date;
+		int totalDays = (int)Math.Floor(diff.TotalDays);
+		switch (totalDays)
+		{
+			case > 365:
+				return $"-{Math.Floor(diff.TotalDays / 365f)}Y";
+			case > 30:
+				return $"-{Math.Floor(diff.TotalDays / 30f)}M";
+			case > 7:
+				return $"-{Math.Floor(diff.TotalDays / 7f)}W";
+			case > 0:
+				return $"-{Math.Floor(diff.TotalDays)}D";
+		}
+
+		if (diff.Hours >= 1)
+			return $"-{diff.Hours}h";
+		if (diff.Minutes >= 1)
+			return $"-{diff.Minutes}m";
+		return $"-{diff.Seconds}m";
 	}
 }

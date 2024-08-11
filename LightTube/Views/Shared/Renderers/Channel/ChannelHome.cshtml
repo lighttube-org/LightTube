@@ -1,0 +1,127 @@
+@using InnerTube
+@using InnerTube.Exceptions
+@using InnerTube.Models
+@using InnerTube.Protobuf.Responses
+@using InnerTube.Renderers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model (IEnumerable<RendererContainer> Renderers, LightTube.Localization.LocalizationManager Localization)
+
+@foreach (RendererContainer renderer in Model.Renderers.Select(x => x.OriginalType == "itemSectionRenderer" ? (x.Data as ContainerRendererData)!.Items.First() : x))
+{
+	@switch (renderer.Type)
+	{
+		case "video":
+			VideoRendererData video = (VideoRendererData)renderer.Data;
+			<div class="renderer-channelvideoplayerrenderer">
+				<div class="promotedvideo-player">
+					@try
+					{
+						// for anyone reading this part
+						// im sorry
+						InnerTubePlayer player = Context.RequestServices.GetService<SimpleInnerTubeClient>()
+							!.GetVideoPlayerAsync(video.VideoId, false).Result;
+						PlayerContext playerContext = new(Context, player, null, "channel-promoted-video", false, "18", []);
+						<partial name="Player" model="playerContext"/>
+					}
+					catch (Exception ex)
+					{
+						ex = ex.InnerException ?? ex;
+						@if (ex is PlayerException playerException)
+						{
+							<div class="player-error-container">
+								<div class="player-error-icon">
+									<svg class="icon" fill="currentColor" style="color: white;" width="64" height="64">
+										<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+									</svg>
+								</div>
+								<div class="player-error-info">
+									@if (playerException.Code == PlayabilityStatus.Types.Status.LoginRequired)
+									{
+										<div class="title" title="[@playerException.Code] @playerException.Reason">@playerException.Reason</div>
+										<p class="ml-1">@Model.Localization.GetString("error.player.agerestricted")</p>
+									}
+									else
+									{
+										<div class="title" title="[@playerException.Code] @playerException.Reason">@playerException.Reason</div>
+										<p class="ml-1">@playerException.Subreason</p>
+										@if (playerException.Code is PlayabilityStatus.Types.Status.ContentCheckRequired)
+										{
+											<a href="@Context.Request.Path.ToString()@Context.Request.QueryString&contentCheckOk=true" class="btn-white">@Model.Localization.GetString("error.player.contentcheck")</a>
+										}
+									}
+								</div>
+							</div>
+						}
+						else
+						{
+							<div class="player-error-container">
+								<div class="player-error-icon">
+									<svg class="icon" fill="currentColor" style="color: white;" width="64" height="64">
+										<use xlink:href="/svg/bootstrap-icons.svg#exclamation-circle"></use>
+									</svg>
+								</div>
+								<div class="player-error-info">
+									<div class="title">@Model.Localization.GetString("error.player.exception") @(ex.GetType() == typeof(Exception) ? "" : $"({ex.GetType().Name})")</div>
+									<p class="ml-1">@ex.Message</p>
+								</div>
+							</div>
+						}
+					}
+				</div>
+				<div class="promotedvideo-info">
+					<a href="/watch?v=@video.VideoId" class="title ml-1" title="@video.Title">
+						@video.Title
+					</a>
+					<div>
+						@video.ViewCountText • @video.PublishedText
+					</div>
+					<div class="promotedvideo-description">
+						@Html.Raw(video.Description)
+					</div>
+				</div>
+			</div>
+			break;
+		case "container":
+			ContainerRendererData container = (ContainerRendererData)renderer.Data;
+			<partial name="Renderers/ContainerRenderer" model="(container, Model.Localization)"/>
+			break;
+		case "recognitionShelf":
+			RecognitionShelfRendererData recognition = (RecognitionShelfRendererData)renderer.Data;
+			<div class="renderer-recognitionshelfrenderer">
+				<div class="recognition-shelf-text">
+					<div class="ml-1 title">@Model.Localization.GetString("channel.recognition.title")</div>
+					<div class="ml-1">@Model.Localization.GetString("channel.recognition.subtitle")</div>
+				</div>
+				<div class="flex-divider"></div>
+				<div class="recognition-shelf-items">
+					@foreach (string avatar in recognition.Avatars.Take(7))
+					{
+						<img loading="lazy" src="@avatar" alt="User Avatar">
+					}
+				</div>
+			</div>
+			break;
+		case "unknown":
+			<div>
+				<div>Unknown RendererContainer.OriginalType: <code>@renderer.OriginalType</code></div>
+				if (renderer.OriginalType == "UnknownProtobufRenderer")
+				{
+				<code>@Convert.ToBase64String((renderer.Data as UnknownRendererData)?.ProtobufBytes ?? [])</code>
+				}
+				else
+				{
+				<code>@((renderer.Data as UnknownRendererData)?.Json)</code>
+				}
+			</div>
+			break;
+		case "exception":
+			ExceptionRendererData e = (ExceptionRendererData)renderer.Data;
+			<div class="renderer-null">
+				<code>@e.Message</code> while converting <code>@e.RendererCase</code>
+			</div>
+			break;
+		default:
+			<div class="renderer-null">Unexpected RendererContainer.Type: <code>@renderer.Type/@renderer.OriginalType</code></div>
+			break;
+	}
+}

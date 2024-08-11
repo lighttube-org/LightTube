@@ -2,14 +2,8 @@ using LightTube.Database.Models;
 
 namespace LightTube.ApiModels;
 
-public class ApiSubscriptionInfo
+public class ApiSubscriptionInfo(SubscriptionType userSubscription)
 {
-	public bool Subscribed { get; }
-	public bool Notifications { get; }
-	
-	public ApiSubscriptionInfo(SubscriptionType userSubscription)
-	{
-		Subscribed = userSubscription != SubscriptionType.NONE;
-		Notifications = userSubscription == SubscriptionType.NOTIFICATIONS_ON;
-	}
+    public bool Subscribed { get; } = userSubscription != SubscriptionType.NONE;
+    public bool Notifications { get; } = userSubscription == SubscriptionType.NOTIFICATIONS_ON;
 }

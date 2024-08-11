@@ -1,63 +1,90 @@
+@using LightTube.Localization
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model AppearanceSettingsContext
 
 @{
 	Layout = "_SettingsLayout";
-	Model.Title = "Appearance settings";
+	Model.Title = Model.Localization.GetRawString("settings.appearance.title");
+	bool innerTubeLanguageLocalized = Context.IsInnerTubeLanguageLocalized();
 }
 
-<h1 class="title">Theme</h1>
+<h1 class="title">@Model.Localization.GetString("settings.appearance.interface")</h1>
 
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Theme
+			@Model.Localization.GetString("settings.appearance.theme.title")
 		</div>
 		<div>
-			Change how LightTube looks like!
+			@Model.Localization.GetString("settings.appearance.theme.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
 		<select name="theme" class="subscription-dropdown">
-			<option disabled>Built-in</option>
+			<option disabled>@Model.Localization.GetString("settings.appearance.theme.builtin")</option>
 			@foreach ((string className, string name) in Model.BuiltinThemes)
 			{
-				@if (Model.GetThemeClass() == $"theme-{className}")
-				{
-					<option value="@className" selected>@name</option>
-				}
-				else
-				{
-					<option value="@className">@name</option>
-				}
+			@if (Model.GetThemeClass() == $"theme-{className}")
+			{
+			<option value="@className" selected>@name</option>
+			}
+			else
+			{
+			<option value="@className">@name</option>
+			}
 			}
 			@if (Model.CustomThemes.Count > 0)
 			{
-				<option disabled>Custom</option>
-				@foreach ((string className, string name) in Model.CustomThemes)
+			<option disabled>@Model.Localization.GetString("settings.appearance.theme.custom")</option>
+			@foreach ((string className, string name) in Model.CustomThemes)
+			{
+			@if (Model.GetThemeClass() == $"theme-{className}")
+			{
+			<option value="@className" selected>@name</option>
+			}
+			else
+			{
+			<option value="@className">@name</option>
+			}
+			}
+			}
+		</select>
+	</div>
+</div>
+
+<div class="settings-option">
+	<div class="settings-option__info">
+		<div class="ml-2 title">
+			@Model.Localization.GetString("settings.appearance.language.title")
+		</div>
+		<div>
+			@Model.Localization.GetString("settings.appearance.language.subtitle")
+		</div>
+	</div>
+	<div class="settings-option__option">
+		<select name="language" class="subscription-dropdown">
+			@foreach (Language language in Model.Languages)
+			{
+				@if (Model.Localization.CurrentLocale == language.Code)
 				{
-					@if (Model.GetThemeClass() == $"theme-{className}")
-					{
-						<option value="@className" selected>@name</option>
-					}
-					else
-					{
-						<option value="@className">@name</option>
-					}
+					<option value="@language.Code" selected>@language.Name</option>
+				}
+				else
+				{
+					<option value="@language.Code">@language.Name</option>
 				}
 			}
 		</select>
 	</div>
 </div>
 
-<h1 class="title">Content Settings</h1>
-
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Last videos
+			@Model.Localization.GetString("settings.appearance.homescreensubs.title")
 		</div>
 		<div>
-			Show last n videos from subscribed feed on homepage
+			@Model.Localization.GetString("settings.appearance.homescreensubs.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -65,21 +92,30 @@
 	</div>
 </div>
 
+<h1 class="title">Content Settings</h1>
+
 <div class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-1 title">
-			Content Language
+			@Model.Localization.GetString("settings.appearance.innertube.language.title")
 		</div>
-		
 		<div>
-			Only affects video title & descriptions
+			@Model.Localization.GetString("settings.appearance.innertube.language.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
 		<select name="hl" class="subscription-dropdown">
+			@if (innerTubeLanguageLocalized)
+			{
+				<option value="localized" selected>@Model.Localization.FormatString("settings.appearance.innertube.language.localized", Model.Localization.GetString("language.name"))</option>
+			}
+			else
+			{
+				<option value="localized">@Model.Localization.FormatString("settings.appearance.innertube.language.localized", Model.Localization.GetString("language.name"))</option>
+			}
 			@foreach ((string id, string label) in Model.Locals.Languages)
 			{
-				@if (id == Context.GetLanguage())
+				@if (id == Context.GetInnerTubeLanguage() && !innerTubeLanguageLocalized)
 				{
 					<option value="@id" selected>@label</option>
 				}
@@ -94,18 +130,18 @@
 
 <div class="settings-option">
 	<div class="settings-option__info">
-		<div class="ml-2 title">
-			Content Region
+		<div class="ml-1 title">
+			@Model.Localization.GetString("settings.appearance.innertube.region.title")
 		</div>
 		<div>
-			Affects the recommended content
+			@Model.Localization.GetString("settings.appearance.innertube.region.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
 		<select name="gl" class="subscription-dropdown">
 			@foreach ((string id, string label) in Model.Locals.Regions)
 			{
-				@if (id == Context.GetRegion())
+				@if (id == Context.GetInnerTubeRegion())
 				{
 					<option value="@id" selected>@label</option>
 				}
@@ -121,10 +157,10 @@
 <label class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Show Recommended Videos By Default
+			@Model.Localization.GetString("settings.appearance.recommendations.title")
 		</div>
 		<div>
-			If unchecked, recommendations will be collapsed by default
+			@Model.Localization.GetString("settings.appearance.recommendations.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -142,10 +178,10 @@
 <label class="settings-option">
 	<div class="settings-option__info">
 		<div class="ml-2 title">
-			Compatibility mode
+			@Model.Localization.GetString("settings.appearance.compatibility.title")
 		</div>
 		<div>
-			Use MP4 streams instead of HLS streams. Breaks livestreams
+			@Model.Localization.GetString("settings.appearance.compatibility.subtitle")
 		</div>
 	</div>
 	<div class="settings-option__option">
@@ -160,4 +196,4 @@
 	</div>
 </label>
 <br>
-<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="Save Changes">
+<input type="submit" class="btn-outline btn-blue" style="width:fit-content;" value="@Model.Localization.GetString("settings.save")">

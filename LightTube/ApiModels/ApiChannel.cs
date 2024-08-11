@@ -1,84 +1,147 @@
-using InnerTube;
+using InnerTube.Models;
+using InnerTube.Protobuf;
 using InnerTube.Renderers;
 using LightTube.Database.Models;
+using LightTube.Localization;
+using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.ApiModels;
 
 public class ApiChannel
 {
-	public string Id { get; }
-	public string Title { get; }
-	public IEnumerable<Thumbnail> Avatars { get; }
-	public IEnumerable<Thumbnail> Banner { get; }
-	public IEnumerable<Badge> Badges { get; }
-	public IEnumerable<ChannelLink> PrimaryLinks { get; }
-	public IEnumerable<ChannelLink> SecondaryLinks { get; }
-	public string SubscriberCountText { get; }
-	public IEnumerable<string> EnabledTabs { get; }
-	public IEnumerable<IRenderer> Contents { get; }
-	public string? Continuation { get; }
+	public ChannelHeader? Header { get; }
+	public ChannelTab[] Tabs { get; }
+	public ChannelMetadata? Metadata { get; }
+	public RendererContainer[] Contents { get; }
 
-	public ApiChannel(InnerTubeChannelResponse channel)
+	public ApiChannel(InnerTubeChannel channel)
 	{
-		if (channel.Header != null)
-		{
-			Id = channel.Header.Id;
-			Title = channel.Header.Title;
-			Avatars = channel.Header.Avatars;
-			Banner = channel.Header.Banner;
-			Badges = channel.Header.Badges;
-			PrimaryLinks = channel.Header.PrimaryLinks;
-			SecondaryLinks = channel.Header.SecondaryLinks;
-			SubscriberCountText = channel.Header.SubscriberCountText;
-		}
-		else
-		{
-			Id = channel.Metadata.Id;
-			Title = channel.Metadata.Title;
-			Avatars = channel.Metadata.Avatar;
-			Banner = Array.Empty<Thumbnail>();
-			Badges = Array.Empty<Badge>();
-			PrimaryLinks = Array.Empty<ChannelLink>();
-			SecondaryLinks = Array.Empty<ChannelLink>();
-			SubscriberCountText = "Unavailable";
-		}
-
-		EnabledTabs = channel.EnabledTabs.Select(x => x.ToString());
+		Header = channel.Header;
+		Tabs = channel.Tabs.ToArray();
+		Metadata = channel.Metadata;
 		Contents = channel.Contents;
-		Continuation =
-			(channel.Contents.FirstOrDefault(x => x is ContinuationItemRenderer) as ContinuationItemRenderer)?.Token;
 	}
 
-	public ApiChannel(InnerTubeContinuationResponse channel)
+	public ApiChannel(ContinuationResponse continuation)
 	{
-		Id = "";
-		Title = "";
-		Avatars = Array.Empty<Thumbnail>();
-		Banner = Array.Empty<Thumbnail>();
-		Badges = Array.Empty<Badge>();
-		PrimaryLinks = Array.Empty<ChannelLink>();
-		SecondaryLinks = Array.Empty<ChannelLink>();
-		SubscriberCountText = "Unavailable";
-		EnabledTabs = Array.Empty<string>();
-		Contents = channel.Contents;
-		Continuation = channel.Continuation;
+		Header = null;
+		Tabs = [];
+		Metadata = null;
+		List<RendererContainer> renderers = new();
+		renderers.AddRange(continuation.Results);
+		if (continuation.ContinuationToken != null)
+			renderers.Add(new RendererContainer
+			{
+				Type = "continuation",
+				OriginalType = "continuationItemRenderer",
+				Data = new ContinuationRendererData
+				{
+					ContinuationToken = continuation.ContinuationToken
+				}
+			});
+		Contents = renderers.ToArray();
 	}
 
-	public ApiChannel(DatabaseUser channel)
+	public ApiChannel(DatabaseUser channel, LocalizationManager localization)
 	{
-		Id = channel.LTChannelID;
-		Title = channel.UserID;
-		Avatars = Array.Empty<Thumbnail>();
-		Banner = Array.Empty<Thumbnail>();
-		Badges = Array.Empty<Badge>();
-		PrimaryLinks = Array.Empty<ChannelLink>();
-		SecondaryLinks = Array.Empty<ChannelLink>();
-		SubscriberCountText = "LightTube account";
-		EnabledTabs = new[]
+		Header = new ChannelHeader(new PageHeaderRenderer
 		{
-			ChannelTabs.Playlists.ToString()
-		};
-		Contents = new[] { channel.PlaylistRenderers() };
-		Continuation = null;
+			PageTitle = channel.UserID,
+			Content = new RendererWrapper
+			{
+				PageHeaderViewModel = new PageHeaderViewModel
+				{
+					Image = new RendererWrapper
+					{
+						DecoratedAvatarViewModel = new DecoratedAvatarViewModel
+						{
+							Avatar = new RendererWrapper
+							{
+								AvatarViewModel = new AvatarViewModel
+								{
+									Image = new Image()
+								}
+							}
+						},
+						ImageBannerViewModel = new ImageBannerViewModel
+						{
+							Image = new Image()
+						}
+					},
+					Metadata = new RendererWrapper
+					{
+						ContentMetadataViewModel = new ContentMetadataViewModel
+						{
+							MetadataRows =
+							{
+								new ContentMetadataViewModel.Types.MetadataRow
+								{
+									MetadataParts =
+									{
+										new ContentMetadataViewModel.Types.MetadataRow.Types.
+											AttributedDescriptionWrapper
+											{
+												Text = new AttributedDescription
+												{
+													Content = $"@LT_{channel.UserID}"
+												}
+											}
+									}
+								},
+								new ContentMetadataViewModel.Types.MetadataRow
+								{
+									MetadataParts =
+									{
+										new ContentMetadataViewModel.Types.MetadataRow.Types.
+											AttributedDescriptionWrapper
+											{
+												Text = new AttributedDescription
+												{
+													Content = "LightTube Channel"
+												}
+											},
+										new ContentMetadataViewModel.Types.MetadataRow.Types.
+											AttributedDescriptionWrapper
+											{
+												Text = new AttributedDescription
+												{
+													Content = ""
+												}
+											}
+									}
+								}
+							}
+						}
+					},
+					Description = new RendererWrapper
+					{
+						DescriptionPreviewViewModel = new DescriptionPreviewViewModel
+						{
+							Content = new AttributedDescription
+							{
+								Content = ""
+							}
+						}
+					}
+				}
+			}
+		}, channel.LTChannelID, "en");
+		Tabs =
+		[
+			new ChannelTab(new TabRenderer
+			{
+				Endpoint = new Endpoint
+				{
+					BrowseEndpoint = new BrowseEndpoint
+					{
+						Params = "EglwbGF5bGlzdHPyBgQKAkIA"
+					}
+				},
+				Title = "Playlists",
+				Selected = true
+			})
+		];
+		Metadata = null;
+		Contents = channel.PlaylistRenderers(localization).ToArray();
 	}
 }

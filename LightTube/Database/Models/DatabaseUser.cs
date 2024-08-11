@@ -1,81 +1,76 @@
-﻿using InnerTube.Renderers;
+﻿using InnerTube.Protobuf;
+using InnerTube.Renderers;
+using LightTube.Localization;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace LightTube.Database.Models;
 
 [BsonIgnoreExtraElements]
 public class DatabaseUser
 {
-	private const string INNERTUBE_GRID_RENDERER_TEMPLATE = "{\"items\": [%%CONTENTS%%]}";
+    private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    [JsonProperty("userId")] public string UserID { get; set; }
+    [JsonIgnore] public string PasswordHash { get; set; }
+    [JsonIgnore] public Dictionary<string, SubscriptionType> Subscriptions { get; set; }
+    [JsonProperty("ltChannelId")] public string LTChannelID { get; set; }
 
-	private const string INNERTUBE_MESSAGE_RENDERER_TEMPLATE =
-		"{\"messageRenderer\":{\"text\":{\"simpleText\":\"%%MESSAGE%%\"}}}";
+    public static DatabaseUser CreateUser(string userId, string password) =>
+        new()
+        {
+            UserID = userId,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+            Subscriptions = [],
+            LTChannelID = GetChannelId(userId)
+        };
 
-	private const string ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-	public string UserID { get; set; }
-	[JsonIgnore] public string PasswordHash { get; set; }
-	[JsonIgnore] public Dictionary<string, SubscriptionType> Subscriptions { get; set; }
-	public string LTChannelID { get; set; }
+    public static string GetChannelId(string userId)
+    {
+        Random rng = new(userId.GetHashCode());
+        string channelId = "LT_UC";
+        while (channelId.Length < 24)
+            channelId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
+        return channelId;
+    }
 
-	[JsonIgnore] [BsonIgnoreIfNull] [Obsolete("Use Subscriptions dictionary instead")]
-	public string[]? SubscribedChannels;
+    public List<RendererContainer> PlaylistRenderers(LocalizationManager localization, PlaylistVisibility minVisibility = PlaylistVisibility.Visible)
+    {
+        DatabasePlaylist[] playlists =
+            DatabaseManager.Playlists.GetUserPlaylists(UserID, minVisibility).ToArray();
+        if (playlists.Length == 0)
+        {
+            return
+            [
+                new RendererContainer
+                {
+                    Type = "message",
+                    OriginalType = "messageRenderer",
+                    Data = new MessageRendererData(localization.GetRawString("channel.noplaylists"))
+                }
+            ];
+        }
 
-	[JsonIgnore] [BsonIgnoreIfNull] [Obsolete("Use UserID instead")]
-	public string? Email;
-
-	public static DatabaseUser CreateUser(string userId, string password) =>
-		new()
-		{
-			UserID = userId,
-			PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-			Subscriptions = new Dictionary<string, SubscriptionType>(),
-			LTChannelID = GetChannelId(userId)
-		};
-
-	public void Migrate()
-	{
-#pragma warning disable CS0618
-		if (SubscribedChannels is not null)
-		{
-			Subscriptions ??= new Dictionary<string, SubscriptionType>();
-			foreach (string id in SubscribedChannels)
-				if (!Subscriptions.ContainsKey(id))
-					Subscriptions.Add(id, SubscriptionType.NOTIFICATIONS_ON);
-			SubscribedChannels = null;
-		}
-
-		if (Email is not null && UserID is null)
-		{
-			UserID = Email;
-			Email = null;
-		}
-#pragma warning restore CS0618
-
-		LTChannelID ??= GetChannelId(UserID);
-	}
-
-	public static string GetChannelId(string userId)
-	{
-		Random rng = new(userId.GetHashCode());
-		string channelId = "LT_UC";
-		while (channelId.Length < 24)
-			channelId += ID_ALPHABET[rng.Next(0, ID_ALPHABET.Length)];
-		return channelId;
-	}
-
-	public GridRenderer PlaylistRenderers(PlaylistVisibility minVisibility = PlaylistVisibility.VISIBLE)
-	{
-		IEnumerable<DatabasePlaylist> playlists =
-			DatabaseManager.Playlists.GetUserPlaylists(UserID, minVisibility);
-		string playlistsJson = playlists.Any()
-			? string.Join(',', playlists.Select(x => x.GetInnerTubeGridPlaylistJson()))
-			: INNERTUBE_MESSAGE_RENDERER_TEMPLATE.Replace("%%MESSAGE%%",
-				"This user doesn't have any public playlists.");
-
-		string json = INNERTUBE_GRID_RENDERER_TEMPLATE
-			.Replace("%%CONTENTS%%", playlistsJson);
-		return new GridRenderer(JObject.Parse(json));
-	}
+        return playlists.Select(x => new RendererContainer
+        {
+            Type = "playlist",
+            OriginalType = "gridPlaylistRenderer",
+            Data = new PlaylistRendererData
+            {
+                PlaylistId = x.Id,
+                Thumbnails = [
+                    new Thumbnail
+                    {
+                        Url = $"https://i.ytimg.com/vi/{x.VideoIds.FirstOrDefault()}/hqdefault.jpg",
+                        Width = 480,
+                        Height = 360
+                    }
+                ],
+                Title = x.Name,
+                VideoCountText = string.Format(localization.GetRawString("playlist.videos.count"), x.VideoIds.Count),
+                VideoCount = x.VideoIds.Count,
+                SidebarThumbnails = [],
+                Author = null
+            }
+        }).ToList();
+    }
 }
