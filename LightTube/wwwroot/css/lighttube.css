@@ -746,6 +746,10 @@ body.no-guide .app {
         margin-left: -8px;
         height: auto !important;
     }
+    
+    .mobile-comments-breakpoint {
+        display: block !important;
+    }
 }
 
 .watch-page, .watch-page > div {
@@ -1091,6 +1095,10 @@ input#comments-toggle {
     font-weight: bold;
     color: var(--text-primary);
     font-size: larger;
+}
+
+.mobile-comments-breakpoint {
+    display: none;
 }
 
 /* Search Page */
