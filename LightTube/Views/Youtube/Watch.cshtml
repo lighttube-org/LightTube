@@ -46,7 +46,7 @@
 		</div>
 		@if (Model.Comments is not null)
 		{
-			<div class="interaction-buttons hide-on-desktop">
+			<div class="interaction-buttons mobile-comments-breakpoint">
 				<label class="interaction-button" for="comments-toggle">
 					<svg class="icon" width="20" height="20" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#chat-left-text"></use>
@@ -108,13 +108,13 @@
 	{
 		<details>
 			<summary>
-				<svg class="icon hide-on-desktop" width="32" height="32" fill="currentColor">
+				<svg class="icon mobile-comments-breakpoint" width="32" height="32" fill="currentColor">
 					<use class="only-when-closed" xlink:href="/svg/bootstrap-icons.svg#chevron-right"></use>
 					<use class="only-when-open" xlink:href="/svg/bootstrap-icons.svg#chevron-down"></use>
 				</svg>
 				@(Model.Video.CommentsCountText ?? Model.Comments.Results.Length + (Model.Comments.ContinuationToken != null ? "+" : "")) @Model.Localization.GetString("watch.comments.count")
-				<div class="flex-divider hide-on-desktop"></div>
-				<label for="comments-toggle" class="hide-on-desktop">
+				<div class="flex-divider mobile-comments-breakpoint"></div>
+				<label for="comments-toggle" class="mobile-comments-breakpoint">
 					<svg class="icon" width="32" height="32" fill="currentColor">
 						<use xlink:href="/svg/bootstrap-icons.svg#x"></use>
 					</svg>
