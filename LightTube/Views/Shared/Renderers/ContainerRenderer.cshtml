@@ -26,6 +26,7 @@
 									<div class="compact-thumbnail__duration__container">
 										<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 									</div>
+									<a href="/watch?v=@video.VideoId" class="thumbnail__video-href"></a>
 									<div class="thumbnail__buttons__container">
 										<a href="/addToPlaylist?v=@video.VideoId" class="thumbnail__button" title="@Model.Localization.GetString("watch.save")">
 											<svg class="bi" width="20" height="20" fill="currentColor">
