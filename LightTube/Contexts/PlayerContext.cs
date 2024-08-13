@@ -1,8 +1,6 @@
-﻿using InnerTube;
-using InnerTube.Models;
+﻿using InnerTube.Models;
 using InnerTube.Protobuf;
 using InnerTube.Protobuf.Responses;
-using InnerTube.Renderers;
 using Newtonsoft.Json;
 
 namespace LightTube.Contexts;
@@ -20,9 +18,10 @@ public class PlayerContext : BaseContext
     public bool UseEmbedUi = false;
     public string? ClassName;
     public SponsorBlockSegment[] Sponsors;
+    public bool AudioOnly;
 
     public PlayerContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo? video, string className,
-        bool compatibility, string? preferredItag, SponsorBlockSegment[] sponsors) : base(context)
+        bool compatibility, string? preferredItag, SponsorBlockSegment[] sponsors, bool audioOnly) : base(context)
     {
         Player = innerTubePlayer;
         Video = video;
@@ -31,6 +30,7 @@ public class PlayerContext : BaseContext
         Sponsors = sponsors;
         UseHls = !compatibility && !string.IsNullOrWhiteSpace(innerTubePlayer.HlsManifestUrl); // Prefer HLS
         UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;
+        AudioOnly = audioOnly;
         // Formats
         if (!Configuration.ProxyEnabled)
         {
@@ -81,11 +81,9 @@ public class PlayerContext : BaseContext
     public int? GetFirstItag() => GetPreferredFormat()?.Itag;
 
     public Format? GetPreferredFormat() =>
-        Player?.Formats.FirstOrDefault(x => x.Itag == PreferredItag && x.Itag != 17) ??
-        Player?.Formats.FirstOrDefault(x => x.Itag != 17);
+        AudioOnly
+            ? Player?.AdaptiveFormats.FirstOrDefault(x => x.Mime.StartsWith("audio/"))
+            : Player?.Formats.FirstOrDefault();
 
     public string GetClass() => ClassName is not null ? $" {ClassName}" : "";
-
-    public IEnumerable<Format> GetFormatsInPreferredOrder() =>
-        Player!.Formats.OrderBy(x => x.Itag != PreferredItag).Where(x => x.Itag != 17);
 }

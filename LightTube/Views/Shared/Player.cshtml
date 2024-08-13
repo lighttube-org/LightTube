@@ -75,24 +75,9 @@
 		</div>
 	}
 }
-else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
+else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any() && !Model.AudioOnly)
 {
 	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@if (Configuration.ProxyEnabled)
-		{
-			foreach (Format format in Model.GetFormatsInPreferredOrder())
-			{
-				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">
-			}
-		}
-		else
-		{
-			foreach (Format format in Model.GetFormatsInPreferredOrder())
-			{
-				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url">
-			}
-		}
-
 		@foreach (InnerTubePlayer.VideoCaption subtitle in Model.Player.Captions)
 		{
 			@:<track src="/proxy/caption/@Model.Player.Details.Id/@subtitle.VssId" label="@subtitle.Label" kind="subtitles">
@@ -103,16 +88,13 @@ else if ((Model.UseHls || Model.UseDash) && !Model.Player.Formats.Any())
 else if (Model.Player.Formats.Any())
 {
 	<video controls id="player" class="player @(Model.GetClass())" poster="@Model.Thumbnails.LastOrDefault()?.Url">
-		@if (Configuration.ProxyEnabled)
+		@foreach (Format format in Model.AudioOnly ? Model.Player.AdaptiveFormats.Where(x => x.Mime.StartsWith("audio/")).OrderByDescending(x => x.Bitrate).ToArray() : Model.Player.Formats)
 		{
-			foreach (Format format in Model.GetFormatsInPreferredOrder())
+			if (Configuration.ProxyEnabled)
 			{
 				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">
 			}
-		}
-		else
-		{
-			foreach (Format format in Model.GetFormatsInPreferredOrder())
+			else
 			{
 				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url">
 			}
@@ -150,7 +132,7 @@ else
 			href: "/channel/@Model.Player!.Details.Author.Id"
 		},
 		title: "@Model.Player!.Details.Title", // .Replace("\"", "\\\"")
-		@if (Model.UseHls)
+		@if (Model.UseHls && !Model.AudioOnly)
 		{
 			@:hlsManifest: "/proxy/media/@(Model.Player.Details.Id).m3u8",
 		}

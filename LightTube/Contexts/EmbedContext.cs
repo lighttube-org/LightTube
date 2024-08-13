@@ -9,10 +9,10 @@ public class EmbedContext : BaseContext
     public InnerTubeVideo Video;
 
     public EmbedContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo innerTubeNextResponse,
-        bool compatibility, SponsorBlockSegment[] sponsors) : base(context)
+        bool compatibility, SponsorBlockSegment[] sponsors, bool audioOnly) : base(context)
     {
         Player = new PlayerContext(context, innerTubePlayer, innerTubeNextResponse, "embed", compatibility,
-            context.Request.Query["q"], sponsors);
+            context.Request.Query["q"], sponsors, audioOnly);
         Video = innerTubeNextResponse;
     }
 
