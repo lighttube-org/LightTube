@@ -92,11 +92,11 @@ else if (Model.Player.Formats.Any())
 		{
 			if (Configuration.ProxyEnabled)
 			{
-				@:<source label="@format.QualityLabel" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">
+				@:<source label="@Model.Localization.FormatString("player.audioQuality", Math.Round(format.Bitrate / 1000f))" type="@format.Mime" src="/proxy/media/@Model.Player.Details.Id/@format.Itag">
 			}
 			else
 			{
-				@:<source label="@format.QualityLabel" type="@format.Mime" src="@format.Url">
+				@:<source label="@Model.Localization.FormatString("player.audioQuality", Math.Round(format.Bitrate / 1000f))" type="@format.Mime" src="@format.Url">
 			}
 		}
 

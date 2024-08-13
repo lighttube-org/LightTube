@@ -99,6 +99,8 @@
   "pagination.first": "First Page",
   "pagination.next": "Next Page",
   
+  "player.audioQuality": "(Audio only) {0}kbps",
+  
   "playlist.add.title": "Add video to playlist",
   "playlist.add.body": "Please select the playlist to add this video into.",
   "playlist.add.confirm": "Add",
