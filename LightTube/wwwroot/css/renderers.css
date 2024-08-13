@@ -242,6 +242,35 @@
 	border-radius: 4px;
 }
 
+.thumbnail__buttons__container {
+	grid-row: 1 / 1;
+	grid-column: 1 / 3;
+	width: calc(100% - 16px);
+	height: 40px;
+	display: flex;
+	justify-content: end;
+	margin-top: -40px;
+	transition: 100ms margin-top linear;
+	padding: 4px 8px;
+	gap: 4px;
+}
+
+.thumbnail__button {
+	background-color: rgba(0, 0, 0, 0.8);
+	height: 32px;
+	width: 32px;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.thumbnail:hover .thumbnail__buttons__container,
+.grid-thumbnail:hover .thumbnail__buttons__container,
+.compact-thumbnail:hover .thumbnail__buttons__container {
+	margin-top: 0;
+}
+
 .thumbnail__playlist__overlay {
 	grid-row: 1 / 3;
 	grid-column: 2 / 2;

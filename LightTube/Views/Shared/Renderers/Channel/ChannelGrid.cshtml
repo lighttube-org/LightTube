@@ -9,12 +9,29 @@
 		case "video":
 			VideoRendererData video = (VideoRendererData)renderer.Data;
 			<div class="renderer-gridvideorenderer">
-				<a href="/watch?v=@video.VideoId" class="grid-thumbnail">
+				<div href="/watch?v=@video.VideoId" class="grid-thumbnail">
 					<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
 					<div class="compact-thumbnail__duration__container">
 						<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 					</div>
-				</a>
+					<div class="thumbnail__buttons__container">
+						<a href="/addToPlaylist?v=@video.VideoId" class="thumbnail__button" title="@Model.Localization.GetString("watch.save")">
+							<svg class="bi" width="20" height="20" fill="currentColor">
+								<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
+							</svg>
+						</a>
+						<a href="/watch?v=@video.VideoId&audioOnly=true" class="thumbnail__button" title="@Model.Localization.GetString("video.listen")">
+							<svg class="bi" width="20" height="20" fill="currentColor">
+								<use xlink:href="/svg/bootstrap-icons.svg#headphones"/>
+							</svg>
+						</a>
+						<a href="/download/@video.VideoId" class="thumbnail__button" title="@Model.Localization.GetString("video.download")">
+							<svg class="bi" width="20" height="20" fill="currentColor">
+								<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+							</svg>
+						</a>
+					</div>
+				</div>
 				<div class="info">
 					<a href="/watch?v=@video.VideoId" class="ml-2 title" title="@video.Title">
 						@video.Title

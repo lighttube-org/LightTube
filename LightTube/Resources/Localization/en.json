@@ -247,6 +247,9 @@
   "video.unavailable": "Unavailable",
   "video.trailer.title": "Trailer",
   "video.trailer.body": "Livestream will begin in {0}",
+  "video.watch": "Watch",
+  "video.listen": "Listen",
+  "video.download": "Download",
 
   "watch.like.unavailable": "Like",
   "watch.dislike.unavailable": "Dislike",
