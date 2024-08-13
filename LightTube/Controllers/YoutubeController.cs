@@ -171,15 +171,6 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 			: "/");
 	}
 
-	[Route("/@{handle}")]
-	public async Task<IActionResult> ChannelFromHandle(string handle)
-	{
-			ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/@" + handle);
-		return Redirect(endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint
-			? $"/channel/{endpoint.Endpoint.BrowseEndpoint.BrowseId}"
-			: "/");
-	}
-
 	[Route("/channel/{id}")]
 	public async Task<IActionResult> Channel(string id, string? continuation = null) =>
 		await Channel(id, ChannelTabs.Featured, continuation);
