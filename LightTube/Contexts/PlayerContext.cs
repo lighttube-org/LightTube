@@ -12,7 +12,7 @@ public class PlayerContext : BaseContext
     public Exception? Exception;
     public bool UseHls;
     public bool UseDash;
-    public Thumbnail[] Thumbnails = [];
+    public Thumbnail[] Thumbnails;
     public string? ErrorMessage = null;
     public int PreferredItag = 18;
     public bool UseEmbedUi = false;
@@ -31,6 +31,7 @@ public class PlayerContext : BaseContext
         UseHls = !compatibility && !string.IsNullOrWhiteSpace(innerTubePlayer.HlsManifestUrl); // Prefer HLS
         UseDash = innerTubePlayer.AdaptiveFormats.Any() && !compatibility;
         AudioOnly = audioOnly;
+        Thumbnails = innerTubePlayer.Details.Thumbnails;
         // Formats
         if (!Configuration.ProxyEnabled)
         {
