@@ -16,7 +16,8 @@ namespace LightTube.Controllers;
 public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient client) : Controller
 {
 	[Route("/embed/{v}")]
-	public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false)
+	public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false,
+		bool audioOnly = false)
 	{
 		InnerTubePlayer? player;
 		Exception? e;
@@ -49,11 +50,12 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 			language: HttpContext.GetInnerTubeLanguage(), region: HttpContext.GetInnerTubeRegion());
 		if (player is null || e is not null)
 			return View(new EmbedContext(HttpContext, e ?? new Exception("player is null"), video));
-		return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors));
+		return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors, audioOnly));
 	}
 
 	[Route("/watch")]
-	public async Task<IActionResult> Watch(string v, string? list, bool contentCheckOk, bool compatibility = false)
+	public async Task<IActionResult> Watch(string v, string? list, bool contentCheckOk, bool compatibility = false,
+		bool audioOnly = false)
 	{
 		InnerTubePlayer? player;
 		Exception? e;
@@ -127,14 +129,14 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 				return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, pl, comments,
 					dislikes));
 			return View(new WatchContext(HttpContext, player, video, pl, comments, compatibility, dislikes,
-				sponsors));
+				sponsors, audioOnly));
 		}
 
 		if (player is null || e is not null)
 			return View(new WatchContext(HttpContext, e ?? new Exception("player is null"), video, comments,
 				dislikes));
 		return View(
-			new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, sponsors));
+			new WatchContext(HttpContext, player, video, comments, compatibility, dislikes, sponsors, audioOnly));
 	}
 
 	[Route("/results")]

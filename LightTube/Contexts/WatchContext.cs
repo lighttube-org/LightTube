@@ -16,10 +16,10 @@ public class WatchContext : BaseContext
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo innerTubeVideo,
 		ContinuationResponse? comments, bool compatibility, int dislikes,
-		SponsorBlockSegment[] sponsors) : base(context)
+		SponsorBlockSegment[] sponsors, bool audioOnly) : base(context)
 	{
 		Player = new PlayerContext(context, innerTubePlayer, innerTubeVideo, "embed", compatibility,
-			context.Request.Query["q"], sponsors);
+			context.Request.Query["q"], sponsors, audioOnly);
 		Video = innerTubeVideo;
 		Playlist = Video.Playlist;
 		Comments = comments;
@@ -80,10 +80,10 @@ public class WatchContext : BaseContext
 
 	public WatchContext(HttpContext context, InnerTubePlayer innerTubePlayer, InnerTubeVideo innerTubeVideo,
 		DatabasePlaylist? playlist, ContinuationResponse? comments, bool compatibility, int dislikes,
-		SponsorBlockSegment[] sponsors) : base(context)
+		SponsorBlockSegment[] sponsors, bool audioOnly) : base(context)
 	{
 		Player = new PlayerContext(context, innerTubePlayer, innerTubeVideo, "embed", compatibility,
-			context.Request.Query["q"], sponsors);
+			context.Request.Query["q"], sponsors, audioOnly);
 		Video = innerTubeVideo;
 		Playlist = playlist?.GetVideoPlaylistInfo(innerTubeVideo.Id,
 			DatabaseManager.Users.GetUserFromId(playlist.Author).Result!,

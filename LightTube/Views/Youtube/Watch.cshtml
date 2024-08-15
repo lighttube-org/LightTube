@@ -77,6 +77,25 @@
 				</div>
 			</a>
 		</div>
+		@if (Model.Player.AudioOnly) {
+			<div class="interaction-buttons">
+				<a class="interaction-button" href="/watch@(Context.Request.QueryString.ToString().Replace("&audioOnly=true", ""))" title="@Model.Localization.GetString("video.watch")">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#film"/>
+					</svg>
+				</a>
+			</div>
+		}
+		else
+		{
+			<div class="interaction-buttons">
+				<a class="interaction-button" href="/watch@(Context.Request.QueryString)&audioOnly=true" title="@Model.Localization.GetString("video.listen")">
+					<svg class="icon" width="20" height="20" fill="currentColor">
+						<use xlink:href="/svg/bootstrap-icons.svg#headphones"/>
+					</svg>
+				</a>
+			</div>
+		}
 		<div class="interaction-buttons">
 			<a class="interaction-button" href="https://youtube.com/watch@(Context.Request.QueryString)" title="@Model.Localization.GetString("watch.youtube")">
 				<svg class="icon" width="20" height="20" fill="currentColor">
@@ -264,12 +283,30 @@
 						case "video":
 							VideoRendererData video = (VideoRendererData)renderer.Data;
 							<div class="renderer-compactvideorenderer">
-								<a class="compact-thumbnail" href="/watch?v=@video.VideoId">
+								<div class="compact-thumbnail">
 									<img loading="lazy" src="@video.Thumbnails.LastOrDefault()?.Url" alt="@video.Title">
 									<div class="compact-thumbnail__duration__container">
 										<span class="compact-thumbnail__duration">@video.Duration.ToDurationString()</span>
 									</div>
-								</a>
+									<a href="/watch?v=@video.VideoId" class="thumbnail__video-href"></a>
+									<div class="thumbnail__buttons__container">
+										<a href="/addToPlaylist?v=@video.VideoId" class="thumbnail__button" title="@Model.Localization.GetString("watch.save")">
+											<svg class="bi" width="20" height="20" fill="currentColor">
+												<use xlink:href="/svg/bootstrap-icons.svg#folder-plus"/>
+											</svg>
+										</a>
+										<a href="/watch?v=@video.VideoId&audioOnly=true" class="thumbnail__button" title="@Model.Localization.GetString("video.listen")">
+											<svg class="bi" width="20" height="20" fill="currentColor">
+												<use xlink:href="/svg/bootstrap-icons.svg#headphones"/>
+											</svg>
+										</a>
+										<a href="/download/@video.VideoId" class="thumbnail__button" title="@Model.Localization.GetString("video.download")">
+											<svg class="bi" width="20" height="20" fill="currentColor">
+												<use xlink:href="/svg/bootstrap-icons.svg#download"/>
+											</svg>
+										</a>
+									</div>
+								</div>
 								<div class="info">
 									<a class="ml-2 title" href="/watch?v=@video.VideoId" title="@video.Title">
 										@video.Title
