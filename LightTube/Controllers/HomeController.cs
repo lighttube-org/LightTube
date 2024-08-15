@@ -1,14 +1,15 @@
 ﻿using System.Text;
+using InnerTube;
+using InnerTube.Protobuf.Responses;
 using LightTube.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.Controllers;
 
-public class HomeController(ILogger<HomeController> logger) : Controller
+public class HomeController(SimpleInnerTubeClient innerTube) : Controller
 {
-    private readonly ILogger<HomeController> _logger = logger;
-
     public IActionResult Index() => View(new HomepageContext(HttpContext));
 
     [Route("/rss")]
@@ -53,9 +54,20 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         return Redirect(redirectUrl);
     }
 
-    [Route("/{videoId:regex([[a-zA-Z0-9-_]]{{11}})}")]
-    public IActionResult VideoRedirect(string videoId)
+    [Route("/{str}")]
+    public async Task<IActionResult> AutoRedirect(string str)
     {
-        return Redirect($"/watch?v={videoId}");
+        if (str.StartsWith('@'))
+        {
+            ResolveUrlResponse endpoint = await innerTube.ResolveUrl("https://youtube.com/" + str);
+            return Redirect(endpoint.Endpoint.EndpointTypeCase == Endpoint.EndpointTypeOneofCase.BrowseEndpoint
+                ? $"/channel/{endpoint.Endpoint.BrowseEndpoint.BrowseId}"
+                : "/");
+        }
+
+        if (str.Length == 11)
+            return Redirect($"/watch?v={str}");
+
+        return Redirect("/");
     }
 }
