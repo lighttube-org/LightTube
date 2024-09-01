@@ -121,7 +121,16 @@
     "channel.tab.releases": "Veröffentlichungen",
     "download.format.audio": "Nur Audio",
     "download.format.video": "Nur Video",
-    "oauth2.scope.subscriptions.write": "Konten abonnieren &amp; deabonnieren",
+    "oauth2.scope.subscriptions.write": "Kanäle abonnieren &amp; abbestellen",
     "layout.guide.version": "Läuft auf LightTube v{0}",
-    "oauth2.title": "Anwendung autorisieren"
+    "oauth2.title": "Anwendung autorisieren",
+    "rss.explain.username.url": "dein Benutzername",
+    "search.filters.uploaddate.title": "Hochladedatum",
+    "search.filters.uploaddate.clear": "Löschen",
+    "search.filters.duration.clear": "Löschen",
+    "search.filters.category.clear": "Löschen",
+    "search.filters.features.title": "Funktionen",
+    "search.filters.features.purchased": "Gekauft",
+    "search.filters.sort.date": "Hochladedatum",
+    "search.filters.uploaddate.hour": "Letzte Stunde"
 }
