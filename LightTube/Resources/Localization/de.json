@@ -121,5 +121,7 @@
     "channel.tab.releases": "Veröffentlichungen",
     "download.format.audio": "Nur Audio",
     "download.format.video": "Nur Video",
-    "oauth2.scope.subscriptions.write": "Konten abonnieren &amp; deabonnieren"
+    "oauth2.scope.subscriptions.write": "Konten abonnieren &amp; deabonnieren",
+    "layout.guide.version": "Läuft auf LightTube v{0}",
+    "oauth2.title": "Anwendung autorisieren"
 }
