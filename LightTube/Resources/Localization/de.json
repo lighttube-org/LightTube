@@ -113,5 +113,13 @@
     "search.filters.features.hdr": "HDR",
     "search.didyoumean": "Meintest du: <a href=\"{1}\">{0}</a>?",
     "settings.account.delete": "Konto löschen",
-    "settings.appearance.language.title": "Sprache"
+    "settings.appearance.language.title": "Sprache",
+    "channel.about.links": "Links",
+    "channel.banner": "Kanalbanner",
+    "channel.supporter.avatar": "Profilbild",
+    "channel.tab.playlists": "Wiedergabelisten",
+    "channel.tab.releases": "Veröffentlichungen",
+    "download.format.audio": "Nur Audio",
+    "download.format.video": "Nur Video",
+    "oauth2.scope.subscriptions.write": "Konten abonnieren &amp; deabonnieren"
 }
