@@ -132,5 +132,13 @@
     "search.filters.features.title": "Funktionen",
     "search.filters.features.purchased": "Gekauft",
     "search.filters.sort.date": "Hochladedatum",
-    "search.filters.uploaddate.hour": "Letzte Stunde"
+    "search.filters.uploaddate.hour": "Letzte Stunde",
+    "playlist.add.confirm": "Hinzufügen",
+    "playlist.view.full": "Komplette Wiedergabeliste anzeigen",
+    "search.filters.duration.title": "Dauer",
+    "search.filters.features.location": "Ort",
+    "search.filters.sort.title": "Sortieren nach",
+    "search.filters.sort.relevance": "Relevanz",
+    "search.filters.sort.views": "Aufrufe",
+    "search.showingresultsfor": "Ergebnisse für <a href=\"{1}\">{0}</a> anzeigen"
 }
