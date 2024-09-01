@@ -140,5 +140,5 @@
     "search.filters.sort.title": "Sortieren nach",
     "search.filters.sort.relevance": "Relevanz",
     "search.filters.sort.views": "Aufrufe",
-    "search.showingresultsfor": "Ergebnisse für <a href=\"{1}\">{0}</a> anzeigen"
+    "search.showingresultsfor": "Ergebnisse für <a href=\"{1}\">{0}</a> werden angezeigt"
 }
