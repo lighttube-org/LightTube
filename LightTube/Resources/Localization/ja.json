@@ -1,1 +1,20 @@
-{}
+{
+    "account.password": "パスワード",
+    "language.name": "日本語",
+    "language.name.english": "日本語",
+    "language.ietf": "ja",
+    "language.innertube": "ja",
+    "titles.account.login": "サインイン",
+    "titles.account.delete": "アカウントを削除",
+    "account.password.confirm": "パスワードを確定",
+    "account.showpassword": "パスワードを表示",
+    "account.confirmpassword": "パスワードを確定",
+    "account.login": "サインイン",
+    "account.signup": "サインアップ",
+    "account.register": "アカウントを作成",
+    "account.delete": "削除",
+    "language.code": "ja",
+    "titles.account.register": "アカウントを作成",
+    "account.userid": "ユーザーID",
+    "account.deleteconfirm": "削除をクリックすると、このLightTubeインスタンスからすべてのプレイリスト、購読しているチャンネルなどが削除されます ({0})"
+}
