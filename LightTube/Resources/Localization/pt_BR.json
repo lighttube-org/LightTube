@@ -35,10 +35,10 @@
     "pagination.prev": "Página Anterior",
     "playlist.add.title": "Adicionar vídeo a lista",
     "playlist.create.confirm": "Criar lista de reprodução",
-    "language.code": "pt-br",
+    "language.code": "pt-BR",
     "language.name": "Português (Brasil)",
-    "language.name.english": "Português (Brasil)",
-    "language.ietf": "pt-br",
+    "language.name.english": "Portuguese (Brazil)",
+    "language.ietf": "pt",
     "titles.account.login": "Fazer o Login",
     "titles.account.delete": "Excluir a sua conta",
     "account.userid": "ID do Usuário",
@@ -86,7 +86,7 @@
     "playlist.create.title": "Criar Nova Lista de Reprodução",
     "playlist.delete.title": "Excluir lista",
     "account.login": "Fazer o Login",
-    "language.innertube": "pt-br",
+    "language.innertube": "pt",
     "titles.account.register": "Criar uma conta",
     "account.password": "Senha"
 }
