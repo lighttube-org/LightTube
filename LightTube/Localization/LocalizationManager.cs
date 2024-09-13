@@ -85,6 +85,14 @@ public class LocalizationManager(string locale)
 			return;
 		}
 
+		if (!Utils.GetLocals().Languages.ContainsKey(parsed["language.innertube"]))
+		{
+			Log.Warning(
+				"[Localization] Not loading localization {0}, since it's InnerTube language equivalent isn't valid against any other language",
+				code);
+			return;
+		}
+
 		Localizations.Add(code, parsed);
 		Log.Information("[Localization] Loaded localization file for {0} with {1} keys", code,
 			Localizations[code].Count);
