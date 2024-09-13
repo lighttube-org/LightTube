@@ -120,4 +120,10 @@ public class LocalizationManager(string locale)
 
 		return languages.OrderBy(x => x.Name).ToArray();
 	}
+
+	public static Dictionary<string,int> GetLanguagePercentages()
+	{
+		int defaultKeys = Localizations["en"].Count;
+		return Localizations.ToDictionary(x => x.Key, x => x.Value.Count * 100 / defaultKeys);
+	}
 }
