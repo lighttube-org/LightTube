@@ -1,7 +1,7 @@
 {
     "playlist.videos.count": "{0} vidéos",
-    "language.name": "Anglais",
-    "language.name.english": "Anglais",
+    "language.name": "Français",
+    "language.name.english": "French",
     "titles.account.register": "Créer un compte",
     "titles.account.login": "Se connecter",
     "titles.account.delete": "Supprimer votre compte",
@@ -272,5 +272,8 @@
     "error.register.password.invalid": "Mot de passe invalide",
     "error.register.password.length": "Le mot de passe doit être plus long que 8 caractères",
     "error.body.details.locale": "Langage &amp; région InnerTube",
-    "error.body.details.version": "Versions LightTube &amp; InnerTube"
+    "error.body.details.version": "Versions LightTube &amp; InnerTube",
+    "language.code": "fr",
+    "language.ietf": "fr",
+    "language.innertube": "fr"
 }
