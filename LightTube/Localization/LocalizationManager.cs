@@ -12,6 +12,9 @@ public class LocalizationManager(string locale)
 	private Dictionary<string, string> PreferredLocaleStrings { get; set; }
 	private Dictionary<string, string> FallbackLocaleStrings { get; set; }
 
+	private static readonly string[] RequiredKeys =
+		["language.code", "language.name", "language.name.english", "language.ietf", "language.innertube"];
+
 	public string CurrentLocale => locale;
 
 	public string GetRawString(string key, bool forceFallback = false)
@@ -59,13 +62,32 @@ public class LocalizationManager(string locale)
 		{
 			string code = file.Split('/')[2].Split('.')[0];
 			using FileStream s = File.Open(file, FileMode.Open, FileAccess.Read);
-			Localizations.Add(code, JsonSerializer.Deserialize<Dictionary<string, string>>(s) ?? []);
+			Dictionary<string, string>? parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(s);
 			s.Close();
-			Log.Information("[Localization] Loaded localization file for {0} with {1} keys", code,
-				Localizations[code].Count);
+			AddLocalization(code, parsed ?? []);
 		}
 
 		Log.Information("[Localization] Localization files initialized.");
+	}
+
+	private static void AddLocalization(string code, Dictionary<string, string> parsed)
+	{
+		// remove all empty/whitespace keys
+		foreach ((string? key, _) in parsed.Where(x => string.IsNullOrWhiteSpace(x.Value)))
+			parsed.Remove(key);
+		
+		// don't add languages without their information present
+		if (!RequiredKeys.All(parsed.ContainsKey))
+		{
+			Log.Warning(
+				"[Localization] Not loading localization {0}, since it doesn't contain the required fields",
+				code);
+			return;
+		}
+
+		Localizations.Add(code, parsed);
+		Log.Information("[Localization] Loaded localization file for {0} with {1} keys", code,
+			Localizations[code].Count);
 	}
 
 	public static LocalizationManager GetFromHttpContext(HttpContext context)
@@ -121,7 +143,7 @@ public class LocalizationManager(string locale)
 		return languages.OrderBy(x => x.Name).ToArray();
 	}
 
-	public static Dictionary<string,int> GetLanguagePercentages()
+	public static Dictionary<string, int> GetLanguagePercentages()
 	{
 		int defaultKeys = Localizations["en"].Count;
 		return Localizations.ToDictionary(x => x.Key, x => x.Value.Count * 100 / defaultKeys);
