@@ -67,11 +67,11 @@
 			{
 				@if (Model.Localization.CurrentLocale == language.Code)
 				{
-					<option value="@language.Code" selected>@language.Name (@Model.LanguagePercentages[language.Code]%)</option>
+					<option value="@language.Code" selected>@language.GetDisplayName() (@Model.LanguagePercentages[language.Code]%)</option>
 				}
 				else
 				{
-					<option value="@language.Code">@language.Name (@Model.LanguagePercentages[language.Code]%)</option>
+					<option value="@language.Code">@language.GetDisplayName() (@Model.LanguagePercentages[language.Code]%)</option>
 				}
 			}
 		</select>
