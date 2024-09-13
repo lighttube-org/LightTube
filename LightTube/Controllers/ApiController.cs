@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Text.RegularExpressions;
 using InnerTube;
 using InnerTube.Models;
@@ -9,6 +10,7 @@ using LightTube.ApiModels;
 using LightTube.Attributes;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Health;
 using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Endpoint = InnerTube.Protobuf.Endpoint;
@@ -37,6 +39,15 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 			}
 		};
 
+	[Route("health")]
+	public HealthResponse GetHealth() =>
+		new()
+		{
+			VideoHealth = (int)HealthManager.GetHealthPercentage(),
+			AveragePlayerResponseTime = HealthManager.GetAveragePlayerResponseTime(),
+			CacheStats = innerTube.GetPlayerCacheStats()
+		};
+
 	private ApiResponse<T> Error<T>(string message, int code, HttpStatusCode statusCode)
 	{
 		Response.StatusCode = (int)statusCode;
@@ -55,11 +66,15 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		if (!videoIdRegex.IsMatch(id) || id.Length != 11)
 			return Error<InnerTubePlayer>($"Invalid video ID: {id}", 400, HttpStatusCode.BadRequest);
 
+		Stopwatch sp = Stopwatch.StartNew();
 		try
 		{
 			InnerTubePlayer player = await innerTube.GetVideoPlayerAsync(id, contentCheckOk,
 				HttpContext.GetInnerTubeLanguage(),
 				HttpContext.GetInnerTubeRegion());
+			sp.Stop();
+			// we dont check if the video id is correct here, might be an issue for the future
+			HealthManager.PushVideoResponse(id, true, sp.ElapsedMilliseconds);
 
 			DatabaseUser? user = await DatabaseManager.Oauth2.GetUserFromHttpRequest(Request);
 			ApiUserData? userData = ApiUserData.GetFromDatabaseUser(user);
@@ -69,6 +84,8 @@ public partial class ApiController(SimpleInnerTubeClient innerTube) : Controller
 		}
 		catch (Exception e)
 		{
+			sp.Stop();
+			HealthManager.PushVideoResponse(id, false, sp.ElapsedMilliseconds);
 			return Error<InnerTubePlayer>(e.Message, 500, HttpStatusCode.InternalServerError);
 		}
 	}
