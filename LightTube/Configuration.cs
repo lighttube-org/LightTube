@@ -34,20 +34,21 @@ public static class Configuration
     {
         InnerTubeAuthorization = null;
         string? authType = Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_TYPE");
-        if (authType == "cookie")
+        switch (authType)
         {
-            Log.Error("Cookie authentication has been removed in LightTube v3 as it does not work with youtubei.googleapis.com");
-        }
-        else if (authType == "oauth2")
-        {
-            InnerTubeAuthorization = InnerTubeAuthorization.RefreshTokenAuthorization(
-                Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ??
-                throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN",
-                    "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set."));
-        }
-        else
-        {
-            Log.Warning("Unknown auth type: '{AuthType}'", authType);
+            case "cookie":
+                Log.Error("Cookie authentication has been removed in LightTube v3 as it does not work with youtubei.googleapis.com");
+                break;
+            case "oauth2":
+                InnerTubeAuthorization = InnerTubeAuthorization.RefreshTokenAuthorization(
+                    Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ??
+                    throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN",
+                        "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set."),
+                    Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_USER_ID"));
+                break;
+            default:
+                Log.Warning("Unknown auth type: '{AuthType}'", authType);
+                break;
         }
 
         CustomCssPath = Environment.GetEnvironmentVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
