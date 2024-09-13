@@ -7,15 +7,17 @@ public static class HealthManager
 
 	public static void PushVideoResponse(string videoId, bool isSuccess, long playerResponseTime)
 	{
+		// don't include cache hits 
+		if (playerResponseTime < 50) return;
+
+		// if entry with the same videoId exists, remove it
+		videoStatuses.RemoveAll(x => x.Key == videoId);
+
+		// only keep last 100 requests
 		if (videoStatuses.Count >= 100) videoStatuses.RemoveAt(0);
 		if (playerResponseTimes.Count >= 100) playerResponseTimes.RemoveAt(0);
-		
+
 		playerResponseTimes.Add(playerResponseTime);
-
-		KeyValuePair<string, bool>? oldData = videoStatuses.FirstOrDefault(x => x.Key == videoId);
-		if (oldData?.Key == null) oldData = null; // unsure why the entire thing isnt null
-
-		if (oldData?.Value == isSuccess) return;
 		videoStatuses.Add(new KeyValuePair<string, bool>(videoId, isSuccess));
 	}
 
