@@ -65,7 +65,7 @@ public static class Configuration
         OauthEnabled = GetVariable("LIGHTTUBE_DISABLE_OAUTH", "false")?.ToLower() != "true";
         RegistrationEnabled = GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "false")?.ToLower() != "true";
         ProxyEnabled = GetVariable("LIGHTTUBE_DISABLE_PROXY", "false")?.ToLower() != "true";
-        ThirdPartyProxyEnabled = GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() != "true" && ProxyEnabled;
+        ThirdPartyProxyEnabled = GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true" && ProxyEnabled;
 
         CacheSize = int.Parse(GetVariable("LIGHTTUBE_CACHE_SIZE", "50")!);
         ConnectionString = GetVariable("LIGHTTUBE_MONGODB_CONNSTR") ?? throw new ArgumentNullException(
