@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using InnerTube;
 using InnerTube.Models;
 using InnerTube.Protobuf.Params;
@@ -6,9 +7,9 @@ using InnerTube.Protobuf.Responses;
 using LightTube.Contexts;
 using LightTube.Database;
 using LightTube.Database.Models;
+using LightTube.Health;
 using LightTube.Localization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using Endpoint = InnerTube.Protobuf.Endpoint;
 
 namespace LightTube.Controllers;
@@ -19,6 +20,7 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 	public async Task<IActionResult> Embed(string v, bool contentCheckOk, bool compatibility = false,
 		bool audioOnly = false)
 	{
+		Stopwatch sp = Stopwatch.StartNew();
 		InnerTubePlayer? player;
 		Exception? e;
 		try
@@ -32,6 +34,7 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 			player = null;
 			e = ex;
 		}
+		sp.Stop();
 
 		SponsorBlockSegment[] sponsors;
 		try
@@ -48,6 +51,7 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 
 		InnerTubeVideo video = await innerTube.GetVideoDetailsAsync(v, contentCheckOk, null, null, null,
 			language: HttpContext.GetInnerTubeLanguage(), region: HttpContext.GetInnerTubeRegion());
+		HealthManager.PushVideoResponse(v, player != null, sp.ElapsedMilliseconds);
 		if (player is null || e is not null)
 			return View(new EmbedContext(HttpContext, e ?? new Exception("player is null"), video));
 		return View(new EmbedContext(HttpContext, player, video, compatibility, sponsors, audioOnly));
@@ -57,6 +61,7 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 	public async Task<IActionResult> Watch(string v, string? list, bool contentCheckOk, bool compatibility = false,
 		bool audioOnly = false)
 	{
+		Stopwatch sp = Stopwatch.StartNew();
 		InnerTubePlayer? player;
 		Exception? e;
 		bool localPlaylist = list?.StartsWith("LT-PL") ?? false;
@@ -77,9 +82,11 @@ public class YoutubeController(SimpleInnerTubeClient innerTube, HttpClient clien
 			player = null;
 			e = ex;
 		}
+		sp.Stop();
 
 		InnerTubeVideo video = await innerTube.GetVideoDetailsAsync(v, contentCheckOk, localPlaylist ? null : list,
 			null, null, language: HttpContext.GetInnerTubeLanguage(), region: HttpContext.GetInnerTubeRegion());
+		HealthManager.PushVideoResponse(v, player != null, sp.ElapsedMilliseconds);
 		ContinuationResponse? comments = null;
 
 		if (HttpContext.GetDefaultCompatibility())

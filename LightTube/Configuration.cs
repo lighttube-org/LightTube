@@ -25,6 +25,7 @@ public static class Configuration
     public static string[] Messages { get; private set; }
     public static string? Alert { get; private set; }
     public static string? AlertHash { get; private set; }
+    public static string? PoTokenGeneratorUrl { get; private set; }
     private static Random random = new();
 
     private static string? GetVariable(string var, string? def = null) =>
@@ -34,20 +35,21 @@ public static class Configuration
     {
         InnerTubeAuthorization = null;
         string? authType = Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_TYPE");
-        if (authType == "cookie")
+        switch (authType)
         {
-            Log.Error("Cookie authentication has been removed in LightTube v3 as it does not work with youtubei.googleapis.com");
-        }
-        else if (authType == "oauth2")
-        {
-            InnerTubeAuthorization = InnerTubeAuthorization.RefreshTokenAuthorization(
-                Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ??
-                throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN",
-                    "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set."));
-        }
-        else
-        {
-            Log.Warning("Unknown auth type: '{AuthType}'", authType);
+            case "cookie":
+                Log.Error("Cookie authentication has been removed in LightTube v3 as it does not work with youtubei.googleapis.com");
+                break;
+            case "oauth2":
+                InnerTubeAuthorization = InnerTubeAuthorization.RefreshTokenAuthorization(
+                    Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_REFRESH_TOKEN") ??
+                    throw new ArgumentNullException("LIGHTTUBE_AUTH_REFRESH_TOKEN",
+                        "Authentication type set to 'oauth2' but the 'LIGHTTUBE_AUTH_REFRESH_TOKEN' environment variable is not set."),
+                    Environment.GetEnvironmentVariable("LIGHTTUBE_AUTH_USER_ID"));
+                break;
+            default:
+                Log.Warning("Unknown auth type: '{AuthType}'", authType);
+                break;
         }
 
         CustomCssPath = Environment.GetEnvironmentVariable("LIGHTTUBE_CUSTOM_CSS_PATH");
@@ -65,7 +67,7 @@ public static class Configuration
         OauthEnabled = GetVariable("LIGHTTUBE_DISABLE_OAUTH", "false")?.ToLower() != "true";
         RegistrationEnabled = GetVariable("LIGHTTUBE_DISABLE_REGISTRATION", "false")?.ToLower() != "true";
         ProxyEnabled = GetVariable("LIGHTTUBE_DISABLE_PROXY", "false")?.ToLower() != "true";
-        ThirdPartyProxyEnabled = GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() != "true" && ProxyEnabled;
+        ThirdPartyProxyEnabled = GetVariable("LIGHTTUBE_ENABLE_THIRD_PARTY_PROXY", "false")?.ToLower() == "true" && ProxyEnabled;
 
         CacheSize = int.Parse(GetVariable("LIGHTTUBE_CACHE_SIZE", "50")!);
         ConnectionString = GetVariable("LIGHTTUBE_MONGODB_CONNSTR") ?? throw new ArgumentNullException(
@@ -89,6 +91,27 @@ public static class Configuration
 
         Alert = GetVariable("LIGHTTUBE_ALERT");
         AlertHash = Alert != null ? Utils.Md5Sum(Alert) : null;
+        
+        PoTokenGeneratorUrl = GetVariable("LIGHTTUBE_POT_GENERATOR_URL");
+        if (PoTokenGeneratorUrl is null)
+        {
+            Log.Warning("|=========================================|");
+            Log.Warning("| /!\\ PoToken generator is not configured |");
+            Log.Warning("|=========================================|");
+            Log.Warning("| It's recommended to host LightTube side |");
+            Log.Warning("| by side with a PoToken generator, as it |");
+            Log.Warning("| MIGHT reduce the risk of your IP or the |");
+            Log.Warning("| account used with LightTube to not get  |");
+            Log.Warning("| banned by YouTube.                      |");
+            Log.Warning("| Please note that there's still a risk   |");
+            Log.Warning("| of being banned even if you use a       |");
+            Log.Warning("| PoToken generator.                      |");
+            Log.Warning("|=========================================|");
+        }
+        else
+        {
+            
+        }
     }
 
     public static string RandomMessage() => Messages[random.Next(0, Messages.Length)];
