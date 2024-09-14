@@ -4,6 +4,7 @@ using LightTube;
 using LightTube.Chores;
 using LightTube.Database;
 using LightTube.Localization;
+using LightTube.PoToken;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Serilog;
@@ -37,12 +38,15 @@ try
         });
 
     InnerTubeAuthorization? auth = Configuration.InnerTubeAuthorization;
-    builder.Services.AddSingleton(new SimpleInnerTubeClient(new InnerTubeConfiguration
+    SimpleInnerTubeClient innerTube = new SimpleInnerTubeClient(new InnerTubeConfiguration
     {
         Authorization = auth,
         CacheSize = Configuration.CacheSize,
         CacheExpirationPollingInterval = default
-    }));
+    });
+    if (Configuration.PoTokenGeneratorUrl != null)
+        PoTokenManager.Init(Configuration.PoTokenGeneratorUrl, innerTube);
+    builder.Services.AddSingleton(innerTube);
     builder.Services.AddSingleton(new HttpClient());
 
     await JsCache.DownloadLibraries();

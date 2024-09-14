@@ -25,6 +25,7 @@ public static class Configuration
     public static string[] Messages { get; private set; }
     public static string? Alert { get; private set; }
     public static string? AlertHash { get; private set; }
+    public static string? PoTokenGeneratorUrl { get; private set; }
     private static Random random = new();
 
     private static string? GetVariable(string var, string? def = null) =>
@@ -90,6 +91,27 @@ public static class Configuration
 
         Alert = GetVariable("LIGHTTUBE_ALERT");
         AlertHash = Alert != null ? Utils.Md5Sum(Alert) : null;
+        
+        PoTokenGeneratorUrl = GetVariable("LIGHTTUBE_POT_GENERATOR_URL");
+        if (PoTokenGeneratorUrl is null)
+        {
+            Log.Warning("|=========================================|");
+            Log.Warning("| /!\\ PoToken generator is not configured |");
+            Log.Warning("|=========================================|");
+            Log.Warning("| It's recommended to host LightTube side |");
+            Log.Warning("| by side with a PoToken generator, as it |");
+            Log.Warning("| MIGHT reduce the risk of your IP or the |");
+            Log.Warning("| account used with LightTube to not get  |");
+            Log.Warning("| banned by YouTube.                      |");
+            Log.Warning("| Please note that there's still a risk   |");
+            Log.Warning("| of being banned even if you use a       |");
+            Log.Warning("| PoToken generator.                      |");
+            Log.Warning("|=========================================|");
+        }
+        else
+        {
+            
+        }
     }
 
     public static string RandomMessage() => Messages[random.Next(0, Messages.Length)];
