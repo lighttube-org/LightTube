@@ -25,7 +25,7 @@ public class SettingsController(SimpleInnerTubeClient innerTube) : Controller
     public IActionResult Appearance()
     {
         ApiLocals locals = Utils.GetLocals();
-        AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.CustomThemeDefs, LocalizationManager.GetAllLanguages());
+        AppearanceSettingsContext ctx = new(HttpContext, locals, Configuration.CustomThemeDefs, LocalizationManager.GetAllLanguages(), LocalizationManager.GetLanguagePercentages());
         return View(ctx);
     }
 

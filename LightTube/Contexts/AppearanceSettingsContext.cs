@@ -8,9 +8,11 @@ public class AppearanceSettingsContext(
     HttpContext context,
     ApiLocals locals,
     Dictionary<string, string> customThemes,
-    Language[] languages) : BaseContext(context)
+    Language[] languages,
+    Dictionary<string, int> languagePercentages) : BaseContext(context)
 {
     public Language[] Languages = languages;
+    public Dictionary<string, int> LanguagePercentages { get; set; } = languagePercentages;
     public ApiLocals Locals = locals;
     public Dictionary<string, string> CustomThemes = customThemes;
     public Dictionary<string, string> BuiltinThemes = new()
@@ -19,4 +21,5 @@ public class AppearanceSettingsContext(
         ["light"] = "Light",
         ["dark"] = "Dark",
     };
+
 }
