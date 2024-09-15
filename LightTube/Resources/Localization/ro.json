@@ -1,1 +1,21 @@
-{}
+{
+    "language.code": "ro",
+    "language.name": "Română",
+    "language.name.english": "Romanian",
+    "language.ietf": "ro",
+    "language.innertube": "ro",
+    "titles.account.register": "Creează un cont",
+    "titles.account.login": "Logează-te",
+    "titles.account.delete": "Ștergeți contul",
+    "account.userid": "Nume de utilizator",
+    "account.showpassword": "Arată parola",
+    "account.rememberme": "Amintește-mi",
+    "account.login": "Logare",
+    "account.register": "Creează cont",
+    "account.delete": "Șterge",
+    "account.password": "Parolă",
+    "account.password.confirm": "Confirmă parola",
+    "account.confirmpassword": "Confirmă parola",
+    "account.signup": "Înregistrează-te",
+    "account.deleteconfirm": "Înțeleg că apăsând Șterge, tot playlist-urile mele, canale abonate etc. vor fi șterse de pe această instanță LightTube ({0})"
+}
