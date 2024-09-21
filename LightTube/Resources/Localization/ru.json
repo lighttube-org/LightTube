@@ -1,1 +1,12 @@
-{}
+{
+    "language.code": "ru",
+    "language.ietf": "ru",
+    "language.innertube": "ru",
+    "titles.account.register": "Создать аккаунт",
+    "titles.account.login": "Войти",
+    "titles.account.delete": "Удалить ваш аккаунт",
+    "account.userid": "UserID",
+    "account.password": "Пароль",
+    "language.name.english": "Russian",
+    "language.name": "Русский"
+}
