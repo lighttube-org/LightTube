@@ -247,5 +247,6 @@
     "oauth2.scope.logins.read": "Siehe deine anderen Anmeldungen",
     "playlist.delete.body": "Bist du sicher, dass du diese Wiedergabeliste löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
     "playlist.video.uncached": "Ungepuffertes Video. Lade das Video, um den Puffer zu aktualisieren",
-    "playlist.add.body": "Bitte wähle die Wiedergabeliste aus, zu der du dieses Video hinzufügen möchtest."
+    "playlist.add.body": "Bitte wähle die Wiedergabeliste aus, zu der du dieses Video hinzufügen möchtest.",
+    "playlist.visibility.1": "Nicht öffentlich"
 }
