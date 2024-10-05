@@ -29,7 +29,7 @@
     "channel.tagline.lighttube": "LightTube Kanal",
     "channel.noplaylists": "Dieser Nutzer hat keine öffentlichen Widergabelisten.",
     "download.title": "Video herunterladen",
-    "download.direct": "Direkter Download",
+    "download.direct": "Direktes Herunterladen",
     "feed.title": "Abonnements",
     "feed.library.title": "Bibliothek",
     "feed.library.playlist.new": "Neue Wiedergabeliste",
@@ -242,5 +242,10 @@
     "settings.appearance.title": "Erscheinungsbild",
     "settings.appearance.theme.subtitle": "Ändere das Aussehen von LightTube",
     "settings.appearance.innertube.language.subtitle": "Betrifft nur Videotitel und -beschreibungen",
-    "download.proxy": "Download über Proxy"
+    "download.proxy": "Herunterladen über Proxy",
+    "layout.region": "Region des InnerTube-Inhalts",
+    "oauth2.scope.logins.read": "Siehe deine anderen Anmeldungen",
+    "playlist.delete.body": "Bist du sicher, dass du diese Wiedergabeliste löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "playlist.video.uncached": "Ungepuffertes Video. Lade das Video, um den Puffer zu aktualisieren",
+    "playlist.add.body": "Bitte wähle die Wiedergabeliste aus, zu der du dieses Video hinzufügen möchtest."
 }
