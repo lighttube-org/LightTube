@@ -241,5 +241,6 @@
     "sponsorblock.category.interaction": "Interaktion",
     "settings.appearance.title": "Erscheinungsbild",
     "settings.appearance.theme.subtitle": "Ändere das Aussehen von LightTube",
-    "settings.appearance.innertube.language.subtitle": "Betrifft nur Videotitel und -beschreibungen"
+    "settings.appearance.innertube.language.subtitle": "Betrifft nur Videotitel und -beschreibungen",
+    "download.proxy": "Download über Proxy"
 }
