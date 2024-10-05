@@ -144,5 +144,6 @@
     "search.searchinsteadfor": "Stattdessen nach <a href=\"{1}\">{0}</a> suchen",
     "account.logininstead": "Stattdessen anmelden",
     "account.register.disabled": "Diese Instanz erlaubt keine Kontoregistrierungen",
-    "channel.recognition.subtitle": "Danke, Kanalmitglieder!"
+    "channel.recognition.subtitle": "Danke, Kanalmitglieder!",
+    "download.format.select": "Bitte wähle ein Format zum runterladen."
 }
