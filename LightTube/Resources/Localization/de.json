@@ -141,5 +141,8 @@
     "search.filters.sort.relevance": "Relevanz",
     "search.filters.sort.views": "Aufrufe",
     "search.showingresultsfor": "Ergebnisse für <a href=\"{1}\">{0}</a> werden angezeigt",
-    "search.searchinsteadfor": "Stattdessen nach <a href=\"{1}\">{0}</a> suchen"
+    "search.searchinsteadfor": "Stattdessen nach <a href=\"{1}\">{0}</a> suchen",
+    "account.logininstead": "Stattdessen anmelden",
+    "account.register.disabled": "Diese Instanz erlaubt keine Kontoregistrierungen",
+    "channel.recognition.subtitle": "Danke, Kanalmitglieder!"
 }
